@@ -1,0 +1,117 @@
+{
+  "overflow_scan_values": [
+    "1e+308",
+    "1.175e+308",
+    "1.35e+308",
+    "inf",
+    "inf"
+  ],
+  "overflow_scan_validated": [
+    "1e+308",
+    "1.175e+308",
+    "1.35e+308",
+    "inf",
+    "inf"
+  ],
+  "overflow_scan_start_exception": "REVIEWER_SPAWN_SENTINEL",
+  "overflow_scan_Popen_called": true,
+  "missing_wavelength": {
+    "accepted": true,
+    "raw": {
+      "wavelength": [
+        0.0,
+        650.0,
+        660.0
+      ],
+      "intensity": [
+        2.0,
+        0.0,
+        0.0
+      ]
+    },
+    "ion": {
+      "Wavelength (nm)": [
+        0.0,
+        650.0,
+        660.0
+      ],
+      "H I": [
+        2.0,
+        0.0,
+        0.0
+      ],
+      "Sum(calc)": [
+        2.0,
+        0.0,
+        0.0
+      ]
+    },
+    "quit_count": 1
+  },
+  "nan_total": {
+    "accepted": true,
+    "raw": {
+      "wavelength": [
+        650.0,
+        655.0,
+        660.0
+      ],
+      "intensity": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "ion": {
+      "Wavelength (nm)": [
+        650.0,
+        655.0,
+        660.0
+      ],
+      "H I": [
+        0.0,
+        2.0,
+        0.0
+      ],
+      "Sum(calc)": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "quit_count": 1
+  },
+  "single_950": {
+    "size": [
+      950,
+      680
+    ],
+    "cancel_mapped": true,
+    "progress_mapped": true
+  },
+  "batch_950": {
+    "size": [
+      950,
+      680
+    ],
+    "cancel_mapped": true,
+    "progress_mapped": true
+  },
+  "scan_950": {
+    "size": [
+      950,
+      680
+    ],
+    "cancel_mapped": true,
+    "progress_mapped": true
+  },
+  "restore_default_scan": {
+    "axis": "Te",
+    "values": {
+      "start": "1",
+      "stop": "2",
+      "count": "2",
+      "step": "0.1"
+    }
+  }
+}

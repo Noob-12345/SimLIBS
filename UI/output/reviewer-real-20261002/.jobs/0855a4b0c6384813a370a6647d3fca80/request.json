@@ -1,0 +1,22 @@
+{
+  "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\78492bc48f4243ef995b9028d70b4a94\\result\\manifest.json",
+  "target": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\R-frames",
+  "format": "directory",
+  "kind": "export",
+  "job_id": "0855a4b0c6384813a370a6647d3fca80",
+  "settings": {
+    "python": "D:\\Anaconda3\\envs\\simLIBS\\python.exe",
+    "source": "D:\\LIBS\\simLIBS-2.0.3\\simLIBS-2.0.3",
+    "driver": "",
+    "chrome": "",
+    "output": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002",
+    "connect_timeout": 10.0,
+    "read_timeout": 30.0,
+    "page_timeout": 45.0,
+    "script_timeout": 15.0,
+    "static_deadline": 60.0,
+    "dynamic_deadline": 180.0,
+    "tls_verify": true
+  },
+  "directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\0855a4b0c6384813a370a6647d3fca80"
+}

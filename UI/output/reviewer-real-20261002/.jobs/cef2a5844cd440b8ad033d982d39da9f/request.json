@@ -1,0 +1,22 @@
+{
+  "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\c90ea5e5fc92437fa4e0f235b351f0c0\\result\\manifest.json",
+  "target": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\Ne.gif",
+  "format": "gif",
+  "kind": "export",
+  "job_id": "cef2a5844cd440b8ad033d982d39da9f",
+  "settings": {
+    "python": "D:\\Anaconda3\\envs\\simLIBS\\python.exe",
+    "source": "D:\\LIBS\\simLIBS-2.0.3\\simLIBS-2.0.3",
+    "driver": "",
+    "chrome": "",
+    "output": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002",
+    "connect_timeout": 10.0,
+    "read_timeout": 30.0,
+    "page_timeout": 45.0,
+    "script_timeout": 15.0,
+    "static_deadline": 60.0,
+    "dynamic_deadline": 180.0,
+    "tls_verify": true
+  },
+  "directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\cef2a5844cd440b8ad033d982d39da9f"
+}

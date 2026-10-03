@@ -1,0 +1,97 @@
+{
+  "size": [
+    950,
+    680
+  ],
+  "controls": [
+    {
+      "text": "颜色",
+      "mapped": true,
+      "actual": [
+        93,
+        33
+      ],
+      "requested": [
+        93,
+        33
+      ],
+      "all_ancestor_bounds": true
+    },
+    {
+      "text": "显示归一化",
+      "mapped": true,
+      "actual": [
+        81,
+        23
+      ],
+      "requested": [
+        81,
+        23
+      ],
+      "all_ancestor_bounds": true
+    },
+    {
+      "text": "标题更新",
+      "mapped": true,
+      "actual": [
+        93,
+        33
+      ],
+      "requested": [
+        93,
+        33
+      ],
+      "all_ancestor_bounds": true
+    },
+    {
+      "text": "上一页",
+      "mapped": true,
+      "actual": [
+        93,
+        33
+      ],
+      "requested": [
+        93,
+        33
+      ],
+      "all_ancestor_bounds": true
+    },
+    {
+      "text": "下一页",
+      "mapped": true,
+      "actual": [
+        93,
+        33
+      ],
+      "requested": [
+        93,
+        33
+      ],
+      "all_ancestor_bounds": true
+    }
+  ],
+  "pagination": {
+    "initial_first": "200",
+    "second_first": "253.3",
+    "second_page_text": "预览第 2/15 页；每页 100 行",
+    "rows": 100,
+    "last_page_clamped": 14,
+    "first_page_restored": true
+  },
+  "normalization": {
+    "max": 1.0,
+    "color": "#ef4444",
+    "invoke_toggle_three_times": true,
+    "label_bbox": [
+      4.166999999999998,
+      32.40972222222223,
+      20.167,
+      117.53472222222223
+    ],
+    "canvas_size": [
+      475.0,
+      125.0
+    ]
+  },
+  "cancel_progress_visible": true
+}

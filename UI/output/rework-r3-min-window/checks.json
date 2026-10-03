@@ -1,0 +1,86 @@
+{
+  "window": [
+    950,
+    680
+  ],
+  "new_simulation": false,
+  "plot_controls": [
+    {
+      "text": "颜色",
+      "mapped": true,
+      "size": [
+        93,
+        33
+      ],
+      "requested": [
+        93,
+        33
+      ]
+    },
+    {
+      "text": "显示归一化",
+      "mapped": true,
+      "size": [
+        81,
+        23
+      ],
+      "requested": [
+        81,
+        23
+      ]
+    },
+    {
+      "text": "标题更新",
+      "mapped": true,
+      "size": [
+        93,
+        33
+      ],
+      "requested": [
+        93,
+        33
+      ]
+    }
+  ],
+  "normalized_max": 1.0,
+  "normalized_label_bbox": [
+    32.40972222222223,
+    117.53472222222223
+  ],
+  "canvas_height": 125.0,
+  "table_pager": [
+    {
+      "text": "上一页",
+      "mapped": true,
+      "size": [
+        93,
+        33
+      ],
+      "requested": [
+        93,
+        33
+      ]
+    },
+    {
+      "text": "下一页",
+      "mapped": true,
+      "size": [
+        93,
+        33
+      ],
+      "requested": [
+        93,
+        33
+      ]
+    }
+  ],
+  "page_change": {
+    "from_first_wavelength": "200",
+    "to_first_wavelength": "253.3",
+    "rows": 100,
+    "caption": "预览第 2/15 页；每页 100 行"
+  },
+  "previous_restores_page": true,
+  "cancel_and_progress_visible": true,
+  "error": null
+}

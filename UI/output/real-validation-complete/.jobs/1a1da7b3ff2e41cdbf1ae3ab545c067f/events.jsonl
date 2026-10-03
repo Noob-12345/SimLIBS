@@ -1,0 +1,2 @@
+{"job_id": "1a1da7b3ff2e41cdbf1ae3ab545c067f", "event": "progress", "message": "正在请求真实 NIST 光谱", "deadline": 180.0}
+{"job_id": "1a1da7b3ff2e41cdbf1ae3ab545c067f", "event": "error", "message": "NIST dynamic 获取失败：WebDriverException: Message: tab crashed\n  (Session info: chrome=154.0.8037.58)\n", "log": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\real-validation-complete\\.jobs\\1a1da7b3ff2e41cdbf1ae3ab545c067f\\error.json"}

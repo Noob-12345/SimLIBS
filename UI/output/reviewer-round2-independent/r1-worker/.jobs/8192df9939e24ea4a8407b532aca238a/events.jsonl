@@ -1,0 +1,2 @@
+{"job_id": "8192df9939e24ea4a8407b532aca238a", "event": "progress", "message": "正在请求真实 NIST 光谱", "deadline": 180.0}
+{"job_id": "8192df9939e24ea4a8407b532aca238a", "event": "error", "message": "NIST dynamic 获取失败：ValueError: 光谱包含非数值数据；ChromeDriver 154.0.8037.92 (mock.exe)", "log": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-round2-independent\\r1-worker\\.jobs\\8192df9939e24ea4a8407b532aca238a\\error.json"}

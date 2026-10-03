@@ -1,0 +1,40 @@
+{
+  "kind": "scan",
+  "axis": "R",
+  "values": [
+    1000,
+    1200
+  ],
+  "completed_values": [
+    1000,
+    1200
+  ],
+  "frames": [
+    "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\real-validation-complete\\.jobs\\de2cee77488341159ba5e524b7c0a0db\\result\\frame_0001\\manifest.json",
+    "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\real-validation-complete\\.jobs\\de2cee77488341159ba5e524b7c0a0db\\result\\frame_0002\\manifest.json"
+  ],
+  "parameters": {
+    "Te": 1.0,
+    "Ne": 1e+17,
+    "resolution": 1000,
+    "low_w": 650.0,
+    "upper_w": 660.0,
+    "max_ion_charge": 3,
+    "webscraping": "static",
+    "headless": true,
+    "elements": [
+      "H"
+    ],
+    "percentages": [
+      100.0
+    ],
+    "step": 0.005,
+    "resample": false
+  },
+  "partial": false,
+  "created_at": "2026-10-02T08:34:42.459597+00:00",
+  "origin": {
+    "kind": "simulation",
+    "label": "真实 NIST 参数扫描（各帧独立请求）"
+  }
+}

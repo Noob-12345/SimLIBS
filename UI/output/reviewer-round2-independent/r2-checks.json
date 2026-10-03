@@ -1,0 +1,370 @@
+{
+  "large": [
+    {
+      "axis": "Te",
+      "values_as_float": [
+        1e+308,
+        1.175e+308,
+        1.35e+308,
+        1.5249999999999999e+308,
+        1.7e+308
+      ],
+      "positive_integer_R": false,
+      "Popen_allowed": true,
+      "no_network": true
+    },
+    {
+      "axis": "Ne",
+      "values_as_float": [
+        1e+308,
+        1.175e+308,
+        1.35e+308,
+        1.5249999999999999e+308,
+        1.7e+308
+      ],
+      "positive_integer_R": false,
+      "Popen_allowed": true,
+      "no_network": true
+    },
+    {
+      "axis": "R",
+      "values_as_float": [
+        1e+308,
+        1.175e+308,
+        1.35e+308,
+        1.5249999999999999e+308,
+        1.7e+308
+      ],
+      "positive_integer_R": true,
+      "Popen_allowed": true,
+      "no_network": true
+    }
+  ],
+  "invalid": [
+    {
+      "axis": "Te",
+      "values": [
+        "1.0",
+        "nan",
+        "2.0"
+      ],
+      "reason": "第 2 帧 Te 必须是有限的正数",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Te",
+      "values": [
+        "1.0",
+        "inf",
+        "2.0"
+      ],
+      "reason": "第 2 帧 Te 必须是有限的正数",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Te",
+      "values": [
+        "1.0",
+        "0.0",
+        "2.0"
+      ],
+      "reason": "第 2 帧 Te 必须是有限的正数",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Te",
+      "values": [
+        "1.0",
+        "3.0",
+        "2.0"
+      ],
+      "reason": "第 2 帧 Te 超出扫描范围",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Te",
+      "values": [
+        "2.0",
+        "1.5",
+        "1.0"
+      ],
+      "reason": "扫描必须包含实际起点和终点",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Te",
+      "values": [
+        "1.0",
+        "1.0",
+        "2.0"
+      ],
+      "reason": "扫描帧未严格递增或浮点精度不足，请减少帧数或扩大范围",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Te",
+      "values": [
+        "1.1",
+        "1.5",
+        "2.0"
+      ],
+      "reason": "扫描必须包含实际起点和终点",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Te",
+      "values": [
+        "1.0",
+        "1.5",
+        "1.9"
+      ],
+      "reason": "扫描必须包含实际起点和终点",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Ne",
+      "values": [
+        "1.0",
+        "nan",
+        "2.0"
+      ],
+      "reason": "第 2 帧 Ne 必须是有限的正数",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Ne",
+      "values": [
+        "1.0",
+        "inf",
+        "2.0"
+      ],
+      "reason": "第 2 帧 Ne 必须是有限的正数",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Ne",
+      "values": [
+        "1.0",
+        "0.0",
+        "2.0"
+      ],
+      "reason": "第 2 帧 Ne 必须是有限的正数",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Ne",
+      "values": [
+        "1.0",
+        "3.0",
+        "2.0"
+      ],
+      "reason": "第 2 帧 Ne 超出扫描范围",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Ne",
+      "values": [
+        "2.0",
+        "1.5",
+        "1.0"
+      ],
+      "reason": "扫描必须包含实际起点和终点",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Ne",
+      "values": [
+        "1.0",
+        "1.0",
+        "2.0"
+      ],
+      "reason": "扫描帧未严格递增或浮点精度不足，请减少帧数或扩大范围",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Ne",
+      "values": [
+        "1.1",
+        "1.5",
+        "2.0"
+      ],
+      "reason": "扫描必须包含实际起点和终点",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Ne",
+      "values": [
+        "1.0",
+        "1.5",
+        "1.9"
+      ],
+      "reason": "扫描必须包含实际起点和终点",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "R",
+      "values": [
+        "1.0",
+        "nan",
+        "2.0"
+      ],
+      "reason": "第 2 帧 R 必须是有限的数值",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "R",
+      "values": [
+        "1.0",
+        "inf",
+        "2.0"
+      ],
+      "reason": "第 2 帧 R 必须是有限的数值",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "R",
+      "values": [
+        "1.0",
+        "0.0",
+        "2.0"
+      ],
+      "reason": "第 2 帧 R 必须为 >= 1 的整数",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "R",
+      "values": [
+        "1.0",
+        "3.0",
+        "2.0"
+      ],
+      "reason": "第 2 帧 R 超出扫描范围",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "R",
+      "values": [
+        "2.0",
+        "1.5",
+        "1.0"
+      ],
+      "reason": "第 2 帧 R 必须为 >= 1 的整数",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "R",
+      "values": [
+        "1.0",
+        "1.0",
+        "2.0"
+      ],
+      "reason": "扫描帧未严格递增或浮点精度不足，请减少帧数或扩大范围",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "R",
+      "values": [
+        "1.1",
+        "1.5",
+        "2.0"
+      ],
+      "reason": "第 1 帧 R 必须为 >= 1 的整数",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "R",
+      "values": [
+        "1.0",
+        "1.5",
+        "1.9"
+      ],
+      "reason": "第 2 帧 R 必须为 >= 1 的整数",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "R",
+      "values": [
+        "1.0",
+        "1.5",
+        "2.0"
+      ],
+      "reason": "第 2 帧 R 必须为 >= 1 的整数",
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Te",
+      "generated_precision_failure": true,
+      "Popen_calls": 0,
+      "requests_calls": 0
+    },
+    {
+      "axis": "Ne",
+      "generated_precision_failure": true,
+      "Popen_calls": 0,
+      "requests_calls": 0
+    }
+  ],
+  "normal_scans": [
+    {
+      "axis": "Te",
+      "values": [
+        1.0,
+        1.2
+      ],
+      "actual_source_constructor_calls": 2,
+      "transport": "mocked",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-round2-independent\\normal-Te\\manifest.json"
+    },
+    {
+      "axis": "Ne",
+      "values": [
+        1e+17,
+        1.2e+17
+      ],
+      "actual_source_constructor_calls": 2,
+      "transport": "mocked",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-round2-independent\\normal-Ne\\manifest.json"
+    },
+    {
+      "axis": "R",
+      "values": [
+        1000,
+        1200
+      ],
+      "actual_source_constructor_calls": 2,
+      "transport": "mocked",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-round2-independent\\normal-R\\manifest.json"
+    }
+  ],
+  "exact_step_endpoints": [
+    1.12345678912345,
+    1.2234567891235,
+    1.3234567891234,
+    1.42345678912345
+  ]
+}

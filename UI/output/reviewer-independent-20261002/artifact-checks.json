@@ -1,0 +1,135 @@
+{
+  "artifact_checks": [
+    {
+      "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\23aa12fe783b4f32930356812305e426\\result\\manifest.json",
+      "input_Ne": 1e+17,
+      "actual_Ne": "1e17",
+      "passed": true
+    },
+    {
+      "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\9e87707fa040455084867877248637a1\\result\\sample_0001\\manifest.json",
+      "input_Ne": 1e+17,
+      "actual_Ne": "1e17",
+      "passed": true
+    },
+    {
+      "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\9e87707fa040455084867877248637a1\\result\\sample_0002\\manifest.json",
+      "input_Ne": 1e+17,
+      "actual_Ne": "1e17",
+      "passed": true
+    },
+    {
+      "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\56f90ff37f244941b06280d747824c1a\\result\\frame_0001\\manifest.json",
+      "input_Ne": 1e+17,
+      "actual_Ne": "1e17",
+      "passed": true
+    },
+    {
+      "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\56f90ff37f244941b06280d747824c1a\\result\\frame_0002\\manifest.json",
+      "input_Ne": 1e+17,
+      "actual_Ne": "1e17",
+      "passed": true
+    },
+    {
+      "scan": "Te",
+      "max_frame_difference": 6437.0
+    },
+    {
+      "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\c90ea5e5fc92437fa4e0f235b351f0c0\\result\\frame_0001\\manifest.json",
+      "input_Ne": 1e+17,
+      "actual_Ne": "1e17",
+      "passed": true
+    },
+    {
+      "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\c90ea5e5fc92437fa4e0f235b351f0c0\\result\\frame_0002\\manifest.json",
+      "input_Ne": 1.2e+17,
+      "actual_Ne": "1.2e17",
+      "passed": true
+    },
+    {
+      "scan": "Ne",
+      "max_frame_difference": 10.166544120000026
+    },
+    {
+      "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\78492bc48f4243ef995b9028d70b4a94\\result\\frame_0001\\manifest.json",
+      "input_Ne": 1e+17,
+      "actual_Ne": "1e17",
+      "passed": true
+    },
+    {
+      "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\78492bc48f4243ef995b9028d70b4a94\\result\\frame_0002\\manifest.json",
+      "input_Ne": 1e+17,
+      "actual_Ne": "1e17",
+      "passed": true
+    },
+    {
+      "scan": "R",
+      "max_frame_difference": 360.0
+    },
+    {
+      "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-dynamic-fullaccess-20261002\\.jobs\\f5973f6e337d41d79e699cdf53138682\\result\\manifest.json",
+      "input_Ne": 1e+17,
+      "actual_Ne": "1e17",
+      "passed": true
+    }
+  ],
+  "export_bytes_equal": true,
+  "gif_all_frames_loaded": true,
+  "dynamic_original_single_ion_preserved": true,
+  "min_window_result_controls": [
+    {
+      "class": "TLabel",
+      "text": "结果视图",
+      "mapped": true,
+      "x": 0,
+      "width": 52,
+      "parent_width": 469,
+      "clipped": false
+    },
+    {
+      "class": "TCombobox",
+      "text": "",
+      "mapped": true,
+      "x": 57,
+      "width": 105,
+      "parent_width": 469,
+      "clipped": false
+    },
+    {
+      "class": "TEntry",
+      "text": "",
+      "mapped": true,
+      "x": 170,
+      "width": 181,
+      "parent_width": 469,
+      "clipped": false
+    },
+    {
+      "class": "TButton",
+      "text": "标题更新",
+      "mapped": true,
+      "x": 354,
+      "width": 93,
+      "parent_width": 469,
+      "clipped": false
+    },
+    {
+      "class": "TButton",
+      "text": "颜色",
+      "mapped": true,
+      "x": 450,
+      "width": 16,
+      "parent_width": 469,
+      "clipped": false
+    },
+    {
+      "class": "TCheckbutton",
+      "text": "显示归一化",
+      "mapped": false,
+      "x": 0,
+      "width": 1,
+      "parent_width": 469,
+      "clipped": false
+    }
+  ]
+}

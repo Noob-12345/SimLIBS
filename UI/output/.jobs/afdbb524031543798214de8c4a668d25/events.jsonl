@@ -1,0 +1,2 @@
+{"job_id": "afdbb524031543798214de8c4a668d25", "event": "progress", "message": "正在请求真实 NIST 光谱", "deadline": 60.0}
+{"job_id": "afdbb524031543798214de8c4a668d25", "event": "success", "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\.jobs\\afdbb524031543798214de8c4a668d25\\result\\manifest.json"}

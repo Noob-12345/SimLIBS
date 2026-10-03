@@ -1,0 +1,2 @@
+{"job_id": "9ce8c20f6c254dc298c7ab61aeb2e046", "event": "progress", "message": "正在请求真实 NIST 光谱", "deadline": 180.0}
+{"job_id": "9ce8c20f6c254dc298c7ab61aeb2e046", "event": "error", "message": "NIST dynamic 获取失败：ValueError: 光谱包含 NaN 或无穷值；ChromeDriver 154.0.8037.92 (mock.exe)", "log": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-round2-independent\\r1-worker\\.jobs\\9ce8c20f6c254dc298c7ab61aeb2e046\\error.json"}

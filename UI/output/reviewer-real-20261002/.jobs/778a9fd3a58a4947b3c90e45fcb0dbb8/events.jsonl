@@ -1,0 +1,2 @@
+{"job_id": "778a9fd3a58a4947b3c90e45fcb0dbb8", "event": "progress", "message": "正在请求真实 NIST 光谱", "deadline": 180.0}
+{"job_id": "778a9fd3a58a4947b3c90e45fcb0dbb8", "event": "error", "message": "NIST dynamic 获取失败：WebDriverException: Message: tab crashed\n  (Session info: chrome=154.0.8037.95)\n；ChromeDriver 154.0.8037.92 (D:\\LIBS\\simLIBS-2.0.3\\UI\\.driver-cache\\.wdm\\drivers\\chromedriver\\win64\\154.0.8037\\chromedriver-win32/chromedriver.exe)", "log": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\778a9fd3a58a4947b3c90e45fcb0dbb8\\error.json"}

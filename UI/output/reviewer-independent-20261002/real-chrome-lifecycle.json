@@ -1,0 +1,69 @@
+[
+  {
+    "action": "cancel",
+    "owned_before": [
+      {
+        "pid": 15744,
+        "parent": 27592,
+        "name": "python.exe"
+      },
+      {
+        "pid": 24932,
+        "parent": 1720,
+        "name": "chrome.exe"
+      },
+      {
+        "pid": 27444,
+        "parent": 15744,
+        "name": "conhost.exe"
+      },
+      {
+        "pid": 1720,
+        "parent": 24540,
+        "name": "chrome.exe"
+      },
+      {
+        "pid": 24540,
+        "parent": 15744,
+        "name": "chromedriver.exe"
+      }
+    ],
+    "elapsed": 1.0,
+    "state": "CANCELLED",
+    "worker_exited": true,
+    "owned_alive_after": [],
+    "unrelated_pid": 20044,
+    "unrelated_alive": true
+  },
+  {
+    "action": "close",
+    "owned_before": [
+      {
+        "pid": 8032,
+        "parent": 27592,
+        "name": "python.exe"
+      },
+      {
+        "pid": 12480,
+        "parent": 8032,
+        "name": "chromedriver.exe"
+      },
+      {
+        "pid": 24888,
+        "parent": 12480,
+        "name": "chrome.exe"
+      },
+      {
+        "pid": 26680,
+        "parent": 8032,
+        "name": "conhost.exe"
+      }
+    ],
+    "elapsed": 1.139999999999418,
+    "state": "CANCELLED",
+    "worker_exited": true,
+    "owned_alive_after": [],
+    "unrelated_pid": 20044,
+    "unrelated_alive": true
+  }
+]

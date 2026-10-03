@@ -1,0 +1,51 @@
+{
+  "parameters": {
+    "Te": 1.0,
+    "Ne": 1e+17,
+    "resolution": 1000,
+    "low_w": 650.0,
+    "upper_w": 660.0,
+    "max_ion_charge": 3,
+    "webscraping": "static",
+    "headless": true,
+    "elements": [
+      "H"
+    ],
+    "percentages": [
+      100.0
+    ],
+    "step": 0.005,
+    "resample": false
+  },
+  "spec": {
+    "size": 2,
+    "Te_min": 1.0,
+    "Te_max": 1.0,
+    "Ne_min": 1e+17,
+    "Ne_max": 1e+17,
+    "seed": 42
+  },
+  "compositions": [
+    {
+      "H": 100.0,
+      "name": "H-only"
+    }
+  ],
+  "kind": "batch",
+  "job_id": "9e87707fa040455084867877248637a1",
+  "settings": {
+    "python": "D:\\Anaconda3\\envs\\simLIBS\\python.exe",
+    "source": "D:\\LIBS\\simLIBS-2.0.3\\simLIBS-2.0.3",
+    "driver": "",
+    "chrome": "",
+    "output": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002",
+    "connect_timeout": 10.0,
+    "read_timeout": 30.0,
+    "page_timeout": 45.0,
+    "script_timeout": 15.0,
+    "static_deadline": 60.0,
+    "dynamic_deadline": 180.0,
+    "tls_verify": true
+  },
+  "directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\9e87707fa040455084867877248637a1"
+}

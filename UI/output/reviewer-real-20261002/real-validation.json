@@ -1,0 +1,257 @@
+{
+  "command": [
+    "D:\\Anaconda3\\envs\\simLIBS\\python.exe",
+    ".\\verify_real.py",
+    "--output",
+    ".\\output\\reviewer-real-20261002"
+  ],
+  "settings": {
+    "python": "D:\\Anaconda3\\envs\\simLIBS\\python.exe",
+    "source": "D:\\LIBS\\simLIBS-2.0.3\\simLIBS-2.0.3",
+    "driver": "",
+    "chrome": "",
+    "output": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002",
+    "connect_timeout": 10,
+    "read_timeout": 30,
+    "page_timeout": 45,
+    "script_timeout": 15,
+    "static_deadline": 60,
+    "dynamic_deadline": 180,
+    "tls_verify": true
+  },
+  "steps": [
+    {
+      "label": "H100 static 650–660 nm",
+      "state": "SUCCEEDED",
+      "elapsed": 3.75,
+      "heartbeats": 110,
+      "worker_pid": 22808,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\23aa12fe783b4f32930356812305e426",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\23aa12fe783b4f32930356812305e426\\result\\manifest.json",
+      "spectra": {
+        "raw": {
+          "shape": [
+            47,
+            2
+          ],
+          "max": 1802.0
+        },
+        "interpolated": {
+          "shape": [
+            2000,
+            2
+          ],
+          "max": 1802.0
+        }
+      },
+      "origin": {
+        "kind": "simulation",
+        "label": "本次真实 NIST / SimulatedLIBS 模拟",
+        "class": "simLIBS.simulation.SimulatedLIBS",
+        "source_file": "D:\\LIBS\\simLIBS-2.0.3\\simLIBS-2.0.3\\simLIBS\\simulation.py",
+        "source_sha256": "4279a121c07d88d1bef9e6e8650b2df77ef04a6b4cca28b705afc143ed2fa899",
+        "parameters": {
+          "Te": 1.0,
+          "Ne": 1e+17,
+          "resolution": 1000,
+          "low_w": 650.0,
+          "upper_w": 660.0,
+          "max_ion_charge": 3,
+          "webscraping": "static",
+          "headless": true,
+          "elements": [
+            "H"
+          ],
+          "percentages": [
+            100.0
+          ],
+          "step": 0.005,
+          "resample": false
+        },
+        "submitted_composition": {
+          "H": 100.0
+        },
+        "actual_Ne": "1e17",
+        "nist_url": "https://physics.nist.gov/cgi-bin/ASD/lines1.pl?composition=H%3A100.0&spectra=H0-3&low_w=650.0&limits_type=0&upp_w=660.0&show_av=3&unit=1&resolution=1000&temp=1.0&eden=1e17&maxcharge=3&min_rel_int=0.001&int_scale=2&libs=1",
+        "created_at": "2026-10-02T09:25:47.870295+00:00",
+        "tls_verify": true,
+        "driver_version": null,
+        "browser_arguments": [],
+        "ion_total": null,
+        "interpolation": "source CubicSpline"
+      }
+    },
+    {
+      "label": "H 导出 raw",
+      "state": "SUCCEEDED",
+      "elapsed": 0.7339999999967404,
+      "heartbeats": 23,
+      "worker_pid": 26272,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\9744a3391fae4ac4974f338cb8fcfbba",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\9744a3391fae4ac4974f338cb8fcfbba\\export.json"
+    },
+    {
+      "label": "H 导出 interpolated",
+      "state": "SUCCEEDED",
+      "elapsed": 0.75,
+      "heartbeats": 24,
+      "worker_pid": 11572,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\19e3b6515f2448c0bc31fa78cf8635d6",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\19e3b6515f2448c0bc31fa78cf8635d6\\export.json"
+    },
+    {
+      "label": "H 导出 png",
+      "state": "SUCCEEDED",
+      "elapsed": 1.3130000000019209,
+      "heartbeats": 42,
+      "worker_pid": 12480,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\5771faae741c4c9abca509b1d7cb4ea5",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\5771faae741c4c9abca509b1d7cb4ea5\\export.json"
+    },
+    {
+      "label": "H 导出 json",
+      "state": "SUCCEEDED",
+      "elapsed": 0.75,
+      "heartbeats": 24,
+      "worker_pid": 27208,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\896dc86067c94d35aaa775fa5b1dedc6",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\896dc86067c94d35aaa775fa5b1dedc6\\export.json"
+    },
+    {
+      "label": "size=2 真实批量",
+      "state": "SUCCEEDED",
+      "elapsed": 4.811999999998079,
+      "heartbeats": 151,
+      "worker_pid": 26988,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\9e87707fa040455084867877248637a1",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\9e87707fa040455084867877248637a1\\result\\manifest.json",
+      "dataset_shape": [
+        2,
+        2004
+      ]
+    },
+    {
+      "label": "批量导出宽表",
+      "state": "SUCCEEDED",
+      "elapsed": 0.8280000000013388,
+      "heartbeats": 26,
+      "worker_pid": 12708,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\2c9e9ee9449749389fc8c0fc5099a3db",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\2c9e9ee9449749389fc8c0fc5099a3db\\export.json"
+    },
+    {
+      "label": "Te 两帧真实扫描",
+      "state": "SUCCEEDED",
+      "elapsed": 4.421999999998661,
+      "heartbeats": 139,
+      "worker_pid": 26204,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\56f90ff37f244941b06280d747824c1a",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\56f90ff37f244941b06280d747824c1a\\result\\manifest.json"
+    },
+    {
+      "label": "Te GIF 全帧导出",
+      "state": "SUCCEEDED",
+      "elapsed": 1.5630000000019209,
+      "heartbeats": 50,
+      "worker_pid": 18936,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\d2760767312f4543b203d411b5f3fd3c",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\d2760767312f4543b203d411b5f3fd3c\\export.json",
+      "gif_frames": 2
+    },
+    {
+      "label": "Te 完整帧目录导出",
+      "state": "SUCCEEDED",
+      "elapsed": 0.75,
+      "heartbeats": 24,
+      "worker_pid": 1972,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\f5f5b43a507d47fdba1c5384958db525",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\f5f5b43a507d47fdba1c5384958db525\\export.json"
+    },
+    {
+      "label": "Ne 两帧真实扫描",
+      "state": "SUCCEEDED",
+      "elapsed": 4.0459999999984575,
+      "heartbeats": 128,
+      "worker_pid": 27368,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\c90ea5e5fc92437fa4e0f235b351f0c0",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\c90ea5e5fc92437fa4e0f235b351f0c0\\result\\manifest.json"
+    },
+    {
+      "label": "Ne GIF 全帧导出",
+      "state": "SUCCEEDED",
+      "elapsed": 1.5619999999980791,
+      "heartbeats": 50,
+      "worker_pid": 9800,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\cef2a5844cd440b8ad033d982d39da9f",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\cef2a5844cd440b8ad033d982d39da9f\\export.json",
+      "gif_frames": 2
+    },
+    {
+      "label": "Ne 完整帧目录导出",
+      "state": "SUCCEEDED",
+      "elapsed": 0.7659999999996217,
+      "heartbeats": 24,
+      "worker_pid": 26708,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\f4ec6fb3f080464b823e5d5179963ce0",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\f4ec6fb3f080464b823e5d5179963ce0\\export.json"
+    },
+    {
+      "label": "R 两帧真实扫描",
+      "state": "SUCCEEDED",
+      "elapsed": 5.827999999997701,
+      "heartbeats": 185,
+      "worker_pid": 21436,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\78492bc48f4243ef995b9028d70b4a94",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\78492bc48f4243ef995b9028d70b4a94\\result\\manifest.json"
+    },
+    {
+      "label": "R GIF 全帧导出",
+      "state": "SUCCEEDED",
+      "elapsed": 1.5469999999986612,
+      "heartbeats": 50,
+      "worker_pid": 25244,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\79536a880eff44288807ff6ad2b23ed4",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\79536a880eff44288807ff6ad2b23ed4\\export.json",
+      "gif_frames": 2
+    },
+    {
+      "label": "R 完整帧目录导出",
+      "state": "SUCCEEDED",
+      "elapsed": 0.7809999999990396,
+      "heartbeats": 24,
+      "worker_pid": 20464,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\0855a4b0c6384813a370a6647d3fca80",
+      "manifest": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\0855a4b0c6384813a370a6647d3fca80\\export.json"
+    },
+    {
+      "label": "H 真实 dynamic / ion 尝试",
+      "state": "FAILED",
+      "elapsed": 9.96900000000096,
+      "heartbeats": 322,
+      "worker_pid": 27300,
+      "worker_exited": true,
+      "job_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\778a9fd3a58a4947b3c90e45fcb0dbb8",
+      "error": "NIST dynamic 获取失败：WebDriverException: Message: tab crashed\n  (Session info: chrome=154.0.8037.95)\n；ChromeDriver 154.0.8037.92 (D:\\LIBS\\simLIBS-2.0.3\\UI\\.driver-cache\\.wdm\\drivers\\chromedriver\\win64\\154.0.8037\\chromedriver-win32/chromedriver.exe)"
+    }
+  ],
+  "heartbeats": 1398,
+  "independent_acceptance": false,
+  "source_hashes_unchanged": true,
+  "all_requested_steps_succeeded": false
+}

@@ -1,0 +1,115 @@
+{
+  "kind": "spectrum",
+  "origin": {
+    "kind": "simulation",
+    "label": "本次真实 NIST / SimulatedLIBS 模拟",
+    "class": "simLIBS.simulation.SimulatedLIBS",
+    "source_file": "D:\\LIBS\\simLIBS-2.0.3\\simLIBS-2.0.3\\simLIBS\\simulation.py",
+    "source_sha256": "4279a121c07d88d1bef9e6e8650b2df77ef04a6b4cca28b705afc143ed2fa899",
+    "parameters": {
+      "Te": 1.0,
+      "Ne": 1e+17,
+      "resolution": 1000,
+      "low_w": 650.0,
+      "upper_w": 660.0,
+      "max_ion_charge": 3,
+      "webscraping": "dynamic",
+      "headless": true,
+      "elements": [
+        "H"
+      ],
+      "percentages": [
+        100.0
+      ],
+      "step": 0.005,
+      "resample": false
+    },
+    "submitted_composition": {
+      "H": 100.0
+    },
+    "actual_Ne": "1e17",
+    "nist_url": "https://physics.nist.gov/cgi-bin/ASD/lines1.pl?composition=H%3A100.0&spectra=H0-3&low_w=650.0&limits_type=0&upp_w=660.0&show_av=3&unit=1&resolution=1000&temp=1.0&eden=1e17&maxcharge=3&min_rel_int=0.001&int_scale=2&libs=1",
+    "created_at": "2026-10-02T10:38:25.999297+00:00",
+    "tls_verify": true,
+    "driver_version": "154.0.8037.92",
+    "browser_arguments": [
+      "--headless=new",
+      "--disable-notifications"
+    ],
+    "ion_total": "copied sole H I contribution (NIST omitted Sum(calc))",
+    "ion_blank_policy": "only explicit blank cells in valid ion contribution columns -> 0; missing wavelength/total and NaN/Inf rejected",
+    "interpolation": "NIST grid (raw = interpolated)"
+  },
+  "files": {
+    "raw": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-round2-independent\\r1-worker\\.jobs\\e4e3ec5dce2541ec96e15ff98483ff96\\result\\raw.csv",
+    "interpolated": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-round2-independent\\r1-worker\\.jobs\\e4e3ec5dce2541ec96e15ff98483ff96\\result\\interpolated.csv",
+    "ion": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-round2-independent\\r1-worker\\.jobs\\e4e3ec5dce2541ec96e15ff98483ff96\\result\\ion.csv"
+  },
+  "counts": {
+    "raw": 3,
+    "interpolated": 3,
+    "ion": 3
+  },
+  "preview": {
+    "raw": [
+      {
+        "wavelength": 650.0,
+        "intensity": 0.0
+      },
+      {
+        "wavelength": 655.0,
+        "intensity": 2.0
+      },
+      {
+        "wavelength": 660.0,
+        "intensity": 0.0
+      }
+    ],
+    "interpolated": [
+      {
+        "wavelength": 650.0,
+        "intensity": 0.0
+      },
+      {
+        "wavelength": 655.0,
+        "intensity": 2.0
+      },
+      {
+        "wavelength": 660.0,
+        "intensity": 0.0
+      }
+    ],
+    "ion": [
+      {
+        "Wavelength (nm)": 650.0,
+        "H I": 0.0,
+        "Sum(calc)": 0.0
+      },
+      {
+        "Wavelength (nm)": 655.0,
+        "H I": 2.0,
+        "Sum(calc)": 2.0
+      },
+      {
+        "Wavelength (nm)": 660.0,
+        "H I": 0.0,
+        "Sum(calc)": 0.0
+      }
+    ]
+  },
+  "columns": {
+    "raw": [
+      "wavelength",
+      "intensity"
+    ],
+    "interpolated": [
+      "wavelength",
+      "intensity"
+    ],
+    "ion": [
+      "Wavelength (nm)",
+      "H I",
+      "Sum(calc)"
+    ]
+  }
+}

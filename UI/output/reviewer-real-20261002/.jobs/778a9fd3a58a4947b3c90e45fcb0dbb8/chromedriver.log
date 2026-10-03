@@ -1,0 +1,317 @@
+[1790933185.382][INFO]: Starting ChromeDriver 154.0.8037.92 (334b65d254ccc35df4fca82706d1753227b01039-refs/branch-heads/8037@{#1589}) on port 58771
+[1790933185.383][INFO]: Please see https://chromedriver.chromium.org/security-considerations for suggestions on keeping ChromeDriver safe.
+[1790933185.389][INFO]: ChromeDriver was started successfully on port 58771
+[1790933185.877][INFO]: [f88ac7e84f560a2f771ad31f672f3c50] COMMAND InitSession {
+   "capabilities": {
+      "alwaysMatch": {
+         "browserName": "chrome",
+         "goog:chromeOptions": {
+            "args": [ "--headless=new", "--disable-notifications" ],
+            "extensions": [  ]
+         },
+         "pageLoadStrategy": "normal"
+      },
+      "firstMatch": [ {
+      } ]
+   }
+}
+[1790933185.878][INFO]: Browser search. Trying... D:\LIBS\simLIBS-2.0.3\UI\.driver-cache\.wdm\drivers\chromedriver\win64\154.0.8037\chromedriver-win32\chrome.exe
+[1790933185.878][INFO]: Browser search. Trying... D:\LIBS\simLIBS-2.0.3\UI\.driver-cache\.wdm\drivers\chromedriver\win64\154.0.8037\chromedriver-win32\chrome.exe
+[1790933185.878][INFO]: Browser search. Trying... D:\LIBS\simLIBS-2.0.3\UI\.driver-cache\.wdm\drivers\chromedriver\win64\154.0.8037\chromedriver-win32\chromium.exe
+[1790933185.880][INFO]: Browser search. Trying... C:\Users\32957\AppData\Local\Google\Chrome\Application\chrome.exe
+[1790933185.880][INFO]: Browser search. Trying... C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
+[1790933185.880][INFO]: Browser search. Trying... C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
+[1790933185.880][INFO]: Browser search. Trying... C:\Program Files\Google\Chrome\Application\chrome.exe
+[1790933185.880][INFO]: Browser search. Found at  C:\Program Files\Google\Chrome\Application\chrome.exe
+[1790933185.881][INFO]: Populating Preferences file: {
+   "alternate_error_pages": {
+      "enabled": false
+   },
+   "autofill": {
+      "enabled": false
+   },
+   "browser": {
+      "check_default_browser": false
+   },
+   "distribution": {
+      "import_bookmarks": false,
+      "import_history": false,
+      "import_search_engine": false,
+      "make_chrome_default_for_user": false,
+      "skip_first_run_ui": true
+   },
+   "dns_prefetching": {
+      "enabled": false
+   },
+   "profile": {
+      "content_settings": {
+         "pattern_pairs": {
+            "https://*,*": {
+               "media-stream": {
+                  "audio": "Default",
+                  "video": "Default"
+               }
+            }
+         }
+      },
+      "default_content_setting_values": {
+         "geolocation": 1
+      },
+      "default_content_settings": {
+         "geolocation": 1,
+         "mouselock": 1,
+         "notifications": 1,
+         "popups": 1,
+         "ppapi-broker": 1
+      },
+      "password_manager_enabled": false
+   },
+   "safebrowsing": {
+      "enabled": false
+   },
+   "search": {
+      "suggest_enabled": false
+   },
+   "translate": {
+      "enabled": false
+   }
+}
+[1790933185.881][INFO]: Populating Local State file: {
+   "background_mode": {
+      "enabled": false
+   },
+   "ssl": {
+      "rev_checking": {
+         "enabled": false
+      }
+   }
+}
+[1790933185.882][INFO]: ChromeDriver supports communication with Chrome via pipes. This is more reliable and more secure.
+[1790933185.882][INFO]: Use the --remote-debugging-pipe Chrome switch instead of the default --remote-debugging-port to enable this communication mode.
+[1790933185.882][INFO]: Launching chrome: "C:\Program Files\Google\Chrome\Application\chrome.exe" --allow-pre-commit-input --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-client-side-phishing-detection --disable-default-apps --disable-features=IgnoreDuplicateNavs,Prewarm --disable-hang-monitor --disable-notifications --disable-popup-blocking --disable-prompt-on-repost --disable-sync --enable-automation --enable-logging=stderr --headless=new --log-level=0 --no-first-run --no-service-autorun --password-store=basic --remote-debugging-port=0 --test-type=webdriver --use-mock-keychain --user-data-dir="C:\Users\32957\AppData\Local\Temp\scoped_dir9968_1597274573" data:,
+[22852:10836:1002/172626.625:ERROR:chrome\installer\util\google_update_settings_win.cc:270] Failed opening key Software\Google\Update\ClientStateMedium\{8A69D345-D564-463c-AFF1-A69D9E530F96} to set usagestats; result: 5
+[22852:25344:1002/172626.626:INFO:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:241] No machine level policy manager exists.
+
+DevTools listening on ws://127.0.0.1:58778/devtools/browser/ea0d035a-e66e-4a44-a887-febf006f4029
+[1790933186.706][DEBUG]: DevTools HTTP Request: http://localhost:58778/json/version
+[22852:25344:1002/172626.780:ERROR:content\browser\gpu\gpu_process_host.cc:1130] GPU process exited unexpectedly: exit_code=-1073741790
+[22852:25344:1002/172626.780:WARNING:content\browser\gpu\gpu_process_host.cc:1588] The GPU process has crashed 1 time(s)
+[22852:24996:1002/172626.780:ERROR:components\viz\host\persistent_cache_sandboxed_file_factory.cc:153] Failed to open persistent cache files in directory "C:\Users\32957\AppData\Local\Temp\scoped_dir9968_1597274573\GPUPersistentCache\DawnGraphiteCache\H6POMLZSBZPTMTLBCTMXRDH27BAKUDTA", error: 0: 另一个程序正在使用此文件，进程无法访问。 (0x20)
+[1790933186.794][DEBUG]: DevTools HTTP Response: {
+   "Browser": "Chrome/154.0.8037.95",
+   "Protocol-Version": "1.3",
+   "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+   "V8-Version": "15.4.80.19",
+   "WebKit-Version": "537.36 (@05d469856e75794131cc2e5d9b2f6b6f10a70388)",
+   "webSocketDebuggerUrl": "ws://localhost:58778/devtools/browser/ea0d035a-e66e-4a44-a887-febf006f4029"
+}
+
+[1790933186.794][DEBUG]: DevTools HTTP Request: http://localhost:58778/json/list
+[22852:25344:1002/172626.806:ERROR:content\browser\gpu\gpu_process_host.cc:1130] GPU process exited unexpectedly: exit_code=-1073741790
+[22852:25344:1002/172626.806:WARNING:content\browser\gpu\gpu_process_host.cc:1588] The GPU process has crashed 2 time(s)
+[1790933186.812][DEBUG]: DevTools HTTP Response: [ {
+   "description": "",
+   "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@05d469856e75794131cc2e5d9b2f6b6f10a70388/inspector.html?ws=localhost:58778/devtools/page/B514A535709C6149D07182456A1B6E9A",
+   "id": "B514A535709C6149D07182456A1B6E9A",
+   "title": "",
+   "type": "page",
+   "url": "data:,",
+   "webSocketDebuggerUrl": "ws://localhost:58778/devtools/page/B514A535709C6149D07182456A1B6E9A"
+}, {
+   "description": "",
+   "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@05d469856e75794131cc2e5d9b2f6b6f10a70388/inspector.html?ws=localhost:58778/devtools/page/3DBBB660196100AC78A8670C8D03EBCB",
+   "id": "3DBBB660196100AC78A8670C8D03EBCB",
+   "title": "",
+   "type": "browser_ui",
+   "url": "chrome://omnibox-popup.top-chrome/",
+   "webSocketDebuggerUrl": "ws://localhost:58778/devtools/page/3DBBB660196100AC78A8670C8D03EBCB"
+}, {
+   "description": "",
+   "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@05d469856e75794131cc2e5d9b2f6b6f10a70388/inspector.html?ws=localhost:58778/devtools/page/31884C4D535A315258A17BD17C76243D",
+   "id": "31884C4D535A315258A17BD17C76243D",
+   "title": "",
+   "type": "browser_ui",
+   "url": "chrome://omnibox-popup.top-chrome/omnibox_popup_aim.html",
+   "webSocketDebuggerUrl": "ws://localhost:58778/devtools/page/31884C4D535A315258A17BD17C76243D"
+} ]
+
+[1790933186.818][INFO]: resolved localhost to ["::1","127.0.0.1"]
+[22852:25344:1002/172626.823:ERROR:content\browser\gpu\gpu_process_host.cc:1130] GPU process exited unexpectedly: exit_code=-1073741790
+[22852:25344:1002/172626.823:WARNING:content\browser\gpu\gpu_process_host.cc:1588] The GPU process has crashed 3 time(s)
+[22852:10836:1002/172626.823:ERROR:components\viz\host\persistent_cache_sandboxed_file_factory.cc:153] Failed to open persistent cache files in directory "C:\Users\32957\AppData\Local\Temp\scoped_dir9968_1597274573\GPUPersistentCache\DawnGraphiteCache\H6POMLZSBZPTMTLBCTMXRDH27BAKUDTA", error: 0: 另一个程序正在使用此文件，进程无法访问。 (0x20)
+[1790933186.828][DEBUG]: DevTools WebSocket Command: Target.getTargets (id=1) (session_id=) browser {
+   "filter": [ {
+      "exclude": true,
+      "type": "browser"
+   }, {
+      "exclude": true,
+      "type": "page"
+   }, {
+      "exclude": false
+   } ]
+}
+[1790933186.830][DEBUG]: DevTools WebSocket Response: Target.getTargets (id=1) (session_id=) browser {
+   "targetInfos": [ {
+      "attached": false,
+      "browserContextId": "FB2A58C67B7712F1C41E0E8A8C805DE6",
+      "canAccessOpener": false,
+      "targetId": "3DBBB660196100AC78A8670C8D03EBCB",
+      "title": "",
+      "type": "browser_ui",
+      "url": "chrome://omnibox-popup.top-chrome/"
+   }, {
+      "attached": false,
+      "browserContextId": "FB2A58C67B7712F1C41E0E8A8C805DE6",
+      "canAccessOpener": false,
+      "targetId": "31884C4D535A315258A17BD17C76243D",
+      "title": "",
+      "type": "browser_ui",
+      "url": "chrome://omnibox-popup.top-chrome/omnibox_popup_aim.html"
+   }, {
+      "attached": false,
+      "browserContextId": "FB2A58C67B7712F1C41E0E8A8C805DE6",
+      "canAccessOpener": false,
+      "embedderData": {
+         "tabActive": true,
+         "tabPinned": false,
+         "tabStripIndex": 0
+      },
+      "targetId": "E4757B4C5DB2D0355C01680DCC67DC70",
+      "title": "",
+      "type": "tab",
+      "url": "data:,"
+   } ]
+}
+[1790933186.830][DEBUG]: DevTools WebSocket Command: Target.attachToTarget (id=2) (session_id=) browser {
+   "flatten": true,
+   "targetId": "E4757B4C5DB2D0355C01680DCC67DC70"
+}
+[1790933186.839][DEBUG]: DevTools WebSocket Event: Target.attachedToTarget (session_id=) browser {
+   "sessionId": "D381FDCB45F3541911F8A13545343849",
+   "targetInfo": {
+      "attached": true,
+      "browserContextId": "FB2A58C67B7712F1C41E0E8A8C805DE6",
+      "canAccessOpener": false,
+      "embedderData": {
+         "tabActive": true,
+         "tabPinned": false,
+         "tabStripIndex": 0
+      },
+      "targetId": "E4757B4C5DB2D0355C01680DCC67DC70",
+      "title": "",
+      "type": "tab",
+      "url": "data:,"
+   },
+   "waitingForDebugger": false
+}
+[1790933186.839][DEBUG]: DevTools WebSocket Response: Target.attachToTarget (id=2) (session_id=) browser {
+   "sessionId": "D381FDCB45F3541911F8A13545343849"
+}
+[1790933186.839][DEBUG]: DevTools WebSocket Command: Target.setAutoAttach (id=3) (session_id=D381FDCB45F3541911F8A13545343849) E4757B4C5DB2D0355C01680DCC67DC70 {
+   "autoAttach": true,
+   "flatten": true,
+   "waitForDebuggerOnStart": false
+}
+[22852:25100:1002/172626.840:ERROR:services\device\public\cpp\geolocation\system_geolocation_source_win.cc:124] Failed to create IAppCapability: 拒绝访问。 (0x80070005)
+[22852:25344:1002/172626.841:ERROR:content\browser\gpu\gpu_process_host.cc:1130] GPU process exited unexpectedly: exit_code=-1073741790
+[22852:25344:1002/172626.841:WARNING:content\browser\gpu\gpu_process_host.cc:1588] The GPU process has crashed 4 time(s)
+[1790933186.846][DEBUG]: DevTools WebSocket Event: Target.attachedToTarget (session_id=D381FDCB45F3541911F8A13545343849) E4757B4C5DB2D0355C01680DCC67DC70 {
+   "sessionId": "AEEFE6FC281CC924088D0BA74CE7B59F",
+   "targetInfo": {
+      "attached": true,
+      "browserContextId": "FB2A58C67B7712F1C41E0E8A8C805DE6",
+      "canAccessOpener": false,
+      "targetId": "B514A535709C6149D07182456A1B6E9A",
+      "title": "",
+      "type": "page",
+      "url": "data:,"
+   },
+   "waitingForDebugger": false
+}
+[1790933186.846][DEBUG]: DevTools WebSocket Command: Page.enable (id=4) (session_id=AEEFE6FC281CC924088D0BA74CE7B59F) B514A535709C6149D07182456A1B6E9A {
+}
+[1790933186.846][DEBUG]: DevTools WebSocket Command: Page.addScriptToEvaluateOnNewDocument (id=5) (session_id=AEEFE6FC281CC924088D0BA74CE7B59F) B514A535709C6149D07182456A1B6E9A {
+   "source": "(function () {window.cdc_adoQpoasnfa76pfcZLmcfl_Array = window.Array;window.cdc_adoQpoasnfa76pfcZLmcfl_Object = window.Object;window.cdc_adoQpoasnfa76pfcZLmcfl_Promise = window.Promise;window.cdc_a..."
+}
+[1790933186.846][DEBUG]: DevTools WebSocket Command: Runtime.evaluate (id=6) (session_id=AEEFE6FC281CC924088D0BA74CE7B59F) B514A535709C6149D07182456A1B6E9A {
+   "expression": "(function () {window.cdc_adoQpoasnfa76pfcZLmcfl_Array = window.Array;window.cdc_adoQpoasnfa76pfcZLmcfl_Object = window.Object;window.cdc_adoQpoasnfa76pfcZLmcfl_Promise = window.Promise;window.cdc_a..."
+}
+[1790933186.846][DEBUG]: DevTools WebSocket Command: Log.enable (id=7) (session_id=AEEFE6FC281CC924088D0BA74CE7B59F) B514A535709C6149D07182456A1B6E9A {
+}
+[1790933186.846][DEBUG]: DevTools WebSocket Command: Target.setAutoAttach (id=8) (session_id=AEEFE6FC281CC924088D0BA74CE7B59F) B514A535709C6149D07182456A1B6E9A {
+   "autoAttach": true,
+   "flatten": true,
+   "waitForDebuggerOnStart": false
+}
+[1790933186.846][DEBUG]: DevTools WebSocket Response: Target.setAutoAttach (id=3) (session_id=D381FDCB45F3541911F8A13545343849) E4757B4C5DB2D0355C01680DCC67DC70 {
+}
+[1790933186.854][DEBUG]: DevTools WebSocket Event: Page.frameStoppedLoading (session_id=AEEFE6FC281CC924088D0BA74CE7B59F) B514A535709C6149D07182456A1B6E9A {
+   "frameId": "B514A535709C6149D07182456A1B6E9A"
+}
+[1790933186.854][DEBUG]: DevTools WebSocket Response: Target.setAutoAttach (id=8) (session_id=AEEFE6FC281CC924088D0BA74CE7B59F) B514A535709C6149D07182456A1B6E9A {
+}
+[1790933186.854][DEBUG]: DevTools WebSocket Command: Runtime.enable (id=9) (session_id=AEEFE6FC281CC924088D0BA74CE7B59F) B514A535709C6149D07182456A1B6E9A {
+}
+[1790933186.857][DEBUG]: DevTools WebSocket Event: Inspector.targetCrashed (session_id=AEEFE6FC281CC924088D0BA74CE7B59F) B514A535709C6149D07182456A1B6E9A {
+}
+[1790933186.857][INFO]: [f88ac7e84f560a2f771ad31f672f3c50] RESPONSE InitSession {
+   "capabilities": {
+      "acceptInsecureCerts": false,
+      "browserName": "chrome",
+      "browserVersion": "154.0.8037.95",
+      "chrome": {
+         "chromedriverVersion": "154.0.8037.92 (334b65d254ccc35df4fca82706d1753227b01039-refs/branch-heads/8037@{#1589})",
+         "userDataDir": "C:\\Users\\32957\\AppData\\Local\\Temp\\scoped_dir9968_1597274573"
+      },
+      "fedcm:accounts": true,
+      "goog:chromeOptions": {
+         "debuggerAddress": "localhost:58778"
+      },
+      "goog:processID": 22852,
+      "networkConnectionEnabled": false,
+      "pageLoadStrategy": "normal",
+      "platformName": "windows",
+      "proxy": {
+      },
+      "setWindowRect": true,
+      "strictFileInteractability": false,
+      "timeouts": {
+         "implicit": 0,
+         "pageLoad": 300000,
+         "script": 30000
+      },
+      "unhandledPromptBehavior": "dismiss and notify",
+      "webauthn:extension:cmtgKey": true,
+      "webauthn:extension:credBlob": true,
+      "webauthn:extension:largeBlob": true,
+      "webauthn:extension:minPinLength": true,
+      "~~~": "..."
+   },
+   "sessionId": "f88ac7e84f560a2f771ad31f672f3c50"
+}
+[22852:25344:1002/172626.856:ERROR:content\browser\gpu\gpu_process_host.cc:1130] GPU process exited unexpectedly: exit_code=-1073741790
+[22852:25344:1002/172626.856:WARNING:content\browser\gpu\gpu_process_host.cc:1588] The GPU process has crashed 5 time(s)
+[22852:24996:1002/172626.857:ERROR:components\viz\host\persistent_cache_sandboxed_file_factory.cc:153] Failed to open persistent cache files in directory "C:\Users\32957\AppData\Local\Temp\scoped_dir9968_1597274573\GPUPersistentCache\DawnGraphiteCache\H6POMLZSBZPTMTLBCTMXRDH27BAKUDTA", error: 0: 另一个程序正在使用此文件，进程无法访问。 (0x20)
+[1790933186.859][INFO]: [f88ac7e84f560a2f771ad31f672f3c50] COMMAND SetTimeouts {
+   "pageLoad": 45000
+}
+[1790933186.859][INFO]: [f88ac7e84f560a2f771ad31f672f3c50] RESPONSE SetTimeouts
+[1790933186.860][INFO]: [f88ac7e84f560a2f771ad31f672f3c50] COMMAND SetTimeouts {
+   "script": 15000
+}
+[1790933186.860][INFO]: [f88ac7e84f560a2f771ad31f672f3c50] RESPONSE SetTimeouts
+[1790933186.861][INFO]: [f88ac7e84f560a2f771ad31f672f3c50] COMMAND Navigate {
+   "url": "https://physics.nist.gov/cgi-bin/ASD/lines1.pl?composition=H%3A100.0&spectra=H0-3&low_w=650.0&limits_type=0&upp_w=660.0&show_av=3&unit=1&resolution=1000&temp=1.0&eden=1e17&maxcharge=3&min_rel_int=0.001&int_scale=2&libs=1"
+}
+[1790933186.861][INFO]: Waiting for pending navigations...
+[1790933186.861][DEBUG]: DevTools WebSocket Command: Runtime.evaluate (id=10) (session_id=AEEFE6FC281CC924088D0BA74CE7B59F) B514A535709C6149D07182456A1B6E9A {
+   "expression": "1"
+}
+[1790933186.861][INFO]: Done waiting for pending navigations. Status: tab crashed
+[1790933186.861][INFO]: [f88ac7e84f560a2f771ad31f672f3c50] RESPONSE Navigate ERROR tab crashed
+  (Session info: chrome=154.0.8037.95)
+[1790933186.863][INFO]: [f88ac7e84f560a2f771ad31f672f3c50] COMMAND Quit {
+}
+[1790933186.922][INFO]: [f88ac7e84f560a2f771ad31f672f3c50] RESPONSE Quit
+[1790933186.922][DEBUG]: Log type 'driver' lost 0 entries on destruction
+[1790933186.922][DEBUG]: Log type 'browser' lost 0 entries on destruction

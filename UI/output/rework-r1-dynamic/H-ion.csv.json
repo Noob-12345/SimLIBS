@@ -1,0 +1,40 @@
+{
+  "kind": "simulation",
+  "label": "本次真实 NIST / SimulatedLIBS 模拟",
+  "class": "simLIBS.simulation.SimulatedLIBS",
+  "source_file": "D:\\LIBS\\simLIBS-2.0.3\\simLIBS-2.0.3\\simLIBS\\simulation.py",
+  "source_sha256": "4279a121c07d88d1bef9e6e8650b2df77ef04a6b4cca28b705afc143ed2fa899",
+  "parameters": {
+    "Te": 1.0,
+    "Ne": 1e+17,
+    "resolution": 1000,
+    "low_w": 650.0,
+    "upper_w": 660.0,
+    "max_ion_charge": 3,
+    "webscraping": "dynamic",
+    "headless": true,
+    "elements": [
+      "H"
+    ],
+    "percentages": [
+      100.0
+    ],
+    "step": 0.005,
+    "resample": false
+  },
+  "submitted_composition": {
+    "H": 100.0
+  },
+  "actual_Ne": "1e17",
+  "nist_url": "https://physics.nist.gov/cgi-bin/ASD/lines1.pl?composition=H%3A100.0&spectra=H0-3&low_w=650.0&limits_type=0&upp_w=660.0&show_av=3&unit=1&resolution=1000&temp=1.0&eden=1e17&maxcharge=3&min_rel_int=0.001&int_scale=2&libs=1",
+  "created_at": "2026-10-02T09:53:10.364090+00:00",
+  "tls_verify": true,
+  "driver_version": "154.0.8037.92",
+  "browser_arguments": [
+    "--headless=new",
+    "--disable-notifications"
+  ],
+  "ion_total": "copied sole H I contribution (NIST omitted Sum(calc))",
+  "ion_blank_policy": "only explicit blank cells in valid ion contribution columns -> 0; missing wavelength/total and NaN/Inf rejected",
+  "interpolation": "NIST grid (raw = interpolated)"
+}

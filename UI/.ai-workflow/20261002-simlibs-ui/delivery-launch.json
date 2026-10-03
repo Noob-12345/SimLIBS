@@ -1,0 +1,12 @@
+﻿{
+    "Time":  "2026-10-02T18:51:02.8736361+08:00",
+    "ProcessId":  10340,
+    "Executable":  "D:\\Anaconda3\\envs\\simLIBS\\pythonw.exe",
+    "Argument":  "-B D:\\LIBS\\simLIBS-2.0.3\\UI\\run_ui.py",
+    "MainWindowTitle":  "simLIBS 光谱模拟工作台",
+    "MainWindowHandle":  17893510,
+    "Running":  true,
+    "NewTerminalWindow":  false,
+    "AutomaticNistRequest":  false,
+    "Responding":  true
+}

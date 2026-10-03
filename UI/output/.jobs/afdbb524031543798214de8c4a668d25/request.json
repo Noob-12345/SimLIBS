@@ -1,0 +1,47 @@
+{
+  "parameters": {
+    "Te": 0.75,
+    "Ne": 1e+17,
+    "resolution": 3000,
+    "low_w": 200.0,
+    "upper_w": 1000.0,
+    "max_ion_charge": 3,
+    "webscraping": "static",
+    "headless": true,
+    "elements": [
+      "W",
+      "Fe",
+      "Mo"
+    ],
+    "percentages": [
+      50.0,
+      25.0,
+      25.0
+    ],
+    "step": 0.005,
+    "resample": false,
+    "intensity_scale": "photon",
+    "broadening": "nist",
+    "broaden_convention": "nist",
+    "broaden_grid_step": 0.005,
+    "broaden_center_decimals": null,
+    "broaden_min_rel_int": 0.0
+  },
+  "kind": "single",
+  "job_id": "afdbb524031543798214de8c4a668d25",
+  "settings": {
+    "python": "D:\\Anaconda3\\envs\\simLIBS\\python.exe",
+    "source": "D:\\LIBS\\simLIBS-2.0.3\\simLIBS-2.0.3",
+    "driver": "",
+    "chrome": "",
+    "output": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output",
+    "connect_timeout": 10.0,
+    "read_timeout": 30.0,
+    "page_timeout": 45.0,
+    "script_timeout": 15.0,
+    "static_deadline": 60.0,
+    "dynamic_deadline": 180.0,
+    "tls_verify": true
+  },
+  "directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\.jobs\\afdbb524031543798214de8c4a668d25"
+}

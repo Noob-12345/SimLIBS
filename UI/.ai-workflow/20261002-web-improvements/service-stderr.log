@@ -1,0 +1,4 @@
+D:\LIBS\simLIBS-2.0.3\UI\simlibs_ui\plotting.py:49: UserWarning: Glyph 8315 (\N{SUPERSCRIPT MINUS}) missing from font(s) Microsoft YaHei.
+  atomic_write(target, lambda path: figure.savefig(path, format='png', dpi=150))
+D:\LIBS\simLIBS-2.0.3\UI\simlibs_ui\plotting.py:49: UserWarning: Glyph 8315 (\N{SUPERSCRIPT MINUS}) missing from font(s) Microsoft YaHei.
+  atomic_write(target, lambda path: figure.savefig(path, format='png', dpi=150))

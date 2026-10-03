@@ -1,0 +1,20 @@
+{
+  "pid": 27644,
+  "current_directory": "D:\\LIBS\\simLIBS-2.0.3\\UI\\web\\",
+  "image_path": "D:\\Anaconda3\\envs\\simLIBS\\python.exe",
+  "command_line": "\"D:\\Anaconda3\\envs\\simLIBS\\python.exe\" -B D:\\LIBS\\simLIBS-2.0.3\\UI\\web\\server.py --port 8517 --no-browser ",
+  "home_sha256": "0035dc0460a7d5116f33e1bfa90d26230558dac7621ac1e90d237897b26195ca",
+  "jobs": [
+    {
+      "job_id": "e7a2a65dd38e4cfbab21319e5d372b87",
+      "kind": "单次模拟",
+      "status": "completed",
+      "summary": "Te=1 · Ne=1e+17 · R1000 · 650–660nm · static · H 100%",
+      "progress": 100,
+      "duration": "3.2 s",
+      "error": null,
+      "created": "10-02 21:27"
+    }
+  ],
+  "active_jobs": []
+}

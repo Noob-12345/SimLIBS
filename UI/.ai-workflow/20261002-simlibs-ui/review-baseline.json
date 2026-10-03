@@ -1,0 +1,139 @@
+﻿{
+    "CreatedAt":  "2026-10-02T17:21:26.1937719+08:00",
+    "CoderStatus":  "done",
+    "TestCount":  46,
+    "UI":  [
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\adapter.py",
+                   "Hash":  "F4BC75EF2C62403F54D5061B34054B6C77B651AFE9DBD4D8B609EBBE2C2ECE04"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\app.py",
+                   "Hash":  "DD74D372AB13418CB74BDB135EFD25F6A5E807FF2D7598E959C76AD9247EA77B"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\input_views.py",
+                   "Hash":  "A580EBF2BC5D6DC4D35BF7ACE16CC18425262653049FCC8D668D832970BA8CD1"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\jobs.py",
+                   "Hash":  "43916E6738CA36CE648EDB401C9A9435BE4014048BAF4F862D9638A9EC4985EB"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\models.py",
+                   "Hash":  "4AEB5FE9FDEAC03AE524023FE81DBAC0EB6DA355DDDA58819890E1A1C07156D2"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\operations.py",
+                   "Hash":  "DB828F3AC991D31C66FAC2225BEC9371E9751B2FF1751AEAE5347A999F5349B6"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\plotting.py",
+                   "Hash":  "B452CA46637C4B54538B012F1A4484CC43306944CE472CCDFCE643C431917A66"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\result_view.py",
+                   "Hash":  "8839E3AC0F5D45BF1915D880C6E80BE2FF841F4A6C83A545743533368A4FE60C"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\settings.py",
+                   "Hash":  "24A1887948CC213F924B1EE6FBDA4521234430DE37AB0FF1B76B75CA9CB4A297"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\storage.py",
+                   "Hash":  "161BC9B849ED9D52120EC5CAEEB23E2025DDB2901633ADB50380C48E0CEF4EB6"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\worker.py",
+                   "Hash":  "F675965F71CFFA7C878300935D8AAF28B80032E1B450494BD40A7FF319CDABDC"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\simlibs_ui\\__init__.py",
+                   "Hash":  "937D6097F12F063D4124AE314B8D8F13686E4E246453844D534FDBEAC9F737A7"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\tests\\job_fixture.py",
+                   "Hash":  "90583F6C42FBA11B020B32CF5764A201CF9AB87C012DDCD724300F7C1259C88B"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\tests\\test_adapter.py",
+                   "Hash":  "CB2447226BE1EF06AD5798E65B47F97AF2A3F9DC250D82BF54372E06D7711A47"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\tests\\test_app.py",
+                   "Hash":  "75782D02B361D8E88AAC6004B057DF9FC30BABD21A4C0974C90C8C3A638F4E61"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\tests\\test_cli.py",
+                   "Hash":  "F061B9B935258056F57CEF6DF7EBD11F53416022D7BB37F51293A6DCE1E742ED"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\tests\\test_jobs.py",
+                   "Hash":  "41D6F69DB785098D801BEBBEDBE2D955F84F56B179C6342EBD421769DD54D80B"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\tests\\test_models.py",
+                   "Hash":  "BD141BC8CD1D4A7BCFB50C7E0E631D5CE5BE26BB5EBB591865A01D5B45EB1625"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\tests\\test_operations.py",
+                   "Hash":  "CF8B367A0781387082DD656BA1398EDA58C450F5FAC7504C9608B9C5D9C77F14"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\tests\\test_storage.py",
+                   "Hash":  "5C471C75A82EE21D0BD58F62BDEF20A0BC8D9FC03BAC60FB012AFB2D6D5D5AB0"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\tests\\__init__.py",
+                   "Hash":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\tests\\fixtures\\nist_H_singleion.csv",
+                   "Hash":  "F16DE4CD5502EA03321D648343E5CF52B47143FAC40CF6F89DCADCE011A5B351"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\tests\\fixtures\\README.md",
+                   "Hash":  "3051F1BCF0FF6122AFE62D07463DE3AABD64E8BD7856463CA66587CD405C13F3"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\run_ui.py",
+                   "Hash":  "79545142E3135909A007C8D7D8E012DB45847344F975068FDF1C4494F26A1A2D"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\verify_real.py",
+                   "Hash":  "00A23A2CDC37D3682AD7D229163602AE9C21D18AD279691F96CD4BCDB782BB17"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\start_ui.cmd",
+                   "Hash":  "BAFAFF949C321BAB3B2F6FA53B6F368CA8CEAD4599C464DEAB6E895F2E6E189B"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\start_ui.ps1",
+                   "Hash":  "342861BD90AACBAFE6DBD51FC0E67F35DAAA980131B5D70753679D6B80BB548A"
+               },
+               {
+                   "Path":  "D:\\LIBS\\simLIBS-2.0.3\\UI\\README.md",
+                   "Hash":  "2A1B92FB598B3DDC4C9C83AE535A113E110873338FB8E0FB0AD67364F8D337B4"
+               }
+           ],
+    "Source":  [
+                   {
+                       "Path":  "D:\\LIBS\\simLIBS-2.0.3\\simLIBS-2.0.3\\simLIBS\\simulation.py",
+                       "Expected":  "4279A121C07D88D1BEF9E6E8650B2DF77EF04A6B4CCA28B705AFC143ED2FA899",
+                       "Actual":  "4279A121C07D88D1BEF9E6E8650B2DF77EF04A6B4CCA28B705AFC143ED2FA899",
+                       "Unchanged":  true
+                   },
+                   {
+                       "Path":  "D:\\LIBS\\simLIBS-2.0.3\\simLIBS-2.0.3\\simLIBS\\animation.py",
+                       "Expected":  "EEE804D29155A4130FB7CA2F2C378A38BA2653B43817B1518EDC31975E296DCC",
+                       "Actual":  "EEE804D29155A4130FB7CA2F2C378A38BA2653B43817B1518EDC31975E296DCC",
+                       "Unchanged":  true
+                   },
+                   {
+                       "Path":  "D:\\LIBS\\simLIBS-2.0.3\\simLIBS-2.0.3\\simLIBS\\__init__.py",
+                       "Expected":  "EA49DBDFD082A543137ED75619C18F3AA21C2B4924AB8721D0284B4A322FB24A",
+                       "Actual":  "EA49DBDFD082A543137ED75619C18F3AA21C2B4924AB8721D0284B4A322FB24A",
+                       "Unchanged":  true
+                   }
+               ]
+}

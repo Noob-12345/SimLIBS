@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>simLIBS Studio · 界面设计原型</title>
+<style>
+/* ================= 设计令牌 ================= */
+:root[data-theme="dark"]{
+  --bg:#0c1016; --bg2:#0f141b; --card:#141a23; --card2:#182029; --inset:#0e131a;
+  --border:#222c39; --border2:#2b3750;
+  --text:#e8edf5; --muted:#8fa0b5; --faint:#5c6b80;
+  --accent:#22d3ee; --accent2:#8b5cf6; --accent-soft:rgba(34,211,238,.12);
+  --good:#34d399; --good-soft:rgba(52,211,153,.13);
+  --warn:#fbbf24; --warn-soft:rgba(251,191,36,.13);
+  --bad:#f87171; --bad-soft:rgba(248,113,113,.13);
+  --info:#60a5fa; --info-soft:rgba(96,165,250,.13);
+  --grid:rgba(143,160,181,.10);
+  --shadow:0 8px 28px rgba(0,0,0,.38);
+  --chart-raw:#5f7387; --chart-main:#22d3ee; --chart-ion:#a78bfa;
+}
+:root[data-theme="light"]{
+  --bg:#f3f5f9; --bg2:#eef1f6; --card:#ffffff; --card2:#f7f9fc; --inset:#f1f4f8;
+  --border:#dfe5ee; --border2:#c9d4e4;
+  --text:#1a2330; --muted:#5b6b81; --faint:#93a1b4;
+  --accent:#0891b2; --accent2:#7c3aed; --accent-soft:rgba(8,145,178,.10);
+  --good:#059669; --good-soft:rgba(5,150,105,.10);
+  --warn:#b45309; --warn-soft:rgba(180,83,9,.10);
+  --bad:#dc2626; --bad-soft:rgba(220,38,38,.10);
+  --info:#2563eb; --info-soft:rgba(37,99,235,.10);
+  --grid:rgba(91,107,129,.14);
+  --shadow:0 8px 24px rgba(23,36,58,.10);
+  --chart-raw:#9aa8ba; --chart-main:#0891b2; --chart-ion:#7c3aed;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Inter","Segoe UI",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--text); font-size:13.5px; line-height:1.55;
+  overflow:hidden;
+}
+.mono{font-family:"JetBrains Mono",Consolas,ui-monospace,monospace}
+
+/* ================= 应用骨架 ================= */
+#app{display:grid;grid-template-columns:236px 1fr;height:100vh}
+
+/* --- 侧边栏 --- */
+#sidebar{
+  background:var(--bg2); border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:18px 14px 14px;gap:4px;min-width:0;
+}
+.brand{display:flex;align-items:center;gap:11px;padding:2px 8px 16px}
+.brand .logo{width:34px;height:34px;border-radius:10px;flex:none;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(34,211,238,.28)}
+.brand h1{font-size:15.5px;font-weight:700;letter-spacing:.2px}
+.brand small{display:block;color:var(--faint);font-size:10.5px;font-weight:500;letter-spacing:1.4px;text-transform:uppercase}
+.nav-label{color:var(--faint);font-size:10.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;padding:10px 10px 6px}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;cursor:pointer;
+  color:var(--muted);font-weight:500;user-select:none;position:relative;
+  transition:background .15s,color .15s;
+}
+.nav-item svg{width:17px;height:17px;flex:none;opacity:.85}
+.nav-item:hover{background:var(--card2);color:var(--text)}
+.nav-item.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.nav-item.active::before{content:"";position:absolute;left:-14px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;
+  background:linear-gradient(180deg,var(--accent),var(--accent2))}
+.sidebar-card{
+  margin-top:auto;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 13px;
+}
+.sidebar-card .row{display:flex;align-items:center;gap:8px;padding:3.5px 0;color:var(--muted);font-size:12px}
+.sidebar-card .row b{color:var(--text);font-weight:600;margin-left:auto;font-size:11.5px}
+.dot{width:7px;height:7px;border-radius:50%;flex:none}
+.dot.g{background:var(--good);box-shadow:0 0 6px var(--good)}
+.dot.y{background:var(--warn);box-shadow:0 0 6px var(--warn)}
+.dot.off{background:var(--faint)}
+
+/* --- 主区 --- */
+#main{display:flex;flex-direction:column;min-width:0}
+#topbar{
+  height:56px;flex:none;display:flex;align-items:center;gap:14px;padding:0 22px;
+  border-bottom:1px solid var(--border);background:var(--bg2);
+}
+#topbar h2{font-size:15.5px;font-weight:650}
+#topbar .sub{color:var(--faint);font-size:12px;margin-left:2px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;padding:4.5px 12px;border-radius:99px;
+  font-size:12px;font-weight:550;border:1px solid var(--border);background:var(--card);color:var(--muted);
+}
+.pill .dot{margin-right:1px}
+.icon-btn{
+  width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--card);
+  color:var(--muted);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:all .15s;
+}
+.icon-btn:hover{color:var(--text);border-color:var(--border2)}
+.icon-btn svg{width:16px;height:16px}
+
+#content{flex:1;overflow-y:auto;padding:22px 24px 40px}
+.page{display:none;max-width:1460px;margin:0 auto}
+.page.active{display:block;animation:pageIn .32s cubic-bezier(.2,.7,.3,1)}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ================= 通用组件 ================= */
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;
+}
+.card h3{font-size:13px;font-weight:650;letter-spacing:.2px;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.card h3 .hint{font-weight:450;color:var(--faint);font-size:11.5px;margin-left:auto}
+.grid-2{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
+.grid-2r{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+
+label.f{display:block;color:var(--muted);font-size:11.5px;font-weight:600;margin:12px 0 5px;letter-spacing:.3px}
+label.f:first-child{margin-top:0}
+label.f .val{float:right;color:var(--accent);font-weight:650;font-family:"JetBrains Mono",Consolas,monospace;font-size:11.5px}
+input[type=text],input[type=number],select{
+  width:100%;background:var(--inset);border:1px solid var(--border);border-radius:8px;color:var(--text);
+  padding:7.5px 10px;font-size:13px;outline:none;font-family:inherit;transition:border .15s, box-shadow .15s;
+}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:4px;border-radius:2px;margin:11px 0 3px;
+  background:linear-gradient(90deg,var(--accent) var(--fill,50%),var(--border) var(--fill,50%));outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--card);
+  border:2.5px solid var(--accent);box-shadow:0 1px 6px rgba(0,0,0,.35);transition:transform .12s;
+}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.18)}
+
+.seg{display:flex;background:var(--inset);border:1px solid var(--border);border-radius:9px;padding:3px;gap:3px}
+.seg button{
+  flex:1;border:none;background:transparent;color:var(--muted);padding:6px 10px;border-radius:7px;
+  font-size:12.5px;font-weight:550;cursor:pointer;font-family:inherit;transition:all .15s;
+}
+.seg button.on{background:var(--card2);color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.22)}
+
+.switch{position:relative;display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
+.switch input{display:none}
+.switch .track{width:34px;height:19px;border-radius:99px;background:var(--border);position:relative;transition:background .18s;flex:none}
+.switch .track::after{content:"";position:absolute;top:2.5px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.switch input:checked + .track{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.switch input:checked + .track::after{left:17px}
+.switch span{color:var(--muted);font-size:12.5px}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:9px;border:1px solid var(--border);
+  background:var(--card2);color:var(--text);padding:8px 15px;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:inherit;transition:all .15s;white-space:nowrap;
+}
+.btn:hover{border-color:var(--border2);background:var(--inset)}
+.btn svg{width:15px;height:15px}
+.btn.primary{
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);border:none;color:#fff;
+  box-shadow:0 4px 16px rgba(34,211,238,.30);
+}
+.btn.primary:hover{filter:brightness(1.1);box-shadow:0 6px 20px rgba(34,211,238,.42)}
+.btn.primary:disabled{opacity:.55;cursor:not-allowed;filter:none}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--text);background:var(--card2)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:5px 11px;font-size:12px;border-radius:7px}
+
+.tag{display:inline-flex;align-items:center;gap:5px;padding:2.5px 9px;border-radius:6px;font-size:11px;font-weight:600}
+.tag.g{background:var(--good-soft);color:var(--good)}
+.tag.y{background:var(--warn-soft);color:var(--warn)}
+.tag.b{background:var(--info-soft);color:var(--info)}
+.tag.r{background:var(--bad-soft);color:var(--bad)}
+.tag.n{background:var(--card2);color:var(--muted);border:1px solid var(--border)}
+
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:550;
+  background:var(--card2);border:1px solid var(--border);color:var(--muted);
+}
+.chip i{width:8px;height:8px;border-radius:2px;flex:none;font-style:normal}
+
+/* ================= 页面：单次模拟 ================= */
+.legend{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.legend .chip{cursor:pointer;transition:all .15s}
+.legend .chip.off{opacity:.38}
+.chart-wrap{position:relative}
+#specChart,#scanChart{width:100%;height:330px;display:block;border-radius:10px;background:var(--inset);border:1px solid var(--border)}
+#tooltip{
+  position:absolute;pointer-events:none;background:var(--card2);border:1px solid var(--border2);border-radius:8px;
+  padding:6px 10px;font-size:11.5px;display:none;z-index:5;box-shadow:var(--shadow);white-space:nowrap;
+}
+#tooltip b{color:var(--accent)}
+.preview-tag{
+  position:absolute;top:12px;right:14px;font-size:10.5px;color:var(--faint);border:1px dashed var(--border2);
+  border-radius:6px;padding:2px 8px;letter-spacing:.5px;background:var(--card);
+}
+.meta-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;min-height:26px}
+
+/* 配比编辑器 */
+.comp-row{display:grid;grid-template-columns:64px 76px 16px 1fr 28px;gap:8px;align-items:center;margin-bottom:9px;animation:rowIn .25s ease}
+@keyframes rowIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.comp-row input{padding:6px 9px;font-size:12.5px}
+.comp-el{text-transform:uppercase;font-weight:650;text-align:center}
+.comp-pct{text-align:right}
+.comp-bar{height:7px;border-radius:4px;background:var(--inset);overflow:hidden}
+.comp-bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease}
+.comp-del{width:28px;height:28px;border-radius:7px;border:none;background:transparent;color:var(--faint);cursor:pointer;font-size:13px}
+.comp-del:hover{color:var(--bad);background:var(--bad-soft)}
+.sum-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:9px;background:var(--inset);border:1px solid var(--border);margin-top:4px}
+.sum-row.ok{border-color:rgba(52,211,153,.4)}
+.sum-row.bad{border-color:rgba(248,113,113,.5)}
+.presets{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+
+/* 任务日志 */
+.logbox{
+  background:var(--inset);border:1px solid var(--border);border-radius:10px;padding:11px 13px;height:150px;overflow-y:auto;
+  font-family:"JetBrains Mono",Consolas,monospace;font-size:11.3px;line-height:1.85;color:var(--muted);
+}
+.logbox .t{color:var(--faint)}
+.logbox .ok{color:var(--good)}
+.logbox .info{color:var(--info)}
+.logbox .warnc{color:var(--warn)}
+
+/* 进度条 */
+.progress{height:8px;border-radius:5px;background:var(--inset);overflow:hidden;position:relative}
+.progress i{display:block;height:100%;width:0%;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .35s ease;position:relative}
+.progress i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+  animation:shimmer 1.4s infinite}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+
+/* ================= 页面：批量 ================= */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:15px 17px}
+.stat .k{color:var(--muted);font-size:11.5px;font-weight:600;letter-spacing:.3px}
+.stat .v{font-size:23px;font-weight:700;margin-top:3px;font-family:"JetBrains Mono",Consolas,monospace}
+.stat .v small{font-size:12px;color:var(--faint);font-weight:500}
+.stat .d{font-size:11px;margin-top:2px;color:var(--faint)}
+.stat .d.up{color:var(--good)}
+.stat.hl .v{color:var(--accent)}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{color:var(--faint);text-align:left;font-weight:600;font-size:11px;letter-spacing:.6px;text-transform:uppercase;
+  padding:8px 10px;border-bottom:1px solid var(--border)}
+td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:var(--card2)}
+td b{color:var(--text);font-weight:600}
+.ecomp{display:flex;gap:5px;flex-wrap:wrap}
+.ecomp span{background:var(--inset);border:1px solid var(--border);border-radius:5px;padding:1px 7px;font-size:10.5px;
+  font-family:"JetBrains Mono",Consolas,monospace}
+.pager{display:flex;align-items:center;gap:5px;justify-content:flex-end;margin-top:13px;color:var(--faint);font-size:12px}
+.pager button{min-width:27px;height:27px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);
+  cursor:pointer;font-family:inherit;font-size:12px}
+.pager button.on{background:var(--accent-soft);color:var(--accent);border-color:transparent;font-weight:650}
+.pager button:hover:not(.on){color:var(--text)}
+
+/* ================= 页面：扫描 ================= */
+.playbar{display:flex;align-items:center;gap:11px;margin-top:13px}
+.playbar .pbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--card2);color:var(--text);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex:none}
+.playbar .pbtn.main{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;width:42px;height:42px;
+  box-shadow:0 3px 14px rgba(34,211,238,.35)}
+.playbar .pbtn:hover{transform:scale(1.07)}
+.playbar .pbtn svg{width:16px;height:16px}
+#scanSlider{flex:1;margin:0}
+.frame-info{font-family:"JetBrains Mono",Consolas,monospace;font-size:12px;color:var(--accent);font-weight:650;min-width:150px;text-align:right}
+.scanvals{display:flex;flex-wrap:wrap;gap:5px;max-height:96px;overflow-y:auto}
+.scanvals span{font-family:"JetBrains Mono",Consolas,monospace;font-size:10.5px;background:var(--inset);border:1px solid var(--border);
+  border-radius:5px;padding:2px 7px;color:var(--muted)}
+.scanvals span.cur{color:var(--accent);border-color:var(--accent)}
+
+/* ================= 页面：任务记录 / 设置 ================= */
+.artifacts{display:flex;gap:6px;flex-wrap:wrap}
+.artifacts code{background:var(--inset);border:1px solid var(--border);border-radius:5px;padding:1px 7px;font-size:10.5px;
+  font-family:"JetBrains Mono",Consolas,monospace;color:var(--info);cursor:pointer}
+.artifacts code:hover{border-color:var(--info)}
+.set-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.set-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.set-row:last-child{border-bottom:none}
+.set-row .lab{color:var(--muted);font-size:12.5px;min-width:150px}
+.set-row .ctl{margin-left:auto;display:flex;align-items:center;gap:8px}
+.set-row .ctl input{width:200px;text-align:right}
+
+/* toast */
+#toasts{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:9px;z-index:99}
+.toast{
+  background:var(--card);border:1px solid var(--border2);border-left:3px solid var(--accent);border-radius:10px;
+  padding:11px 16px;min-width:250px;max-width:360px;box-shadow:var(--shadow);font-size:12.5px;
+  animation:toastIn .3s cubic-bezier(.2,.8,.3,1);display:flex;gap:10px;align-items:flex-start;
+}
+.toast.ok{border-left-color:var(--good)} .toast.warn{border-left-color:var(--warn)} .toast.err{border-left-color:var(--bad)}
+.toast b{display:block;font-size:12.5px}
+.toast small{color:var(--muted);font-size:11.5px}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+.toast.out{animation:toastOut .25s forwards}
+@keyframes toastOut{to{opacity:0;transform:translateX(30px)}}
+
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:5px;border:2px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ 侧边栏 ============ -->
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round">
+          <line x1="6" y1="6" x2="6" y2="18"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="18" y1="8" x2="18" y2="16"/>
+        </svg>
+      </div>
+      <h1>simLIBS Studio<small>SPECTRUM WORKBENCH</small></h1>
+    </div>
+
+    <div class="nav-label">模拟</div>
+    <div class="nav-item active" data-page="single">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 3h6M10 3v5.2L5.6 15a3.2 3.2 0 0 0 2.7 5h7.4a3.2 3.2 0 0 0 2.7-5L14 8.2V3"/>
+        <line x1="7.5" y1="14" x2="16.5" y2="14"/>
+      </svg>单次模拟
+    </div>
+    <div class="nav-item" data-page="batch">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+        <rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/>
+        <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/>
+      </svg>批量 dataset
+    </div>
+    <div class="nav-item" data-page="scan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 12h4l3-8 4 16 3-8h6"/>
+      </svg>扫描动画
+    </div>
+
+    <div class="nav-label">记录与环境</div>
+    <div class="nav-item" data-page="jobs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+        <circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>
+      </svg>任务记录
+    </div>
+    <div class="nav-item" data-page="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+        <line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2.1" fill="currentColor" stroke="none"/>
+        <line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2.1" fill="currentColor" stroke="none"/>
+        <line x1="4" y1="17" x2="20" y2="17"/><circle cx="7" cy="17" r="2.1" fill="currentColor" stroke="none"/>
+      </svg>设置
+    </div>
+
+    <div class="sidebar-card">
+      <div class="row"><span class="dot g"></span>NIST 数据库<b class="mono">32 ms</b></div>
+      <div class="row"><span class="dot g"></span>Python worker<b class="mono">3.10</b></div>
+      <div class="row"><span class="dot y"></span>ChromeDriver<b class="mono">需匹配</b></div>
+      <div class="row" style="margin-top:6px;padding-top:8px;border-top:1px solid var(--border);color:var(--faint)">
+        引擎 simLIBS 2.0.3<b class="mono">空闲</b></div>
+    </div>
+  </aside>
+
+  <!-- ============ 主区 ============ -->
+  <div id="main">
+    <div id="topbar">
+      <h2 id="pageTitle">单次模拟</h2><span class="sub" id="pageSub">Te · Ne · R · 组成 → NIST 光谱</span>
+      <div class="topbar-right">
+        <span class="pill"><span class="dot g"></span>NIST 可达</span>
+        <span class="pill mono" id="enginePill" style="display:none;color:var(--accent);border-color:var(--accent)">● 运行中 · <span id="enginePct">0%</span></span>
+        <button class="icon-btn" id="themeBtn" title="切换亮/暗主题">
+          <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+          <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" style="display:none">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="content">
+
+      <!-- ============ 页 1：单次模拟 ============ -->
+      <section class="page active" data-page="single">
+        <div class="grid-2">
+          <div class="card">
+            <h3>共同参数</h3>
+
+            <label class="f">电子温度 Te<span class="val" id="teVal">1.00 eV</span></label>
+            <input type="range" id="teSlider" min="0.5" max="2.5" step="0.05" value="1.0">
+
+            <label class="f">电子密度 Ne<span class="val" id="neVal">1.0×10¹⁷ cm⁻³</span></label>
+            <input type="range" id="neSlider" min="14" max="18" step="0.1" value="17">
+
+            <label class="f">光谱分辨率 R（仪器分辨率，非重采样步长）<span class="val" id="rVal">5000</span></label>
+            <input type="range" id="rSlider" min="500" max="10000" step="100" value="5000">
+
+            <label class="f">波长范围 [nm]</label>
+            <div class="row2">
+              <input type="number" id="lowW" value="350" min="10" max="2000" step="1">
+              <input type="number" id="upW" value="560" min="20" max="2500" step="1">
+            </div>
+
+            <label class="f">最大离子电荷</label>
+            <select id="maxIon"><option>0</option><option selected>2</option><option>3</option><option>5</option></select>
+
+            <label class="f">抓取方式</label>
+            <div class="seg" id="modeSeg">
+              <button data-v="static">static（requests）</button>
+              <button data-v="dynamic" class="on">dynamic（Selenium）</button>
+            </div>
+            <div style="margin-top:12px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <label class="switch"><input type="checkbox" id="headless" checked><span class="track"></span><span>headless 后台抓取</span></label>
+              <label class="switch"><input type="checkbox" id="resample"><span class="track"></span><span>主动重采样</span></label>
+            </div>
+
+            <h3 style="margin-top:22px">元素配比 <span class="hint">总原子数密度占比</span></h3>
+            <div id="compRows"></div>
+            <div class="sum-row ok" id="sumRow">
+              <span style="color:var(--muted);font-size:12px">总和</span>
+              <b class="mono" id="sumVal" style="color:var(--good)">100.0 %</b>
+            </div>
+            <div class="presets">
+              <button class="btn sm" data-preset="wfm">预设 W/Fe/Mo 50·25·25</button>
+              <button class="btn sm" data-preset="h">预设 H 100%</button>
+              <button class="btn sm ghost" id="addEl">＋ 添加元素</button>
+            </div>
+
+            <button class="btn primary" id="runBtn" style="width:100%;margin-top:18px;padding:11px">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
+              <span id="runBtnText">开始模拟</span>
+            </button>
+          </div>
+
+          <div>
+            <div class="card">
+              <h3>光谱结果
+                <span class="hint">单谱上限 200,000 点 · 预览抽样 ≤1500</span>
+              </h3>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:11px;flex-wrap:wrap">
+                <input type="text" id="chartTitle" value="W Fe Mo composition · Te=1.00 eV" style="max-width:340px;font-weight:600">
+                <div class="legend" id="legend">
+                  <span class="chip" data-view="raw"><i style="background:var(--chart-raw)"></i>raw</span>
+                  <span class="chip" data-view="interp"><i style="background:var(--chart-main)"></i>interpolated</span>
+                  <span class="chip" data-view="ion"><i style="background:var(--chart-ion)"></i>ion</span>
+                  <span class="chip" data-view="norm" id="normChip">归一化</span>
+                </div>
+              </div>
+              <div class="chart-wrap">
+                <canvas id="specChart"></canvas>
+                <div id="tooltip"></div>
+                <span class="preview-tag" id="previewTag">示意预览 · 尚未运行</span>
+              </div>
+              <div class="meta-chips" id="metaChips"></div>
+              <div style="display:flex;gap:9px;margin-top:13px;flex-wrap:wrap">
+                <button class="btn sm" data-x="csv">导出 CSV</button>
+                <button class="btn sm" data-x="png">导出 PNG</button>
+                <button class="btn sm" data-x="json">来源 JSON</button>
+                <button class="btn sm ghost" data-x="dir">完整结果目录…</button>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:18px">
+              <h3>任务日志 <span class="hint" id="jobHint">空闲 · output/.jobs/&lt;task-id&gt;</span></h3>
+              <div class="progress" style="margin-bottom:12px" id="runProgressWrap" hidden><i id="runProgress"></i></div>
+              <div class="logbox" id="logbox"><span class="t">[ui] 就绪。配置参数后点击「开始模拟」。</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 页 2：批量 dataset ============ -->
+      <section class="page" data-page="batch">
+        <div class="stats">
+          <div class="stat"><div class="k">样本总数</div><div class="v">248</div><div class="d">来自 contents.csv · 已校验</div></div>
+          <div class="stat hl"><div class="k">已完成</div><div class="v">173</div><div class="d up">↑ 32 / 最近 10 分钟</div></div>
+          <div class="stat"><div class="k">排队中</div><div class="v">75</div><div class="d">顺序执行 · 专属 worker</div></div>
+          <div class="stat"><div class="k">预计剩余</div><div class="v">4<small> 分 </small>12<small> 秒</small></div><div class="d">逐样本刷新超时期限</div></div>
+        </div>
+
+        <div class="grid-2r">
+          <div class="card">
+            <h3>样本组成表 <span class="hint">name 列映射 · 每行校验总和 100%</span></h3>
+            <table>
+              <thead><tr><th style="width:36px">#</th><th>组成</th><th>Te [eV]</th><th>Ne [cm⁻³]</th><th>状态</th><th style="width:80px"></th></tr></thead>
+              <tbody id="batchBody"></tbody>
+            </table>
+            <div class="pager" id="batchPager">
+              <button>‹</button><button class="on">1</button><button>2</button><button>3</button>
+              <span style="padding:0 6px">…</span><button>9</button><button>›</button>
+              <span style="margin-left:10px">100 行 / 页 · 共 248 行</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <h3>采样设置</h3>
+              <label class="f">随机种子</label>
+              <input type="number" value="42" id="seed">
+              <div class="row2" style="margin-top:12px">
+                <div><label class="f">Te 范围</label><div class="row2"><input type="number" value="0.8" step="0.1"><input type="number" value="1.6" step="0.1"></div></div>
+                <div><label class="f">Ne 范围 (10^)</label><div class="row2"><input type="number" value="16" step="0.5"><input type="number" value="18" step="0.5"></div></div>
+              </div>
+              <div style="margin-top:14px">
+                <label class="switch"><input type="checkbox" checked><span class="track"></span><span>统一重采样（dynamic 批量必须）</span></label>
+              </div>
+              <button class="btn primary" style="width:100%;margin-top:16px" id="batchRun">开始批量模拟</button>
+            </div>
+
+            <div class="card" style="margin-top:18px">
+              <h3>宽表预览 <span class="hint">仅示意</span></h3>
+              <table>
+                <thead><tr><th>λ [nm]</th><th>W</th><th>Fe</th><th>Mo</th><th>name</th><th>Te</th><th>Ne</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">350.00</td><td>0.021</td><td>0.142</td><td>0.083</td><td>W-25</td><td>0.9</td><td>1e17</td></tr>
+                  <tr><td class="mono">350.01</td><td>0.022</td><td>0.148</td><td>0.081</td><td>W-25</td><td>0.9</td><td>1e17</td></tr>
+                  <tr><td class="mono">350.02</td><td>0.020</td><td>0.151</td><td>0.086</td><td>W-25</td><td>0.9</td><td>1e17</td></tr>
+                </tbody>
+              </table>
+              <div style="color:var(--faint);font-size:11.5px;margin-top:10px">波长列在前，末列为占比、name、Te、Ne · 共 6,014 列 × 248 行</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 页 3：扫描动画 ============ -->
+      <section class="page" data-page="scan">
+        <div class="grid-2">
+          <div class="card">
+            <h3>扫描设置</h3>
+            <label class="f">扫描轴</label>
+            <div class="seg" id="scanAxis">
+              <button data-v="te" class="on">Te [eV]</button>
+              <button data-v="ne">Ne [cm⁻³]</button>
+              <button data-v="r">R</button>
+            </div>
+            <div class="row2" style="margin-top:12px">
+              <div><label class="f">起始值</label><input type="number" id="scanFrom" value="0.60" step="0.05"></div>
+              <div><label class="f">结束值</label><input type="number" id="scanTo" value="1.80" step="0.05"></div>
+            </div>
+            <label class="f">帧数（均匀包含两端）<span class="val" id="framesVal">41</span></label>
+            <input type="range" id="scanFrames" min="2" max="200" step="1" value="41">
+
+            <div style="margin-top:14px">
+              <button class="btn sm" id="previewScan">预览扫描值</button>
+            </div>
+            <div class="scanvals" id="scanVals" style="margin-top:11px"></div>
+            <div style="color:var(--faint);font-size:11.5px;margin-top:10px" id="scanNote">
+              每帧独立真实模拟 · 最多 200 帧 / 5,000,000 光谱单元</div>
+
+            <h3 style="margin-top:22px">导出</h3>
+            <div style="display:flex;gap:9px;flex-wrap:wrap">
+              <button class="btn sm" id="gifBtn">导出 GIF（Pillow）</button>
+              <button class="btn sm ghost">本帧 PNG</button>
+            </div>
+            <div style="color:var(--faint);font-size:11.5px;margin-top:9px">完整结果目录保留各帧 raw/interpolated/ion CSV 与 manifest</div>
+          </div>
+
+          <div class="card">
+            <h3>动画预览 <span class="hint">播放仅读取已保存结果 · 不联网</span></h3>
+            <div class="chart-wrap">
+              <canvas id="scanChart" style="height:360px"></canvas>
+              <div id="scanTip" class="mono" style="position:absolute;top:12px;left:14px;font-size:12px;color:var(--accent);font-weight:650"></div>
+            </div>
+            <div class="playbar">
+              <button class="pbtn" id="framePrev" title="上一帧"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 5v14L8 12z"/><rect x="5" y="5" width="2.2" height="14" rx="1"/></svg></button>
+              <button class="pbtn main" id="playBtn">
+                <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
+                <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4.5" width="4" height="15" rx="1.2"/><rect x="14" y="4.5" width="4" height="15" rx="1.2"/></svg>
+              </button>
+              <button class="pbtn" id="frameNext" title="下一帧"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5v14l10-7z"/><rect x="16.8" y="5" width="2.2" height="14" rx="1"/></svg></button>
+              <input type="range" id="scanSlider" min="0" max="40" step="1" value="0">
+              <span class="frame-info" id="frameInfo">Te = 0.600 eV · 1 / 41</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 页 4：任务记录 ============ -->
+      <section class="page" data-page="jobs">
+        <div class="card">
+          <h3>历史任务 <span class="hint">output/.jobs/&lt;task-id&gt; · request / events / manifest 可追溯</span></h3>
+          <table>
+            <thead><tr><th>任务 ID</th><th>类型</th><th>参数摘要</th><th>状态</th><th>耗时</th><th>产物</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">j-7f3a21</td><td>单次模拟</td><td class="mono">H 100% · 650–660nm · R1000</td><td><span class="tag g">成功</span></td><td class="mono">3.2 s</td>
+                <td><div class="artifacts"><code>manifest</code><code>events</code><code>PNG</code></div></td></tr>
+              <tr><td class="mono">j-7f3a1e</td><td>批量 dataset</td><td class="mono">48 样本 · seed=42</td><td><span class="tag g">成功</span></td><td class="mono">2 分 41 秒</td>
+                <td><div class="artifacts"><code>宽表 CSV</code><code>manifest</code></div></td></tr>
+              <tr><td class="mono">j-7f39d8</td><td>扫描动画</td><td class="mono">Te 0.6→1.8 · 41 帧</td><td><span class="tag g">成功</span></td><td class="mono">1 分 55 秒</td>
+                <td><div class="artifacts"><code>GIF</code><code>41×CSV</code></div></td></tr>
+              <tr><td class="mono">j-7f39b0</td><td>批量 dataset</td><td class="mono">96 样本 · static</td><td><span class="tag r">失败</span></td><td class="mono">38.4 s</td>
+                <td><div class="artifacts"><code>error.json</code><code>partial/</code></div></td></tr>
+              <tr><td class="mono">j-7f39ac</td><td>单次模拟</td><td class="mono">W/Fe/Mo · 200–1000nm</td><td><span class="tag y">已取消</span></td><td class="mono">12.1 s</td>
+                <td><div class="artifacts"><code>events</code></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 页 5：设置 ============ -->
+      <section class="page" data-page="settings">
+        <div class="set-grid">
+          <div class="card">
+            <h3>网络与超时</h3>
+            <div class="set-row"><span class="lab">连接超时</span><div class="ctl"><input type="number" value="10"><span style="color:var(--faint)">秒</span></div></div>
+            <div class="set-row"><span class="lab">读取超时</span><div class="ctl"><input type="number" value="30"><span style="color:var(--faint)">秒</span></div></div>
+            <div class="set-row"><span class="lab">页面加载（dynamic）</span><div class="ctl"><input type="number" value="45"><span style="color:var(--faint)">秒</span></div></div>
+            <div class="set-row"><span class="lab">static 单次总期限</span><div class="ctl"><input type="number" value="60"><span style="color:var(--faint)">秒</span></div></div>
+            <div class="set-row"><span class="lab">TLS 证书校验</span><div class="ctl"><label class="switch"><input type="checkbox" checked><span class="track"></span></label></div></div>
+          </div>
+          <div>
+            <div class="card">
+              <h3>运行环境</h3>
+              <div class="set-row"><span class="lab">Python 解释器</span><div class="ctl"><input type="text" value="D:\Anaconda3\envs\simLIBS\python.exe" style="width:280px"></div></div>
+              <div class="set-row"><span class="lab">Chrome 路径</span><div class="ctl"><input type="text" value="(自动检测)" style="width:280px"></div></div>
+              <div class="set-row"><span class="lab">ChromeDriver</span><div class="ctl"><input type="text" value="留空则自动获取匹配版本" style="width:280px"></div></div>
+              <div class="set-row"><span class="lab">版本匹配</span><div class="ctl"><button class="btn sm">立即检查</button></div></div>
+            </div>
+            <div class="card" style="margin-top:18px">
+              <h3>输出</h3>
+              <div class="set-row"><span class="lab">输出根目录</span><div class="ctl"><input type="text" value="…\UI\output" style="width:280px"></div></div>
+              <div class="set-row"><span class="lab">打开输出目录</span><div class="ctl"><button class="btn sm">打开</button></div></div>
+              <div class="set-row"><span class="lab">配置</span><div class="ctl"><button class="btn sm">保存配置</button><button class="btn sm ghost">恢复默认</button></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+"use strict";
+/* ================================================================
+   simLIBS Studio · 界面设计原型（纯示意，无真实数据）
+   ================================================================ */
+
+/* ---------- 工具 ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+function mulberry(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- 状态 ---------- */
+const state = {
+  comp:[{el:'W',pct:50},{el:'Fe',pct:25},{el:'Mo',pct:25}],
+  mode:'dynamic', headless:true, resample:false,
+  views:{raw:true, interp:true, ion:true, norm:false},
+  hasResult:false,
+  scan:{axis:'te', playing:false, frame:0, timer:null},
+  batchTimer:null,
+};
+
+/* ---------- 谱线库（示意） ---------- */
+const PEAKS = [
+  [434.05,.42,'N','H'],[486.13,.72,'N','H'],[656.28,1.0,'N','H'],[410.17,.30,'N','H'],
+  [388.90,.30,'N','He'],[587.56,.55,'N','He'],[706.52,.24,'N','He'],
+  [373.71,.62,'N','Fe'],[404.58,.38,'N','Fe'],[438.35,.30,'N','Fe'],[526.95,.22,'N','Fe'],[561.56,.16,'N','Fe'],
+  [390.30,.45,'N','Mo'],[550.65,.26,'N','Mo'],[603.07,.18,'N','Mo'],[379.83,.24,'N','Mo'],
+  [400.87,.40,'N','W'],[429.46,.34,'N','W'],[498.26,.20,'N','W'],[430.21,.18,'N','W'],
+  [516.73,.30,'I','Fe II'],[527.04,.22,'I','Fe II'],[492.39,.16,'I','Fe II'],
+  [261.36,.30,'I','Mo II'],[291.14,.22,'I','Mo II'],
+  [281.62,.26,'I','W II'],[263.48,.20,'I','W II'],
+  [447.15,.35,'I','He II'],[468.57,.28,'I','He II'],
+  [410.00,.24,'I','H II'],[486.30,.20,'I','H II'],
+];
+const base = e => e.split(' ')[0];
+
+/* ---------- 光谱计算 ---------- */
+function elementsSet(){ return new Set(state.comp.filter(c=>c.el.trim()).map(c=>base(c.el.trim()))); }
+function ionicW(te){ return 1/(1+Math.exp(-(te-1.35)*3)); }
+function neutralW(te){ return .15+.85/(1+Math.exp((te-1.6)*3)); }
+function neFactor(neExp){ return Math.min(3.2, 1+Math.pow(10,neExp-17)*0.9); }
+
+function calcSpectrum(o){
+  // o: {te, neExp, R, low, up, n, raw}
+  const els = elementsSet();
+  const iw = ionicW(o.te), nw = neutralW(o.te), broad = neFactor(o.neExp);
+  const n = o.n || 760, xs=[], ys=[], yi=[];
+  const rand = mulberry(Math.round(o.te*100)*7919 + Math.round(o.neExp*10)*104729 + o.R + Math.round(o.low));
+  for(let i=0;i<n;i++){
+    const x = o.low + (o.up-o.low)*i/(n-1);
+    let v = 0.028, vi = 0;
+    for(const p of PEAKS){
+      const b = base(p[3]);
+      if(!els.has(b)) continue;
+      if(x < o.low - 2 || x > o.up + 2) continue;
+      const w = p[2]==='I' ? iw : nw;
+      if(w < .02) continue;
+      const hw = Math.max(.018, (p[0]/o.R)*broad);
+      const g = hw/2, d = x-p[0];
+      const L = g*g/(d*d+g*g);
+      v += p[1]*w*L;
+      if(p[2]==='I') vi += p[1]*w*L;
+    }
+    if(o.raw){
+      const amp = .045;
+      v += (rand()-.5)*2*amp*(0.25+v);
+    }
+    xs.push(x); ys.push(Math.max(0,v)); yi.push(Math.max(0,vi));
+  }
+  return {xs, ys, yi};
+}
+
+/* ---------- Canvas 绘制 ---------- */
+function setupCanvas(cv){
+  const r = cv.getBoundingClientRect();
+  if(r.width < 10) return null;
+  const d = window.devicePixelRatio || 1;
+  cv.width = Math.round(r.width*d); cv.height = Math.round(r.height*d);
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(d,0,0,d,0,0);
+  return {ctx, w:r.width, h:r.height};
+}
+function niceTicks(min,max,count){
+  const span=max-min, step0=span/count, mag=Math.pow(10,Math.floor(Math.log10(step0)));
+  const norm=step0/mag; const step=(norm<1.5?1:norm<3.5?2:norm<7.5?5:10)*mag;
+  const t=[]; for(let v=Math.ceil(min/step)*step; v<=max+1e-9; v+=step) t.push(v);
+  return t;
+}
+function drawSpectrum(cv, spec, opts){
+  const s = setupCanvas(cv); if(!s) return;
+  const {ctx,w,h} = s;
+  const pad = {l:48,r:16,t:14,b:28};
+  const cw = w-pad.l-pad.r, ch = h-pad.t-pad.b;
+  const C = {
+    text:cssVar('--muted'), faint:cssVar('--faint'), grid:cssVar('--grid'),
+    raw:cssVar('--chart-raw'), main:cssVar('--chart-main'), ion:cssVar('--chart-ion'),
+  };
+  ctx.clearRect(0,0,w,h);
+  const {xs, ys, yi} = spec;
+  let ymax = 1e-6;
+  for(let i=0;i<ys.length;i++) ymax = Math.max(ymax, ys[i]);
+  if(opts.norm){ const k=ymax; for(let i=0;i<ys.length;i++){ys[i]/=k; yi[i]/=k;} ymax=1; }
+  ymax *= 1.12;
+  const X = i => pad.l + (xs[i]-xs[0])/(xs[xs.length-1]-xs[0])*cw;
+  const Y = v => pad.t + ch - Math.min(1, v/ymax)*ch;
+
+  // 网格
+  ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.font = '10px Consolas, monospace';
+  const ytk = niceTicks(0, ymax, 4);
+  ytk.forEach(v=>{ const y=Y(v); ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.fillStyle=C.faint; ctx.textAlign='right'; ctx.fillText(v.toFixed(2), pad.l-7, y+3); });
+  const xtk = niceTicks(xs[0], xs[xs.length-1], 6);
+  xtk.forEach(v=>{ const x = pad.l + (v-xs[0])/(xs[xs.length-1]-xs[0])*cw;
+    ctx.strokeStyle=C.grid; ctx.beginPath(); ctx.moveTo(x,pad.t); ctx.lineTo(x,pad.t+ch); ctx.stroke();
+    ctx.fillStyle=C.faint; ctx.textAlign='center'; ctx.fillText(v.toFixed(0), x, h-9); });
+  ctx.textAlign='center'; ctx.fillText('λ / nm', pad.l+cw/2, h-0.5);
+
+  // 主渐变线（interpolated）
+  function line(arr, color, widthPx, glow){
+    ctx.beginPath();
+    for(let i=0;i<xs.length;i++){ const x=X(i), y=Y(arr[i]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+    ctx.strokeStyle = color; ctx.lineWidth = widthPx;
+    ctx.lineJoin='round'; ctx.lineCap='round';
+    if(glow){ ctx.shadowColor=color; ctx.shadowBlur=7; }
+    ctx.stroke(); ctx.shadowBlur=0;
+  }
+  if(opts.views.interp !== false) line(ys, C.main, 1.7, true);
+  if(opts.views.ion && opts.showIon){
+    ctx.save(); ctx.setLineDash([5,4]); line(yi, C.ion, 1.5, true); ctx.restore();
+  }
+  // raw 抽样点
+  if(opts.views.raw){
+    const step = Math.max(1, Math.floor(xs.length/260));
+    ctx.fillStyle = C.raw; ctx.globalAlpha = .8;
+    for(let i=0;i<xs.length;i+=step){ ctx.beginPath(); ctx.arc(X(i),Y(ys[i]),1.5,0,7); ctx.fill(); }
+    ctx.globalAlpha = 1;
+  }
+  // hover 十字线由 tooltip 事件绘制（存 spec）
+  cv._plot = {pad, cw, ch, xs, ys, ymax, norm:opts.norm};
+}
+function drawEmpty(cv, text){
+  const s = setupCanvas(cv); if(!s) return;
+  const {ctx,w,h}=s;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = cssVar('--faint'); ctx.font='12px "Segoe UI", sans-serif';
+  ctx.textAlign='center'; ctx.fillText(text, w/2, h/2);
+}
+
+/* ---------- 单次模拟页 ---------- */
+const specCanvas = $('#specChart'), tooltip = $('#tooltip');
+let specData = null;
+
+function currentParams(){
+  return {
+    te: parseFloat($('#teSlider').value),
+    neExp: parseFloat($('#neSlider').value),
+    R: parseInt($('#rSlider').value),
+    low: parseFloat($('#lowW').value)||350,
+    up: parseFloat($('#upW').value)||560,
+  };
+}
+function redrawSingle(raw=false){
+  const p = currentParams();
+  $('#teVal').textContent = p.te.toFixed(2)+' eV';
+  $('#neVal').textContent = '1.0×10'+sup(p.neExp)+' cm⁻³';
+  $('#rVal').textContent = p.R;
+  fillSlider($('#teSlider')); fillSlider($('#neSlider')); fillSlider($('#rSlider'));
+  const dyn = state.mode==='dynamic';
+  $('#legend [data-view=ion]').style.display = dyn ? '' : 'none';
+  if(p.low >= p.up){ drawEmpty(specCanvas, '波长范围无效：需 0 < 下界 < 上界'); specData=null; return; }
+  const raw1 = calcSpectrum({...p, raw:true});
+  specData = raw1;
+  drawSpectrum(specCanvas, raw1, {
+    views: state.views, norm: state.views.norm,
+    showIon: dyn && state.hasResult ? true : (dyn && state.views.ion),
+    raw,
+  });
+}
+function sup(v){
+  const m={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','.':'·','-':'⁻'};
+  return String(v).split('').map(c=>m[c]||c).join('');
+}
+function fillSlider(el){
+  const pct = (el.value-el.min)/(el.max-el.min)*100;
+  el.style.setProperty('--fill', pct+'%');
+}
+
+/* 配比编辑器 */
+function renderComp(){
+  const box = $('#compRows'); box.innerHTML='';
+  state.comp.forEach((c,idx)=>{
+    const row = document.createElement('div'); row.className='comp-row';
+    row.innerHTML = `
+      <input class="comp-el" value="${c.el}" maxlength="4" spellcheck="false">
+      <input class="comp-pct" type="number" min="0" max="100" step="0.1" value="${c.pct}">
+      <span style="color:var(--faint);font-size:12px">%</span>
+      <div class="comp-bar"><i style="width:${Math.min(100,c.pct)}%"></i></div>
+      <button class="comp-del" title="删除">✕</button>`;
+    row.querySelector('.comp-el').addEventListener('input', e=>{ c.el=e.target.value; updateSum(); redrawSingle(); });
+    row.querySelector('.comp-pct').addEventListener('input', e=>{
+      c.pct = parseFloat(e.target.value)||0;
+      row.querySelector('.comp-bar i').style.width = Math.min(100,c.pct)+'%';
+      updateSum(); redrawSingle();
+    });
+    row.querySelector('.comp-del').addEventListener('click', ()=>{ state.comp.splice(idx,1); renderComp(); redrawSingle(); });
+    box.appendChild(row);
+  });
+  updateSum();
+}
+function updateSum(){
+  const s = state.comp.reduce((a,c)=>a+(+c.pct||0),0);
+  const ok = Math.abs(s-100) < 1e-6 && state.comp.length>0;
+  const row = $('#sumRow');
+  row.className = 'sum-row '+(ok?'ok':'bad');
+  const el = $('#sumVal');
+  el.textContent = s.toFixed(1)+' %'+(ok?' ✓':' · 须为 100%');
+  el.style.color = ok ? 'var(--good)' : 'var(--bad)';
+}
+
+/* 图例切换 */
+$$('#legend .chip').forEach(ch=>{
+  ch.addEventListener('click', ()=>{
+    const v = ch.dataset.view;
+    if(v==='norm'){ state.views.norm=!state.views.norm; ch.classList.toggle('off', !state.views.norm); }
+    else { state.views[v]=!state.views[v]; ch.classList.toggle('off', !state.views[v]); }
+    redrawSingle();
+  });
+});
+
+/* 抓取方式切换 */
+$$('#modeSeg button').forEach(b=>b.addEventListener('click',()=>{
+  $$('#modeSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  state.mode=b.dataset.v; redrawSingle();
+}));
+
+/* 滑条与输入 */
+['teSlider','neSlider','rSlider'].forEach(id=>$('#'+id).addEventListener('input',()=>redrawSingle()));
+['lowW','upW'].forEach(id=>$('#'+id).addEventListener('input',()=>redrawSingle()));
+
+/* 预设 */
+const PRESETS = {
+  wfm:{comp:[{el:'W',pct:50},{el:'Fe',pct:25},{el:'Mo',pct:25}], te:1.0, neExp:17, R:1000, low:200, up:1000, title:'W Fe Mo composition · Te=1.00 eV'},
+  h:{comp:[{el:'H',pct:100}], te:1.0, neExp:17, R:1000, low:650, up:660, title:'H 100% · Balmer α · Te=1.00 eV'},
+};
+$$('.presets [data-preset]').forEach(b=>b.addEventListener('click',()=>{
+  const p = PRESETS[b.dataset.preset];
+  state.comp = p.comp.map(c=>({...c}));
+  $('#teSlider').value=p.te; $('#neSlider').value=p.neExp; $('#rSlider').value=p.R;
+  $('#lowW').value=p.low; $('#upW').value=p.up; $('#chartTitle').value=p.title;
+  renderComp(); redrawSingle();
+  toast('ok','预设已应用', b.textContent.replace('预设 ','')+' · 参数已填写，未联网');
+}));
+$('#addEl').addEventListener('click',()=>{
+  if(state.comp.length>=8) return toast('warn','已达上限','最多 8 个元素行');
+  state.comp.push({el:'',pct:0}); renderComp();
+});
+
+/* tooltip 十字光标 */
+specCanvas.addEventListener('mousemove', e=>{
+  if(!specData || !specCanvas._plot) return;
+  const r = specCanvas.getBoundingClientRect();
+  const px = e.clientX-r.left, py = e.clientY-r.top;
+  const {pad,cw,xs,ys,ymax,norm} = specCanvas._plot;
+  if(px<pad.l||px>pad.l+cw){ tooltip.style.display='none'; redrawSingle(); return; }
+  const frac=(px-pad.l)/cw, i=Math.round(frac*(xs.length-1));
+  const x=Xof(specCanvas,i), y=Yof(specCanvas,i);
+  redrawSingle();  // 重绘并叠加十字线
+  const ctx = specCanvas.getContext('2d');
+  const P = specCanvas._plot;
+  ctx.strokeStyle=cssVar('--border2'); ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(x,P.pad.t); ctx.lineTo(x,P.pad.t+P.ch); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=cssVar('--accent');
+  ctx.beginPath(); ctx.arc(x,y,3.5,0,7); ctx.fill();
+  tooltip.style.display='block';
+  tooltip.style.left=Math.min(px+14, r.width-150)+'px';
+  tooltip.style.top=(py-34)+'px';
+  tooltip.innerHTML=`<b>${xs[i].toFixed(2)} nm</b> · I = ${(norm?ys[i]:ys[i]).toFixed(3)}`;
+});
+specCanvas.addEventListener('mouseleave',()=>{ tooltip.style.display='none'; redrawSingle(); });
+function Xof(cv,i){const P=cv._plot;return P.pad.l+(P.xs[i]-P.xs[0])/(P.xs[P.xs.length-1]-P.xs[0])*P.cw}
+function Yof(cv,i){const P=cv._plot;return P.pad.t+P.ch-Math.min(1,P.ys[i]/(P.ymax||1))*P.ch}
+
+/* ---------- 假运行流程 ---------- */
+const LOG_STAGES = [
+  [200,  'info','[worker] 任务 <b>j-8c41f2</b> 启动 · python 3.10 · headless=true'],
+  [900,  '','[adapter] SimulatedLIBS(Te=1.00, Ne=1e17, R=5000, 350–560 nm, dynamic)'],
+  [1700, 'info','[nist] GET physics.nist.gov/cgi-bin/ASD/ie.pl … <b>200 OK</b> (1.24 s)'],
+  [2400, '','[parse] 列映射 Wavelength (nm) × W I / Fe I / Mo I → <b>213 行</b>'],
+  [3000, '','[interp] CubicSpline · 主动重采样 0.005 nm → 42,001 点'],
+  [3500, 'ok','[done] manifest.json → output/.jobs/j-8c41f2 · SHA256 已记录'],
+];
+let runTimer=null, runStageTimers=[];
+$('#runBtn').addEventListener('click',()=>{
+  if(runTimer){ cancelRun('已取消本次模拟'); return; }
+  const s = Math.abs(state.comp.reduce((a,c)=>a+(+c.pct||0),0)-100)<1e-6;
+  if(!s) return toast('err','无法启动','元素占比总和必须为 100%（当前不满足）');
+  startRun();
+});
+function startRun(){
+  runTimer = true;
+  $('#runBtnText').textContent='取消模拟';
+  $('#runBtn').classList.add('danger');
+  $('#previewTag').style.display='none';
+  $('#runProgressWrap').hidden=false;
+  $('#enginePill').style.display='';
+  $('#jobHint').textContent='运行中 · j-8c41f2';
+  const box=$('#logbox'); box.innerHTML='';
+  const t0=performance.now();
+  runStageTimers = LOG_STAGES.map(([t,cls,msg])=>setTimeout(()=>{
+    const d=document.createElement('div');
+    d.innerHTML=`<span class="t">[${((performance.now()-t0)/1000).toFixed(1).padStart(4)}s]</span> <span class="${cls}">${msg}</span>`;
+    box.appendChild(d); box.scrollTop=box.scrollHeight;
+  }, t));
+  const iv=setInterval(()=>{
+    const p=Math.min(100,(performance.now()-t0)/36);
+    $('#runProgress').style.width=p+'%';
+    $('#enginePct').textContent=Math.round(p)+'%';
+    if(p>=100){
+      clearInterval(iv); runTimer=null; runStageTimers.forEach(clearTimeout);
+      finishRun();
+    }
+  },50);
+}
+function finishRun(){
+  state.hasResult=true;
+  $('#runBtnText').textContent='重新模拟';
+  $('#runBtn').classList.remove('danger');
+  $('#enginePill').style.display='none';
+  $('#jobHint').textContent='完成 · output/.jobs/j-8c41f2';
+  setTimeout(()=>{ $('#runProgressWrap').hidden=true; }, 600);
+  $('#metaChips').innerHTML=`
+    <span class="chip"><i style="background:var(--good)"></i>NIST ASD · HTTP 200</span>
+    <span class="chip">213 行 raw → 42,001 点</span>
+    <span class="chip mono">3.6 s</span>
+    <span class="chip mono" title="源库文件哈希">SHA256 3f2a…9c14</span>
+    <span class="chip">实际 Ne = 1.00e17（3 位有效数字）</span>`;
+  redrawSingle();
+  toast('ok','模拟完成','光谱已绘制 · 来源证据已写入 manifest.json');
+}
+function cancelRun(msg){
+  runTimer=null; runStageTimers.forEach(clearTimeout);
+  $('#runBtnText').textContent='开始模拟';
+  $('#runBtn').classList.remove('danger');
+  $('#enginePill').style.display='none';
+  $('#runProgressWrap').hidden=true;
+  $('#jobHint').textContent='空闲 · output/.jobs/<task-id>';
+  const d=document.createElement('div');
+  d.innerHTML=`<span class="t">[ui]</span> <span class="warnc">${msg} · 已保留上一次成功图谱</span>`;
+  $('#logbox').appendChild(d);
+  toast('warn','任务取消','已发送协作取消标记，worker 树已清理');
+}
+
+/* 导出按钮（示意） */
+$$('[data-x]').forEach(b=>b.addEventListener('click',()=>{
+  const names={csv:'单谱 CSV（全量 · 不带索引）',png:'PNG（当前标题/颜色/归一化）',json:'来源 JSON（清单+参数证据）',dir:'完整结果目录'};
+  toast('ok','导出（示意）',names[b.dataset.x]+' — 原型中不生成真实文件');
+}));
+
+/* ---------- 批量页 ---------- */
+const BATCH_ROWS=[
+  ['#01',[['W',50],['Fe',25],['Mo',25]],0.92,'1.2e17','done'],
+  ['#02',[['W',40],['Fe',35],['Mo',25]],1.05,'1.5e17','done'],
+  ['#03',[['Fe',60],['Mo',40]],1.18,'1.8e17','done'],
+  ['#04',[['W',70],['Mo',30]],1.31,'2.1e17','run',64],
+  ['#05',[['W',50],['Fe',25],['Mo',25]],1.44,'2.4e17','queue'],
+  ['#06',[['H',100]],1.57,'3.0e17','queue'],
+  ['#07',[['H',80],['He',20]],1.70,'3.6e17','queue'],
+  ['#08',[['He',100]],1.83,'4.0e17','fail'],
+];
+const ST={done:['g','已完成'],run:['b','运行中'],queue:['n','排队中'],fail:['r','失败 · NIST 超时']};
+function renderBatch(){
+  const tb=$('#batchBody'); tb.innerHTML='';
+  BATCH_ROWS.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    const compHtml=r[1].map(([e,p])=>`<span>${e} ${p}%</span>`).join('');
+    const [cls,label]=ST[r[4]];
+    let statusHtml;
+    if(r[4]==='run') statusHtml=`<span class="tag b">${label} ${r[5]}%</span><div class="progress" style="margin-top:6px;width:90px"><i style="width:${r[5]}%"></i></div>`;
+    else statusHtml=`<span class="tag ${cls}">${label}</span>`;
+    const act = r[4]==='fail' ? `<button class="btn sm ghost" data-retry="${i}">重试</button>`
+      : r[4]==='done' ? `<button class="btn sm ghost" data-view="${i}">查看</button>` : '';
+    tr.innerHTML=`<td class="mono">${r[0]}</td><td><div class="ecomp">${compHtml}</div></td>
+      <td class="mono">${r[2]}</td><td class="mono">${r[3]}</td><td>${statusHtml}</td><td>${act}</td>`;
+    tb.appendChild(tr);
+  });
+  $$('#batchBody [data-retry]').forEach(b=>b.addEventListener('click',()=>{
+    const r=BATCH_ROWS[+b.dataset.retry]; r[4]='run'; r[5]=0;
+    toast('ok','已重新排队','样本 '+r[0]+' 将在下个 worker 空闲时执行');
+    renderBatch();
+    if(!state.batchTimer){
+      state.batchTimer=setInterval(()=>{
+        const rr=BATCH_ROWS.find(x=>x[4]==='run');
+        if(!rr){ clearInterval(state.batchTimer); state.batchTimer=null; return; }
+        rr[5]+=7; if(rr[5]>=100){ rr[5]=100; rr[4]='done'; toast('ok','样本完成',rr[0]+' · 宽表已追加 1 行'); }
+        renderBatch();
+      },700);
+    }
+  }));
+  $$('#batchBody [data-view]').forEach(b=>b.addEventListener('click',()=>{
+    toast('ok','样本查看（示意）','实际实现将切换到该样本的单谱视图');
+  }));
+}
+$('#batchRun').addEventListener('click',()=>toast('ok','批量任务已提交（示意）','专属 worker 顺序执行 · Tk 主线程不阻塞'));
+$$('#batchPager button').forEach(b=>b.addEventListener('click',()=>{
+  if(!/^\d+$/.test(b.textContent)) return;
+  $$('#batchPager button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+}));
+
+/* ---------- 扫描页 ---------- */
+const scanCanvas=$('#scanChart');
+function scanAxisVal(i){
+  const from=parseFloat($('#scanFrom').value)||0.6, to=parseFloat($('#scanTo').value)||1.8;
+  const f=parseInt($('#scanFrames').value)||41;
+  return {v: from+(to-from)*i/(f-1), from, to, f};
+}
+function drawScanFrame(){
+  const {v,f}=scanAxisVal(state.scan.frame);
+  const p=currentParams();
+  const opts={te:p.te, neExp:p.neExp, R:p.R, low:p.low, up:p.up};
+  if(state.scan.axis==='te') opts.te=v;
+  if(state.scan.axis==='ne') opts.neExp=v;
+  if(state.scan.axis==='r') opts.R=Math.round(v);
+  const spec=calcSpectrum({...opts, raw:true});
+  drawSpectrum(scanCanvas, spec, {views:{raw:true,interp:true,ion:false}, norm:false, showIon:false});
+  const axName={te:'Te',ne:'Ne',r:'R'}[state.scan.axis];
+  const axUnit={te:' eV',ne:'×10^x cm⁻³',r:''}[state.scan.axis];
+  const valStr = state.scan.axis==='ne' ? '10'+sup(v) : (state.scan.axis==='r' ? Math.round(v) : v.toFixed(3));
+  $('#frameInfo').textContent=`${axName} = ${valStr}${axUnit} · ${state.scan.frame+1} / ${f}`;
+  $('#scanTip').textContent=`帧 ${state.scan.frame+1} / ${f} · ${axName} = ${valStr}${axUnit}`;
+  $$('#scanVals span').forEach((el,i)=>el.classList.toggle('cur', i===state.scan.frame));
+}
+function renderScanVals(){
+  const {from,to,f}=scanAxisVal(0);
+  const box=$('#scanVals'); box.innerHTML='';
+  const shown=Math.min(f,14);
+  for(let i=0;i<shown;i++){
+    const v=from+(to-from)*i/(f-1);
+    const s=document.createElement('span');
+    s.textContent=state.scan.axis==='r'?Math.round(v):v.toFixed(2);
+    box.appendChild(s);
+  }
+  if(f>shown){ const e=document.createElement('span'); e.textContent=`… 共 ${f} 帧（= ${f} 次 NIST 请求）`; box.appendChild(e); }
+  $('#scanSlider').max=f-1;
+}
+$$('#scanAxis button').forEach(b=>b.addEventListener('click',()=>{
+  $$('#scanAxis button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  state.scan.axis=b.dataset.v;
+  if(state.scan.axis==='te'){$('#scanFrom').value=0.6;$('#scanTo').value=1.8;}
+  if(state.scan.axis==='ne'){$('#scanFrom').value=15;$('#scanTo').value=18;}
+  if(state.scan.axis==='r'){$('#scanFrom').value=1000;$('#scanTo').value=10000;}
+  renderScanVals(); drawScanFrame();
+}));
+['scanFrom','scanTo','scanFrames'].forEach(id=>$('#'+id).addEventListener('input',()=>{
+  $('#framesVal').textContent=$('#scanFrames').value;
+  renderScanVals(); drawScanFrame();
+}));
+$('#previewScan').addEventListener('click',()=>{ renderScanVals(); toast('ok','扫描值已预览','实际实现将列出确切采样值与 NIST 请求数量'); });
+$('#playBtn').addEventListener('click',()=>{
+  state.scan.playing=!state.scan.playing;
+  $('#iconPlay').style.display=state.scan.playing?'none':'';
+  $('#iconPause').style.display=state.scan.playing?'':'none';
+  if(state.scan.playing){
+    state.scan.timer=setInterval(()=>{
+      const f=parseInt($('#scanFrames').value);
+      state.scan.frame=(state.scan.frame+1)%f;
+      $('#scanSlider').value=state.scan.frame;
+      drawScanFrame();
+    },140);
+  } else clearInterval(state.scan.timer);
+});
+$('#framePrev').addEventListener('click',()=>{ clearInterval(state.scan.timer); state.scan.playing=false;
+  $('#iconPlay').style.display='';$('#iconPause').style.display='none';
+  state.scan.frame=Math.max(0,state.scan.frame-1); $('#scanSlider').value=state.scan.frame; drawScanFrame(); });
+$('#frameNext').addEventListener('click',()=>{ clearInterval(state.scan.timer); state.scan.playing=false;
+  $('#iconPlay').style.display='';$('#iconPause').style.display='none';
+  const f=parseInt($('#scanFrames').value);
+  state.scan.frame=Math.min(f-1,state.scan.frame+1); $('#scanSlider').value=state.scan.frame; drawScanFrame(); });
+$('#scanSlider').addEventListener('input',e=>{ state.scan.frame=+e.target.value; drawScanFrame(); });
+$('#gifBtn').addEventListener('click',()=>toast('ok','GIF 导出（示意）','实际实现用 Pillow 在后台渲染全部帧，不依赖 ImageMagick'));
+
+/* ---------- 页面切换 ---------- */
+const TITLES={
+  single:['单次模拟','Te · Ne · R · 组成 → NIST 光谱'],
+  batch:['批量 dataset','多样本组成 → 机器学习宽表'],
+  scan:['扫描动画','参数轴扫描 · 帧动画 · GIF 导出'],
+  jobs:['任务记录','output/.jobs 可追溯产物'],
+  settings:['设置','超时 · 环境 · 输出目录'],
+};
+$$('.nav-item').forEach(n=>n.addEventListener('click',()=>{
+  $$('.nav-item').forEach(x=>x.classList.remove('on','active')); n.classList.add('active');
+  const p=n.dataset.page;
+  $$('.page').forEach(pg=>pg.classList.toggle('active', pg.dataset.page===p));
+  $('#pageTitle').textContent=TITLES[p][0]; $('#pageSub').textContent=TITLES[p][1];
+  requestAnimationFrame(()=>{ if(p==='single') redrawSingle(); if(p==='scan'){ renderScanVals(); drawScanFrame(); } });
+}));
+
+/* ---------- 主题 ---------- */
+$('#themeBtn').addEventListener('click',()=>{
+  const root=document.documentElement;
+  const dark=root.dataset.theme==='dark';
+  root.dataset.theme=dark?'light':'dark';
+  $('#iconMoon').style.display=dark?'none':'';
+  $('#iconSun').style.display=dark?'':'none';
+  redrawSingle(); drawScanFrame();
+});
+
+/* ---------- toast ---------- */
+function toast(type,title,msg){
+  const t=document.createElement('div');
+  t.className='toast '+type;
+  t.innerHTML=`<div><b>${title}</b><small>${msg||''}</small></div>`;
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{ t.classList.add('out'); setTimeout(()=>t.remove(),260); },3600);
+}
+
+/* ---------- 启动 ---------- */
+window.addEventListener('resize',()=>{ redrawSingle(); drawScanFrame(); });
+renderComp();
+redrawSingle();
+renderBatch();
+renderScanVals();
+requestAnimationFrame(drawScanFrame);
+</script>
+</body>
+</html>
