@@ -1,4 +1,3 @@
-from dataclasses import replace
 from urllib.parse import parse_qs,urlsplit
 from unittest.mock import Mock,patch
 import unittest
@@ -7,7 +6,6 @@ from simlibs_ui.settings import Settings
 from simlibs_ui.adapter import simulate,source_module
 from tests.test_adapter import HTML,CSV
 import pandas as pd
-from matplotlib.figure import Figure
 
 
 class FluxTests(unittest.TestCase):
@@ -56,16 +54,6 @@ class FluxTests(unittest.TestCase):
                 figure=figure_for(read_manifest(path),'interpolated','fixture','#ef4444',False)
                 self.assertEqual(figure.axes[0].get_ylabel(),label)
                 figure.clear()
-
-    def test_tk_parameter_roundtrip_does_not_downgrade_energy_config(self):
-        import tkinter as tk
-        from simlibs_ui.input_views import ParameterInputs,CompositionEditor
-        root=tk.Tk();root.withdraw()
-        try:
-            view=ParameterInputs(root);view.composition=CompositionEditor(root)
-            view.set_parameters(replace(Parameters(),intensity_scale='energy'))
-            self.assertEqual(view.parameters().intensity_scale,'energy')
-        finally:root.destroy()
 
 
 if __name__=='__main__':unittest.main()

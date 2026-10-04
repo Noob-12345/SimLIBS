@@ -8,7 +8,7 @@ import re
 import uuid
 import numpy as np
 import pandas as pd
-from .models import composition, MAX_POINTS, ELEMENTS
+from .models import composition, MAX_POINTS, ELEMENTS, MAX_CELLS
 
 
 def now():
@@ -73,22 +73,44 @@ def validate_compositions(df):
     return pd.DataFrame(records, columns=elements + ['name'])
 
 
+def valid_ion_column(column):
+    """合法元素/离子列，可选丰度须为有限非负十进制数（含科学计数）。"""
+    name = str(column).strip()
+    match = re.fullmatch(r'([A-Z][a-z]?)\s+[IVXLCDM]+(?:\s*\(([^()]*)\))?', name)
+    if not match:
+        prefix = re.match(r'([A-Z][a-z]?)\s+[IVXLCDM]+(?:\s|\(|$)', name)
+        if prefix and prefix.group(1) in ELEMENTS:
+            raise ValueError(f'离子列名或丰度后缀格式无效：{name}')
+        return False
+    if match.group(1) not in ELEMENTS:
+        return False
+    abundance = match.group(2)
+    if abundance is not None:
+        abundance = abundance.strip()
+        if not re.fullmatch(r'[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?', abundance):
+            raise ValueError(f'离子丰度须为有限非负数：{name}')
+        number = float(abundance)
+        if not np.isfinite(number) or number < 0:
+            raise ValueError(f'离子丰度须为有限非负数：{name}')
+    return True
+
+
 def clean_spectrum(df, ion=False):
     df = drop_index(df)
     if ion:
         # 保留 CSV 原始词元后，只将合法离子列的真正空白单元视为无贡献。
         # np.nan/pd.NA/None 和字面 NaN/Inf 都不是空白，必须在后续数值检查拒绝。
+        # 离子列名允许 NIST 的丰度后缀，如 "Fe I (4.4e-2)"（dynamic 页面表格常见）。
+        ion_columns = {column for column in df.columns if valid_ion_column(column)}
         for column in df.columns:
-            match = re.fullmatch(r'([A-Z][a-z]?)\s+[IVXLCDM]+', str(column).strip())
-            if match and match.group(1) in ELEMENTS:
+            if column in ion_columns:
                 blank = df[column].map(lambda value: isinstance(value, str) and not value.strip())
                 if blank.any():
                     df.loc[blank, column] = '0'
         # 真实 NIST 当前单离子 CSV 省略 Sum(calc)，总谱就是唯一贡献列原值。
         if 'Wavelength (nm)' in df and 'Sum(calc)' not in df and len(df.columns) == 2:
             column = next(c for c in df if c != 'Wavelength (nm)')
-            match = re.fullmatch(r'([A-Z][a-z]?)\s+[IVXLCDM]+', column.strip())
-            if match and match.group(1) in ELEMENTS:
+            if column in ion_columns:
                 df['Sum(calc)'] = df[column]
         if 'Wavelength (nm)' not in df or 'Sum(calc)' not in df or len(df.columns) < 3:
             raise ValueError(f'离子 CSV 需要 Wavelength (nm)、Sum(calc) 和离子分量列；实际列：{list(df.columns)}')
@@ -100,6 +122,8 @@ def clean_spectrum(df, ion=False):
         wavelength = 'wavelength'
     if df.empty or len(df) > MAX_POINTS:
         raise ValueError('光谱为空或超过 200000 点')
+    if ion and df.size>MAX_CELLS:
+        raise ValueError('离子通道超过5000000个单元，请缩小波段/离子阶数')
     try:
         df = df.apply(pd.to_numeric, errors='raise').astype(float)
     except (TypeError, ValueError) as exc:
@@ -134,7 +158,7 @@ def save_result(directory, frames, origin, preview_limit=1500):
     directory.mkdir(parents=True, exist_ok=True)
     manifest = {'kind': 'spectrum', 'origin': origin, 'files': {}, 'counts': {}, 'preview': {}, 'columns': {}}
     for key, frame in frames.items():
-        df = clean_spectrum(frame, ion=key == 'ion')
+        df = clean_spectrum(frame, ion=key in ('ion','ion_interpolated'))
         path = directory / f'{key}.csv'
         write_csv(path, df)
         manifest['files'][key] = str(path)

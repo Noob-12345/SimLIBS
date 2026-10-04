@@ -1,2 +1,0 @@
-{"job_id": "e4e3ec5dce2541ec96e15ff98483ff96", "event": "progress", "message": "正在请求真实 NIST 光谱", "deadline": 180.0}
-{"job_id": "e4e3ec5dce2541ec96e15ff98483ff96", "event": "success", "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-round2-independent\\r1-worker\\.jobs\\e4e3ec5dce2541ec96e15ff98483ff96\\result\\manifest.json"}

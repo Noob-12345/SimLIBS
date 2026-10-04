@@ -108,8 +108,15 @@ def resolve_driver(settings):
         raise RuntimeError(f'Chrome {browser} 的匹配驱动获取失败：{exc}。后台 webdriver_manager 需要可用网络；可在设置中填写匹配 chromedriver.exe') from exc
 
 
-def simulate(parameters, settings):
+def simulate(parameters, settings, cancelled=lambda:False, emit=None):
     p, s = parameters.validated(), settings.validated()
+    if p.webscraping=='client':
+        from .mode_engine import client_simulate
+        return client_simulate(p,s,cancelled,emit)
+    original_parameters=p
+    if p.webscraping=='server':
+        from dataclasses import replace
+        p=replace(p,webscraping='dynamic',mode_version=1)
     module = source_module(s.source)
     source_file = Path(module.__file__).resolve()
     original_get = module.requests.get
@@ -135,6 +142,14 @@ def simulate(parameters, settings):
             super().__init__()
             if p.headless:
                 self.add_argument('--headless=new')
+            if original_parameters.mode_version==2:
+                # Chrome does not inherit HTTP(S)_PROXY like requests. Respect
+                # the existing credential-free transport in this owned session only.
+                from requests.utils import get_environ_proxies
+                proxy=get_environ_proxies('https://physics.nist.gov/').get('https')
+                if proxy and not urlsplit(proxy).username:
+                    self.add_argument('--proxy-server='+proxy)
+                self.set_capability('goog:loggingPrefs',{'performance':'ALL'})
             if s.chrome:
                 self.binary_location = s.chrome
             options_seen.append(self)
@@ -163,7 +178,7 @@ def simulate(parameters, settings):
         def get_site(self):
             site=urlsplit(super().get_site())
             scale='1' if p.intensity_scale=='energy' else '2'
-            min_rel = f'{p.broaden_min_rel_int:g}' if p.broadening == 'local' else None
+            min_rel = f'{p.broaden_min_rel_int:g}' if p.broadening == 'local' or original_parameters.mode_version==2 else None
             query=[]
             for key,value in parse_qsl(site.query,keep_blank_values=True):
                 if key=='int_scale':
@@ -260,11 +275,21 @@ def simulate(parameters, settings):
                 return
             self.driver.get(self.get_site())
             captured['html'] = self.driver.page_source  # 供实际 R 解析
+            if original_parameters.mode_version==2:
+                from .mode_engine import RECALC_OBSERVER,browser_sources
+                captured['browser_sources']=browser_sources(self.driver,self.get_site(),diagnostics)
+                self.driver.execute_script(RECALC_OBSERVER)
             wait = WebDriverWait(self.driver, s.page_timeout)
             resolution = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input#resolution, input[name="resolution"]')))
             resolution.clear()
             resolution.send_keys(str(self.resolution))
             wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[name="recalc"]'))).click()
+            if original_parameters.mode_version==2:
+                runtime=wait.until(lambda driver:driver.execute_script('return window.__simlibsRecalculated'))
+                if not runtime.get('rows') or not isinstance(runtime.get('effective_r'),(int,float)) or not math.isfinite(runtime['effective_r']) or runtime['effective_r']<=0:
+                    raise ValueError('官方重算没有就绪的实际R/数据')
+                captured['recalculated']=runtime
+                if runtime['rows']>MAX_POINTS:raise ValueError('官方重算超过200000点生成上限，请缩小波段')
             old = set(self.driver.window_handles)
             wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[name="ViewDataCSV"], button[onclick*="viewDataCSV"]'))).click()
             # 某些页面复用已有 popup；优先新窗口，再用现有非主窗口。
@@ -306,7 +331,7 @@ def simulate(parameters, settings):
                                resolution=p.resolution, low_w=p.low_w, upper_w=p.upper_w,
                                max_ion_charge=p.max_ion_charge, webscraping=p.webscraping,
                                headless=p.headless, keep_browser_open=False, detach_browser=False)
-            if p.resample and p.webscraping == 'dynamic':
+            if p.resample and p.webscraping == 'dynamic' and original_parameters.mode_version==1:
                 obj.interpolate(p.step)
             frames = {'raw': clean_spectrum(obj.get_raw_spectrum()),
                       'interpolated': clean_spectrum(obj.get_interpolated_spectrum())}
@@ -355,6 +380,22 @@ def simulate(parameters, settings):
             if actual_res is not None and p.broadening == 'nist' and abs(actual_res - p.resolution) > p.resolution * 0.02:
                 origin['resolution_warning'] = (f'NIST 实际 R={actual_res:g}，低于请求 R={p.resolution:g}；'
                                                 '谱线形状由实际 R 决定')
+            if original_parameters.mode_version==2:
+                from .mode_engine import finish_frames
+                frames=finish_frames(original_parameters,frames['ion'])
+                runtime=captured['recalculated']
+                origin.update(parameters=original_parameters.to_dict(),mode='server',mode_version=2,
+                              label='NIST 数据 + 官方 JS Recalculate（服务器模式 v2）',data_provider='NIST',
+                              line_strength_location='official browser JavaScript',computation_location='official-browser-js',
+                              initial_server_resolution=actual_res,actual_resolution=runtime['effective_r'],
+                              requested_resolution=original_parameters.resolution,recalculation=runtime,
+                              interpolation='linear on shared requested grid' if original_parameters.resample else 'none; complete official CSV')
+                origin.update(browser_sources=captured['browser_sources'],official_js_sha256=captured['browser_sources']['official_js']['sha256'],
+                              execution_environment='owned isolated Chrome; official lte_spectrum_js/Recalculate',
+                              effective_resolution_source='official function return title built from its local effective resolution')
+                origin.pop('resolution_warning',None)
+                if runtime['effective_r']!=original_parameters.resolution:
+                    origin['resolution_warning']=runtime['warning'] or f"官方重算受内存限制：实际 R={runtime['effective_r']}，请求 R={original_parameters.resolution}"
             return frames, origin
     except Exception as exc:
         driver_info = f'；ChromeDriver {resolved[1]} ({resolved[0]})' if resolved else ''

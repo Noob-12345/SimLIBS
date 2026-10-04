@@ -29,6 +29,8 @@ def finite(value, label, positive=False):
 
 
 def integer(value, label, minimum=0):
+    if isinstance(value, bool):
+        raise ValueError(f'{label} 必须为整数，不能是布尔值')
     n = finite(value, label)
     if not n.is_integer() or n < minimum:
         raise ValueError(f'{label} 必须为 >= {minimum} 的整数')
@@ -75,6 +77,7 @@ class Parameters:
     upper_w: float = 660.0
     max_ion_charge: int = 3
     webscraping: str = 'static'
+    mode_version: int = 1
     headless: bool = True
     elements: tuple = ('H',)
     percentages: tuple = (100.0,)
@@ -101,7 +104,7 @@ class Parameters:
             quotient = (float(self.upper_w) - float(self.low_w)) / step
         if not math.isfinite(quotient):
             raise ValueError('网格点数超出有限范围，请缩小波段或增加步长')
-        return math.ceil(quotient)
+        return math.ceil(quotient) + (1 if self.broadening == 'local' else 0)
 
     def validated(self):
         e, p = composition(self.elements, self.percentages)
@@ -110,8 +113,19 @@ class Parameters:
         values['max_ion_charge'] = integer(self.max_ion_charge, '最大离子电荷')
         if values['upper_w'] <= values['low_w']:
             raise ValueError('波长上界必须大于下界')
-        if self.webscraping not in ('static', 'dynamic'):
-            raise ValueError('模式必须为 static 或 dynamic')
+        if self.webscraping not in ('static', 'dynamic', 'server', 'client'):
+            raise ValueError('模式必须为 static/dynamic（旧版）或 server/client（v2）')
+        expected_version = 2 if self.webscraping in ('server', 'client') else 1
+        if integer(self.mode_version, '模式版本', 1) != expected_version:
+            raise ValueError('模式字段与版本不一致；server/client 需要 mode_version=2')
+        if self.mode_version == 2:
+            expected = 'nist' if self.webscraping == 'server' else 'local'
+            if self.broadening != expected:
+                raise ValueError('v2 计算模式固定展宽路径，不能独立组合')
+            if self.webscraping == 'server' and values['resolution'] < 100:
+                raise ValueError('官方 JS Recalculate 要求 R >= 100')
+            if self.webscraping=='server' and (self.broaden_convention!='nist' or self.broaden_center_decimals is not None):
+                raise ValueError('服务器 v2 使用官方 JS 约定；Python 展宽高级参数仅适用于客户端')
         if self.intensity_scale not in ('photon','energy'):
             raise ValueError('强度尺度必须为 photon 或 energy（NIST相对通量）')
         if self.broadening not in ('nist', 'local'):
@@ -135,6 +149,9 @@ class Parameters:
     def request_composition(self):
         pairs = [(e, p) for e, p in zip(self.elements, self.percentages) if p > 0]
         return [e for e, _ in pairs], [p for _, p in pairs]
+
+    def deadline(self, settings):
+        return settings.dynamic_deadline if self.webscraping in ('dynamic', 'server') else settings.static_deadline
 
     def to_dict(self):
         return asdict(self)
@@ -210,18 +227,22 @@ class BatchSpec:
     Ne_min: float = 1e17
     Ne_max: float = 1e17
     seed: int = 42
+    batch_size: int = 32
 
     def validated(self, params):
         p = params.validated()
-        if p.webscraping == 'dynamic' and not p.resample:
+        if p.webscraping in ('dynamic', 'server') and p.broadening != 'local' and not p.resample:
             raise ValueError('动态批量须主动选择统一重采样网格')
         size = integer(self.size, '样本数', 1)
+        batch_size = integer(self.batch_size, '每 batch 的光谱数', 1)
+        if size > 5000 or batch_size > 5000:
+            raise ValueError('样本数和每 batch 的光谱数均须 <= 5000')
         vals = {k: finite(getattr(self, k), k, True) for k in ('Te_min', 'Te_max', 'Ne_min', 'Ne_max')}
         if vals['Te_min'] > vals['Te_max'] or vals['Ne_min'] > vals['Ne_max']:
             raise ValueError('采样范围最小值不能大于最大值')
         if size * p.points > MAX_CELLS:
             raise ValueError('批量最多 5000000 个光谱单元，请减少样本数或网格点数')
-        return replace(self, size=size, seed=integer(self.seed, '随机种子'), **vals)
+        return replace(self, size=size, batch_size=batch_size, seed=integer(self.seed, '随机种子'), **vals)
 
 
 @dataclass(frozen=True)

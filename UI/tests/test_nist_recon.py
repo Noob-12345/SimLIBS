@@ -48,7 +48,8 @@ class RenderTests(unittest.TestCase):
     def test_area_conservation(self):
         grid = np.linspace(480.0, 660.0, 180001)
         spectrum = render_nist_sticks(self.sticks, grid, 3000.0)
-        area = float(np.trapz(spectrum["intensity"], spectrum["wavelength"]))
+        integrate = np.trapezoid if hasattr(np, 'trapezoid') else np.trapz
+        area = float(integrate(spectrum["intensity"], spectrum["wavelength"]))
         expected = float((self.sticks["H I"] + self.sticks["H II"]).sum())
         self.assertAlmostEqual(area, expected, delta=expected * 1e-9)
 

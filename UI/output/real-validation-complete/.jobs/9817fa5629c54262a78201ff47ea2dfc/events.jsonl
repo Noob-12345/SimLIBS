@@ -1,5 +1,0 @@
-{"job_id": "9817fa5629c54262a78201ff47ea2dfc", "event": "progress", "message": "Ne = 1e+17，帧 1/2", "current": 0, "total": 2, "deadline": 60.0}
-{"job_id": "9817fa5629c54262a78201ff47ea2dfc", "event": "progress", "message": "已完成帧 1/2", "current": 1, "total": 2}
-{"job_id": "9817fa5629c54262a78201ff47ea2dfc", "event": "progress", "message": "Ne = 1.2e+17，帧 2/2", "current": 1, "total": 2, "deadline": 60.0}
-{"job_id": "9817fa5629c54262a78201ff47ea2dfc", "event": "progress", "message": "已完成帧 2/2", "current": 2, "total": 2}
-{"job_id": "9817fa5629c54262a78201ff47ea2dfc", "event": "success", "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\real-validation-complete\\.jobs\\9817fa5629c54262a78201ff47ea2dfc\\result\\manifest.json"}

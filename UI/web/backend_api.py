@@ -23,7 +23,7 @@ API_VERSION = "1"
 # ---- 契约常量（与 UI README 一致）----
 SUM_TOL = 1e-6              # 配比总和 100% 的绝对浮点容差
 MAX_SINGLE_POINTS = 200_000     # 单谱点数上限
-MAX_PREVIEW_POINTS = 6_000      # Web 显示预算，与物理点数/Tk预览分开
+MAX_PREVIEW_POINTS = MAX_SINGLE_POINTS  # all actual nodes; generation ceiling, no display budget
 MAX_SCAN_FRAMES = 200           # 扫描帧数上限
 MAX_BATCH_SAMPLES = 5_000       # 批量样本数上限
 MAX_BATCH_CELLS = 5_000_000     # 批量光谱单元上限
@@ -122,6 +122,7 @@ class CommonParams:
     up_w: float
     max_ion_charge: int
     mode: str                      # static | dynamic
+    mode_version: int = 1
     headless: bool = True
     resample: bool = False         # 是否本地插值（重采样）
     resample_step: float = DEFAULT_RESAMPLE_STEP
@@ -136,8 +137,11 @@ class CommonParams:
     def from_api(raw: Any) -> "CommonParams":
         d = _require_dict(raw, "params")
         mode = d.get("mode", "dynamic")
-        if mode not in ("static", "dynamic"):
-            raise ApiError(400, "params.mode 只能是 static 或 dynamic", "validation")
+        if mode not in ('static','dynamic','server','client'):
+            raise ApiError(400, '无效计算模式', 'validation')
+        version = _int(d.get('mode_version',1),'mode_version',1)
+        if version != (2 if mode in ('server','client') else 1):
+            raise ApiError(400,'server/client 需要 mode_version=2；旧模式使用版本1','validation')
         scale=d.get('intensity_scale','photon')
         if scale not in ('photon','energy'):raise ApiError(400,'intensity_scale须为photon或energy','validation')
         p = CommonParams(
@@ -148,6 +152,7 @@ class CommonParams:
             up_w=_positive(d.get("up_w"), "params.up_w"),
             max_ion_charge=_int(d.get("max_ion_charge"), "params.max_ion_charge", minimum=0),
             mode=mode,
+            mode_version=version,
             headless=_bool(d.get("headless", True), "params.headless"),
             resample=_bool(d.get("resample", False), "params.resample"),
             resample_step=DEFAULT_RESAMPLE_STEP,
@@ -157,19 +162,26 @@ class CommonParams:
             p.resample_step = _positive(d.get("resample_step", DEFAULT_RESAMPLE_STEP), "params.resample_step")
         if not (0 < p.low_w < p.up_w):
             raise ApiError(400, "波长范围需满足 0 < 下界 < 上界", "validation")
-        p.broadening = d.get("broadening", "nist")
+        expected = 'local' if mode=='client' else 'nist'
+        p.broadening = d.get('broadening', expected)
+        if version==2 and p.broadening!=expected:
+            raise ApiError(400,'v2 计算模式固定展宽路径，不能独立组合','validation')
+        if mode=='server' and p.resolution<100:
+            raise ApiError(400,'官方 JS 重算要求 R>=100','validation')
         if p.broadening not in ("nist", "local"):
             raise ApiError(400, "params.broadening 只能是 'nist' 或 'local'", "validation")
         p.broaden_convention = d.get("broaden_convention", "nist")
         if p.broaden_convention not in ("nist", "physics"):
             raise ApiError(400, "params.broaden_convention 只能是 'nist' 或 'physics'", "validation")
-        p.broaden_grid_step = _positive(d.get("broaden_grid_step", DEFAULT_RESAMPLE_STEP), "params.broaden_grid_step")
+        p.broaden_grid_step = _positive(d.get('broaden_grid_step',.01 if mode=='client' else DEFAULT_RESAMPLE_STEP),'params.broaden_grid_step')
         center = d.get("broaden_center_decimals")
         if center is not None:
             p.broaden_center_decimals = _int(center, "params.broaden_center_decimals", 0)
         p.broaden_min_rel_int = _finite(d.get("broaden_min_rel_int", 0.0), "params.broaden_min_rel_int")
         if p.broaden_min_rel_int < 0:
             raise ApiError(400, "params.broaden_min_rel_int 不能为负", "validation")
+        if mode=='server' and (p.broaden_convention!='nist' or p.broaden_center_decimals is not None):
+            raise ApiError(400,'服务器 v2 使用官方 JS 约定，不能指定 Python 展宽参数','validation')
         return p
 
     def grid_step(self) -> float:
@@ -185,7 +197,9 @@ class CommonParams:
         return 0.005 if self.mode == "static" else 0.01
 
     def points_estimate(self) -> int:
-        return int((self.up_w - self.low_w) / self.grid_step()) + 1
+        ratio=(self.up_w-self.low_w)/self.grid_step()
+        if not math.isfinite(ratio):raise ApiError(400,'网格点数超出有限范围','validation')
+        return int(ratio)+1
 
     def check_points(self) -> None:
         n = self.points_estimate()
@@ -250,6 +264,7 @@ class BatchRequest:
     te_range: Tuple[float, float]
     ne_range: Tuple[float, float]      # 以 10^ 指数表示
     compositions: List[BatchSample]    # 候选组成池（至少 1 个，每行总和须 100%）
+    batch_size: int = 32
 
     @staticmethod
     def from_api(raw: Any) -> "BatchRequest":
@@ -258,7 +273,10 @@ class BatchRequest:
         n = _int(d.get("n_samples"), "n_samples", minimum=1)
         if n > MAX_BATCH_SAMPLES:
             raise ApiError(400, f"n_samples 超过批量上限 {MAX_BATCH_SAMPLES}", "validation")
-        seed = _int(d.get("seed", 0), "seed")
+        batch_size = _int(d.get('batch_size', 32), 'batch_size', minimum=1)
+        if batch_size > MAX_BATCH_SAMPLES:
+            raise ApiError(400, 'batch_size 须 <= 5000', 'validation')
+        seed = _int(d.get("seed", 0), "seed", minimum=0)
 
         def _range(key: str) -> Tuple[float, float]:
             r = d.get(key)
@@ -271,6 +289,15 @@ class BatchRequest:
 
         te_range = _range("te_range")
         ne_range = _range("ne_range")
+        for te in te_range:
+            _positive(te, '实际 Te')
+        try:
+            for exponent in ne_range:
+                _positive(10.0 ** exponent, '实际 Ne')
+        except OverflowError:
+            raise ApiError(400, 'Ne 指数产生非有限密度', 'validation') from None
+        if params.mode in ('dynamic','server') and params.broadening != 'local' and not params.resample:
+            raise ApiError(400, '客户端计算的 NIST 展宽批量须选择统一重采样', 'validation')
         comps: List[BatchSample] = []
         for i, row in enumerate(d.get("compositions", [])):
             rd = _require_dict(row, f"compositions[{i}]")
@@ -283,7 +310,7 @@ class BatchRequest:
         if cells > MAX_BATCH_CELLS:
             raise ApiError(400, f"批量光谱单元 {cells:,} 超过上限 {MAX_BATCH_CELLS:,}", "validation")
         return BatchRequest(params=params, n_samples=n, seed=seed,
-                            te_range=te_range, ne_range=ne_range, compositions=comps)
+                            te_range=te_range, ne_range=ne_range, compositions=comps, batch_size=batch_size)
 
 
 @dataclass

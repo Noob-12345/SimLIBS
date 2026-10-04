@@ -132,6 +132,7 @@ class Handler(BaseHTTPRequestHandler):
                     "up_w": _num(qget("up_w", "560")),
                     "max_ion_charge": _num(qget("max_ion_charge", "2")),
                     "mode": qget("mode", "dynamic"),
+                    "mode_version":_num(qget('mode_version','1')),
                     "headless": True,
                     "resample": qget("resample", "0") == "1",
                     "intensity_scale":qget('intensity_scale','photon'),
@@ -144,7 +145,11 @@ class Handler(BaseHTTPRequestHandler):
             elif len(parts) == 3 and parts[:2] == ["api", "jobs"]:
                 self._json(BACKEND.get_job(parts[2]))
             elif len(parts) == 4 and parts[1] == "jobs" and parts[3] == "result":
-                self._json(BACKEND.get_result(parts[2]))
+                if 'frame' in q:
+                    try:frame=int(q['frame'][0])
+                    except ValueError:raise ApiError(400,'frame 必须为整数','validation')
+                    self._json(BACKEND.get_result(parts[2],frame=frame))
+                else:self._json(BACKEND.get_result(parts[2]))
             elif len(parts) == 4 and parts[1] == "jobs" and parts[3] == "events":
                 self._sse(parts[2])
             elif len(parts) == 4 and parts[1] == "jobs" and parts[3] == "export":

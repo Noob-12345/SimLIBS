@@ -12,7 +12,7 @@ const cssVar = name => getComputedStyle(document.documentElement).getPropertyVal
 const SUPMAP = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','.':'·','-':'⁻' };
 const sup = v => String(v).split('').map(c => SUPMAP[c] || c).join('');
 const TERMINAL = ['completed', 'failed', 'cancelled'];
-const KIND_PAGE = { '单次模拟': 'single', '批量 dataset': 'batch', '扫描动画': 'scan' };
+const KIND_PAGE = { '单次模拟': 'single', '批量模拟': 'batch', '批量 dataset': 'batch', '扫描动画': 'scan' };
 
 function toast(type, title, msg) {
   const t = document.createElement('div');
@@ -22,12 +22,12 @@ function toast(type, title, msg) {
   setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 260); }, 3600);
 }
 
-async function api(method, url, body) {
-  const opt = { method, headers: {} };
+async function api(method, url, body, options={}) {
+  const opt = { ...options, method, headers: {} };
   if (body !== undefined) { opt.headers['Content-Type'] = 'application/json'; opt.body = JSON.stringify(body); }
   let resp;
   try { resp = await fetch(url, opt); }
-  catch (e) { const err = new Error('后端服务不可达'); err.network = true; throw err; }
+  catch (e) { if(e.name==='AbortError')throw e;const err = new Error('后端服务不可达'); err.network = true; throw err; }
   if (!resp.ok) {
     const j = await resp.json().catch(() => null);
     const err = new Error(j && j.error ? j.error.message : ('HTTP ' + resp.status));
@@ -42,9 +42,10 @@ const state = {
   offline: false,
   previewUnsupported: false,   // 真实引擎无合成预览（501）后缓存，避免反复请求
   comp: [{ el: 'W', pct: 50 }, { el: 'Fe', pct: 25 }, { el: 'Mo', pct: 25 }],
-  mode: 'dynamic',
+  mode: 'server',
+  hiddenElements: {},
   broadening: 'nist',   // nist=服务端/页面展宽；local=本地线表展宽
-  views: { raw: true, interp: true, ion: true, norm: false },
+  views: { raw: false, interp: true, ion: false, norm: false },
   hasResult: false,
   engineMock: false,
   currentJob: null,     // {id, kind}
@@ -76,6 +77,7 @@ function niceTicks(min, max, count) {
   return t;
 }
 function numberLabel(v) { return v === 0 ? '0' : (Math.abs(v)<.001 || Math.abs(v)>=1e4 ? v.toExponential(3) : String(Number(v.toPrecision(7)))); }
+function wavelengthLabel(v,step){const precision=Math.max(0,-Math.floor(Math.log10(Math.abs(step))));if(Math.abs(v)>=1e7||precision>12)return v.toExponential(Math.min(14,Math.max(0,Math.floor(Math.log10(Math.abs(v)||1))-Math.floor(Math.log10(Math.abs(step)))+1)));return v.toFixed(Math.min(12,precision));}
 function intensityLabel(spec,norm){
   if(norm)return 'Normalized intensity';
   const meta=spec&&spec.meta||{};
@@ -85,6 +87,13 @@ function intensityLabel(spec,norm){
   return scale==='energy'?'Energy flux [a.u.]':scale==='photon'?'Photon flux [a.u.]':spec&&spec.illustrative?'Illustrative [a.u.]':'Intensity [a.u.; scale unknown]';
 }
 function lowerIndex(xs,x) { let a=0,b=xs.length;while(a<b){const m=(a+b)>>1;xs[m]<x?a=m+1:b=m;}return a; }
+function elementColor(el){const i=ELEMENT_SYMBOLS.indexOf(el);return `hsl(${((i+1)*137.508)%360} 75% 48%)`;}
+function elementGroup(spec,views){const groups=spec?.series?.elements||{};return (views.interp!==false?groups.interpolated:groups.raw)||groups.raw||{xs:[],curves:[]};}
+function renderElementLegend(spec,id){
+  const group=elementGroup(spec,state.views),box=$('#'+id);box.replaceChildren();
+  for(const curve of group.curves){const button=document.createElement('button');button.textContent=curve.label;button.style.setProperty('--element-color',elementColor(curve.label));button.classList.toggle('off',!!state.hiddenElements[curve.label]);button.setAttribute('aria-pressed',String(!state.hiddenElements[curve.label]));button.addEventListener('click',()=>{state.hiddenElements[curve.label]=!state.hiddenElements[curve.label];if(id==='elementLegend'){drawSingle(specData,true);renderElementLegend(specData,id);}else drawScanFrame('instant');});box.appendChild(button);}
+  if(!group.curves.length)box.textContent='此来源未提供真实元素分量';
+}
 function drawSpectrum(cv, spec, opts) {
   const s = setupCanvas(cv); if (!s) return;
   const { ctx, w, h } = s;
@@ -100,8 +109,9 @@ function drawSpectrum(cv, spec, opts) {
     ctx.fillText(opts.emptyText || '暂无数据', w / 2, h / 2);
     cv._plot = null; return;
   }
-  const actual=spec.series || {}, main=actual.interpolated || actual.raw || {xs:spec.xs,ys:spec.ys};
-  const available=[main,actual.raw,...(actual.ions||[])].filter(s=>s&&s.xs.length);
+  const actual=spec.series || {}, main=(opts.views.interp!==false?actual.interpolated:actual.raw)||actual.raw||{xs:spec.xs,ys:spec.ys};
+  const group=elementGroup(spec,opts.views);
+  const available=[main,opts.views.raw?actual.raw:null,...(opts.views.ion?actual.ions||[]:[])].filter(s=>s&&s.xs.length);
   let fullMin=Math.min(...available.map(s=>s.xs[0])),fullMax=Math.max(...available.map(s=>s.xs[s.xs.length-1]));
   if(fullMin===fullMax){fullMin-=.05;fullMax+=.05;}
   let xmin=fullMin,xmax=fullMax;
@@ -116,13 +126,15 @@ function drawSpectrum(cv, spec, opts) {
       xmin=view.xmin;xmax=view.xmax;
     }
   }
-  const slice=s=>{const lo=lowerIndex(s.xs,xmin),hi=lowerIndex(s.xs,xmax);return {...s,xs:s.xs.slice(lo,hi+(s.xs[hi]===xmax?1:0)),ys:s.ys.slice(lo,hi+(s.xs[hi]===xmax?1:0))};};
+  const slice=s=>{const lo=lowerIndex(s.xs,xmin),hi=lowerIndex(s.xs,xmax);return lo===0&&hi>=s.xs.length-1?s:{...s,xs:s.xs.slice(lo,hi+(s.xs[hi]===xmax?1:0)),ys:s.ys.slice(lo,hi+(s.xs[hi]===xmax?1:0))};};
   const lines=[];
   if(opts.views.interp!==false)lines.push({...slice(main),style:'main'});
   if(opts.views.raw&&actual.raw)lines.push({...slice(actual.raw),style:'raw'});
   if(opts.views.ion&&opts.showIon)for(const ion of actual.ions||[])lines.push({...slice(ion),style:'ion'});
+  for(const curve of group.curves)if(!state.hiddenElements[curve.label])lines.push({...slice({...curve,xs:group.xs}),style:'element',color:elementColor(curve.label)});
+  let totalMax=0;for(const y of main.ys)totalMax=Math.max(totalMax,y);
   let ymax=0;for(const s of lines)for(const y of s.ys)ymax=Math.max(ymax,y);
-  const divisor=ymax>0?ymax:1;
+  const divisor=totalMax>0?totalMax:1,physical=lines.map(s=>({...s}));
   if(opts.norm){for(const s of lines)s.ys=s.ys.map(y=>y/divisor);ymax=1;}else if(!ymax)ymax=1;
   ymax *= 1.12;
   const X = x => pad.l + (x-xmin)/(xmax-xmin)*cw;
@@ -131,10 +143,11 @@ function drawSpectrum(cv, spec, opts) {
   ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.font = '10px Consolas, monospace';
   niceTicks(0, ymax, 4).forEach(v => { const y = Y(v); ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
     ctx.fillStyle = C.faint; ctx.textAlign = 'right'; ctx.fillText(numberLabel(v), pad.l - 7, y + 3); });
-  niceTicks(xmin,xmax,6).forEach(v => {
+  const xTicks=niceTicks(xmin,xmax,6),xStep=xTicks.length>1?xTicks[1]-xTicks[0]:xmax-xmin;
+  xTicks.forEach(v => {
     const x = X(v);
     ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + ch); ctx.stroke();
-    ctx.fillStyle = C.faint; ctx.textAlign = 'center'; ctx.fillText(v.toFixed(0), x, h - 9); });
+    ctx.fillStyle = C.faint; ctx.textAlign = 'center'; ctx.fillText(wavelengthLabel(v,xStep), x, h - 9); });
   ctx.textAlign = 'center'; ctx.fillText('λ / nm', pad.l + cw / 2, h - 0.5);
   ctx.save();ctx.translate(12,pad.t+ch/2);ctx.rotate(-Math.PI/2);ctx.fillText(intensityLabel(spec,opts.norm),0,0);ctx.restore();
 
@@ -153,11 +166,15 @@ function drawSpectrum(cv, spec, opts) {
       for(let i=0;i<s.xs.length;i++){ctx.beginPath();ctx.arc(X(s.xs[i]),Y(s.ys[i]),1.2,0,7);ctx.fill();}
       ctx.globalAlpha=1;
     }else if(s.style==='ion'){ctx.save();ctx.setLineDash([5,4]);line(s,C.ion,1.2,false);ctx.restore();}
-    else line(s,C.main,1.4,true);
+    else if(s.style==='element')line(s,s.color,1.6,false);
+    else line(s,C.main,1.4,false);
   }
   ctx.restore();
   const basis=lines.find(s=>s.xs.length)||slice(main);
-  cv._plot = { pad,cw,ch,xs:basis.xs,ys:basis.ys,ymax,xmin,xmax,fullMin,fullMax,norm:!!opts.norm };
+  const original=physical.find(s=>s.xs===basis.xs)||physical[0];
+  cv._plot = { pad,cw,ch,xs:basis.xs,ys:basis.ys,actualYs:original?.ys||basis.ys,elements:physical.filter(s=>s.style==='element'),divisor,ymax,xmin,xmax,fullMin,fullMax,norm:!!opts.norm,
+               drawn_nodes:lines.map(s=>({label:s.label||s.style,count:s.xs.length})) };
+  if(cv===specCanvas)$('#nodeInfo').textContent=`${main.label||'当前视图'}：原数据 ${main.xs.length}/${main.total_points||main.xs.length} 实际节点 · 当前视口 ${basis.xs.length} 节点 · 实际 R ${spec.meta?.actual_resolution??'未知'}`;
 }
 function drawEmpty(cv, text) {
   drawSpectrum(cv, null, { views: {}, emptyText: text });
@@ -178,23 +195,48 @@ function drawSingle(spec, instant = false) {
 }
 
 function currentParams() {
+  const value = id => $('#'+id).value.trim() === '' ? NaN : Number($('#'+id).value);
+  const ne = value('neInput');
   return {
-    te: parseFloat($('#teSlider').value),
-    neExp: parseFloat($('#neSlider').value),
-    R: parseInt($('#rSlider').value),
-    low: parseFloat($('#lowW').value) || 350,
-    up: parseFloat($('#upW').value) || 560,
+    te: value('teInput'), ne, neExp: Math.log10(ne), R: value('rInput'),
+    low: value('lowW'), up: value('upW'),
   };
 }
+function numericInput(id, label, integer=false, minimum=Number.MIN_VALUE) {
+  const input=$('#'+id), raw=input.value.trim(), n=raw===''?NaN:Number(raw);
+  if(!Number.isFinite(n) || n<minimum || (integer&&!Number.isSafeInteger(n))) {
+    throw new Error(label+'须为有限'+(integer?'整数':'数值')+'，'+(minimum===Number.MIN_VALUE?'大于0':'不小于'+minimum));
+  }
+  return n;
+}
+function syncParameterSliders() {
+  const p=currentParams();
+  for(const [id,n] of [['teSlider',p.te],['neSlider',p.neExp],['rSlider',p.R]]) {
+    if(!Number.isFinite(n)||(id!=='neSlider'&&n<=0))continue;
+    const el=$('#'+id); el.min=Math.min(Number(el.min),n);el.max=Math.max(Number(el.max),n);el.value=n;fillSlider(el);
+  }
+}
+function setParameterValues(te,ne,r) {
+  $('#teInput').value=te;$('#neInput').value=formatDensity(ne);$('#rInput').value=r;
+  syncParameterSliders();updateParamLabels();
+}
+function formatDensity(value) { return Number(value).toExponential().replace('e+','e'); }
 function fillSlider(el) {
   const pct = (el.value - el.min) / (el.max - el.min) * 100;
   el.style.setProperty('--fill', pct + '%');
 }
 function updateParamLabels() {
   const p = currentParams();
-  $('#teVal').textContent = p.te.toFixed(2) + ' eV';
-  $('#neVal').textContent = '1.0×10' + sup(p.neExp) + ' cm⁻³';
-  $('#rVal').textContent = p.R;
+  const errors=[];
+  for(const [id,n,label,isInteger] of [['teInput',p.te,'Te',false],['neInput',p.ne,'Ne',false],['rInput',p.R,'R',true]]) {
+    const valid=Number.isFinite(n)&&n>0&&(!isInteger||Number.isSafeInteger(n));
+    $('#'+id).setAttribute('aria-invalid',String(!valid));
+    if(!valid)errors.push(label+'须为有限正'+(isInteger?'整数':'数'));
+  }
+  $('#paramError').textContent=errors.join('；');
+  $('#teVal').textContent = Number.isFinite(p.te)?numberLabel(p.te)+' eV':'无效';
+  $('#neVal').textContent = Number.isFinite(p.ne)?numberLabel(p.ne)+' cm⁻³':'无效';
+  $('#rVal').textContent = Number.isFinite(p.R)?p.R:'无效';
   fillSlider($('#teSlider')); fillSlider($('#neSlider')); fillSlider($('#rSlider'));
 }
 
@@ -207,14 +249,17 @@ async function fetchPreview() {
   $('#legend [data-view=ion]').style.display = state.hasResult?specData&&specData.series&&specData.series.ions.length?'':'none':'none';
   // 已有真实结果：保留图谱直到下次运行（与桌面版“保留上一成功图谱”语义一致）
   if (state.hasResult) return;
+  if(!Number.isFinite(p.te)||p.te<=0||!Number.isFinite(p.ne)||p.ne<=0||!Number.isSafeInteger(p.R)||p.R<=0) {
+    drawEmpty(specCanvas,'请填写有效的 Te、Ne 和 R');return;
+  }
   if (p.low >= p.up) { drawEmpty(specCanvas, '波长范围无效：需 0 < 下界 < 上界'); specData = null; return; }
   const els = state.comp.filter(c => c.el.trim()).map(c => c.el.trim());
   const seq = ++previewSeq;
   if (!state.offline && !state.previewUnsupported) {
     try {
       const q = new URLSearchParams({
-        te: String(p.te), ne: String(Math.pow(10, p.neExp)), resolution: String(p.R),
-        low_w: String(p.low), up_w: String(p.up), mode: state.mode,
+        te: String(p.te), ne: String(p.ne), resolution: String(p.R),
+        low_w: String(p.low), up_w: String(p.up), mode: state.mode,mode_version:'2',
         resample: $('#resample').checked ? '1' : '0', elements: els.join(','),
         intensity_scale:$('#intensityScale').value,
       });
@@ -297,7 +342,7 @@ specCanvas.addEventListener('mousemove', e => {
   tooltip.style.display = 'block';
   tooltip.style.left = Math.min(px + 14, r.width - 150) + 'px';
   tooltip.style.top = (py - 34) + 'px';
-  tooltip.innerHTML = `<b>${numberLabel(P2.xs[i])} nm</b> · I = ${numberLabel(P2.ys[i])}`;
+  tooltip.innerHTML = `<b>${P2.xs[i]} nm</b> · I = ${P2.actualYs[i]}`+(P2.norm?`（归一化 ${numberLabel(P2.ys[i])}）`:'')+P2.elements.filter(s=>s.xs.length).map(s=>{let at=Math.min(s.xs.length-1,lowerIndex(s.xs,P2.xs[i]));if(at>0&&P2.xs[i]-s.xs[at-1]<s.xs[at]-P2.xs[i])at--;return `<br><span style="color:${s.color}">${s.label}: ${s.ys[at]}</span>`;}).join('');
 });
 specCanvas.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; schedulePreview(); });
 
@@ -314,6 +359,7 @@ const easeOut = k => 1 - Math.pow(1 - k, 3);
 
 /* present：以指定模式把 spec 呈现到画布，并维护"当前显示值"供悬停/中断续接 */
 function present(cv, spec, opts, mode = 'instant') {
+  if(spec?.series)mode='instant'; // Full scientific CSV nodes are never morphed or repeatedly revealed.
   const A = getAnim(cv);
   const token = ++A.token;
   if (REDUCED || mode === 'instant' || !spec || !spec.xs) {
@@ -489,6 +535,27 @@ function attachChartInteractions(cv, redraw) {
 const ELEMENT_SYMBOLS='H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og'.split(' ');
 let elementMap=new Map(ELEMENT_SYMBOLS.map(e=>[e.toLowerCase(),e]));
 function canonicalElement(value){return elementMap.get(String(value).trim().toLowerCase())||null;}
+function bindElementPicker(input,list,c,idx) {
+  let options=[],active=-1;
+  const close=()=>{list.hidden=true;input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');};
+  const choose=el=>{c.el=el;input.value=el;close();input.focus();updateSum();schedulePreview();};
+  const mark=()=>{Array.from(list.children).forEach((b,i)=>b.setAttribute('aria-selected',String(i===active)));if(active>=0){input.setAttribute('aria-activedescendant',list.children[active].id);list.children[active].scrollIntoView({block:'nearest'});}};
+  const show=()=>{
+    const prefix=input.value.trim().toLowerCase(),used=new Set(state.comp.filter((_,i)=>i!==idx).map(x=>canonicalElement(x.el)));
+    options=Array.from(elementMap.values()).filter(el=>el.toLowerCase().startsWith(prefix)&&!used.has(el));
+    active=-1;list.replaceChildren();
+    options.forEach((el,i)=>{const button=document.createElement('button');button.type='button';button.role='option';button.id=list.id+'-'+i;button.tabIndex=-1;button.textContent=el;button.setAttribute('aria-selected','false');button.addEventListener('pointerdown',e=>e.preventDefault());button.addEventListener('click',()=>choose(el));list.appendChild(button);});
+    list.hidden=!options.length;input.setAttribute('aria-expanded',String(options.length>0));
+  };
+  input.addEventListener('focus',show);
+  input.addEventListener('input',()=>{c.el=input.value;show();updateSum();schedulePreview();});
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){close();return;}
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(list.hidden)show();if(options.length){active=active<0?(e.key==='ArrowDown'?0:options.length-1):(active+(e.key==='ArrowDown'?1:-1)+options.length)%options.length;mark();}}
+    if(e.key==='Enter'&&!list.hidden&&options.length){e.preventDefault();choose(options[active<0?0:active]);}
+  });
+  input.addEventListener('blur',()=>{const valid=canonicalElement(c.el);if(valid){c.el=valid;input.value=valid;}close();updateSum();});
+}
 function compositionPayload(){
   const seen=new Set();
   if(!state.comp.length)throw new Error('至少需要一个元素');
@@ -543,16 +610,13 @@ function renderComp() {
   state.comp.forEach((c, idx) => {
     const row = document.createElement('div'); row.className = 'comp-row';
     row.innerHTML = `
-      <input class="comp-el" value="${c.el}" maxlength="4" spellcheck="false">
+      <div class="element-picker"><input class="comp-el" maxlength="4" spellcheck="false" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-label="元素 ${idx+1}" aria-controls="element-options-${idx}"><div class="element-options" id="element-options-${idx}" role="listbox" hidden></div></div>
       <input class="comp-pct" type="number" min="0" max="100" step="0.1" value="${c.pct}">
       <span style="color:var(--faint);font-size:12px">%</span>
       <div class="comp-bar"><i style="width:${Math.min(100, c.pct)}%"></i></div>
       <button class="comp-del" title="删除">✕</button>`;
-    row.querySelector('.comp-el').addEventListener('input', e => { c.el = e.target.value; updateSum(); schedulePreview(); });
-    row.querySelector('.comp-el').addEventListener('blur',e=>{
-      const valid=canonicalElement(c.el);if(valid){c.el=valid;e.target.value=valid;}
-      updateSum();
-    });
+    const elementInput=row.querySelector('.comp-el');elementInput.value=c.el;
+    bindElementPicker(elementInput,row.querySelector('.element-options'),c,idx);
     row.querySelector('.comp-pct').addEventListener('input', e => {
       c.pct = e.target.value;
       balanceComposition(idx,false);schedulePreview();
@@ -598,7 +662,7 @@ function setProgress(pct) {
   pct = Math.max(0, Math.min(100, pct || 0));
   $('#runProgress').style.width = pct + '%';
   $('#enginePct').textContent = Math.round(pct) + '%';
-  if (state.currentJob?.kind === '批量 dataset') $('#batchProgress').style.width = pct + '%';
+  if (KIND_PAGE[state.currentJob?.kind] === 'batch') $('#batchProgress').style.width = pct + '%';
 }
 
 function attachJob(jobId, kind) {
@@ -631,7 +695,7 @@ async function handleJobEvent(ev) {
     if (state.currentJob?.kind === '扫描动画') {
       $('#scanNote').textContent = '扫描中 · ' + Math.round(ev.progress || 0) + '%';
     }
-    if (state.currentJob?.kind === '批量 dataset') {
+    if (KIND_PAGE[state.currentJob?.kind] === 'batch') {
       $('#batchLiveMeta').textContent = '已完成 ' + Math.round(ev.progress || 0) + '% · ' + state.currentJob.id;
     }
   }
@@ -653,7 +717,7 @@ function setRunningUI(running) {
   $('#enginePill').style.display = running ? '' : 'none';
   if (running) { $('#runProgressWrap').hidden = false; $('#runProgress').style.width = '0%'; }
   else setTimeout(() => { $('#runProgressWrap').hidden = true; }, 600);
-  if (kind === '批量 dataset') {
+  if (KIND_PAGE[kind] === 'batch') {
     $('#batchLive').hidden = false;
     $('#batchCancel').hidden = !running;
   }
@@ -706,22 +770,26 @@ async function finalizeFromJob(j) {
 
 /* ---------- 单次模拟：运行 ---------- */
 function broadeningPayload() {
-  const local = state.broadening === 'local';
+  const local = state.mode === 'client';
   const centerRaw = $('#bCenter').value.trim();
   return {
-    broadening: state.broadening,
-    broaden_convention: $('#bConvention').value,
-    broaden_grid_step: parseFloat($('#bGridStep').value) || 0.005,
-    broaden_center_decimals: local && centerRaw !== '' ? parseInt(centerRaw) : null,
-    broaden_min_rel_int: parseFloat($('#bMinRel').value) || 0,
+    broadening: local?'local':'nist',
+    broaden_convention: local?$('#bConvention').value:'nist',
+    broaden_grid_step: local ? numericInput('bGridStep','合成网格步长') : 0.005,
+    broaden_center_decimals: local && centerRaw !== '' ? numericInput('bCenter','线中心舍入位',true,0) : null,
+    broaden_min_rel_int: local ? numericInput('bMinRel','选线阈值',false,0) : 0,
   };
 }
 function commonParamsPayload() {
   const p = currentParams();
+  numericInput('teInput','Te');numericInput('neInput','实际 Ne');numericInput('rInput','R',true);
+  numericInput('lowW','波长下界');numericInput('upW','波长上界');
+  if(p.low>=p.up)throw new Error('波长上界须大于下界');
   return {
-    te: p.te, ne: Math.pow(10, p.neExp), resolution: p.R, low_w: p.low, up_w: p.up,
+    te: p.te, ne: p.ne, resolution: p.R, low_w: p.low, up_w: p.up,
     max_ion_charge: parseInt($('#maxIon').value) || 0,
-    mode: state.mode, headless: $('#headless').checked, resample: $('#resample').checked,
+    mode: state.mode, mode_version:2, headless: $('#headless').checked, resample: $('#resample').checked,
+    resample_step:$('#resample').checked?numericInput('resampleStep','插值步长'):.01,
     intensity_scale:$('#intensityScale').value,
     ...broadeningPayload(),
   };
@@ -753,6 +821,8 @@ async function runSingle() {
 
 function renderSingleResult(jobId, result) {
   state.hasResult = true;
+  state.hiddenElements={};
+  renderElementLegend(result,'elementLegend');
   $('#previewTag').style.display = 'none';
   specData = { ...result };
   singleOpts = {
@@ -775,7 +845,7 @@ function renderSingleResult(jobId, result) {
   if(m.ions&&m.ions.length)chips.push(`<span class="chip" title="${m.ions.join(' / ')}">离子：${m.ions.join(' / ')}</span>`);
   // 数据路径证据（重塑方案）
   if (m.computation_location) {
-    const loc = m.computation_location === 'server' ? '计算：NIST 服务器' : '计算：客户端';
+    const loc = m.mode_version===2?(m.mode==='server'?'服务器模式 v2 · 官方浏览器 JS 重算':'客户端模式 v2 · NIST 线强 + Python 合成'):m.computation_location === 'server' ? '旧版 NIST 服务器' : '旧版浏览器 JS';
     chips.push(`<span class="chip" title="线强计算位置">${loc}</span>`);
   }
   if (m.broadening) {
@@ -783,6 +853,7 @@ function renderSingleResult(jobId, result) {
     chips.push(`<span class="chip" title="${m.broadening === 'local' && m.line_table_rows ? '线表 ' + m.line_table_rows + ' 行' : '服务端/页面展宽'}">${b}</span>`);
   }
   if (m.actual_resolution != null) {
+    if(m.initial_server_resolution!=null)chips.push(`<span class="chip">初始 NIST R ${m.initial_server_resolution}</span>`);
     const warned = !!m.resolution_warning;
     chips.push(`<span class="chip" ${warned ? 'style="color:var(--warn);border-color:var(--warn)"' : ''} title="${m.resolution_warning || '响应中的实际分辨本领'}">实际 R ${m.actual_resolution}</span>`);
   }
@@ -815,21 +886,23 @@ async function downloadExport(jobId, kind, extra) {
 }
 
 /* ================================================================
-   批量 dataset
+   批量模拟
    ================================================================ */
 async function runBatch() {
   if (state.currentJob) { toast('warn', '已有任务在运行', '请等待完成或先取消'); return; }
   if (!updateSum()) { toast('err', '无法启动', '当前配比总和必须为 100%'); return; }
-  const teA = +$('#batchTeA').value, teB = +$('#batchTeB').value;
-  const neA = +$('#batchNeA').value, neB = +$('#batchNeB').value;
-  if (!(teA < teB) || !(neA < neB)) { toast('err', '无法启动', 'Te / Ne 范围需要 min < max'); return; }
-  const pp = commonParamsPayload();
-  if ($('#batchResample').checked) pp.resample = true;
   try {
+    const teA=numericInput('batchTeA','Te 下限'),teB=numericInput('batchTeB','Te 上限');
+    const neA=numericInput('batchNeA','Ne 指数下限',false,-Number.MAX_VALUE),neB=numericInput('batchNeB','Ne 指数上限',false,-Number.MAX_VALUE);
+    if(teA>teB||neA>neB)throw new Error('Te / Ne 范围须 min ≤ max（相等可固定值）');
+    if([10**neA,10**neB].some(n=>!Number.isFinite(n)||n<=0))throw new Error('Ne 指数产生非有限或非正密度');
+    const n=numericInput('batchCount','样本数',true),batchSize=numericInput('batchSize','每 batch 光谱数',true),seed=numericInput('batchSeed','随机种子',true,0);
+    if(n>5000||batchSize>5000)throw new Error('样本数和每 batch 光谱数均须 ≤5000');
+    const pp = commonParamsPayload();
+    if ($('#batchResample').checked && pp.mode==='server') {pp.resample=true;pp.resample_step=numericInput('resampleStep','插值步长');}
     const r = await api('POST', '/api/simulate/batch', {
       params: pp,
-      n_samples: parseInt($('#batchCount').value) || 1,
-      seed: parseInt($('#batchSeed').value) || 0,
+      n_samples: n, batch_size: batchSize, seed,
       te_range: [teA, teB], ne_range: [neA, neB],
       compositions: [{ name: 'current', items: compositionPayload() }],
     });
@@ -838,7 +911,7 @@ async function runBatch() {
     $('#batchLive').hidden = false;
     $('#batchProgress').style.width = '0%';
     $('#batchLiveMeta').textContent = '排队中…';
-    attachJob(r.job_id, '批量 dataset');
+    attachJob(r.job_id, '批量模拟');
     setRunningUI(true);
     $('#batchLive').hidden = false;
     $('#batchCancel').hidden = false;
@@ -872,6 +945,18 @@ function renderBatchResult(jobId, result) {
   $('#wideHead').innerHTML = (w.cols || []).map(c => `<th>${c}</th>`).join('');
   $('#wideBody').innerHTML = (w.rows || []).map(r => '<tr>' + r.map(v => `<td class="mono">${v}</td>`).join('') + '</tr>').join('');
   $('#wideNote').textContent = (w.note || '任务完成后更新') + ` · ${jobId}`;
+  state.batchResultId=jobId;
+  $('#datasetDownload').disabled=!!s.partial;
+  const training=result.training_package;
+  $('#trainingDownload').disabled=!training?.available||!!s.partial;
+  $('#trainingPackageNote').textContent=training?.available?`${training.packages} 包 · 每 batch ${training.batch_size} 谱 · 完整光谱和元素标签已配对 · ${training.source}`:training?.reason||'此任务没有训练包；重新运行批量模拟后可下载。';
+}
+function updateBatchPackageEstimate() {
+  try {
+    const n=numericInput('batchCount','样本数',true),b=numericInput('batchSize','每 batch 光谱数',true);
+    if(n>5000||b>5000)throw new Error('样本数和每 batch 光谱数均须 ≤5000');
+    $('#batchPackageEstimate').textContent=`预计 ${Math.ceil(n/b)} 包；末包 ${n%b||Math.min(n,b)} 条光谱`;
+  }catch(e){$('#batchPackageEstimate').textContent=e.message;}
 }
 
 /* ================================================================
@@ -900,7 +985,7 @@ function renderScanVals() {
     box.appendChild(e);
   }
 }
-function drawScanFrame(mode = 'morph') {
+async function drawScanFrame(mode = 'instant') {
   const cv = $('#scanChart');
   const cache = state.scanCache;
   if (!cache || !cache.frames.length) {
@@ -910,20 +995,34 @@ function drawScanFrame(mode = 'morph') {
   }
   const i = Math.min(state.scan.frame, cache.frames.length - 1);
   const fr = cache.frames[i];
-  present(cv, {...fr,intensity_scale:fr.intensity_scale||cache.intensity_scale}, { views: { raw: true, interp: true, ion: false } }, mode);
+  if(cache.lazy_frames&&!fr.series){
+    $('#frameInfo').textContent='读取本帧完整实际 CSV…';
+    try {
+      cache.pending=cache.pending||new Map();
+      if(!cache.pending.has(i)){cache.controller?.abort();cache.controller=new AbortController();cache.pending.set(i,api('GET',`/api/jobs/${cache.job_id}/result?frame=${i}`,undefined,{signal:cache.controller.signal}));}
+      const data=await cache.pending.get(i);cache.pending.delete(i);
+      Object.assign(fr,data,{value:fr.value,loaded:true});
+      cache.order=(cache.order||[]).filter(x=>x!==i);cache.order.push(i);
+      while(cache.order.length>3){const old=cache.order.shift();for(const key of ['series','xs','ys','yi'])delete cache.frames[old][key];cache.frames[old].loaded=false;}
+    }catch(e){cache.pending.delete(i);if(e.name!=='AbortError')$('#frameInfo').textContent='读取完整帧失败：'+e.message;return;}
+    if(cache!==state.scanCache||i!==state.scan.frame)return;
+  }
+  present(cv, {...fr,intensity_scale:fr.intensity_scale||cache.intensity_scale}, { views: state.views,norm:state.views.norm,showIon:!!fr.series?.ions?.length }, mode);
+  renderElementLegend(fr,'scanElementLegend');
   const axName = { te: 'Te', ne: 'Ne', r: 'R' }[cache.axis];
   const axUnit = { te: ' eV', ne: '×10^x cm⁻³', r: '' }[cache.axis];
   const valStr = cache.axis === 'ne' ? '10' + sup(fr.value) : (cache.axis === 'r' ? Math.round(fr.value) : fr.value.toFixed(3));
-  $('#frameInfo').textContent = `${axName} = ${valStr}${axUnit} · ${i + 1} / ${cache.frames.length}`;
+  const selected=(state.views.interp!==false?fr.series?.interpolated:fr.series?.raw)||fr.series?.raw||fr;
+  $('#frameInfo').textContent = `${axName} = ${valStr}${axUnit} · ${i + 1} / ${cache.frames.length} · ${selected.label||'当前视图'} 完整 ${selected.xs.length}/${selected.xs.length} 节点 · 实际 R ${fr.meta?.actual_resolution??fr.actual_resolution??'未知'} · 缓存≤3帧`;
   $('#scanTip').textContent = `帧 ${i + 1} / ${cache.frames.length} · ${axName} = ${valStr}${axUnit}`;
   $$('#scanVals span').forEach((el, k) => el.classList.toggle('cur', k === i));
 }
-function scanSetFrame(i) {
+async function scanSetFrame(i) {
   const cache = state.scanCache;
   if (!cache) return;
   state.scan.frame = Math.max(0, Math.min(cache.frames.length - 1, i));
   $('#scanSlider').value = state.scan.frame;
-  drawScanFrame();
+  await drawScanFrame();
 }
 function scanPlayToggle() {
   if (!state.scanCache) { toast('warn', '尚无扫描结果', '请先运行一次扫描'); return; }
@@ -931,11 +1030,14 @@ function scanPlayToggle() {
   $('#iconPlay').style.display = state.scan.playing ? 'none' : '';
   $('#iconPause').style.display = state.scan.playing ? '' : 'none';
   if (state.scan.playing) {
-    state.scan.timer = setInterval(() => {
+    const next=async()=>{
+      if(!state.scan.playing)return;
       const n = state.scanCache.frames.length;
-      scanSetFrame((state.scan.frame + 1) % n);
-    }, 140);
-  } else clearInterval(state.scan.timer);
+      await scanSetFrame((state.scan.frame + 1) % n);
+      if(state.scan.playing)state.scan.timer=setTimeout(next,300);
+    };
+    state.scan.timer=setTimeout(next,300);
+  } else clearTimeout(state.scan.timer);
 }
 
 async function runScan() {
@@ -981,7 +1083,7 @@ async function loadJobs() {
       const [cls, label] = STATUS_TAG[j.status] || ['n', j.status];
       const tr = document.createElement('tr');
       tr.innerHTML = `<td class="mono">${j.job_id}${j.mock_history ? ' <span class="tag n">历史示意</span>' : ''}</td>
-        <td>${j.kind}</td><td class="mono" style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${j.summary || ''}</td>
+        <td>${KIND_PAGE[j.kind]==='batch'?'批量模拟':j.kind}</td><td class="mono" style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${j.summary || ''}</td>
         <td><span class="tag ${cls}">${label}</span></td>
         <td class="mono">${j.status === 'running' ? (j.progress || 0).toFixed(0) + '%' : '—'}</td>
         <td class="mono">${j.duration || '—'}</td>`;
@@ -1049,7 +1151,7 @@ function setOffline(off) {
    ================================================================ */
 const TITLES = {
   single: ['单次模拟', 'Te · Ne · R · 组成 → NIST 光谱'],
-  batch: ['批量 dataset', '多样本组成 → 机器学习宽表'],
+  batch: ['批量模拟', '真实光谱 → 配对训练 CSV · ZIP 下载'],
   scan: ['扫描动画', '参数轴扫描 · 帧动画 · GIF 导出'],
   jobs: ['任务记录', 'output/.jobs 可追溯产物'],
   settings: ['设置', '超时 · 环境 · 输出目录'],
@@ -1081,17 +1183,24 @@ $('#themeBtn').addEventListener('click', () => {
 });
 
 /* 单次模拟页绑定 */
-['teSlider', 'neSlider', 'rSlider', 'lowW', 'upW'].forEach(id => $('#'+id).addEventListener('input', schedulePreview));
+['lowW','upW'].forEach(id=>$('#'+id).addEventListener('input',schedulePreview));
+for(const [slider,input] of [['teSlider','teInput'],['neSlider','neInput'],['rSlider','rInput']]) {
+  $('#'+slider).addEventListener('input',()=>{const n=Number($('#'+slider).value);$('#'+input).value=slider==='neSlider'?formatDensity(Number((10**n).toPrecision(15))):n;updateParamLabels();schedulePreview();});
+  $('#'+input).addEventListener('input',()=>{syncParameterSliders();updateParamLabels();schedulePreview();});
+}
+$('#neInput').addEventListener('blur',()=>{const n=currentParams().ne;if(Number.isFinite(n)&&n>0)$('#neInput').value=formatDensity(n);});
 $('#intensityScale').addEventListener('change',()=>{schedulePreview();if(state.hasResult)toast('ok','下次运行尺度已选择','当前成功结果仍保持原尺度与原数据');});
 $$('#legend .chip').forEach(ch => ch.addEventListener('click', () => {
   const v = ch.dataset.view;
   if (v === 'norm') { state.views.norm = !state.views.norm; ch.classList.toggle('off', !state.views.norm); }
   else { state.views[v] = !state.views[v]; ch.classList.toggle('off', !state.views[v]); }
   drawSingle(specData, true);
+  renderElementLegend(specData,'elementLegend');
 }));
+function updateModePath(){state.broadening=state.mode==='client'?'local':'nist';$('#broadenParams').hidden=state.mode!=='client';$('#modePath').textContent=state.mode==='client'?'NIST 线强 + Python 分段合并/统一展宽（无需 Chrome）':'NIST 数据 + 官方 JavaScript Recalculate';}
 $$('#modeSeg button').forEach(b => b.addEventListener('click', () => {
   $$('#modeSeg button').forEach(x => x.classList.remove('on')); b.classList.add('on');
-  state.mode = b.dataset.v; schedulePreview();
+  state.mode = b.dataset.v;updateModePath();schedulePreview();
 }));
 $$('#broadSeg button').forEach(b => b.addEventListener('click', () => {
   $$('#broadSeg button').forEach(x => x.classList.remove('on')); b.classList.add('on');
@@ -1106,13 +1215,13 @@ const PRESETS = {
 $$('.presets [data-preset]').forEach(b => b.addEventListener('click', () => {
   const p = PRESETS[b.dataset.preset];
   state.comp = p.comp.map(c => ({ ...c }));
-  $('#teSlider').value = p.te; $('#neSlider').value = p.neExp; $('#rSlider').value = p.R;
+  setParameterValues(p.te,10**p.neExp,p.R);
   $('#lowW').value = p.low; $('#upW').value = p.up; $('#chartTitle').value = p.title;
   renderComp(); schedulePreview();
   toast('ok', '预设已应用', b.textContent.replace('预设 ', '') + ' · 参数已填写，未联网');
 }));
 $('#addEl').addEventListener('click', () => {
-  if (state.comp.length >= 8) return toast('warn', '已达上限', '最多 8 个元素行');
+  if (state.comp.length >= 32) return toast('warn', '已达上限', '最多 32 个元素行');
   state.comp.push({ el: '', pct: 0 }); renderComp();
 });
 $('#runBtn').addEventListener('click', runSingle);
@@ -1127,6 +1236,9 @@ function lastCompletedSingleId() { return _lastSingleId; }
 
 /* 批量页绑定 */
 $('#batchRun').addEventListener('click', runBatch);
+['batchCount','batchSize'].forEach(id=>$('#'+id).addEventListener('input',updateBatchPackageEstimate));
+$('#trainingDownload').addEventListener('click',()=>downloadExport(state.batchResultId,'training'));
+$('#datasetDownload').addEventListener('click',()=>downloadExport(state.batchResultId,'dataset'));
 $('#batchCancel').addEventListener('click', async () => {
   if (state.batchJobId) { try { await api('POST', '/api/jobs/' + state.batchJobId + '/cancel'); } catch (e) {} }
 });
@@ -1179,6 +1291,7 @@ function redrawSpecInstant() {
 }
 attachChartInteractions(specCanvas, redrawSpecInstant);
 attachChartInteractions($('#scanChart'), () => drawScanFrame('instant'));
+$('#scanChart').addEventListener('mousemove',e=>{const cv=e.currentTarget,P=cv._plot;if(!P?.xs.length)return;const r=cv.getBoundingClientRect(),x=P.xmin+(e.clientX-r.left-P.pad.l)/P.cw*(P.xmax-P.xmin);let i=Math.min(P.xs.length-1,lowerIndex(P.xs,x));if(i>0&&x-P.xs[i-1]<P.xs[i]-x)i--;$('#scanTip').textContent=`原节点 ${P.xs[i]} nm · I=${P.actualYs[i]}`+P.elements.filter(s=>s.xs.length).map(s=>{const j=Math.min(s.xs.length-1,lowerIndex(s.xs,P.xs[i]));return ` · ${s.label}=${s.ys[j]}`;}).join('');});
 
 /* 窗口尺寸变化 */
 window.addEventListener('resize', () => { if(state.hasResult)drawSingle(specData,true);else fetchPreview(); drawScanFrame('instant'); });
@@ -1190,6 +1303,7 @@ window.addEventListener('resize', () => { if(state.hasResult)drawSingle(specData
   renderComp();
   updateParamLabels();
   renderScanVals();
+  updateBatchPackageEstimate();
   drawEmpty($('#scanChart'), '扫描完成后可在此播放帧动画');
   try {
     const [st, params] = await Promise.all([api('GET', '/api/status'), api('GET', '/api/params')]);
@@ -1197,9 +1311,9 @@ window.addEventListener('resize', () => { if(state.hasResult)drawSingle(specData
     applyStatus(st);
     if (params.params) {
       const p = params.params;
-      $('#teSlider').value = p.te; $('#neSlider').value = Math.log10(p.ne); $('#rSlider').value = p.resolution;
+      setParameterValues(p.te,p.ne,p.resolution);
       $('#lowW').value = p.low_w; $('#upW').value = p.up_w; $('#maxIon').value = p.max_ion_charge;
-      state.mode = p.mode; $('#headless').checked = p.headless; $('#resample').checked = p.resample;
+      state.mode = ['server','client'].includes(p.mode)?p.mode:'server'; $('#headless').checked = p.headless; $('#resample').checked = p.resample;
       $('#intensityScale').value=p.intensity_scale||'photon';
       if (p.broadening) {
         state.broadening = p.broadening;
@@ -1207,7 +1321,8 @@ window.addEventListener('resize', () => { if(state.hasResult)drawSingle(specData
         if (p.broaden_grid_step) $('#bGridStep').value = p.broaden_grid_step;
         if (p.broaden_min_rel_int != null) $('#bMinRel').value = p.broaden_min_rel_int;
       }
-      $$('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === p.mode));
+      updateModePath();
+      $$('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === state.mode));
       $$('#broadSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === (p.broadening || 'nist')));
     }
     if (params.composition && params.composition.length) {
@@ -1227,13 +1342,15 @@ window.addEventListener('resize', () => { if(state.hasResult)drawSingle(specData
       state.batchJobId = active.job_id;
       attachJob(active.job_id, active.kind);
       setRunningUI(true);
-      if (active.kind === '批量 dataset') { $('#batchLive').hidden = false; $('#batchJobId').textContent = active.job_id; }
+      if (KIND_PAGE[active.kind] === 'batch') { $('#batchLive').hidden = false; $('#batchJobId').textContent = active.job_id; }
     }
     // 记录最近成功任务，供导出按钮使用
     const lastSingle = jobs.jobs.find(j => j.kind === '单次模拟' && j.status === 'completed' && !j.mock_history);
     if (lastSingle) { _lastSingleId = lastSingle.job_id; _lastScanId = lastSingle.job_id; }
     const lastScan = jobs.jobs.find(j => j.kind === '扫描动画' && j.status === 'completed' && !j.mock_history);
     if (lastScan) _lastScanId = lastScan.job_id;
+    const lastBatch=jobs.jobs.find(j=>KIND_PAGE[j.kind]==='batch'&&j.status==='completed'&&!j.mock_history);
+    if(lastBatch)try{renderBatchResult(lastBatch.job_id,await api('GET','/api/jobs/'+lastBatch.job_id+'/result'));}catch(e){}
   } catch (e) {
     setOffline(true);
     updateParamLabels();

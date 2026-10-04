@@ -2,10 +2,10 @@
 import heapq
 import numpy as np
 import pandas as pd
-from simlibs_ui.storage import clean_spectrum
+from simlibs_ui.storage import clean_spectrum, valid_ion_column
 
-SINGLE_POINTS = 6000
-SCAN_POINTS = 2000
+SINGLE_POINTS = 200000  # compatibility aliases for generation safety; no display sampling
+SCAN_POINTS = 200000
 
 
 def sample_indices(xs, ys, budget):
@@ -41,21 +41,31 @@ def sample_indices(xs, ys, budget):
     return np.array(sorted(selected),dtype=int)
 
 
-def file_series(manifest, budget):
-    result = {'ions': []}
+def file_series(manifest, budget=None):
+    # budget only remains for old internal callers; actual CSV nodes are never sampled.
+    result = {'ions': [], 'elements': {}}
     for name, path in (manifest.get('files') or {}).items():
-        if name not in ('raw','interpolated','ion'):
+        if name not in ('raw','interpolated','ion','ion_interpolated'):
             continue
-        frame = clean_spectrum(pd.read_csv(path,encoding='utf-8-sig'), ion=name=='ion')
-        if name == 'ion':
-            columns = [c for c in frame if c not in ('Wavelength (nm)','Sum(calc)')]
-            indices = sample_indices(frame['Wavelength (nm)'],frame[columns],budget)
-            result['ions'] = [dict(label=c,xs=frame['Wavelength (nm)'].iloc[indices].tolist(),
-                                  ys=frame[c].iloc[indices].tolist(),total_points=len(frame)) for c in columns]
+        frame = clean_spectrum(pd.read_csv(path,encoding='utf-8-sig',float_precision='round_trip'), ion=name.startswith('ion'))
+        if name.startswith('ion'):
+            columns = [c for c in frame if valid_ion_column(c)]
+            xs=frame['Wavelength (nm)'].tolist()
+            if name=='ion':
+                result['ions'] = [dict(label=c,xs=xs,ys=frame[c].tolist(),total_points=len(frame)) for c in columns]
+            grouped={}
+            for column in columns:
+                el=column.split()[0]
+                grouped.setdefault(el,[]).append(column)
+            view='raw' if name=='ion' else 'interpolated'
+            result['elements'][view]={'xs':xs,'curves':[{'label':el,'ys':frame[cols].sum(axis=1).tolist(),'ions':cols} for el,cols in sorted(grouped.items())]}
         else:
-            indices = sample_indices(frame['wavelength'],frame['intensity'],budget)
-            result[name] = dict(label=name,xs=frame['wavelength'].iloc[indices].tolist(),
-                                ys=frame['intensity'].iloc[indices].tolist(),total_points=len(frame))
+            result[name] = dict(label=name,xs=frame['wavelength'].tolist(),ys=frame['intensity'].tolist(),total_points=len(frame))
     if not result.get('interpolated') and not result.get('raw'):
         raise ValueError('结果缺少完整光谱 CSV，不能用旧预览补造数据')
+    # Legacy interpolated total may have a distinct grid: contributions use that
+    # same target axis and one linear transformation, never composition ratios.
+    if result['elements'].get('raw') and not result['elements'].get('interpolated'):
+        raw=result['elements']['raw'];target=(result.get('interpolated') or result['raw'])['xs']
+        result['elements']['interpolated']={'xs':target,'curves':[dict(curve,ys=np.interp(target,raw['xs'],curve['ys'],left=0,right=0).tolist()) for curve in raw['curves']]}
     return result

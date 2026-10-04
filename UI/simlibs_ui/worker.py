@@ -17,8 +17,8 @@ def execute(request, emit, cancelled):
     if kind == 'single':
         from .adapter import simulate
         p = Parameters.from_dict(request['parameters'])
-        emit('progress', message='正在请求真实 NIST 光谱', deadline=settings.static_deadline if p.webscraping == 'static' else settings.dynamic_deadline)
-        frames, origin = simulate(p, settings)
+        emit('progress', message='正在请求真实 NIST 光谱', deadline=p.deadline(settings))
+        frames, origin = simulate(p, settings, cancelled=cancelled, emit=emit)
         if cancelled():
             return None
         return save_result(directory / 'result', frames, origin)

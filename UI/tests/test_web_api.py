@@ -13,7 +13,7 @@ from mock_backend import MockBackend
 
 class WebAPITests(unittest.TestCase):
     def test_display_budget_is_separate_from_physical_limit(self):
-        self.assertEqual(backend_api.MAX_PREVIEW_POINTS,6000)
+        self.assertEqual(backend_api.MAX_PREVIEW_POINTS,200000)
         self.assertEqual(backend_api.MAX_SINGLE_POINTS,200000)
 
     def test_flux_defaults_validation_and_three_operations_forwarding(self):

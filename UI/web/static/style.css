@@ -210,6 +210,22 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.18)}
 @keyframes rowIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
 .comp-row input{padding:6px 9px;font-size:12.5px}
 .comp-el{text-transform:none;font-weight:650;text-align:center}
+.element-picker{position:relative;min-width:0}
+.element-picker .comp-el{width:100%}
+.element-options{position:absolute;top:100%;left:0;min-width:140px;max-height:200px;overflow:auto;background:var(--card);border:1px solid var(--border2);border-radius:6px;box-shadow:var(--shadow);z-index:20;padding:4px}
+.element-options button{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--text);padding:7px 10px;cursor:pointer}
+.element-options button:hover,.element-options button[aria-selected=true]{background:var(--accent-soft);color:var(--accent)}
+.param-control{display:flex;align-items:center;gap:10px;min-width:0}
+.param-control input[type=range]{flex:1;min-width:0}
+.param-control input[type=text]{width:118px;text-align:right}
+input[aria-invalid=true]{border-color:var(--bad)}
+.input-error{color:var(--bad);font-size:11.5px;min-height:16px;margin-top:5px}
+.element-legend{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.element-legend button{color:var(--text);background:var(--card2);border:1px solid var(--border2);border-left:4px solid var(--element-color);border-radius:6px;padding:4px 10px;cursor:pointer}
+.element-legend button.off{opacity:.45;text-decoration:line-through}
+#modePath{font-size:11px;color:var(--muted);padding:8px;display:block}
+#frameInfo{min-width:0;white-space:normal;overflow-wrap:anywhere}
+#scanTip{max-width:calc(100% - 28px);overflow-wrap:anywhere;pointer-events:none}
 .comp-pct{text-align:right}
 .comp-bar{height:7px;border-radius:4px;background:var(--inset);overflow:hidden}
 .comp-bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease}

@@ -21,6 +21,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from .storage import valid_ion_column
 
 
 @dataclass(frozen=True)
@@ -64,11 +65,14 @@ def line_strengths(sticks: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     if "wavelength" not in sticks or "intensity" in sticks:
         raise ValueError("Expected a dataSticksArray table, not a Doppler table")
     # Require ion columns to prevent accidental use of ASD's observed Rel. Int.
-    ions = [column for column in sticks if re.match(r"^[A-Z][a-z]? [IVX]+(?:\s|$)", column)]
+    ions = ion_columns(sticks)
     if not ions:
         raise ValueError("No calculated ion intensity columns found")
     centers = sticks["wavelength"].to_numpy(dtype=float)
-    strengths = sticks[ions].fillna(0.0).sum(axis=1).to_numpy(dtype=float)
+    values = sticks[ions].to_numpy(dtype=float)
+    if not np.isfinite(values).all() or (values<0).any():
+        raise ValueError('每个离子线强须有限且非负')
+    strengths = values.sum(axis=1)
     if not np.isfinite(centers).all() or not np.isfinite(strengths).all():
         raise ValueError("Line positions and strengths must be finite")
     if (centers <= 0).any() or (strengths < 0).any():
@@ -136,7 +140,7 @@ def merge_core_sticks(band_tables, bands) -> pd.DataFrame:
 
 def ion_columns(sticks: pd.DataFrame) -> list[str]:
     """UI addition: calculated ion contribution columns of a line table."""
-    return [column for column in sticks if re.match(r"^[A-Z][a-z]? [IVX]+(?:\s|$)", column)]
+    return [column for column in sticks if valid_ion_column(column)]
 
 
 def render_ion_sticks(

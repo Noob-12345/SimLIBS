@@ -4,7 +4,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import tkinter as tk
 import unittest
 from unittest.mock import patch
 from simlibs_ui.models import Parameters, ScanSpec
@@ -110,15 +109,9 @@ class JobTests(unittest.TestCase):
                 self.assertTrue((self.job.directory/'error.json').exists())
                 self.assertEqual(json.loads((self.job.directory/'mock-browser.json').read_text(encoding='utf-8'))['quit_count'], 1)
 
-    def test_tk_heartbeat_and_cancel_owned_tree_only(self):
-        root = tk.Tk()
-        root.withdraw()
-        self.addCleanup(root.destroy)
+    def test_nonblocking_poll_and_cancel_owned_tree_only(self):
         heartbeat = []
-        def tick():
-            heartbeat.append(time.monotonic())
-            root.after(10, tick)
-        tick()
+        poll_times = []
         flags = subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
         unrelated = subprocess.Popen([sys.executable, '-B', '-c', 'import time; time.sleep(15)'], creationflags=flags)
         def cleanup_unrelated():
@@ -128,13 +121,16 @@ class JobTests(unittest.TestCase):
         self.job.start('fixture', delay=20, child=True)
         deadline = time.monotonic() + 3
         while not (self.job.directory / 'child.pid').exists() and time.monotonic() < deadline:
-            root.update()
+            heartbeat.append(time.monotonic())
+            poll_start = time.monotonic()
             self.job.poll()
+            poll_times.append(time.monotonic()-poll_start)
             time.sleep(.01)
         self.assertTrue((self.job.directory / 'child.pid').exists())
         child = int((self.job.directory / 'child.pid').read_text())
         self.assertTrue(alive(child))
         self.assertGreater(len(heartbeat), 2)
+        self.assertLess(max(poll_times), .5, '轮询不能等待受控慢 worker 完成')
         start = time.monotonic()
         self.job.cancel()
         self.finish()

@@ -1,5 +1,0 @@
-{"job_id": "c90ea5e5fc92437fa4e0f235b351f0c0", "event": "progress", "message": "Ne = 1e+17，帧 1/2", "current": 0, "total": 2, "deadline": 60.0}
-{"job_id": "c90ea5e5fc92437fa4e0f235b351f0c0", "event": "progress", "message": "已完成帧 1/2", "current": 1, "total": 2}
-{"job_id": "c90ea5e5fc92437fa4e0f235b351f0c0", "event": "progress", "message": "Ne = 1.2e+17，帧 2/2", "current": 1, "total": 2, "deadline": 60.0}
-{"job_id": "c90ea5e5fc92437fa4e0f235b351f0c0", "event": "progress", "message": "已完成帧 2/2", "current": 2, "total": 2}
-{"job_id": "c90ea5e5fc92437fa4e0f235b351f0c0", "event": "success", "path": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\reviewer-real-20261002\\.jobs\\c90ea5e5fc92437fa4e0f235b351f0c0\\result\\manifest.json"}

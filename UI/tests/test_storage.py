@@ -96,7 +96,7 @@ class StorageTests(unittest.TestCase):
 
     def test_sparse_ion_cells_only_allow_explicit_blank_contributions(self):
         from simlibs_ui.storage import clean_spectrum
-        good = pd.DataFrame({'Wavelength (nm)': ['650', '655'], 'H I': ['  ', '2'], 'Sum(calc)': ['0', '2']})
+        good = pd.DataFrame({'Wavelength (nm)': ['650', '655'], 'H I': ['  ', '2'], 'Sum(calc)': ['0', '2']}, dtype=object)
         result = clean_spectrum(good, ion=True)
         self.assertEqual(result['H I'].tolist(), [0, 2])
         for column in ['Wavelength (nm)', 'Sum(calc)', 'H I']:

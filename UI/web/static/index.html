@@ -31,7 +31,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
         <rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/>
         <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/>
-      </svg>批量 dataset
+      </svg>批量模拟
     </div>
     <div class="nav-item" data-page="scan">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -90,14 +90,15 @@
           <div class="card">
             <h3>共同参数</h3>
 
-            <label class="f">电子温度 Te<span class="val" id="teVal">1.00 eV</span></label>
-            <input type="range" id="teSlider" min="0.5" max="2.5" step="0.05" value="1.0">
+            <label class="f" for="teInput">电子温度 Te [eV]<span class="val" id="teVal">1 eV</span></label>
+            <div class="param-control"><input type="range" id="teSlider" aria-label="电子温度滑块" min="0.5" max="2.5" step="any" value="1.0"><input type="text" inputmode="decimal" id="teInput" value="1" aria-describedby="paramError"></div>
 
-            <label class="f">电子密度 Ne<span class="val" id="neVal">1.0×10¹⁷ cm⁻³</span></label>
-            <input type="range" id="neSlider" min="14" max="18" step="0.1" value="17">
+            <label class="f" for="neInput">电子密度 Ne [cm⁻³]<span class="val" id="neVal">1e17 cm⁻³</span></label>
+            <div class="param-control"><input type="range" id="neSlider" aria-label="电子密度对数滑块" min="14" max="18" step="any" value="17"><input type="text" inputmode="decimal" id="neInput" value="1e17" aria-describedby="paramError"></div>
 
-            <label class="f">光谱分辨率 R（仪器分辨率，非重采样步长）<span class="val" id="rVal">5000</span></label>
-            <input type="range" id="rSlider" min="500" max="10000" step="100" value="5000">
+            <label class="f" for="rInput">光谱分辨率 R<span class="val" id="rVal">5000</span></label>
+            <div class="param-control"><input type="range" id="rSlider" aria-label="分辨率滑块" min="500" max="10000" step="1" value="5000"><input type="text" inputmode="numeric" id="rInput" value="5000" aria-describedby="paramError"></div>
+            <div id="paramError" class="input-error" role="status" aria-live="polite"></div>
 
             <label class="f">波长范围 [nm]</label>
             <div class="row2">
@@ -110,16 +111,15 @@
             <label class="f">NIST 强度尺度（相对通量）</label>
             <select id="intensityScale"><option value="photon">Photon flux · a.u.（旧默认）</option><option value="energy">Energy flux · a.u.</option></select>
 
-            <label class="f">抓取方式</label>
+            <label class="f">计算模式</label>
             <div class="seg" id="modeSeg">
-              <button data-v="static">static · NIST 服务器算线强</button>
-              <button data-v="dynamic" class="on">dynamic · 客户端计算</button>
+              <button data-v="server" class="on">服务器计算</button>
+              <button data-v="client">客户端计算</button>
             </div>
 
-            <label class="f">展宽位置</label>
+            <label class="f">固定处理路径 · v2</label>
             <div class="seg" id="broadSeg">
-              <button data-v="nist" class="on">NIST 展宽</button>
-              <button data-v="local">本地展宽（线表）</button>
+              <span id="modePath">NIST 数据 + 官方 JavaScript Recalculate</span>
             </div>
             <div id="broadenParams" hidden style="margin-top:10px;padding:12px;border:1px dashed var(--border2);border-radius:10px;background:var(--inset)">
               <label class="f">高斯约定</label>
@@ -128,7 +128,7 @@
                 <option value="physics">物理约定（FWHM=λ/R）</option>
               </select>
               <label class="f">合成网格步长 [nm]</label>
-              <input type="number" id="bGridStep" value="0.005" min="0.0005" max="1" step="0.005">
+              <input type="number" id="bGridStep" value="0.01" min="0.0005" max="1" step="any">
               <div class="row2" style="margin-top:10px">
                 <div><label class="f">线中心舍入位</label><input type="number" id="bCenter" placeholder="不舍入" min="0" step="1"></div>
                 <div><label class="f">选线阈值 min_rel_int</label><input type="number" id="bMinRel" value="0" min="0" step="0.001"></div>
@@ -141,6 +141,8 @@
               <label class="switch"><input type="checkbox" id="resample"><span class="track"></span><span>本地插值</span></label>
             </div>
 
+            <label class="f" for="resampleStep">本地插值目标步长 [nm]（选中时生效）</label>
+            <input type="number" id="resampleStep" value="0.01" min="0.000001" step="any">
             <h3 style="margin-top:22px">元素配比 <span class="hint">总原子数密度占比</span></h3>
             <div id="compRows"></div>
             <div class="sum-row ok" id="sumRow">
@@ -162,7 +164,7 @@
           <div>
             <div class="card">
               <h3>光谱结果
-                <span class="hint">单谱上限 200,000 点 · 原点保峰显示 ≤6000</span>
+                <span class="hint" id="nodeInfo">完整实际 CSV 节点 · 单谱生成上限 200,000 点</span>
               </h3>
               <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:11px;flex-wrap:wrap">
                 <input type="text" id="chartTitle" value="W Fe Mo composition · Te=1.00 eV" style="max-width:340px;font-weight:600">
@@ -173,6 +175,7 @@
                   <span class="chip" data-view="norm" id="normChip">归一化</span>
                 </div>
               </div>
+              <div id="elementLegend" class="legend element-legend" aria-label="元素真实贡献"></div>
               <div class="chart-wrap">
                 <canvas id="specChart"></canvas>
                 <div id="tooltip"></div>
@@ -197,7 +200,7 @@
         </div>
       </section>
 
-      <!-- ============ 页 2：批量 dataset ============ -->
+      <!-- ============ 页 2：批量模拟 ============ -->
       <section class="page" data-page="batch">
         <div class="stats">
           <div class="stat"><div class="k">样本总数</div><div class="v" id="batchTotal">—</div><div class="d">来自组成表 · 已校验</div></div>
@@ -232,14 +235,20 @@
                 <div><label class="f">样本数（≤5000）</label><input type="number" id="batchCount" value="48" min="1" max="5000"></div>
                 <div><label class="f">随机种子</label><input type="number" id="batchSeed" value="42"></div>
               </div>
+              <label class="f" for="batchSize">每个 batch 的光谱数（≤5000）</label>
+              <input type="number" id="batchSize" value="32" min="1" max="5000" step="1">
+              <div id="batchPackageEstimate" class="hint" aria-live="polite"></div>
               <div class="row2" style="margin-top:12px">
                 <div><label class="f">Te 范围</label><div class="row2"><input type="number" id="batchTeA" value="0.8" step="0.1"><input type="number" id="batchTeB" value="1.6" step="0.1"></div></div>
                 <div><label class="f">Ne 范围 (10^)</label><div class="row2"><input type="number" id="batchNeA" value="16" step="0.5"><input type="number" id="batchNeB" value="18" step="0.5"></div></div>
               </div>
               <div style="margin-top:14px">
-                <label class="switch"><input type="checkbox" id="batchResample" checked><span class="track"></span><span>统一重采样（dynamic 批量必须）</span></label>
+                <label class="switch"><input type="checkbox" id="batchResample" checked><span class="track"></span><span>统一网格（官方 JS 批量须插值；客户端直接合成）</span></label>
               </div>
               <button class="btn primary" style="width:100%;margin-top:16px" id="batchRun">开始批量模拟</button>
+              <button class="btn" style="width:100%;margin-top:10px" id="trainingDownload" disabled>下载训练数据包 ZIP</button>
+              <button class="btn sm" style="width:100%;margin-top:8px" id="datasetDownload" disabled>下载完整宽表 CSV</button>
+              <div id="trainingPackageNote" class="hint" role="status" style="margin-top:8px">成功后可下载：每谱两行 + 配对元素标签 + 来源清单。</div>
               <div style="color:var(--faint);font-size:11.5px;margin-top:9px">使用「单次模拟」页的当前配比与共同参数作为候选池。</div>
             </div>
 
@@ -291,6 +300,7 @@
 
           <div class="card">
             <h3>动画预览 <span class="hint">播放仅读取已保存结果 · 不联网</span></h3>
+            <div id="scanElementLegend" class="legend element-legend" aria-label="扫描元素贡献"></div>
             <div class="chart-wrap">
               <canvas id="scanChart" style="height:360px"></canvas>
               <div id="scanTip" class="mono" style="position:absolute;top:12px;left:14px;font-size:12px;color:var(--accent);font-weight:650"></div>

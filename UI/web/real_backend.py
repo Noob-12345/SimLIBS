@@ -1,11 +1,11 @@
-"""simLIBS Web UI —— 真实后端（包装现有 simlibs_ui 包，不修改其任何文件）。
+"""simLIBS Web UI —— 使用 simlibs_ui 共享计算后台的真实接口适配。
 
 复用现有任务体系：
 - simlibs_ui.jobs.JobController：专属 worker 子进程、Windows Job Object 所有权、
   go 启动门、cancel 协作取消 + 0.8s 宽限树清理、deadline 超时、events.jsonl；
 - simlibs_ui.worker.execute：真实 adapter.simulate / operations.batch / operations.scan；
 - simlibs_ui.storage.save_result：结果 manifest（含来源证据：源 SHA256、NIST URL、
-  实际 Ne、驱动版本），与 Tk 桌面版完全同源（output/.jobs/<task-id>/）。
+  实际 Ne、驱动版本），写入 Web 共享任务目录（output/.jobs/<task-id>/）。
 
 Web 层职责仅两件事：把 events.jsonl 映射为 Web JobEvent 流；把 manifest 转译为
 前端结果契约（xs/ys/yi、扫描帧缓存、批量摘要）。预览端点返回 501——真实引擎
@@ -157,10 +157,10 @@ class RealBackend:
             'params': {
                 'te': p.Te, 'ne': p.Ne, 'resolution': p.resolution,
                 'low_w': p.low_w, 'up_w': p.upper_w, 'max_ion_charge': p.max_ion_charge,
-                'mode': p.webscraping, 'headless': p.headless, 'resample': p.resample,
+                'mode': 'server', 'mode_version':2, 'headless': p.headless, 'resample': p.resample,
                 'intensity_scale': p.intensity_scale,
                 'broadening': p.broadening, 'broaden_convention': p.broaden_convention,
-                'broaden_grid_step': p.broaden_grid_step,
+                'broaden_grid_step': .01,
                 'broaden_center_decimals': p.broaden_center_decimals,
                 'broaden_min_rel_int': p.broaden_min_rel_int,
             },
@@ -182,6 +182,7 @@ class RealBackend:
             Te=params.te, Ne=params.ne, resolution=params.resolution,
             low_w=params.low_w, upper_w=params.up_w,
             max_ion_charge=params.max_ion_charge, webscraping=params.mode,
+            mode_version=params.mode_version,
             headless=params.headless,
             elements=tuple(c.el for c in composition),
             percentages=tuple(float(c.pct) for c in composition),
@@ -209,14 +210,16 @@ class RealBackend:
             for it in comp.items:
                 row[it.el] = float(it.pct)
             rows.append(row)
+        elements = sorted({item.el for comp in req.compositions for item in comp.items})
+        rows = [dict({el: 0.0 for el in elements}, **row) for row in rows]
         spec = {
-            'size': req.n_samples, 'seed': req.seed,
+            'size': req.n_samples, 'seed': req.seed, 'batch_size': req.batch_size,
             'Te_min': req.te_range[0], 'Te_max': req.te_range[1],
             'Ne_min': 10 ** req.ne_range[0], 'Ne_max': 10 ** req.ne_range[1],
         }
         payload = {'parameters': p.to_dict(), 'spec': spec, 'compositions': rows}
         summary = f'{req.n_samples} 样本 · seed={req.seed} · {req.params.summary()}'
-        return self._launch('批量 dataset', 'batch', payload, summary)
+        return self._launch('批量模拟', 'batch', payload, summary)
 
     def start_scan(self, req: ScanRequest) -> str:
         p = self._to_parameters(req.params, req.composition)
@@ -395,7 +398,7 @@ class RealBackend:
     # ------------------------------------------------------------------
     # 结果转译：manifest → 前端契约
     # ------------------------------------------------------------------
-    def get_result(self, job_id: str) -> Dict[str, Any]:
+    def get_result(self, job_id: str, frame: Optional[int] = None) -> Dict[str, Any]:
         with self._lock:
             job = self._jobs.get(job_id)
         if not job:
@@ -407,6 +410,12 @@ class RealBackend:
         if kind == 'spectrum':
             return self._single_result(job, manifest)
         if kind == 'scan':
+            if frame is not None:
+                paths=manifest.get('frames') or []
+                if not 0<=frame<len(paths):raise ApiError(400,'扫描帧号越界','validation')
+                fm=json.loads(Path(paths[frame]).read_text(encoding='utf-8'))
+                data=self._single_result(job,fm)
+                return dict(data,value=(manifest.get('completed_values') or [])[frame],frame=frame)
             return self._scan_result(job, manifest)
         if kind == 'batch':
             return self._batch_result(job, manifest)
@@ -427,7 +436,7 @@ class RealBackend:
         meta = {
             'source': origin.get('label', '真实 NIST / SimulatedLIBS 模拟'),
             'rows': rows or None,
-            'points': f'{main["label"]}：{len(xs):,}/{main["total_points"]:,} CSV点（保峰预算 {SINGLE_POINTS}）',
+            'points': f'{main["label"]}：显示 {len(xs):,}/{main["total_points"]:,} 实际CSV节点（完整）',
             'duration': job.get('duration'),
             'sha256': ((origin.get('source_sha256') or '')[:4] + '…') or None,
             'ne_actual': origin.get('actual_Ne'),
@@ -441,6 +450,9 @@ class RealBackend:
             'broadening': origin.get('broadening'),
             'broadening_params': origin.get('broadening_params'),
             'actual_resolution': origin.get('actual_resolution'),
+            'requested_resolution':origin.get('requested_resolution') or (origin.get('parameters') or {}).get('resolution'),
+            'initial_server_resolution':origin.get('initial_server_resolution'),
+            'mode_version':origin.get('mode_version',1),'mode':origin.get('mode'),
             'resolution_warning': origin.get('resolution_warning'),
             'line_table_rows': origin.get('line_table_rows'),
         }
@@ -455,19 +467,17 @@ class RealBackend:
             raise ApiError(500, '扫描帧与参数数量不一致')
         for value, frame_path in zip(values, paths):
             fm = json.loads(Path(frame_path).read_text(encoding='utf-8'))
-            series = file_series(fm, FRAME_PREVIEW_POINTS)
-            main = series.get('interpolated') or series['raw']
             # Web 契约：Ne 轴以 10^ 指数表达
             display = math.log10(float(value)) if axis == 'ne' else float(value)
             frames_out.append({
-                'value': display, 'xs': main['xs'], 'ys': main['ys'], 'yi': [], 'series': series,
+                'value': display, 'loaded':False,'actual_resolution':(fm.get('origin') or {}).get('actual_resolution'),
                 'intensity_scale':intensity_scale_from_origin(fm.get('origin')),
             })
         p = manifest.get('parameters') or {}
         params_summary = (f"Te={p.get('Te', 0):g} eV · Ne={p.get('Ne', 0):.3g} · "
                           f"R{p.get('resolution', 0)} · {p.get('low_w', 0):g}–{p.get('upper_w', 0):g} nm")
         return {'kind': 'scan', 'axis': axis, 'unit': {'te': ' eV', 'ne': '×10^x cm⁻³', 'r': ''}[axis],
-                'frames': frames_out, 'params_summary': params_summary,
+                'frames': frames_out, 'params_summary': params_summary,'lazy_frames':True,'job_id':job.get('job_id'),
                 'intensity_scale':frames_out[0]['intensity_scale'] if frames_out else 'unknown','intensity_units':'a.u. (relative flux)'}
 
     def _batch_result(self, job: Dict[str, Any], manifest: Dict[str, Any]) -> Dict[str, Any]:
@@ -506,6 +516,10 @@ class RealBackend:
             'summary': {'total': manifest.get('requested', 0), 'completed': manifest.get('completed', 0),
                         'failed': 0, 'partial': bool(manifest.get('partial'))},
             'samples': samples, 'wide': wide,
+            'training_package': ({k: v for k, v in manifest['training_package'].items()
+                                  if k not in ('archive', 'manifest')}
+                                 if not manifest.get('partial') and manifest.get('training_package')
+                                 else {'available': False, 'reason': '此任务没有完整训练包；重新运行批量模拟后可下载'}),
         }
 
     # ------------------------------------------------------------------
@@ -519,6 +533,12 @@ class RealBackend:
         if job['status'] != 'completed' or not job.get('result_path'):
             raise ApiError(409, '只有成功完成的任务才能导出', 'no_result')
         manifest, result_path = job['manifest'], job['result_path']
+        if kind == 'training':
+            package = manifest.get('training_package') or {}
+            archive = Path(package.get('archive', ''))
+            if manifest.get('partial') or not package.get('available') or not archive.is_file():
+                raise ApiError(409, '此任务没有完整训练包；重新运行批量模拟后可下载', 'no_result')
+            return ExportPayload(archive.read_bytes(), 'application/zip', f'{job_id}_training.zip')
         from simlibs_ui.operations import export_result
         export_dir = Path(result_path).parent / 'exports'
         export_dir.mkdir(parents=True, exist_ok=True)

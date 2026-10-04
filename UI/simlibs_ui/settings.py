@@ -2,11 +2,15 @@
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 import json
+import os
 import sys
 from .models import Parameters, finite
 
 UI_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_PYTHON = r'D:\Anaconda3\envs\simLIBS\python.exe'
+DEFAULT_PYTHON = os.environ.get('SIMLIBS_UI_PYTHON') or next(
+    (path for path in (r'E:\Anaconda\envs\simLIBS\python.exe',
+                       r'D:\Anaconda3\envs\simLIBS\python.exe') if Path(path).is_file()),
+    sys.executable)
 DEFAULT_SOURCE = str(UI_ROOT.parent / 'simLIBS-2.0.3')
 
 

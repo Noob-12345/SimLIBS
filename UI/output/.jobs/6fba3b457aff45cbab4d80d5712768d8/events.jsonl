@@ -1,2 +1,0 @@
-{"job_id": "6fba3b457aff45cbab4d80d5712768d8", "event": "progress", "message": "正在请求真实 NIST 光谱", "deadline": 60.0}
-{"job_id": "6fba3b457aff45cbab4d80d5712768d8", "event": "error", "message": "NIST static 获取失败：ValueError: Data retrieval requires webscraping method set to 'dynamic' and successful data acquisition.", "log": "D:\\LIBS\\simLIBS-2.0.3\\UI\\output\\.jobs\\6fba3b457aff45cbab4d80d5712768d8\\error.json"}

@@ -178,7 +178,7 @@ class MockBackend:
 
     def start_batch(self, req: BatchRequest) -> str:
         summary = f"{req.n_samples} 样本 · seed={req.seed} · {req.params.summary()}"
-        return self._launch("批量 dataset", summary, req.params, [], None, batch_req=req)
+        return self._launch("批量模拟", summary, req.params, [], None, batch_req=req)
 
     def start_scan(self, req: ScanRequest) -> str:
         comp_txt = " / ".join(f"{it.el} {it.pct:g}%" for it in req.composition)
@@ -346,6 +346,8 @@ class MockBackend:
             "intensity_scale":"unknown","requested_intensity_scale":req.params.intensity_scale,
             "summary": {"total": req.n_samples, "completed": done, "failed": 0, "seed": req.seed},
             "samples": samples[:12],
+            "training_package": {"available": False, "batch_size": req.batch_size,
+                                 "reason": "MOCK 为示意数据；训练包需切换真实引擎并完成批量模拟"},
             "wide": {"cols": wide_cols, "rows": wide_rows, "note": "宽表仅示意 · 真实后端输出全量宽表"},
         }
 

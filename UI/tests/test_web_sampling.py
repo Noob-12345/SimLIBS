@@ -61,7 +61,7 @@ class RealWebDataTests(unittest.TestCase):
     def test_single_reads_full_csv_and_keeps_real_raw_and_ions(self):
         result = self.backend._single_result({'duration':'1s'},self.manifest)
         self.assertGreater(len(result['xs']),1500)
-        self.assertLessEqual(len(result['xs']),6000)
+        self.assertEqual(len(result['xs']),12001)
         self.assertIn(1e-12,result['ys'])
         series = result.get('series')
         self.assertIsNotNone(series, '各真实序列不能共用插值数组冒充raw/ion')
@@ -79,13 +79,16 @@ class RealWebDataTests(unittest.TestCase):
         self.assertEqual(result['yi'],[])
         self.assertEqual(result['series']['ions'],[])
 
-    def test_scan_uses_full_files_with_2000_point_budget(self):
+    def test_scan_loads_each_current_frame_without_display_budget(self):
         result = self.backend._scan_result({}, {'kind':'scan','axis':'Te','completed_values':[1,2],
                                                'frames':[self.manifest_path,self.manifest_path]})
         self.assertEqual(len(result['frames']),2)
-        for frame in result['frames']:
-            self.assertGreater(len(frame['xs']),400)
-            self.assertLessEqual(len(frame['xs']),2000)
+        self.assertTrue(result['lazy_frames'])
+        self.backend._lock=__import__('threading').Lock()
+        self.backend._jobs={'fixture':{'status':'completed','manifest':{'kind':'scan','completed_values':[1,2],'frames':[self.manifest_path,self.manifest_path]}}}
+        for i in range(2):
+            frame=self.backend.get_result('fixture',frame=i)
+            self.assertEqual(len(frame['xs']),12001)
             self.assertIn(1e-12,frame['ys'])
             self.assertEqual(frame['series']['raw']['xs'],[650.,651.2,656.,660.])
 
