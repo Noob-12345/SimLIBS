@@ -135,7 +135,7 @@ class TrainingTests(unittest.TestCase):
             build_training_package(self.root/'result',manifest,lambda:True)
 
     def test_api_strict_batch_size_ranges_and_core_local_grid(self):
-        body={'params':{'te':1,'ne':1e17,'resolution':1000,'low_w':650,'up_w':660,'max_ion_charge':3,'mode':'static'},
+        body={'params':{'te':1,'ne':1e17,'resolution':1000,'low_w':650,'up_w':660,'max_ion_charge':2,'mode':'static'},
               'n_samples':3,'seed':42,'te_range':[1,1],'ne_range':[17,17],
               'compositions':[{'name':'H','items':[{'el':'H','pct':100}]}]}
         self.assertEqual(BatchRequest.from_api(body).batch_size,32)

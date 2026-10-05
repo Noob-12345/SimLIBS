@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import os
+from contextlib import contextmanager
 import re
 import uuid
 import numpy as np
@@ -173,3 +174,13 @@ def save_result(directory, frames, origin, preview_limit=1500):
 
 def read_manifest(path):
     return json.loads(Path(path).read_text(encoding='utf-8'))
+@contextmanager
+def diagnostic_scope(directory):
+    """Each dedicated worker sample/frame owns immutable transport diagnostics."""
+    previous=os.environ.get('SIMLIBS_TASK_DIR')
+    path=Path(directory).resolve();path.mkdir(parents=True,exist_ok=True)
+    os.environ['SIMLIBS_TASK_DIR']=str(path)
+    try:yield
+    finally:
+        if previous is None:os.environ.pop('SIMLIBS_TASK_DIR',None)
+        else:os.environ['SIMLIBS_TASK_DIR']=previous

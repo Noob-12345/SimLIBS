@@ -20,6 +20,9 @@ class BrowserCase(unittest.TestCase):
         cls.received = []
         cls.reply_status = None
         cls.reply_result = None
+        cls.params_reply=None;cls.get_paths=[]
+        from simlibs_ui.offline_database import capabilities
+        cls.local_capabilities=capabilities(Settings().line_database)
         class Handler(SimpleHTTPRequestHandler):
             def __init__(self,*args,**kwargs):
                 super().__init__(*args,directory=str(UI_ROOT/'web'/'static'),**kwargs)
@@ -29,8 +32,9 @@ class BrowserCase(unittest.TestCase):
                 self.send_response(status);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body)
             def do_GET(self):
                 path=self.path.split('?')[0]
+                cls.get_paths.append(self.path)
                 if path=='/api/status':return self.send_json({'engine':'simlibs','engine_label':'TEST offline','python':'3.10','nist_ok':False,'chrome':'TEST'})
-                if path=='/api/params':return self.send_json({'params':{'te':1.,'ne':1e17,'resolution':1000,'low_w':650,'up_w':660,'max_ion_charge':3,'mode':'static','headless':True,'resample':False},'composition':[{'el':'W','pct':50},{'el':'Fe','pct':25},{'el':'Mo','pct':25}]})
+                if path=='/api/params':return self.send_json(cls.params_reply or {'params':{'te':1.,'ne':1e17,'resolution':1000,'low_w':650,'up_w':660,'max_ion_charge':2,'mode':'client','mode_version':2,'headless':True,'resample':False},'composition':[{'el':'W','pct':50},{'el':'Fe','pct':25},{'el':'Mo','pct':25}],'local_capabilities':cls.local_capabilities})
                 if path=='/api/settings':return self.send_json({})
                 if path=='/api/jobs':return self.send_json({'jobs':[]})
                 if path=='/api/preview':return self.send_json({'error':{'message':'test: no synthetic scientific preview'}},501)
@@ -43,6 +47,14 @@ class BrowserCase(unittest.TestCase):
             def do_POST(self):
                 data=json.loads(self.rfile.read(int(self.headers.get('Content-Length','0'))))
                 cls.received.append((self.path,data))
+                if self.path=='/api/templates/validate':
+                    import sys
+                    sys.path.insert(0,str(UI_ROOT/'web'))
+                    from backend_api import BatchRequest,ApiError
+                    try:
+                        plan=BatchRequest.from_api(data).template_plan
+                        return self.send_json({k:v for k,v in plan.items() if k not in ('entries','source_csv')})
+                    except ApiError as error:return self.send_json({'error':{'message':str(error)}},400)
                 if cls.reply_status:return self.send_json({'job_id':'fixture'})
                 return self.send_json({'error':{'message':'offline test transport; no worker started'}},400)
         cls.server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
@@ -71,6 +83,7 @@ class BrowserCase(unittest.TestCase):
         type(self).received.clear();type(self).reply_status=None;type(self).reply_result=None
         self.driver.set_window_size(1366,768)
         self.driver.get(self.url)
+        self.js("themePreference={mode:'dark',preset:'violet'};applyTheme();")
         WebDriverWait(self.driver,10).until(lambda d:d.execute_script("return typeof state!=='undefined' && state.previewUnsupported"))
 
     def js(self,code,*args):

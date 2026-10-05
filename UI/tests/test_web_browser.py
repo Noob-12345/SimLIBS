@@ -115,15 +115,15 @@ class WebBrowserTests(BrowserCase):
         self.assertEqual(selector[0].get_attribute('value'),'photon')
         result={'kind':'single','xs':[650,655,660],'ys':[0,2,0],'yi':[],
                 'series':{'interpolated':{'xs':[650,655,660],'ys':[0,2,0]},'raw':{'xs':[650,655,660],'ys':[0,2,0]},'ions':[]},
-                'meta':{'intensity_scale':'photon','source':'offline transport fixture'}}
+                'meta':{'intensity_scale':'energy','source':'legacy offline transport fixture'}}
         self.js("renderSingleResult('previous',arguments[0]);",result)
-        self.js("document.querySelector('#intensityScale').value='energy';document.querySelector('#intensityScale').dispatchEvent(new Event('change'))")
-        self.assertEqual(self.js('return specData.meta.intensity_scale'),'photon')
-        self.assertIn('Photon',self.js('return intensityLabel(specData,false)'))
+        self.assertEqual(self.js("return Array.from(document.querySelector('#intensityScale').options).map(o=>o.value)"),['photon','energy'])
+        self.assertEqual(self.js('return specData.meta.intensity_scale'),'energy')
+        self.assertIn('Energy',self.js('return intensityLabel(specData,false)'))
         type(self).received.clear()
         self.driver.execute_async_script('const done=arguments[0];runSingle().then(done,done);')
-        self.assertEqual(type(self).received[-1][1]['params']['intensity_scale'],'energy')
-        self.assertEqual(self.js('return specData.meta.intensity_scale'),'photon','失败不能改旧尺度标签')
+        self.assertEqual(type(self).received[-1][1]['params']['intensity_scale'],'photon')
+        self.assertEqual(self.js('return specData.meta.intensity_scale'),'energy','失败不能改旧尺度标签')
 
     def test_sse_completed_failed_cancelled_keep_authoritative_scale(self):
         result={'kind':'single','xs':[650,655,660],'ys':[0,2,0],'yi':[],
@@ -162,6 +162,7 @@ class WebBrowserTests(BrowserCase):
         mouse('mouseReleased',rect['x']+rect['w']*.5,'right',0)
         self.assertIsNone(self.js('return specCanvas._view'))
         self.js("document.querySelector('#themeBtn').click()")
+        self.driver.find_element(By.CSS_SELECTOR,'[data-theme-mode=light]').click()
         self.assertEqual(self.js('return document.documentElement.dataset.theme'),'light')
         self.assertEqual(self.js('return specData.meta.intensity_scale'),'photon')
         self.driver.execute_cdp_cmd('Emulation.setDeviceMetricsOverride',{'width':1366,'height':768,'deviceScaleFactor':2,'mobile':False})

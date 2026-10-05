@@ -25,7 +25,7 @@ class FidelityTests(unittest.TestCase):
     def response(self,html=HTML):return Mock(text=html)
 
     def test_versioned_api_legacy_and_fixed_paths_and_three_operation_contracts(self):
-        base={'te':1,'ne':1e17,'resolution':1000,'low_w':650,'up_w':660,'max_ion_charge':3}
+        base={'te':1,'ne':1e17,'resolution':1000,'low_w':650,'up_w':660,'max_ion_charge':2}
         for mode in ('server','client'):
             p=CommonParams.from_api(dict(base,mode=mode,mode_version=2))
             self.assertEqual(p.broadening,'nist' if mode=='server' else 'local')
@@ -41,14 +41,14 @@ class FidelityTests(unittest.TestCase):
 
     def test_client_requests_preserve_ne_scale_threshold_and_never_launch_browser(self):
         getter=Mock(return_value=self.response())
-        p=self.p(Ne=1.23456789123456e17,intensity_scale='energy')
+        p=self.p(Ne=1.23456789123456e17,intensity_scale='photon')
         with patch('simlibs_ui.adapter.resolve_driver') as browser:
             frames,origin=client_simulate(p,Settings(),request_get=getter)
         browser.assert_not_called()
         query=parse_qs(urlsplit(getter.call_args.args[0]).query)
         self.assertEqual(query['eden'],[f'{p.Ne:.15g}'])
         self.assertEqual(query['min_rel_int'],['0.0'])
-        self.assertEqual(query['int_scale'],['1'])
+        self.assertEqual(query['int_scale'],['2'])
         self.assertEqual(len(frames['raw']),1001)
         self.assertEqual(origin['actual_resolution'],1000)
         self.assertEqual(origin['line_strength_location'],'NIST server')

@@ -63,10 +63,12 @@ class RealBackend:
     def _restore_session(self):
         """安全重启后保留已终结任务；只读本项目原有产物，不恢复活动进程。"""
         try:records=json.loads((self._settings_path.parent/'.web-session.json').read_text(encoding='utf-8')).get('jobs',[])
-        except (OSError,ValueError,AttributeError):return
+        except (OSError,ValueError,AttributeError):records=[]
         for record in reversed(records):
             jid=record.get('job_id','')
-            if not re.fullmatch('[0-9a-f]{32}',jid) or record.get('status') not in TERMINAL_STATUSES:continue
+            if not re.fullmatch('[0-9a-f]{32}',jid):continue
+            if record.get('status') not in TERMINAL_STATUSES:
+                record=dict(record,status='failed',error='服务中断；已完成checkpoint可手动续跑')
             path=Path(self._settings.output)/'.jobs'/jid/'result'/'manifest.json'
             manifest=None
             if record['status']=='completed':
@@ -74,6 +76,23 @@ class RealBackend:
                 except (OSError,ValueError):continue
             self._jobs[jid]=dict(record,manifest=manifest,result_path=str(path) if manifest else None,
                                  events=[],subs=[],controller=None,t0=time.monotonic())
+        for checkpoint in (Path(self._settings.output)/'.jobs').glob('*/result/checkpoint.json'):
+            jid=checkpoint.parents[1].name
+            if jid in self._jobs or not re.fullmatch('[0-9a-f]{32}',jid):continue
+            try:
+                cp=json.loads(checkpoint.read_text(encoding='utf-8'));m=json.loads((checkpoint.parent/'manifest.json').read_text(encoding='utf-8'))
+                status='completed' if cp.get('status')=='completed' and not m.get('partial') else 'failed'
+                self._jobs[jid]={'job_id':jid,'kind':'批量模拟','status':status,'summary':f'恢复checkpoint · {m["completed"]}/{m["requested"]}',
+                    'progress':m['completed']/m['requested']*100,'duration':'-','error':m.get('error') or ('服务中断；可手动续跑' if status=='failed' else None),
+                    'created':datetime.fromtimestamp(checkpoint.stat().st_mtime).strftime('%m-%d %H:%M'),'manifest':m if status=='completed' else None,
+                    'result_path':str(checkpoint.parent/'manifest.json'),'events':[],'subs':[],'controller':None,'t0':time.monotonic()}
+            except (OSError,ValueError,KeyError):continue
+
+    def _persist_session(self):
+        from simlibs_ui.storage import write_json
+        with self._lock:
+            records=[{key:job.get(key) for key in ('job_id','kind','status','summary','progress','duration','error','created','resume_from')} for job in reversed(list(self._jobs.values()))]
+        write_json(self._settings_path.parent/'.web-session.json',{'jobs':records})
 
     # ------------------------------------------------------------------
     # 设置
@@ -122,10 +141,15 @@ class RealBackend:
     def api_version(self) -> str:
         return '1'
 
-    def engine_status(self) -> Dict[str, Any]:
+    def engine_status(self, mode='local') -> Dict[str, Any]:
         with self._lock:
             running = sum(1 for j in self._jobs.values() if j['status'] in ('queued', 'running'))
         s = self._settings
+        if mode=='local':
+            from simlibs_ui.offline_database import capabilities
+            return {'engine':'simlibs','engine_label':'离线本地 · LTE/Saha','python':platform.python_version(),
+                    'nist':'本地模式：禁用网络探针','nist_ok':False,'chrome':'本地无需Chrome','jobs_running':running,
+                    'local':capabilities(s.line_database),'network_used':False}
         nist_ok, nist_label = self._probe_nist()
         try:
             from simlibs_ui.adapter import chrome_version
@@ -152,21 +176,23 @@ class RealBackend:
             return False, '不可达（检查网络/代理）'
 
     def default_params(self) -> Dict[str, Any]:
-        p = Parameters()   # H 窄波段（源 UI 已验证参数）
+        p = Parameters(elements=('Fe',),percentages=(100,),low_w=200,upper_w=500,max_ion_charge=2,broadening='local',broaden_convention='physics')
         return {
             'params': {
                 'te': p.Te, 'ne': p.Ne, 'resolution': p.resolution,
                 'low_w': p.low_w, 'up_w': p.upper_w, 'max_ion_charge': p.max_ion_charge,
-                'mode': 'server', 'mode_version':2, 'headless': p.headless, 'resample': p.resample,
+                'mode': 'local', 'mode_version':2, 'headless': p.headless, 'resample': p.resample,
                 'intensity_scale': p.intensity_scale,
                 'broadening': p.broadening, 'broaden_convention': p.broaden_convention,
                 'broaden_grid_step': .01,
                 'broaden_center_decimals': p.broaden_center_decimals,
                 'broaden_min_rel_int': p.broaden_min_rel_int,
+                'local_temperature_mode':'linked','local_temperature_K':0,
             },
             'composition': [{'el': e, 'pct': pct} for e, pct in zip(p.elements, p.percentages)],
             'element_symbols': sorted(ELEMENTS),
-            'title': 'H 100% · 已验证参数（真实引擎）',
+            'local_capabilities':self.engine_status('local')['local'],
+            'title': 'Fe 100% · 离线本地 LTE/Saha',
         }
 
     def preview(self, params: CommonParams, elements: List[str]) -> Dict[str, Any]:
@@ -193,10 +219,12 @@ class RealBackend:
             broaden_grid_step=params.broaden_grid_step,
             broaden_center_decimals=params.broaden_center_decimals,
             broaden_min_rel_int=params.broaden_min_rel_int,
+            local_gaussian_nm=params.local_gaussian_nm,local_lorentz_nm=params.local_lorentz_nm,local_temperature_K=params.local_temperature_K,local_temperature_mode=params.local_temperature_mode,
         )
 
     def start_single(self, req: SingleRequest) -> str:
         p = self._to_parameters(req.params, req.composition)
+        self._validate_local(p)
         payload = {'parameters': p.to_dict()}
         summary = (f"{req.params.summary()} · "
                    + " / ".join(f"{it.el} {it.pct:g}%" for it in req.composition))
@@ -218,11 +246,55 @@ class RealBackend:
             'Ne_min': 10 ** req.ne_range[0], 'Ne_max': 10 ** req.ne_range[1],
         }
         payload = {'parameters': p.to_dict(), 'spec': spec, 'compositions': rows}
+        if req.template_plan is not None:payload['template_plan']=req.template_plan
+        self.validate_batch(req)
         summary = f'{req.n_samples} 样本 · seed={req.seed} · {req.params.summary()}'
         return self._launch('批量模拟', 'batch', payload, summary)
 
+    def resume(self,job_id):
+        from simlibs_ui.batch_pipeline import load_checkpoint
+        with self._lock:
+            job=self._jobs.get(job_id)
+            if not job:raise ApiError(404,'原任务不存在','not_found')
+            if job['status'] not in TERMINAL_STATUSES:raise ApiError(409,'活动任务不能续跑','conflict')
+            active=self.__dict__.setdefault('_resume_active',{})
+            if job_id in active:raise ApiError(409,'该任务正在续跑','conflict')
+            active[job_id]=None
+        path=Path(self._settings.output)/'.jobs'/job_id/'result'/'checkpoint.json'
+        try:
+            if not path.is_file():raise ApiError(409,'旧任务没有确定计划/checkpoint，不能伪造恢复','no_checkpoint')
+            plan,records=load_checkpoint(path,self._settings)
+            if json.loads(path.read_text(encoding='utf-8')).get('status')=='completed':raise ApiError(409,'完整任务已成功，无需续跑','conflict')
+            jid=self._launch('批量模拟','resume',{'checkpoint_path':str(path)},f'续跑 {job_id} · 已完成{len(records)}/{len(plan["entries"])}')
+            with self._lock:
+                self._jobs[jid]['resume_from']=job_id
+                if self._jobs[jid]['status'] in TERMINAL_STATUSES:active.pop(job_id,None)
+                else:active[job_id]=jid
+            self._persist_session()
+            return jid
+        except Exception as error:
+            with self._lock:active.pop(job_id,None)
+            if isinstance(error,(ValueError,OSError,KeyError)):raise ApiError(409,f'checkpoint校验失败：{error}','checkpoint') from error
+            raise
+
+    def validate_batch(self,req):
+        if req.params.mode!='local':return
+        from simlibs_ui.offline_database import capabilities
+        report=capabilities(self._settings.line_database)
+        if req.template_plan:
+            for entry in req.template_plan['entries']:self._validate_local(Parameters.from_dict(entry['parameters']),report)
+        else:
+            for comp in req.compositions:self._validate_local(self._to_parameters(req.params,comp.items),report)
+
+    def _validate_local(self,p,report=None):
+        if p.webscraping!='local':return
+        from simlibs_ui.offline_database import preflight
+        try:preflight(p,self._settings.line_database,report)
+        except (OSError,ValueError,KeyError,TypeError) as error:raise ApiError(400,str(error),'validation') from error
+
     def start_scan(self, req: ScanRequest) -> str:
         p = self._to_parameters(req.params, req.composition)
+        self._validate_local(p)
         axis = AXIS_MAP[req.axis]
         # Web 契约的 Ne 轴以 10^ 指数表达；真实扫描使用绝对 Ne。
         start = 10 ** req.start if req.axis == 'ne' else req.start
@@ -251,6 +323,7 @@ class RealBackend:
         }
         with self._lock:
             self._jobs[job_id] = job
+        self._persist_session()
         self._emit(job_id, 'log', message=f'[worker] 已提交真实引擎（{worker_kind}）· 专属子进程 + Job Object', level='info')
         threading.Thread(target=self._poll_loop, args=(job_id,), daemon=True).start()
         return job_id
@@ -336,7 +409,7 @@ class RealBackend:
                                 f"合成网格 {params.get('grid_step')} nm · 约定 {params.get('convention')}"),
                        level='ok', progress=100)
         self._emit(job_id, 'log',
-                   message=f'[done] manifest 就绪 · {job["result_path"]}（来源证据与 Tk 桌面版同源）',
+                   message=f'[done] manifest 就绪 · {job["result_path"]}（完整来源证据）',
                    level='ok', progress=100)
         self._emit(job_id, 'progress', progress=100)
         self._finish(job_id, 'completed')
@@ -352,6 +425,11 @@ class RealBackend:
         if status == 'cancelled':
             self._emit(job_id, 'log', message='[ui] 已取消 · 保留上一次成功结果', level='warn')
         self._emit(job_id, 'status', status=status, final=True)
+        with self._lock:
+            active=self.__dict__.get('_resume_active',{})
+            for origin,child in list(active.items()):
+                if child==job_id:active.pop(origin,None)
+        self._persist_session()
 
     # ------------------------------------------------------------------
     # 查询 / 取消
@@ -374,8 +452,15 @@ class RealBackend:
         return list(reversed(jobs))
 
     def _job_view(self, job: Dict[str, Any]) -> Dict[str, Any]:
-        return {k: job.get(k) for k in
-                ('job_id', 'kind', 'status', 'summary', 'progress', 'duration', 'error', 'created')}
+        view={k:job.get(k) for k in ('job_id','kind','status','summary','progress','duration','error','created','resume_from')}
+        path=Path(self._settings.output)/'.jobs'/job['job_id']/'result'/'checkpoint.json'
+        if path.is_file():
+            try:
+                checkpoint=json.loads(path.read_text(encoding='utf-8'));plan=json.loads(Path(checkpoint['plan_path']).read_text(encoding='utf-8'))
+                view.update(resumable=job['status'] in TERMINAL_STATUSES and checkpoint.get('status')!='completed',completed_samples=len(checkpoint['samples']),total_samples=len(plan['entries']))
+            except (OSError,ValueError,KeyError):view.update(resumable=False,resume_reason='checkpoint/计划损坏，原结果保留')
+        else:view.update(resumable=False,resume_reason='无确定计划的旧任务仅保留已有结果')
+        return view
 
     def get_job(self, job_id: str) -> Dict[str, Any]:
         with self._lock:

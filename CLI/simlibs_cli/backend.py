@@ -126,7 +126,9 @@ class CliBackend:
     # 保峰抽样按设计直接报错。模拟本身成功、完整 CSV 都在，CLI 端回退为均匀抽样
     # 显示并在 meta 明确标注"显示抽样已降级"，弱峰可能未在预览中显示。
     # ------------------------------------------------------------------
-    def get_result(self, job_id: str) -> dict:
+    def get_result(self, job_id: str, frame: int | None = None) -> dict:
+        if frame is not None:
+            return self._inst.get_result(job_id, frame)   # 扫描懒帧：按帧取全量
         try:
             return self._inst.get_result(job_id)
         except ValueError as exc:

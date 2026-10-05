@@ -55,9 +55,9 @@ class TestQtApp(QtCase):
             w.go(pid)
             self.pump(lambda p=pid: w.stack.currentWidget() is w.pages[pid])
         w.toggle_theme()
-        self.pump(lambda: w.theme_name == 'plasma-light')
+        self.pump(lambda: w.theme_name.endswith('light'))
         w.toggle_theme()
-        self.pump(lambda: w.theme_name == 'plasma-dark')
+        self.pump(lambda: w.theme_name.endswith('dark'))
 
     def test_composition_validation_intercepts(self):
         w = self.win
@@ -106,6 +106,7 @@ class TestQtApp(QtCase):
         self.assertIsNone(w._batch_result)
         w.batch_use_current()
         self.assertEqual(len(w._batch_pool), 1)
+        w.s_resample.setChecked(True)   # 服务器模式 NIST 展宽批量须统一重采样（web 同规则）
         w.start_batch()
         self.pump(lambda: w._batch_result is not None, timeout_s=60)
         self.assertIn('批量完成', self.text_of(w.b_meta))

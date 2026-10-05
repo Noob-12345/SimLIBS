@@ -17,10 +17,11 @@ class WebAPITests(unittest.TestCase):
         self.assertEqual(backend_api.MAX_SINGLE_POINTS,200000)
 
     def test_flux_defaults_validation_and_three_operations_forwarding(self):
-        base={'te':1.,'ne':1e17,'resolution':1000,'low_w':650.,'up_w':660.,'max_ion_charge':3,'mode':'static'}
+        base={'te':1.,'ne':1e17,'resolution':1000,'low_w':650.,'up_w':660.,'max_ion_charge':2,'mode':'static'}
         self.assertEqual(getattr(backend_api.CommonParams.from_api(base),'intensity_scale',None),'photon')
         with self.assertRaises(backend_api.ApiError):backend_api.CommonParams.from_api(dict(base,intensity_scale='watts'))
         backend=RealBackend.__new__(RealBackend)
+        with self.assertRaises(backend_api.ApiError):backend_api.CommonParams.from_api(dict(base,max_ion_charge=3))
         for scale in ('photon','energy'):
             params=dict(base,intensity_scale=scale)
             body={'params':params,'composition':[{'el':'H','pct':100}]}
@@ -49,7 +50,8 @@ class WebAPITests(unittest.TestCase):
             self.assertIn('a.u.',result['meta']['intensity_units'])
         finally:fixture.temp.cleanup()
         backend=MockBackend.__new__(MockBackend);backend._jobs={'fixture':{'duration':'0s'}}
-        p=backend_api.CommonParams.from_api({'te':1,'ne':1e17,'resolution':1000,'low_w':650,'up_w':660,'max_ion_charge':3,'mode':'static','intensity_scale':'energy'})
+        # Read-only legacy fixture bypasses new-request parsing; its energy label remains unchanged.
+        p=backend_api.CommonParams(te=1,ne=1e17,resolution=1000,low_w=650,up_w=660,max_ion_charge=3,mode='static',intensity_scale='energy')
         result=backend._single_result('fixture',p,['H'])
         self.assertEqual(result['meta'].get('requested_intensity_scale'),'energy')
         self.assertEqual(result['meta'].get('intensity_scale'),'unknown')
@@ -60,7 +62,7 @@ class WebAPITests(unittest.TestCase):
         import math
         values=backend_api.scan_values(1e308,1.7e308,5)
         self.assertTrue(all(math.isfinite(v) for v in values))
-        params={'te':1,'ne':1e17,'resolution':1000,'low_w':650,'up_w':660,'max_ion_charge':3,'mode':'static'}
+        params={'te':1,'ne':1e17,'resolution':1000,'low_w':650,'up_w':660,'max_ion_charge':2,'mode':'static'}
         with self.assertRaises(backend_api.ApiError):
             backend_api.ScanRequest.from_api({'params':params,'axis':'ne','start':307,'end':310,'frames':2,'composition':[{'el':'H','pct':100}]})
 
@@ -78,7 +80,8 @@ class WebAPITests(unittest.TestCase):
             backend=RealBackend.__new__(RealBackend);backend._jobs={};backend._settings_path=root/'settings.json'
             backend._settings=replace(Settings(),output=str(root))
             backend._restore_session()
-            self.assertEqual(list(backend._jobs),[jid])
+            self.assertEqual(set(backend._jobs),{jid,'b'*32})
+            self.assertEqual(backend._jobs['b'*32]['status'],'failed')
             self.assertEqual(backend._jobs[jid]['status'],'completed')
             self.assertEqual(backend._jobs[jid]['manifest']['origin']['kind'],'history')
 

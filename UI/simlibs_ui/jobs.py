@@ -94,7 +94,7 @@ class JobController:
             if kind == 'batch':
                 from .storage import validate_compositions
                 import pandas as pd
-                BatchSpec(**payload['spec']).validated(p)
+                BatchSpec(**payload['spec']).validated(p,check_cells=payload.get('template_plan') is None)
                 validate_compositions(pd.DataFrame(payload['compositions']))
             elif kind == 'scan':
                 ScanSpec(**payload['spec']).validated(p)

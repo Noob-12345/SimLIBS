@@ -1,0 +1,662 @@
+{
+  "collected_at": "2026-10-04T18:04:38.007117+00:00",
+  "scope": "Plan-time source verification only; copy static values for offline runtime, do not ship downloader.",
+  "publisher": "Royal Society of Chemistry Periodic Table",
+  "conversion": "kJ/mol * 1000 / (SI Avogadro constant * joules per eV)",
+  "elements": {
+    "Al": {
+      "atomic_number": 13,
+      "atomic_mass_u": 26.982,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 577.539,
+          "eV": 5.985769933008
+        },
+        "2": {
+          "kJ_per_mol": 1816.679,
+          "eV": 18.82855103486871
+        },
+        "3": {
+          "kJ_per_mol": 2744.781,
+          "eV": 28.447650431384947
+        }
+      },
+      "first_ionization_eV": 5.985769933008,
+      "source_url": "https://periodic-table.rsc.org/element/13/",
+      "response_sha256": "13d747b558a7377b9cbf26148d7da1b88758aad5b3539c969ba1cfb8a5a70eba"
+    },
+    "Ca": {
+      "atomic_number": 20,
+      "atomic_mass_u": 40.078,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 589.83,
+          "eV": 6.1131571713531185
+        },
+        "2": {
+          "kJ_per_mol": 1145.447,
+          "eV": 11.87172158495654
+        },
+        "3": {
+          "kJ_per_mol": 4912.368,
+          "eV": 50.913106602793306
+        }
+      },
+      "first_ionization_eV": 6.1131571713531185,
+      "source_url": "https://periodic-table.rsc.org/element/20/",
+      "response_sha256": "51d862b1c870ba9381f25e4c63d69766bae1741d49afdfe5a7851d664fbcdfe6"
+    },
+    "Ce": {
+      "atomic_number": 58,
+      "atomic_mass_u": 140.116,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 534.403,
+          "eV": 5.538696797115475
+        },
+        "2": {
+          "kJ_per_mol": 1046.87,
+          "eV": 10.850042975051181
+        },
+        "3": {
+          "kJ_per_mol": 1948.811,
+          "eV": 20.198002713089945
+        }
+      },
+      "first_ionization_eV": 5.538696797115475,
+      "source_url": "https://periodic-table.rsc.org/element/58/",
+      "response_sha256": "ed7c537c8af2d0431b508fb1eb6a5187cf980dfcdf68db3045422fcf86ea6d95"
+    },
+    "Cr": {
+      "atomic_number": 24,
+      "atomic_mass_u": 51.996,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 652.869,
+          "eV": 6.76651036621423
+        },
+        "2": {
+          "kJ_per_mol": 1590.628,
+          "eV": 16.48569751480099
+        },
+        "3": {
+          "kJ_per_mol": 2987.19,
+          "eV": 30.960042674489806
+        }
+      },
+      "first_ionization_eV": 6.76651036621423,
+      "source_url": "https://periodic-table.rsc.org/element/24/",
+      "response_sha256": "dd729846aea0cc0355e6ad79413613ffdd65f8495dad7166e466536b54a1146e"
+    },
+    "Dy": {
+      "atomic_number": 66,
+      "atomic_mass_u": 162.5,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 573.017,
+          "eV": 5.938902705622382
+        },
+        "2": {
+          "kJ_per_mol": 1125.98,
+          "eV": 11.669960347558083
+        },
+        "3": {
+          "kJ_per_mol": 2199.9,
+          "eV": 22.800356816811156
+        }
+      },
+      "first_ionization_eV": 5.938902705622382,
+      "source_url": "https://periodic-table.rsc.org/element/66/",
+      "response_sha256": "0c56fc983819197358bf7f3597069c92bd802b22304ce45829653383991ee345"
+    },
+    "Eu": {
+      "atomic_number": 63,
+      "atomic_mass_u": 151.964,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 547.109,
+          "eV": 5.670385207367942
+        },
+        "2": {
+          "kJ_per_mol": 1085.46,
+          "eV": 11.250000141086339
+        },
+        "3": {
+          "kJ_per_mol": 2404.41,
+          "eV": 24.919953604213333
+        }
+      },
+      "first_ionization_eV": 5.670385207367942,
+      "source_url": "https://periodic-table.rsc.org/element/63/",
+      "response_sha256": "958dd4e91ca2b50beffa26a2d3218f69c2d5bbf59ddb26096b495ac54bc911cf"
+    },
+    "Fe": {
+      "atomic_number": 26,
+      "atomic_mass_u": 55.845,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 762.466,
+          "eV": 7.902403227731595
+        },
+        "2": {
+          "kJ_per_mol": 1561.876,
+          "eV": 16.18770403364414
+        },
+        "3": {
+          "kJ_per_mol": 2957.469,
+          "eV": 30.652006216036035
+        }
+      },
+      "first_ionization_eV": 7.902403227731595,
+      "source_url": "https://periodic-table.rsc.org/element/26/",
+      "response_sha256": "51d2d12fd58c037e223113b5b537510e164e4d22bf607ff1d2ed9cf89de7ffbb"
+    },
+    "Gd": {
+      "atomic_number": 64,
+      "atomic_mass_u": 157.25,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 593.366,
+          "eV": 6.1498052288576615
+        },
+        "2": {
+          "kJ_per_mol": 1166.51,
+          "eV": 12.09002419672639
+        },
+        "3": {
+          "kJ_per_mol": 1990.49,
+          "eV": 20.629975108093294
+        }
+      },
+      "first_ionization_eV": 6.1498052288576615,
+      "source_url": "https://periodic-table.rsc.org/element/64/",
+      "response_sha256": "ea411e3fdcdea9369dce7afb92de8a787d6110c1c72fc57de362f3d0c63f0975"
+    },
+    "Ho": {
+      "atomic_number": 67,
+      "atomic_mass_u": 164.93,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 580.987,
+          "eV": 6.021505934782792
+        },
+        "2": {
+          "kJ_per_mol": 1138.5,
+          "eV": 11.799721003654485
+        },
+        "3": {
+          "kJ_per_mol": 2203.73,
+          "eV": 22.84005196959464
+        }
+      },
+      "first_ionization_eV": 6.021505934782792,
+      "source_url": "https://periodic-table.rsc.org/element/67/",
+      "response_sha256": "02e6c1cb7c62be1a27eb237dc08ef63d2aaa6318147e0a2ec1274cad591789da"
+    },
+    "K": {
+      "atomic_number": 19,
+      "atomic_mass_u": 39.098,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 418.81,
+          "eV": 4.340659774739161
+        },
+        "2": {
+          "kJ_per_mol": 3051.83,
+          "eV": 31.629989065070593
+        },
+        "3": {
+          "kJ_per_mol": 4419.607,
+          "eV": 45.8059987227039
+        }
+      },
+      "first_ionization_eV": 4.340659774739161,
+      "source_url": "https://periodic-table.rsc.org/element/19/",
+      "response_sha256": "89f217abed78ac5360bdba467ab93f0c9b15f7f2bf0b46e33b32dcf450b597a2"
+    },
+    "La": {
+      "atomic_number": 57,
+      "atomic_mass_u": 138.905,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 538.089,
+          "eV": 5.576899495068457
+        },
+        "2": {
+          "kJ_per_mol": 1067.031,
+          "eV": 11.058997015591084
+        },
+        "3": {
+          "kJ_per_mol": 1850.328,
+          "eV": 19.177298344532275
+        }
+      },
+      "first_ionization_eV": 5.576899495068457,
+      "source_url": "https://periodic-table.rsc.org/element/57/",
+      "response_sha256": "09360972be82fdbe132791079a72ed49e1b1da3d5b64f81a34c78eff80aee905"
+    },
+    "Li": {
+      "atomic_number": 3,
+      "atomic_mass_u": 6.94,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 520.222,
+          "eV": 5.391721089120021
+        },
+        "2": {
+          "kJ_per_mol": 7298.15,
+          "eV": 75.63999459184978
+        },
+        "3": {
+          "kJ_per_mol": 11815.044,
+          "eV": 122.45430201660247
+        }
+      },
+      "first_ionization_eV": 5.391721089120021,
+      "source_url": "https://periodic-table.rsc.org/element/3/",
+      "response_sha256": "e069d791afeb475fb17dc93ea21dc80e0ca5c87f1e79f2325e3ded76d81df397"
+    },
+    "Lu": {
+      "atomic_number": 71,
+      "atomic_mass_u": 174.967,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 523.516,
+          "eV": 5.425860993367748
+        },
+        "2": {
+          "kJ_per_mol": 1341.1,
+          "eV": 13.899522036013202
+        },
+        "3": {
+          "kJ_per_mol": 2022.275,
+          "eV": 20.95940341911759
+        }
+      },
+      "first_ionization_eV": 5.425860993367748,
+      "source_url": "https://periodic-table.rsc.org/element/71/",
+      "response_sha256": "74afefa6e4ef89565afcfb170dd87f0e85e2c32834e0b2659c2f838282f785d6"
+    },
+    "Mg": {
+      "atomic_number": 12,
+      "atomic_mass_u": 24.305,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 737.75,
+          "eV": 7.646239938907419
+        },
+        "2": {
+          "kJ_per_mol": 1450.683,
+          "eV": 15.03526979775538
+        },
+        "3": {
+          "kJ_per_mol": 7732.692,
+          "eV": 80.14370505682126
+        }
+      },
+      "first_ionization_eV": 7.646239938907419,
+      "source_url": "https://periodic-table.rsc.org/element/12/",
+      "response_sha256": "53280a1bd8658a213e8ed816098432a3b49ed6354d359e7f1ce2ca9e3ae7d715"
+    },
+    "Mo": {
+      "atomic_number": 42,
+      "atomic_mass_u": 95.95,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 684.316,
+          "eV": 7.092435554094706
+        },
+        "2": {
+          "kJ_per_mol": 1559.2,
+          "eV": 16.159969248043982
+        },
+        "3": {
+          "kJ_per_mol": 2617.65,
+          "eV": 27.13003046571468
+        }
+      },
+      "first_ionization_eV": 7.092435554094706,
+      "source_url": "https://periodic-table.rsc.org/element/42/",
+      "response_sha256": "a4cc3825d23b4f1ec5e01b633d45585595502124dea32fe93246aa87ceeeba74"
+    },
+    "Na": {
+      "atomic_number": 11,
+      "atomic_mass_u": 22.99,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 495.845,
+          "eV": 5.139071287709318
+        },
+        "2": {
+          "kJ_per_mol": 4562.444,
+          "eV": 47.28639990759542
+        },
+        "3": {
+          "kJ_per_mol": 6910.28,
+          "eV": 71.62000532027538
+        }
+      },
+      "first_ionization_eV": 5.139071287709318,
+      "source_url": "https://periodic-table.rsc.org/element/11/",
+      "response_sha256": "1a846de0d1f12cf8790c0560293af73ec3e26f671e820210479e6059468b3837"
+    },
+    "Nd": {
+      "atomic_number": 60,
+      "atomic_mass_u": 144.242,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 533.082,
+          "eV": 5.525005596899552
+        },
+        "2": {
+          "kJ_per_mol": 1034.32,
+          "eV": 10.71997139086509
+        },
+        "3": {
+          "kJ_per_mol": 2132.3,
+          "eV": 22.099732188047835
+        }
+      },
+      "first_ionization_eV": 5.525005596899552,
+      "source_url": "https://periodic-table.rsc.org/element/60/",
+      "response_sha256": "34643edf9e01ef3b8bd00a92c5f9716f9aace3c30b352b4696ae5e2c71df5e6c"
+    },
+    "Ni": {
+      "atomic_number": 28,
+      "atomic_mass_u": 58.693,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 737.129,
+          "eV": 7.6398037274508805
+        },
+        "2": {
+          "kJ_per_mol": 1753.027,
+          "eV": 18.16884454270831
+        },
+        "3": {
+          "kJ_per_mol": 3395.32,
+          "eV": 35.19001204930009
+        }
+      },
+      "first_ionization_eV": 7.6398037274508805,
+      "source_url": "https://periodic-table.rsc.org/element/28/",
+      "response_sha256": "1237efb03c85c1f076e8b98058ab9005630b1ba07cd3f24b1867f8dfc65bbe54"
+    },
+    "Pb": {
+      "atomic_number": 82,
+      "atomic_mass_u": 207.2,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 715.596,
+          "eV": 7.4166299089425864
+        },
+        "2": {
+          "kJ_per_mol": 1450.414,
+          "eV": 15.032481809217845
+        },
+        "3": {
+          "kJ_per_mol": 3081.481,
+          "eV": 31.937300024648422
+        }
+      },
+      "first_ionization_eV": 7.4166299089425864,
+      "source_url": "https://periodic-table.rsc.org/element/82/",
+      "response_sha256": "275560abb37bd4bf61989d9b79e7106fef8da5d6c0bd45ae0b925c42eb5767e8"
+    },
+    "Si": {
+      "atomic_number": 14,
+      "atomic_mass_u": 28.085,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 786.518,
+          "eV": 8.151684641504012
+        },
+        "2": {
+          "kJ_per_mol": 1577.134,
+          "eV": 16.34584206005939
+        },
+        "3": {
+          "kJ_per_mol": 3231.585,
+          "eV": 33.493018357132
+        }
+      },
+      "first_ionization_eV": 8.151684641504012,
+      "source_url": "https://periodic-table.rsc.org/element/14/",
+      "response_sha256": "f696622ccb571c1650b7159f49847d57b408ed60f5646670d14f5a29f1d565ec"
+    },
+    "Sm": {
+      "atomic_number": 62,
+      "atomic_mass_u": 150.36,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 544.534,
+          "eV": 5.643697213003067
+        },
+        "2": {
+          "kJ_per_mol": 1068.09,
+          "eV": 11.069972777157066
+        },
+        "3": {
+          "kJ_per_mol": 2257.8,
+          "eV": 23.400448029908738
+        }
+      },
+      "first_ionization_eV": 5.643697213003067,
+      "source_url": "https://periodic-table.rsc.org/element/62/",
+      "response_sha256": "98bfae02926a70f611de306e5694537e581320aca9a47d9559aefbcde66259fb"
+    },
+    "Tb": {
+      "atomic_number": 65,
+      "atomic_mass_u": 158.925,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 565.771,
+          "eV": 5.863803207693107
+        },
+        "2": {
+          "kJ_per_mol": 1111.51,
+          "eV": 11.51998936563197
+        },
+        "3": {
+          "kJ_per_mol": 2113.99,
+          "eV": 21.909962410641675
+        }
+      },
+      "first_ionization_eV": 5.863803207693107,
+      "source_url": "https://periodic-table.rsc.org/element/65/",
+      "response_sha256": "0706701bc9df64b7bfd86d7f57b241bccd77f76dfe68c38748c4f0eef51d8652"
+    },
+    "Ti": {
+      "atomic_number": 22,
+      "atomic_mass_u": 47.867,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 658.813,
+          "eV": 6.8281155850510515
+        },
+        "2": {
+          "kJ_per_mol": 1309.837,
+          "eV": 13.575503873749478
+        },
+        "3": {
+          "kJ_per_mol": 2652.546,
+          "eV": 27.491702019639604
+        }
+      },
+      "first_ionization_eV": 6.8281155850510515,
+      "source_url": "https://periodic-table.rsc.org/element/22/",
+      "response_sha256": "f589cde9359f4cc83bfc5d6aad97397d513f1337462c14afd0dbe2d5288976a7"
+    },
+    "Y": {
+      "atomic_number": 39,
+      "atomic_mass_u": 88.906,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 599.878,
+          "eV": 6.217297352859241
+        },
+        "2": {
+          "kJ_per_mol": 1179.437,
+          "eV": 12.22400311057289
+        },
+        "3": {
+          "kJ_per_mol": 1979.88,
+          "eV": 20.520010207040354
+        }
+      },
+      "first_ionization_eV": 6.217297352859241,
+      "source_url": "https://periodic-table.rsc.org/element/39/",
+      "response_sha256": "d42678f31cdc3dbe20e8daea7d828074eb38ac32dfddb6a198b3f4aa84a273fe"
+    },
+    "Yb": {
+      "atomic_number": 70,
+      "atomic_mass_u": 173.045,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 603.435,
+          "eV": 6.254163060026565
+        },
+        "2": {
+          "kJ_per_mol": 1174.805,
+          "eV": 12.175995813525084
+        },
+        "3": {
+          "kJ_per_mol": 2416.96,
+          "eV": 25.050025188399424
+        }
+      },
+      "first_ionization_eV": 6.254163060026565,
+      "source_url": "https://periodic-table.rsc.org/element/70/",
+      "response_sha256": "3b6098298f76294ecb3bbd7aba9f69e9ac0fa8e0565f56e7aa02a59985bae66a"
+    },
+    "Zn": {
+      "atomic_number": 30,
+      "atomic_mass_u": 65.38,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 906.402,
+          "eV": 9.394194744975348
+        },
+        "2": {
+          "kJ_per_mol": 1733.3,
+          "eV": 17.964388595199228
+        },
+        "3": {
+          "kJ_per_mol": 3832.687,
+          "eV": 39.72300157605051
+        }
+      },
+      "first_ionization_eV": 9.394194744975348,
+      "source_url": "https://periodic-table.rsc.org/element/30/",
+      "response_sha256": "a9388ae16a7e28f0cdd2d51f5ef6e977a014fd58cc34732b6d0ace7d929b8609"
+    },
+    "Cu": {
+      "atomic_number": 29,
+      "atomic_mass_u": 63.546,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 745.482,
+          "eV": 7.726376471889639
+        },
+        "2": {
+          "kJ_per_mol": 1957.919,
+          "eV": 20.29240048111918
+        },
+        "3": {
+          "kJ_per_mol": 3554.616,
+          "eV": 36.840998748464024
+        }
+      },
+      "first_ionization_eV": 7.726376471889639,
+      "source_url": "https://periodic-table.rsc.org/element/29/copper",
+      "response_sha256": "503c99821f78ef9202e050d39080529f41eed04034304870485cb747236831aa"
+    },
+    "Er": {
+      "atomic_number": 68,
+      "atomic_mass_u": 167.259,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 589.304,
+          "eV": 6.107705565513925
+        },
+        "2": {
+          "kJ_per_mol": 1151.07,
+          "eV": 11.929999873233701
+        },
+        "3": {
+          "kJ_per_mol": 2194.08,
+          "eV": 22.740036767411713
+        }
+      },
+      "first_ionization_eV": 6.107705565513925,
+      "source_url": "https://periodic-table.rsc.org/element/68/erbium",
+      "response_sha256": "3ae3885466be795ccccddadcd0358dd7e64fb9a958c5b0395fb6ef904943397f"
+    },
+    "Pr": {
+      "atomic_number": 59,
+      "atomic_mass_u": 140.908,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 528.064,
+          "eV": 5.472997691764429
+        },
+        "2": {
+          "kJ_per_mol": 1017.92,
+          "eV": 10.549997368502392
+        },
+        "3": {
+          "kJ_per_mol": 2086.399,
+          "eV": 21.624001846555743
+        }
+      },
+      "first_ionization_eV": 5.472997691764429,
+      "source_url": "https://periodic-table.rsc.org/element/59/praseodymium",
+      "response_sha256": "6af630a7d22adcf530de145310610eb5fa80d7940cda569b7ea3049709202c53"
+    },
+    "Tm": {
+      "atomic_number": 69,
+      "atomic_mass_u": 168.934,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 596.695,
+          "eV": 6.184307882543358
+        },
+        "2": {
+          "kJ_per_mol": 1162.65,
+          "eV": 12.050018115853216
+        },
+        "3": {
+          "kJ_per_mol": 2284.77,
+          "eV": 23.67997238253813
+        }
+      },
+      "first_ionization_eV": 6.184307882543358,
+      "source_url": "https://periodic-table.rsc.org/element/69/thulium",
+      "response_sha256": "131b86b367db09a1dae91eefe6521dc5c6480e516050a3cf67fbd8c70ef6a6a6"
+    },
+    "Mn": {
+      "atomic_number": 25,
+      "atomic_mass_u": 54.938,
+      "ionization_energies": {
+        "1": {
+          "kJ_per_mol": 717.274,
+          "eV": 7.434021153425795
+        },
+        "2": {
+          "kJ_per_mol": 1509.03,
+          "eV": 15.639993839389309
+        },
+        "3": {
+          "kJ_per_mol": 3248.468,
+          "eV": 33.66799832173867
+        }
+      },
+      "first_ionization_eV": 7.434021153425795,
+      "source_url": "https://periodic-table.rsc.org/element/25/",
+      "response_sha256": "68351d3c5998e52aaefe641fda6d7f191842e082fbbe9bbcc69687a236ea464d"
+    }
+  },
+  "errors": {},
+  "reference_file_sha256": "c9c1d5540b5f69e95533e88c6c9851b0d51581aea7365e20ca54ffb4dbb32307",
+  "runtime": "static offline values; no downloader"
+}

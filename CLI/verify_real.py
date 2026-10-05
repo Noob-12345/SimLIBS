@@ -73,19 +73,15 @@ def run_verification(output: Path, wfe_mo: bool) -> dict:
                           'report': str(out / 'verify-real.json')}, ensure_ascii=False), flush=True)
         return report
 
-    # 参数：static + 本地展宽（不启动浏览器）
+    # 参数：本地模拟（离线，确定性，不依赖 NIST）
     pump(0.6)
     win.s_mode.setCurrentIndex(0)
-    win.s_broad.setCurrentIndex(1)
-    win.s_conv.setCurrentIndex(0)
     if wfe_mo:
         win.preset_wfm()
-        win.s_low.setText('200')
-        win.s_up.setText('1000')
-        label = 'W/Fe/Mo 200–1000nm · static+local'
+        label = 'W/Fe/Mo 200–700nm · local 离线'
     else:
         win.preset_h()
-        label = 'H 650–660nm · static+local'
+        label = 'Fe 100% 200–700nm · local 离线'
     pump(0.4)
     report['steps'].append({'step': 'params', 'label': label})
 
@@ -113,7 +109,8 @@ def run_verification(output: Path, wfe_mo: bool) -> dict:
         'chart_rendered': len(win.s_chart._series) >= 1,
         'meta_source': bool(meta.get('source')),
         'sha256': bool(meta.get('sha256')),
-        'nist_url': bool(origin.get('nist_url') or meta.get('nist_url')),
+        'mode_local': (origin.get('mode') or meta.get('mode')) == 'local',
+        'photon_only': (origin.get('parameters') or {}).get('intensity_scale') == 'photon',
         'broadening_local': meta.get('broadening') == 'local',
     }
     report['steps'].append({'step': 'run', 'ok': all(checks.values()), 'elapsed': round(elapsed, 1),

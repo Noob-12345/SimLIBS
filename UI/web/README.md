@@ -1,14 +1,30 @@
-# simLIBS Web UI（前端 + 接口层）
+# SimLIBS · SPECTRUM WORKBENCH FOR SCNU
 
-按 `../design/DESIGN.md` 设计稿实现的可运行网页前端。项目根据组成及等离子体参数生成真实 NIST LIBS 光谱、批量训练数据和参数扫描；前端数据经 `/api/*`，任务进度经 SSE 实时推送，由 `simlibs_ui` 共享计算后台和专属 worker 执行。
+项目根据组成及等离子体参数生成真实离线/NIST LIBS 光谱、训练数据和参数扫描；前端数据经本机 `/api/*`，进度经SSE推送，由共享Python后台和专属worker执行。
 
 ## 元素选择与参数输入
 
 输入 `f` 可从候选中点击选择 `Fe`，也支持上下键、Enter、Esc；候选使用规范大小写并排除其他行已使用的元素。可编辑最多 32 个元素，支持完整参考 28 元素组成。`fe`/`FE` 仍在失焦或提交时规范化，重复/无效元素和无效占比草稿阻止提交。
 
-Te [eV]、实际 Ne [cm⁻³]（如 `1.23e17`）、整数 R 支持直接输入与滑块双向同步；合法数字不受滑块初始范围限制，空值、非正数、非有限数和小数 R 会提示并拒绝。Ne 默认/预设/滑块显示使用科学计数，编辑草稿保留到失焦。新界面明确发送 `mode_version=2` 和 `server/client`，固定处理路径；本地插值是显式选项，并有独立目标步长。
+Te [eV]、实际Ne [cm⁻³]（如1.23e17）、整数R支持直接输入与滑块双向同步，合法数字可超出滑块初始范围。空值/非正/非有限/小数R拒绝，Ne草稿保留至失焦，自动赋值科学计数。新界面发送mode_version=2和local/server/client，处理路径固定；插值有显式独立步长，批量使用批量页自己的步长。
 
-## 新版两路径、完整节点和元素贡献
+## 真正离线 local v2
+
+默认Fe100%，仅读取../Linedatabase的62个CSV/31种元素及simlibs-atomic-metadata.json，无HTTP/TCP状态探针，无Chrome，缺库元素拒绝且不向NIST回退。解析真实成对上下能级，识别普通头/单位头/Unnamed真实列及空行，不固定跳两行；Å转nm，Aki的10^8/s转s^-1，cm^-1乘hc/e转eV。缺Aki排除并记录文件/行/原因；可用能级按(能量,g)去重用于有限分区函数。
+
+使用U=Σg·exp(-E/Te)、I↔II Saha（Ne从cm^-3转m^-3），线面积为原子比例×态分数×g_upper/U×exp(-E_upper/Te)×Aki，不乘光子能量、不用原Intensity排名。静态原子质量和第一至第三电离能核对Royal Society of Chemistry，各元素URL/响应SHA保存在独立JSON；runtime没有下载器。[LTE/Saha教材依据](https://www.astro.uvic.ca/~tatum/stellatm/atm8.pdf)。这是光学薄、有限已知I/II能级的相对光子近似，态分数在I/II归一；max_charge过滤可用发射态，不制造缺失III。缺绝对标定、Stark系数与完整高态库，来源和UI明确覆盖局限。
+
+仪器Gaussian FWHM=λ/R，额外高斯按平方和，洛伦兹FWHM可调，面积归一Voigt。热Doppler由发光原子/离子的平动温度T_h决定：FWHM=λ·sqrt(8k_B T_h ln2/(mc²))，[Tatum热展宽10.3](https://www.astro.uvic.ca/~tatum/stellatm/atm10.pdf)。新UI明确发送local_temperature_mode=linked，在单温度LTE假设下T_h=Te[eV]·e/k_B；这不是普遍相等的结论。manual可独立输入K，0关闭；旧无该字段的请求/配置仍按manual处理。来源记录模式、有效K和每线thermal FWHM，旧结果不重写。模板T_h[K]覆盖自动选择manual，若同时指定doppler_mode=linked则明确拒绝冲突。全部已知有效线在目标网格评估，Gaussian截断8sigma以外，Voigt/Lorentz保留跨边界翼；所有通道共用实际网格与插值。
+
+## 批量 checkpoint 与续跑
+
+启动前按实际Settings.line_database预检每个正含量元素：可读有效成对谱线、I/II必要能级、有限正原子质量/第一电离能及HTTPS来源/响应SHA。单次、独立组成批量、模板实际行和扫描一致；缺失/损坏返回400且不启动worker，零含量缺库元素保留。目录缺失/空库/部分损坏仍可读取params/status并显示原因；自动补全只列真正可用元素，空列表不会放行整个周期表，可用Fe不受无关元素损坏文件阻挡。
+
+执行前保存plan.json（全部确定样本、种子、原模板、顺序/重复、实际参数、算法和库哈希）；每完成一条即原子保存checkpoint.json、CSV和样本来源。每个sample/frame拥有独立线表/HTML/官方JS/CSV诊断目录。失败/取消保留已完成样本，完整ZIP仅成功时发布，文件继承正常输出权限。
+
+任务记录点击“续跑”创建新任务：校验计划、算法/库版本、实际参数与全部已完成文件哈希，从第一条未完成样本继续；已完成样本引用原目录，不覆盖原任务。再次失败仍保留进度，全部样本完成但打包失败时只打包。禁止带新参数/模板续跑及同任务并发续跑。服务中断时恢复终态和磁盘checkpoint，运行中任务标记中断、可手动续跑；旧无确定计划任务仅保留已有结果，不伪造重算进度。
+
+## 在线两路径、完整节点和元素贡献
 
 “服务器计算”使用 NIST 页面数据，在独立 Chrome 中执行官方 JavaScript Recalculate，再读取其 CSV；这是用户定义的模式名，实际 JS 执行位置明确记为浏览器。记录请求 R、初始服务器 R、官方函数返回的重算有效 R 与内存警告，以及实际加载的官方 HTML/JS 响应哈希。有效 R 不从重算前 HTML或输入框推测。隔离浏览器可沿用当前 HTTP(S)_PROXY 环境的无认证代理，未修改全局代理或 TLS 校验。官方 JS 要求 R≥100。
 
@@ -22,7 +38,7 @@ Web 不再做单次6000/扫描2000显示抽样，raw/interpolated 各自传递�
 
 ## 批量模拟与训练 ZIP
 
-使用单次页的共同参数和当前元素配比，在“批量模拟”填写样本总数与每个 batch 的光谱数（默认 32，均为 1–5000 的整数）。Te/Ne 范围允许相等以固定值生成；Ne 范围仍以 10 的指数输入。界面显示预计包数和末包数量，余数样本保留，batch_size 大于总数时只产生一包。当前入口从所填组成池随机选行并均匀采样 Te/Ne，不自动生成新的随机组成。
+“批量模拟”有独立local/server/client、Te/实际Ne/R/波段/合成步长/按需插值/离子/通量/离线宽度与温度模式及组成，不读取单次草稿。插值未选时label/input隐藏并忽略旧草稿；服务器批量需明确勾选统一网格。样本与每包均1–5000整数、余数保留，B>N只一包。无模板保留组成池随机选行和均匀Te/Ne，有模板严格行优先/行内重复。裸Ne、Te为元素；参数列Te[eV]、Ne[cm^-3]、R、low_w[nm]、upper_w[nm]、grid_step[nm]、max_ion_charge、T_h[K]、doppler_mode、intensity_scale。*_at%、name/samples有效，空值/非有限/非100%拒绝，网格不一致拒绝打包。上传文件名独立省略显示且title完整，实际文件选择、替换、校验和清除保留。
 
 成功后“下载训练数据包 ZIP”启用，重复下载复用已生成产物。每包 `Random_spectra.csv` 无表头、无索引，每条谱按完整波长行和强度行交替写两行；配对 `Random_contents.csv` 只有一行元素表头及逐样本原子百分比，不含 name/Te/Ne。第 2、3 包分别命名 `Random_spectra_2.csv` / `Random_contents_2.csv`、`_3` 等。标签按参考 28 元素顺序 Si, Al, Fe, Ca, K, Na, Mg, Cr, Cu, Mn, Zn, Ti, Ni, Mo, C, Li, Pb, Y, Eu, Lu, Er, Ho, Yb, La, Tm, Tb, Sm, Pr；未出现者填 0，H/W 等额外元素稳定追加，保留实际标签。
 
@@ -32,11 +48,11 @@ CSV 使用每个样本实际保存的全量 interpolated 光谱，保持统一�
 
 ## 当前状态：已接入真实引擎
 
-当前支持完整 CSV 节点显示、按帧扫描、真实元素贡献、两条版本化计算路径，以及元素补全、配比余额和训练 ZIP。黑红/亮主题与三键交互保留，显示不改变物理 R 或原数据。
+当前支持完整CSV节点、按帧扫描、真实元素贡献、三条v2计算路径、元素补全、配比余额和训练ZIP。主题图标打开五种固定页面缩略卡，每卡展示日/夜侧栏、卡片、按钮、谱线；点击、方向键、Enter/Space可选，选中状态和偏好持久化，无自定义色输入。太阳/月亮/显示器按钮打开日间/夜间/跟系统菜单，支持方向键、Esc、外点关闭，system响应系统变化，manual保持选择，Canvas同步重绘。图标为原graduation.jpg副本；GitHub SVG链接保留访问性及真实仓库地址。原三键交互保留，显示不改变物理R或原数据；参考dashboard登录前不可见，未复制其未见布局。
 
 配比最后一项始终为100减前项和；编辑末项超额会纠正并提示，前项超额在末项归零后仅限制本次编辑前项，其他项不缩放。编辑文字保留到失焦，空/负/NaN/Inf草稿明确拒绝，不转0、不提交；新增/删除/单元素/小数按余额规则处理。API仍严格验证100%。FE/fe在失焦/提交规范为Fe，无效和重复符号阻止请求。
 
-强度默认Photon flux，沿用原库 `int_scale=2`；Energy flux通过UI子类真实NIST URL `int_scale=1`，不事后乘谱、不仅换标签。单次/批量/扫描参数、JSON来源及PNG/GIF轴均保留实际尺度，以相对 `a.u.` 表示，无绝对标定承诺。选择器改变只作用于下一次运行；旧成功图/标签不会被替换，直到新结果成功。历史未知尺度明确unknown；旧已记录NIST URL可以准确识别旧photon。MOCK只合成示意，不提供真实通量转换，实际尺度unknown、另记请求尺度。
+在线server/client和旧在线模式支持Photon flux(int_scale=2)/Energy flux(int_scale=1)，两项来自实际NIST请求，不事后乘总谱。单次/批量/扫描/模板/训练包及PNG/GIF来源保留实际尺度。local仅相对光子且隐藏NIST选择；client只读NIST dataSticksArray，用户本地库预检不应用到client。最大电荷0–2，旧energy/max3数据只读不重标。正常离线页面省去库声明/阶段长列表，错误保留具体红色预检；成功配比只显示绿色100%✓，无组成预设，后台抓取字段内部仍headless。历史未知尺度unknown，MOCK明确示意。
 
 科学依据：[NIST LIBS输入表](https://physics.nist.gov/PhysRefData/ASD/LIBS/libs-form.html)、[官方LIBS帮助](https://physics.nist.gov/PhysRefData/ASD/Html/libshelp.html)。NIST 阈值可能省略线；完整节点显示不会再丢掉已返回的弱峰，也不会制造未返回的线。
 
@@ -74,11 +90,13 @@ E:\Anaconda\envs\simLIBS\python.exe -B server.py
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/api/status` | 引擎状态（NIST TCP 探测、Chrome 检测、Python、运行中任务数） |
+| GET | `/api/status[?mode=local]` | 默认离线能力、0网络；明确server/client时才探测NIST状态 |
 | GET | `/api/params` | 界面初始参数与默认配比（来自 `models.Parameters()` 已验证参数） |
 | GET | `/api/preview?…` | 图表预览：真实引擎返回 501（前端降级为标注的本地示意） |
 | POST | `/api/simulate/single` | 单次模拟 `{params, composition, title}` → `{job_id}` |
 | POST | `/api/simulate/batch` | 批量 `{params, n_samples, batch_size=32, seed, te_range, ne_range, compositions}` |
+| POST | `/api/templates/validate` | `{params, template_csv, repeats=1, name_column=name}` → 行数/元素/计划数，完整校验 |
+| POST | `/api/jobs/{id}/resume` | 空对象；终态checkpoint创建新任务，拒绝新参数、篡改/变更版本、活动并发 |
 | POST | `/api/simulate/scan` | 扫描 `{params, axis, start, end, frames, composition}` |
 | GET | `/api/jobs` · `/api/jobs/{id}` | 任务列表 / 详情（含事件回放） |
 | GET | `/api/jobs/{id}/events` | **SSE 事件流**（status/log/progress，含重放与心跳） |

@@ -4,7 +4,7 @@
 设计稿）、QSS 换肤、toast 通知、流光进度条、页面淡入动画、可框选缩放的光谱图表。
 不使用 HTML/浏览器，也不在终端里跑 UI（终端里只打印诊断信息）。
 
-后端与 Tk 桌面版 / Web 版**完全同源**：`simlibs_cli/backend.py` 包装
+后端与 Web 版**完全同源**：`simlibs_cli/backend.py` 包装
 `../UI/web/real_backend.py`，任务跑在 `simlibs_ui.jobs.JobController` 的专属 worker
 子进程中（Windows Job Object、协作取消 + 0.8s 宽限树清理、deadline 超时），结果与
 来源证据写入 `../UI/output/.jobs/<task-id>/`。未改动 UI 目录与源库任何文件。
@@ -28,20 +28,24 @@ E:\Anaconda\envs\simLIBS\python.exe -B run_qt.py --screenshot :: offscreen 渲�
 - **输入辅助**：元素输入框带自动补全（输入 `f` 弹出 `Fe`），`fe`/`hE` 等大小写在失焦时
   自动规范为 `Fe`/`He`；Te / Ne / R 支持**滑块拖动 + 数字直输双向同步**
   （Te 0.5–10 eV 线性，Ne 10¹⁴–10¹⁹ 指数，R 100–20000 对数）。
-- **计算方式**：`服务器计算（static）`＝NIST 服务端出谱（requests）；`客户端计算（dynamic）`
-  ＝本地浏览器计算（Selenium）。界面不再使用"抓取"说法。
+- **计算方式（v2，与 Web 版同协议）**：`服务器计算（server）`＝NIST 页面数据 + 浏览器内
+  官方 JS Recalculate（要求 R>=100，固定 NIST 展宽，禁用 Python 展宽参数）；
+  `客户端计算（client）`＝HTTP 取 NIST 未展宽线表 + Python 高斯核在统一目标网格合成
+  （默认步长 0.01，无需浏览器）。请求显式携带 `mode_version=2`；完整节点显示
+  （无显示抽样），扫描按帧懒加载（缓存 3 帧），视图含"元素贡献"（同元素离子求和、
+  按元素稳定配色）。
 
 - **单次模拟**：Te/Ne/R/λ 范围/最大离子电荷、static/dynamic、photon/energy 尺度、
   NIST 服务端或本地展宽（本地展宽无需浏览器）、重采样；配比逐行增删 + 主动归一化 +
   总和 100% 校验（启动前拦截）；两个预设（H 窄波段 / W-Fe-Mo，只填参数不联网）。
   元数据 chip：来源、点数、SHA、实际 Ne、计算位置/展宽/实际 R（含 NIST 实际 R 警告）。
 - **批量模拟**：组成 CSV 导入（元素列 / `*_at%` / name 列映射，可选导入时归一化）、
-  用当前配比；样本数/种子/Te/Ne 范围；样本结果表 + 数据集 CSV 导出。
-- **打包（神经网络训练）**：批量完成后一键把光谱按参照 `nist_R3000_min0` 的格式打包：
-  `<前缀>_spectra[_N].csv` 每条光谱两行（强度行 + 波长行，无表头）、
-  `<前缀>_contents[_N].csv` 每条一行固定元素列浓度（未用元素填 0）；每包样本数可设
-  （默认 32），满包自动换 `_2/_3` 编号，目录里未写满的旧批次优先续写（与
-  `Gen.get_random_batch_target` 语义一致）。
+  用当前配比；样本数/种子/Te/Ne 范围 + **每包样本数**（随请求下发，1–5000）；
+  样本结果表 + 数据集 CSV 导出。服务器模式的 NIST 展宽批量须勾选统一重采样。
+- **训练数据包 ZIP**：批量成功后 worker 自动按 `nist_R3000_min0` 约定打包
+  （`Random_spectra[_N].csv` 强度/波长两行交替、无表头；`Random_contents[_N].csv`
+  固定 28 参考元素列 + 额外元素稳定追加；`package-manifest.json` 记录哈希与来源），
+  完成后"下载训练数据包 ZIP"启用；失败/取消不提供完整训练包。
 - **扫描动画**：Te / Ne(10^x) / R 轴 + 起止 + 帧数；⏮ ▶/⏸ ⏭ 自动播放（0.45s/帧）；
   导出当前帧 PNG / 整段 GIF。
 - **任务记录**：任务表（状态/进度/耗时）+ 点击查看事件日志；查看结果载入对应页面；

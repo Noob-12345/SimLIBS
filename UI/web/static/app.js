@@ -41,8 +41,10 @@ async function api(method, url, body, options={}) {
 const state = {
   offline: false,
   previewUnsupported: false,   // 真实引擎无合成预览（501）后缓存，避免反复请求
-  comp: [{ el: 'W', pct: 50 }, { el: 'Fe', pct: 25 }, { el: 'Mo', pct: 25 }],
-  mode: 'server',
+  comp: [{ el: 'Fe', pct: 100 }],
+  mode: 'local',
+  batchComp:[{el:'Fe',pct:100}],
+  templateText:null,templateName:null,localSymbols:[],
   hiddenElements: {},
   broadening: 'nist',   // nist=服务端/页面展宽；local=本地线表展宽
   views: { raw: false, interp: true, ion: false, norm: false },
@@ -261,7 +263,7 @@ async function fetchPreview() {
         te: String(p.te), ne: String(p.ne), resolution: String(p.R),
         low_w: String(p.low), up_w: String(p.up), mode: state.mode,mode_version:'2',
         resample: $('#resample').checked ? '1' : '0', elements: els.join(','),
-        intensity_scale:$('#intensityScale').value,
+        intensity_scale:state.mode==='local'?'photon':$('#intensityScale').value,
       });
       const r = await api('GET', '/api/preview?' + q);
       if (seq !== previewSeq) return;
@@ -542,7 +544,7 @@ function bindElementPicker(input,list,c,idx) {
   const mark=()=>{Array.from(list.children).forEach((b,i)=>b.setAttribute('aria-selected',String(i===active)));if(active>=0){input.setAttribute('aria-activedescendant',list.children[active].id);list.children[active].scrollIntoView({block:'nearest'});}};
   const show=()=>{
     const prefix=input.value.trim().toLowerCase(),used=new Set(state.comp.filter((_,i)=>i!==idx).map(x=>canonicalElement(x.el)));
-    options=Array.from(elementMap.values()).filter(el=>el.toLowerCase().startsWith(prefix)&&!used.has(el));
+    options=Array.from(elementMap.values()).filter(el=>el.toLowerCase().startsWith(prefix)&&!used.has(el)&&(state.mode!=='local'||state.localSymbols.includes(el)));
     active=-1;list.replaceChildren();
     options.forEach((el,i)=>{const button=document.createElement('button');button.type='button';button.role='option';button.id=list.id+'-'+i;button.tabIndex=-1;button.textContent=el;button.setAttribute('aria-selected','false');button.addEventListener('pointerdown',e=>e.preventDefault());button.addEventListener('click',()=>choose(el));list.appendChild(button);});
     list.hidden=!options.length;input.setAttribute('aria-expanded',String(options.length>0));
@@ -556,15 +558,16 @@ function bindElementPicker(input,list,c,idx) {
   });
   input.addEventListener('blur',()=>{const valid=canonicalElement(c.el);if(valid){c.el=valid;input.value=valid;}close();updateSum();});
 }
-function compositionPayload(){
+function compositionPayload(entries=state.comp,mode=state.mode){
   const seen=new Set();
-  if(!state.comp.length)throw new Error('至少需要一个元素');
-  return state.comp.map(c=>{
+  if(!entries.length)throw new Error('至少需要一个元素');
+  return entries.map(c=>{
     const el=canonicalElement(c.el);
     if(!el)throw new Error('无效或空元素符号：'+c.el);
     if(seen.has(el))throw new Error('元素重复：'+el);seen.add(el);
     if(typeof c.pct==='string'&&!c.pct.trim())throw new Error('占比不能为空');
     const pct=Number(c.pct);if(!Number.isFinite(pct)||pct<0)throw new Error('占比必须是有限非负数字');
+    if(mode==='local'&&pct>0&&!state.localSymbols.includes(el))throw new Error((state.localCapabilities?.error||'本地库不支持 '+el)+'；不向NIST回退');
     return {el,pct};
   });
 }
@@ -634,12 +637,13 @@ function compSum() {
 }
 function updateSum() {
   const s = compSum();
-  let symbolsValid=true;try{compositionPayload();}catch(e){symbolsValid=false;}
+  let symbolsValid=true,error='';try{compositionPayload();}catch(e){symbolsValid=false;error=e.message;}
   const ok = Math.abs(s - 100) < 1e-6 && symbolsValid;
   $('#sumRow').className = 'sum-row ' + (ok ? 'ok' : 'bad');
   const el = $('#sumVal');
-  el.textContent = Number.isFinite(s)?s.toFixed(6).replace(/\.?0+$/,'')+' %'+(ok?' ✓ · '+compositionNotice:symbolsValid?' · 须为100%':' · 元素/占比无效或重复'):'无效草稿 · '+compositionNotice;
+  el.textContent = ok?'100% ✓':error||(!Number.isFinite(s)?'占比须为有限非负数字':`合计 ${Number(s.toFixed(6))}%，应为100%`);
   el.style.color = ok ? 'var(--good)' : 'var(--bad)';
+  updateLocalNotices();
   return ok;
 }
 
@@ -770,14 +774,14 @@ async function finalizeFromJob(j) {
 
 /* ---------- 单次模拟：运行 ---------- */
 function broadeningPayload() {
-  const local = state.mode === 'client';
+  const local = ['client','local'].includes(state.mode);
   const centerRaw = $('#bCenter').value.trim();
   return {
     broadening: local?'local':'nist',
-    broaden_convention: local?$('#bConvention').value:'nist',
+    broaden_convention: state.mode==='local'?'physics':local?$('#bConvention').value:'nist',
     broaden_grid_step: local ? numericInput('bGridStep','合成网格步长') : 0.005,
-    broaden_center_decimals: local && centerRaw !== '' ? numericInput('bCenter','线中心舍入位',true,0) : null,
-    broaden_min_rel_int: local ? numericInput('bMinRel','选线阈值',false,0) : 0,
+    broaden_center_decimals: state.mode==='client' && centerRaw !== '' ? numericInput('bCenter','线中心舍入位',true,0) : null,
+    broaden_min_rel_int: state.mode==='client' ? numericInput('bMinRel','选线阈值',false,0) : 0,
   };
 }
 function commonParamsPayload() {
@@ -790,7 +794,11 @@ function commonParamsPayload() {
     max_ion_charge: parseInt($('#maxIon').value) || 0,
     mode: state.mode, mode_version:2, headless: $('#headless').checked, resample: $('#resample').checked,
     resample_step:$('#resample').checked?numericInput('resampleStep','插值步长'):.01,
-    intensity_scale:$('#intensityScale').value,
+    intensity_scale:state.mode==='local'?'photon':$('#intensityScale').value,
+    local_gaussian_nm:state.mode==='local'?numericInput('localGaussian','额外高斯宽度',false,0):0,
+    local_lorentz_nm:state.mode==='local'?numericInput('localLorentz','洛伦兹宽度',false,0):0,
+    local_temperature_mode:state.mode==='local'?$('#localTemperatureMode').value:'manual',
+    local_temperature_K:state.mode==='local'&&$('#localTemperatureMode').value==='manual'?numericInput('localTemperature','重粒子温度',false,0):0,
     ...broadeningPayload(),
   };
 }
@@ -845,7 +853,7 @@ function renderSingleResult(jobId, result) {
   if(m.ions&&m.ions.length)chips.push(`<span class="chip" title="${m.ions.join(' / ')}">离子：${m.ions.join(' / ')}</span>`);
   // 数据路径证据（重塑方案）
   if (m.computation_location) {
-    const loc = m.mode_version===2?(m.mode==='server'?'服务器模式 v2 · 官方浏览器 JS 重算':'客户端模式 v2 · NIST 线强 + Python 合成'):m.computation_location === 'server' ? '旧版 NIST 服务器' : '旧版浏览器 JS';
+    const loc = m.mode==='local'?'离线本地 v2 · 有限能级 LTE/Saha':m.mode_version===2?(m.mode==='server'?'服务器模式 v2 · 官方浏览器 JS 重算':'客户端模式 v2 · NIST 线强 + Python 合成'):m.computation_location === 'server' ? '旧版 NIST 服务器' : '旧版浏览器 JS';
     chips.push(`<span class="chip" title="线强计算位置">${loc}</span>`);
   }
   if (m.broadening) {
@@ -890,7 +898,6 @@ async function downloadExport(jobId, kind, extra) {
    ================================================================ */
 async function runBatch() {
   if (state.currentJob) { toast('warn', '已有任务在运行', '请等待完成或先取消'); return; }
-  if (!updateSum()) { toast('err', '无法启动', '当前配比总和必须为 100%'); return; }
   try {
     const teA=numericInput('batchTeA','Te 下限'),teB=numericInput('batchTeB','Te 上限');
     const neA=numericInput('batchNeA','Ne 指数下限',false,-Number.MAX_VALUE),neB=numericInput('batchNeB','Ne 指数上限',false,-Number.MAX_VALUE);
@@ -898,13 +905,13 @@ async function runBatch() {
     if([10**neA,10**neB].some(n=>!Number.isFinite(n)||n<=0))throw new Error('Ne 指数产生非有限或非正密度');
     const n=numericInput('batchCount','样本数',true),batchSize=numericInput('batchSize','每 batch 光谱数',true),seed=numericInput('batchSeed','随机种子',true,0);
     if(n>5000||batchSize>5000)throw new Error('样本数和每 batch 光谱数均须 ≤5000');
-    const pp = commonParamsPayload();
-    if ($('#batchResample').checked && pp.mode==='server') {pp.resample=true;pp.resample_step=numericInput('resampleStep','插值步长');}
+    const pp = batchParamsPayload();
     const r = await api('POST', '/api/simulate/batch', {
       params: pp,
       n_samples: n, batch_size: batchSize, seed,
       te_range: [teA, teB], ne_range: [neA, neB],
-      compositions: [{ name: 'current', items: compositionPayload() }],
+      compositions: state.templateText===null?[{name:'current',items:compositionPayload(state.batchComp,pp.mode)}]:[],
+      ...(state.templateText===null?{}:{template_csv:state.templateText,repeats:numericInput('templateRepeat','每行重复次数',true),name_column:$('#templateNameColumn').value}),
     });
     state.batchJobId = r.job_id;
     $('#batchJobId').textContent = r.job_id;
@@ -916,6 +923,35 @@ async function runBatch() {
     $('#batchLive').hidden = false;
     $('#batchCancel').hidden = false;
   } catch (e) { toast('err', e.status === 400 ? '参数校验未通过' : '提交失败', e.message); }
+}
+
+function batchParamsPayload(){
+  const mode=$('#batchMode').value;
+  return {mode,mode_version:2,te:numericInput('batchTe','批量Te'),ne:numericInput('batchNe','批量实际Ne'),resolution:numericInput('batchR','批量R',true),
+          low_w:numericInput('batchLow','批量波长下界'),up_w:numericInput('batchUp','批量波长上界'),max_ion_charge:Number($('#batchMaxIon').value),
+          intensity_scale:mode==='local'?'photon':$('#batchIntensityScale').value,headless:true,broadening:mode==='server'?'nist':'local',broaden_convention:mode==='local'?'physics':'nist',
+          broaden_grid_step:mode==='server'?.005:numericInput('batchGrid','批量合成步长'),resample:$('#batchResample').checked,resample_step:$('#batchResample').checked?numericInput('batchStep','批量插值步长'):.01,
+          local_gaussian_nm:mode==='local'?numericInput('batchGaussian','高斯宽度',false,0):0,local_lorentz_nm:mode==='local'?numericInput('batchLorentz','洛伦兹宽度',false,0):0,
+          local_temperature_mode:mode==='local'?$('#batchTemperatureMode').value:'manual',local_temperature_K:mode==='local'&&$('#batchTemperatureMode').value==='manual'?numericInput('batchTemperature','重粒子温度',false,0):0};
+}
+function renderBatchComposition(){
+  const box=$('#batchCompRows');box.replaceChildren();
+  const list=document.createElement('datalist');list.id='batchElementOptions';
+  for(const el of ($('#batchMode').value==='local'?state.localSymbols:Array.from(elementMap.values()))){const option=document.createElement('option');option.value=el;list.appendChild(option);}box.appendChild(list);
+  state.batchComp.forEach((c,i)=>{const row=document.createElement('div');row.className='comp-row';
+    const el=document.createElement('input');el.className='batch-el';el.setAttribute('list',list.id);el.value=c.el;el.addEventListener('input',()=>{c.el=el.value;updateLocalNotices();});el.addEventListener('blur',()=>{const canonical=canonicalElement(el.value);if(canonical){c.el=canonical;el.value=canonical;}updateLocalNotices();});
+    const pct=document.createElement('input');pct.type='number';pct.className='batch-pct';pct.value=c.pct;pct.step='any';pct.addEventListener('input',()=>{c.pct=pct.value;updateLocalNotices();});
+    const label=document.createElement('span');label.textContent='%';const remove=document.createElement('button');remove.textContent='✕';remove.className='btn sm';remove.addEventListener('click',()=>{state.batchComp.splice(i,1);renderBatchComposition();});row.append(el,pct,label,remove);box.appendChild(row);});
+}
+async function validateTemplate(){
+  if(state.templateText===null)return;
+  try{const params=batchParamsPayload();const result=await api('POST','/api/templates/validate',{params,template_csv:state.templateText,repeats:numericInput('templateRepeat','重复次数',true),name_column:$('#templateNameColumn').value,batch_size:numericInput('batchSize','包大小',true)});
+    $('#batchCount').value=result.sample_count;$('#templateInfo').textContent=`${state.templateName} · ${result.rows}行 · ${result.elements.join('/')} · 计划${result.sample_count}谱 · ${result.order}`;updateBatchPackageEstimate();
+  }catch(error){$('#templateInfo').textContent='模板无效：'+error.message;toast('err','模板校验失败',error.message);}
+}
+async function resumeBatch(id=state.resumeJobId){
+  if(!id||state.currentJob)return;
+  try{const result=await api('POST','/api/jobs/'+id+'/resume',{});state.batchJobId=result.job_id;attachJob(result.job_id,'批量模拟');setRunningUI(true);$('#batchLive').hidden=false;$('#batchJobId').textContent=result.job_id;$('#resumeInfo').textContent='续跑来源 '+id;}catch(error){toast('err','无法续跑',error.message);}
 }
 
 function renderBatchResult(jobId, result) {
@@ -1088,7 +1124,9 @@ async function loadJobs() {
         <td class="mono">${j.status === 'running' ? (j.progress || 0).toFixed(0) + '%' : '—'}</td>
         <td class="mono">${j.duration || '—'}</td>`;
       tb.appendChild(tr);
+      if(j.resumable){const td=document.createElement('td'),button=document.createElement('button');button.className='btn sm';button.textContent=`续跑 ${j.completed_samples}/${j.total_samples}`;button.addEventListener('click',()=>{state.resumeJobId=j.job_id;switchPage('batch');resumeBatch(j.job_id);});td.appendChild(button);tr.appendChild(td);}
     });
+    const resumable=r.jobs.find(j=>j.resumable);if(resumable){state.resumeJobId=resumable.job_id;$('#batchResume').disabled=false;$('#resumeInfo').textContent=`可续跑 ${resumable.job_id} · 已完成 ${resumable.completed_samples}/${resumable.total_samples}`;}
   } catch (e) { if (e.network) setOffline(true); }
 }
 
@@ -1125,6 +1163,7 @@ async function saveSettings() {
    引擎状态 / 离线模式
    ================================================================ */
 function applyStatus(st) {
+  if(st.local){state.localCapabilities=st.local;state.localSymbols=st.local.elements||[];updateLocalNotices();}
   $('#stPy').textContent = st.python || '—';
   $('#stNist').textContent = st.nist || '—';
   $('#stChrome').textContent = st.chrome || '—';
@@ -1150,7 +1189,7 @@ function setOffline(off) {
    页面切换 / 主题 / 绑定
    ================================================================ */
 const TITLES = {
-  single: ['单次模拟', 'Te · Ne · R · 组成 → NIST 光谱'],
+  single: ['单次模拟', 'Te · Ne · R · 组成 → 真实光谱'],
   batch: ['批量模拟', '真实光谱 → 配对训练 CSV · ZIP 下载'],
   scan: ['扫描动画', '参数轴扫描 · 帧动画 · GIF 导出'],
   jobs: ['任务记录', 'output/.jobs 可追溯产物'],
@@ -1172,15 +1211,38 @@ function switchPage(p) {
 }
 $$('.nav-item').forEach(n => n.addEventListener('click', () => switchPage(n.dataset.page)));
 
-$('#themeBtn').addEventListener('click', () => {
-  const root = document.documentElement;
-  const dark = root.dataset.theme === 'dark';
-  root.dataset.theme = dark ? 'light' : 'dark';
-  $('#iconMoon').style.display = dark ? 'none' : '';
-  $('#iconSun').style.display = dark ? '' : 'none';
-  drawSingle(specData, true);
-  drawScanFrame('instant');
-});
+let themePreference;try{themePreference=JSON.parse(localStorage.getItem('simlibs-theme')||'{}');}catch(e){themePreference={};}
+const THEME_PRESETS={violet:{name:'紫藤',light:'#7c3aed',dark:'#a78bfa'},ocean:{name:'海蓝',light:'#2563eb',dark:'#60a5fa'},forest:{name:'松林',light:'#059669',dark:'#34d399'},amber:{name:'琥珀',light:'#c2410c',dark:'#fb923c'},rose:{name:'玫瑰',light:'#be185d',dark:'#f472b6'}};
+themePreference={mode:'system',...themePreference};
+if(!['light','dark','system'].includes(themePreference.mode))themePreference.mode='system';
+if(!THEME_PRESETS[themePreference.preset])themePreference.preset=Object.keys(THEME_PRESETS).find(k=>[THEME_PRESETS[k].light,THEME_PRESETS[k].dark].includes(themePreference.accent))||'violet';
+function renderThemeCards(){
+  $('#themeCards').innerHTML=Object.entries(THEME_PRESETS).map(([key,p])=>`<button type="button" class="theme-card" data-preset-theme="${key}" aria-pressed="false" aria-label="${p.name}页面主题"><span class="theme-previews">${['light','dark'].map(mode=>`<span class="theme-preview ${mode}" style="--preview-accent:${p[mode]}" aria-hidden="true"><span class="mini-sidebar"><b></b><i></i><i></i><i></i></span><span class="mini-workspace"><span class="mini-heading"><b></b><i></i></span><span class="mini-cards"><i></i><i></i><i></i></span><span class="mini-chart"><svg viewBox="0 0 100 34" fill="none"><path d="M0 27H100M0 16H100M0 5H100" stroke="currentColor" opacity=".12"/><path d="M0 29L10 28L15 11L20 28L35 27L42 2L48 26L60 28L70 15L76 28L100 29" stroke="currentColor" stroke-width="1.7"/></svg></span></span></span>`).join('')}</span><span class="theme-card-label">${p.name}<i></i></span></button>`).join('');
+}
+renderThemeCards();
+const systemTheme=matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(persist=true){
+  const mode=themePreference.mode,dark=mode==='system'?systemTheme.matches:mode==='dark';
+  const preset=THEME_PRESETS[themePreference.preset]||THEME_PRESETS.violet;
+  document.documentElement.dataset.theme=dark?'dark':'light';document.documentElement.style.setProperty('--accent',preset[dark?'dark':'light']);
+  $('#iconMoon').style.display=mode==='dark'?'':'none';$('#iconSun').style.display=mode==='light'?'':'none';$('#iconSystem').style.display=mode==='system'?'':'none';$('#systemActual').hidden=mode!=='system';
+  const label=mode==='system'?'跟随系统 · 当前'+(dark?'夜间':'日间'):mode==='dark'?'夜间':'日间';$('#themeBtn').title=label;$('#themeBtn').setAttribute('aria-label',label+'，选择主题模式');$('#themeBtn').dataset.actual=dark?'dark':'light';
+  $$('#themeMenu button').forEach(b=>b.setAttribute('aria-checked',String(b.dataset.themeMode===mode)));
+  $$('.theme-card').forEach(b=>{const selected=b.dataset.presetTheme===themePreference.preset;b.setAttribute('aria-pressed',String(selected));b.querySelector('.theme-card-label i').textContent=selected?'✓':'';});
+  if(persist)localStorage.setItem('simlibs-theme',JSON.stringify({mode,preset:themePreference.preset||'violet'}));
+  drawSingle(specData,true);drawScanFrame('instant');
+}
+function closeThemePanels(focus=false){for(const [panel,trigger] of [['themeMenu','themeBtn'],['themeCatalog','themeCatalogBtn']]){if(focus&&!$('#'+panel).hidden)$('#'+trigger).focus();$('#'+panel).hidden=true;$('#'+trigger).setAttribute('aria-expanded','false');}}
+function toggleThemePanel(panel,trigger){const open=$('#'+panel).hidden;closeThemePanels();if(open){$('#'+panel).hidden=false;$('#'+trigger).setAttribute('aria-expanded','true');($('#'+panel).querySelector('[aria-checked=true],[aria-pressed=true]')||$('#'+panel).querySelector('button')).focus();}}
+$('#themeBtn').addEventListener('click',()=>toggleThemePanel('themeMenu','themeBtn'));
+$('#themeCatalogBtn').addEventListener('click',()=>toggleThemePanel('themeCatalog','themeCatalogBtn'));
+$$('#themeMenu button').forEach(b=>b.addEventListener('click',()=>{themePreference.mode=b.dataset.themeMode;applyTheme();closeThemePanels(true);}));
+$$('.theme-card').forEach(b=>b.addEventListener('click',()=>{themePreference.preset=b.dataset.presetTheme;applyTheme();}));
+for(const panel of ['themeMenu','themeCatalog'])$('#'+panel).addEventListener('keydown',e=>{const buttons=Array.from(e.currentTarget.querySelectorAll('button')),index=buttons.indexOf(document.activeElement);let next=index;if(['ArrowDown','ArrowRight'].includes(e.key))next=(index+1)%buttons.length;else if(['ArrowUp','ArrowLeft'].includes(e.key))next=(index+buttons.length-1)%buttons.length;else if(e.key==='Home')next=0;else if(e.key==='End')next=buttons.length-1;else return;e.preventDefault();buttons[next].focus();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeThemePanels(true);});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.theme-control'))closeThemePanels();});
+systemTheme.addEventListener('change',()=>{if(themePreference.mode==='system')applyTheme(false);});
+applyTheme(false);
 
 /* 单次模拟页绑定 */
 ['lowW','upW'].forEach(id=>$('#'+id).addEventListener('input',schedulePreview));
@@ -1197,28 +1259,25 @@ $$('#legend .chip').forEach(ch => ch.addEventListener('click', () => {
   drawSingle(specData, true);
   renderElementLegend(specData,'elementLegend');
 }));
-function updateModePath(){state.broadening=state.mode==='client'?'local':'nist';$('#broadenParams').hidden=state.mode!=='client';$('#modePath').textContent=state.mode==='client'?'NIST 线强 + Python 分段合并/统一展宽（无需 Chrome）':'NIST 数据 + 官方 JavaScript Recalculate';}
+function updateLocalNotices(){
+  const problem=(entries,mode)=>{if(mode!=='local')return '';const c=state.localCapabilities;if(!c)return '';if(!c.ready)return c.error||'本地库不可用';const missing=entries.filter(e=>Number(e.pct)>0&&!state.localSymbols.includes(canonicalElement(e.el))).map(e=>canonicalElement(e.el)).filter(Boolean);return missing.map(el=>el+'：'+(c.issues?.[el]?.join('；')||'缺少可用本地谱线')).join('；');};
+  for(const [id,entries,mode] of [['localCapability',state.comp,state.mode],['batchLocalError',state.batchComp,$('#batchMode').value]]){const text=problem(entries,mode);$('#'+id).textContent=text;$('#'+id).hidden=!text;}
+}
+function updateOptionalControls(){
+  $('#resampleControl').hidden=!$('#resample').checked;$('#batchResampleControl').hidden=!$('#batchResample').checked;
+  for(const [modeId,inputId,hintId,te] of [['localTemperatureMode','localTemperatureInput','localLinkedTemperature',currentParams().te],['batchTemperatureMode','batchTemperatureInput','batchLinkedTemperature',Number($('#batchTe').value)]]){const linked=$('#'+modeId).value==='linked';$('#'+inputId).hidden=linked;$('#'+hintId).hidden=!linked;const kelvin=te*1.602176634e-19/1.380649e-23;$('#'+hintId).textContent=Number.isFinite(kelvin)&&kelvin>0?'Tₕ = '+kelvin.toExponential(4)+' K':'';}
+}
+function updateModePath(){const local=['client','local'].includes(state.mode);state.broadening=local?'local':'nist';$('#broadenParams').hidden=!local;$('#modePath').textContent=state.mode==='local'?'用户线库 · 本地计算':state.mode==='client'?'NIST线表 · Python展宽':'NIST数据 · 官方JS重算';$('#bConvention').disabled=state.mode==='local';if(state.mode==='local')$('#bConvention').value='physics';for(const id of ['bCenter','bMinRel'])$('#'+id).disabled=state.mode==='local';$('#localWidths').hidden=state.mode!=='local';$('#localThermalControl').hidden=state.mode!=='local';$('#nistIntensityControl').hidden=state.mode==='local';$('#localIntensity').hidden=state.mode!=='local';$('#broadeningNote').hidden=true;updateLocalNotices();updateOptionalControls();}
+function updateBatchMode(){const mode=$('#batchMode').value;$('#batchModePath').textContent=mode==='local'?'用户线库 · 本地计算':mode==='client'?'NIST线表 · Python展宽':'NIST数据 · 官方JS重算';$('#batchNistIntensity').hidden=mode==='local';$('#batchLocalIntensity').hidden=mode!=='local';$('#batchThermalControl').hidden=mode!=='local';$('#batchLocalWidths').hidden=mode!=='local';$('#batchGridControl').hidden=mode==='server';updateLocalNotices();updateOptionalControls();}
 $$('#modeSeg button').forEach(b => b.addEventListener('click', () => {
   $$('#modeSeg button').forEach(x => x.classList.remove('on')); b.classList.add('on');
-  state.mode = b.dataset.v;updateModePath();schedulePreview();
+  state.mode = b.dataset.v;updateModePath();schedulePreview();api('GET','/api/status?mode='+state.mode).then(applyStatus).catch(()=>{});
 }));
 $$('#broadSeg button').forEach(b => b.addEventListener('click', () => {
   $$('#broadSeg button').forEach(x => x.classList.remove('on')); b.classList.add('on');
   state.broadening = b.dataset.v;
   $('#broadenParams').hidden = state.broadening !== 'local';
   schedulePreview();
-}));
-const PRESETS = {
-  wfm: { comp: [{ el: 'W', pct: 50 }, { el: 'Fe', pct: 25 }, { el: 'Mo', pct: 25 }], te: 1.0, neExp: 17, R: 1000, low: 200, up: 1000, title: 'W Fe Mo composition · Te=1.00 eV' },
-  h: { comp: [{ el: 'H', pct: 100 }], te: 1.0, neExp: 17, R: 1000, low: 650, up: 660, title: 'H 100% · Balmer α · Te=1.00 eV' },
-};
-$$('.presets [data-preset]').forEach(b => b.addEventListener('click', () => {
-  const p = PRESETS[b.dataset.preset];
-  state.comp = p.comp.map(c => ({ ...c }));
-  setParameterValues(p.te,10**p.neExp,p.R);
-  $('#lowW').value = p.low; $('#upW').value = p.up; $('#chartTitle').value = p.title;
-  renderComp(); schedulePreview();
-  toast('ok', '预设已应用', b.textContent.replace('预设 ', '') + ' · 参数已填写，未联网');
 }));
 $('#addEl').addEventListener('click', () => {
   if (state.comp.length >= 32) return toast('warn', '已达上限', '最多 32 个元素行');
@@ -1236,6 +1295,19 @@ function lastCompletedSingleId() { return _lastSingleId; }
 
 /* 批量页绑定 */
 $('#batchRun').addEventListener('click', runBatch);
+$('#batchResume').addEventListener('click',()=>resumeBatch());
+$('#batchMode').addEventListener('change',()=>{renderBatchComposition();updateBatchMode();api('GET','/api/status?mode='+$('#batchMode').value).then(applyStatus).catch(()=>{});});
+$('#batchAddElement').addEventListener('click',()=>{if(state.batchComp.length>=32)return;state.batchComp.push({el:'',pct:0});renderBatchComposition();});
+$('#batchBalance').addEventListener('click',()=>{const prefix=state.batchComp.slice(0,-1).reduce((a,c)=>a+Number(c.pct),0);if(!Number.isFinite(prefix)||prefix>100||prefix<0)return toast('err','配比无效','请修正前项');if(state.batchComp.length)state.batchComp.at(-1).pct=100-prefix;renderBatchComposition();});
+$('#templateChoose').addEventListener('click',()=>$('#templateFile').click());
+$('#templateFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;state.templateText=await file.text();state.templateName=file.name;$('#templateFileName').textContent=file.name;$('#templateFileName').title=file.name;await validateTemplate();});
+$('#templateValidate').addEventListener('click',validateTemplate);$('#templateRepeat').addEventListener('change',validateTemplate);
+$('#templateClear').addEventListener('click',()=>{state.templateText=null;state.templateName=null;$('#templateFile').value='';$('#templateFileName').textContent='未选择文件';$('#templateFileName').title='未选择文件';$('#templateInfo').textContent='模板已清除；使用批量独立组成';});
+$('#templateExample').addEventListener('click',()=>{const text='name,Fe_at%,Al_at%,Te[eV],Ne[cm^-3],R\nFe-only,100,0,1,1e17,1000\nFe-Al,50,50,1.2,2e17,2000\nAl-only,0,100,1,1e17,1000\n';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'}));a.download='SimLIBS-template.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);});
+$('#batchTe').addEventListener('change',()=>{const n=Number($('#batchTe').value);if(Number.isFinite(n)&&n>0){$('#batchTeA').value=n;$('#batchTeB').value=n;}});
+$('#batchNe').addEventListener('change',()=>{const n=Number($('#batchNe').value);if(Number.isFinite(n)&&n>0){$('#batchNeA').value=Math.log10(n);$('#batchNeB').value=Math.log10(n);}});
+for(const id of ['resample','batchResample','localTemperatureMode','batchTemperatureMode'])$('#'+id).addEventListener('change',updateOptionalControls);
+for(const id of ['teInput','teSlider','batchTe'])$('#'+id).addEventListener('input',updateOptionalControls);
 ['batchCount','batchSize'].forEach(id=>$('#'+id).addEventListener('input',updateBatchPackageEstimate));
 $('#trainingDownload').addEventListener('click',()=>downloadExport(state.batchResultId,'training'));
 $('#datasetDownload').addEventListener('click',()=>downloadExport(state.batchResultId,'dataset'));
@@ -1301,19 +1373,20 @@ window.addEventListener('resize', () => { if(state.hasResult)drawSingle(specData
    ================================================================ */
 (async function init() {
   renderComp();
+  renderBatchComposition();
   updateParamLabels();
   renderScanVals();
   updateBatchPackageEstimate();
   drawEmpty($('#scanChart'), '扫描完成后可在此播放帧动画');
   try {
-    const [st, params] = await Promise.all([api('GET', '/api/status'), api('GET', '/api/params')]);
+    const [st, params] = await Promise.all([api('GET', '/api/status?mode=local'), api('GET', '/api/params')]);
     setOffline(false);
     applyStatus(st);
     if (params.params) {
       const p = params.params;
       setParameterValues(p.te,p.ne,p.resolution);
       $('#lowW').value = p.low_w; $('#upW').value = p.up_w; $('#maxIon').value = p.max_ion_charge;
-      state.mode = ['server','client'].includes(p.mode)?p.mode:'server'; $('#headless').checked = p.headless; $('#resample').checked = p.resample;
+      state.mode = ['server','client','local'].includes(p.mode)?p.mode:'local'; $('#headless').checked = p.headless; $('#resample').checked = p.resample;
       $('#intensityScale').value=p.intensity_scale||'photon';
       if (p.broadening) {
         state.broadening = p.broadening;
@@ -1330,6 +1403,13 @@ window.addEventListener('resize', () => { if(state.hasResult)drawSingle(specData
       renderComp();
     }
     if(params.element_symbols)elementMap=new Map(params.element_symbols.map(e=>[e.toLowerCase(),e]));
+    state.localSymbols=params.local_capabilities?.elements||st.local?.elements||[];
+    state.localCapabilities=params.local_capabilities||st.local;
+    updateSum();
+    $('#localTemperatureMode').value=params.params?.local_temperature_mode||'linked';$('#localTemperature').value=params.params?.local_temperature_K||0;
+    updateModePath();
+    renderBatchComposition();
+    updateLocalNotices();updateBatchMode();
     if (params.title) $('#chartTitle').value = params.title;
     updateParamLabels();
     fetchPreview();

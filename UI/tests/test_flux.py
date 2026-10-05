@@ -13,7 +13,7 @@ class FluxTests(unittest.TestCase):
         self.assertEqual(getattr(Parameters(),'intensity_scale',None),'photon')
         with self.assertRaises(ValueError):Parameters.from_dict(dict(Parameters().to_dict(),intensity_scale='watts'))
 
-    def test_real_source_static_url_and_provenance_for_both_scales(self):
+    def test_real_source_static_url_and_two_flux_provenance(self):
         for scale,number in [('photon','2'),('energy','1')]:
             with self.subTest(scale=scale):
                 p=Parameters.from_dict(dict(Parameters().to_dict(),intensity_scale=scale))
@@ -30,10 +30,10 @@ class FluxTests(unittest.TestCase):
         driver=Mock();driver.window_handles=['main','csv'];driver.page_source='<pre>'+CSV+'</pre>'
         driver.find_element.return_value.is_displayed.return_value=True
         driver.find_element.return_value.is_enabled.return_value=True
-        p=Parameters.from_dict(dict(Parameters().to_dict(),intensity_scale='energy',webscraping='dynamic'))
+        p=Parameters.from_dict(dict(Parameters().to_dict(),intensity_scale='photon',webscraping='dynamic'))
         with patch('simlibs_ui.adapter.resolve_driver',return_value=('mock.exe','154')),patch.object(module.webdriver,'Chrome',return_value=driver):
             frames,origin=simulate(p,Settings())
-        self.assertEqual(parse_qs(urlsplit(driver.get.call_args.args[0]).query)['int_scale'],['1'])
+        self.assertEqual(parse_qs(urlsplit(driver.get.call_args.args[0]).query)['int_scale'],['2'])
         driver.quit.assert_called_once()
 
     def test_old_simulation_url_and_unknown_history_scale(self):

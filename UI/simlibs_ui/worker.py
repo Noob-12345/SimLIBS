@@ -17,7 +17,7 @@ def execute(request, emit, cancelled):
     if kind == 'single':
         from .adapter import simulate
         p = Parameters.from_dict(request['parameters'])
-        emit('progress', message='正在请求真实 NIST 光谱', deadline=p.deadline(settings))
+        emit('progress', message='正在计算离线 LTE/Saha 光谱' if p.webscraping=='local' else '正在请求真实 NIST 光谱', deadline=p.deadline(settings))
         frames, origin = simulate(p, settings, cancelled=cancelled, emit=emit)
         if cancelled():
             return None
@@ -34,13 +34,21 @@ def execute(request, emit, cancelled):
         # 缺失数据保留空字符串供 UI 校验，绝不作为 0 提交。
         write_json(path, {'kind': 'compositions', 'columns': list(df), 'records': df.fillna('').to_dict('records'), 'path': request['path']})
         return str(path)
+    if kind=='resume':
+        from .batch_pipeline import load_checkpoint
+        from .models import BatchSpec
+        from .operations import batch
+        import pandas as pd
+        plan,_=load_checkpoint(request['checkpoint_path'],settings)
+        p=Parameters.from_dict(plan['parameters'])
+        return batch(p,settings,BatchSpec(**plan['spec']),pd.DataFrame(),directory/'result',emit,cancelled,resume_checkpoint=request['checkpoint_path'])
     if kind in ('batch', 'scan'):
         from .operations import batch, scan
         from .models import BatchSpec, ScanSpec
         p = Parameters.from_dict(request['parameters'])
         if kind == 'batch':
             import pandas as pd
-            return batch(p, settings, BatchSpec(**request['spec']), pd.DataFrame(request['compositions']), directory / 'result', emit, cancelled)
+            return batch(p, settings, BatchSpec(**request['spec']), pd.DataFrame(request['compositions']), directory / 'result', emit, cancelled,planned=request.get('template_plan'))
         return scan(p, settings, ScanSpec(**request['spec']), directory / 'result', emit, cancelled)
     if kind == 'export':
         from .operations import export_result

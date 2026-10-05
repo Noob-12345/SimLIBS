@@ -50,6 +50,8 @@ CONTENT_TYPES = {
     ".css": "text/css; charset=utf-8",
     ".svg": "image/svg+xml",
     ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
     ".ico": "image/x-icon",
     ".json": "application/json; charset=utf-8",
 }
@@ -116,7 +118,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             q = parse_qs(url.query)
             if parts == ["api", "status"]:
-                self._json(BACKEND.engine_status())
+                self._json(BACKEND.engine_status(q.get('mode',['local'])[0]))
             elif parts == ["api", "params"]:
                 self._json(BACKEND.default_params())
             elif parts == ["api", "settings"]:
@@ -179,6 +181,11 @@ class Handler(BaseHTTPRequestHandler):
             body = self._body()
             if parts == ["api", "simulate", "single"]:
                 self._json({"job_id": BACKEND.start_single(SingleRequest.from_api(body))})
+            elif parts==['api','templates','validate']:
+                req=BatchRequest.from_api(body)
+                if req.template_plan is None:raise ApiError(400,'需要template_csv','validation')
+                BACKEND.validate_batch(req)
+                self._json({k:v for k,v in req.template_plan.items() if k not in ('source_csv','entries')})
             elif parts == ["api", "simulate", "batch"]:
                 self._json({"job_id": BACKEND.start_batch(BatchRequest.from_api(body))})
             elif parts == ["api", "simulate", "scan"]:
@@ -186,6 +193,9 @@ class Handler(BaseHTTPRequestHandler):
             elif len(parts) == 4 and parts[1] == "jobs" and parts[3] == "cancel":
                 ok = BACKEND.cancel(parts[2])
                 self._json({"cancelled": bool(ok)})
+            elif len(parts)==4 and parts[1]=='jobs' and parts[3]=='resume':
+                if body:raise ApiError(400,'续跑不得附加新参数/模板','validation')
+                self._json({'job_id':BACKEND.resume(parts[2])})
             elif parts == ["api", "settings"]:
                 self._json(BACKEND.save_settings(body))
             else:

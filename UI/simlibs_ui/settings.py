@@ -18,6 +18,7 @@ DEFAULT_SOURCE = str(UI_ROOT.parent / 'simLIBS-2.0.3')
 class Settings:
     python: str = DEFAULT_PYTHON
     source: str = DEFAULT_SOURCE
+    line_database: str = str(UI_ROOT.parent/'Linedatabase')
     driver: str = ''
     chrome: str = ''
     output: str = str(UI_ROOT / 'output')

@@ -34,14 +34,17 @@ class HTTPTests(unittest.TestCase):
             with urlopen(request,timeout=5) as response:return response.status,json.load(response)
         except HTTPError as exc:return exc.code,json.load(exc)
 
-    def test_three_http_routes_pass_energy_and_reject_bad_composition(self):
-        params={'te':1,'ne':1e17,'resolution':1000,'low_w':650,'up_w':660,'max_ion_charge':3,'mode':'static','intensity_scale':'energy'}
+    def test_three_http_routes_pass_two_fluxes_and_reject_bad_composition(self):
+        params={'te':1,'ne':1e17,'resolution':1000,'low_w':650,'up_w':660,'max_ion_charge':2,'mode':'static','intensity_scale':'photon'}
         body={'params':params,'composition':[{'el':'H','pct':100}]}
         cases=[('single',body,'start_single'),
                ('batch',dict(params=params,n_samples=2,seed=1,te_range=[1,1],ne_range=[17,17],compositions=[{'name':'H','items':body['composition']}]),'start_batch'),
                ('scan',dict(body,axis='te',start=1,end=1.2,frames=2),'start_scan')]
         for name,request,method in cases:
             status,response=self.post('/api/simulate/'+name,request)
+            self.assertEqual(status,200,response)
+            self.assertEqual(getattr(self.backend,method).call_args.args[0].params.intensity_scale,'photon')
+            status,response=self.post('/api/simulate/'+name,dict(request,params=dict(params,intensity_scale='energy')))
             self.assertEqual(status,200,response)
             self.assertEqual(getattr(self.backend,method).call_args.args[0].params.intensity_scale,'energy')
         self.backend.start_single.reset_mock()

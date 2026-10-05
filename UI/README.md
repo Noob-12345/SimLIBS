@@ -1,4 +1,4 @@
-# simLIBS Web UI
+# SimLIBS · SPECTRUM WORKBENCH FOR SCNU
 
 本目录提供 HTML/CSS/JavaScript 光谱界面和 Python 计算后台，根据元素原子百分比、电子温度 Te、电子密度 Ne 与分辨率 R 生成可追溯的 LIBS 光谱，支持单次模拟、批量模拟、参数扫描及训练数据 ZIP 导出。详细功能、计算约定和接口见 [web/README.md](web/README.md)。
 
@@ -31,7 +31,9 @@ Python 文件属于 Web 计算后台，并非因为界面使用 HTML 就可删�
 
 ## 计算与验证
 
-新版请求使用 `server/client`、`mode_version=2`：服务器模式读取 NIST 数据并执行官方浏览器 JavaScript Recalculate；客户端从 NIST 未展宽线表分段合并后 Python 统一合成，无需 Chrome。Web 传递实际完整 CSV 节点，提供真实元素贡献和按帧扫描；旧 `static/dynamic` 请求及历史来源继续原语义。NIST、历史 CSV 与 MOCK 来源明确区分，失败/取消保留上一成功结果。
+新版请求使用 `local/server/client`、`mode_version=2`，默认离线本地：仅读取 `../Linedatabase` 的原始谱线和有来源的静态原子元数据，计算有限能级 LTE/I-II Saha 相对光子谱，无需网络/Chrome。新界面本地热Doppler默认随Te（单温度LTE假设），可选独立重粒子温度；旧无温度模式字段的请求保持manual语义。服务器读取NIST数据并执行官方JavaScript重算；客户端从NIST线表分段合并后Python统一合成，不读用户线库，无需Chrome。在线支持Photon flux/int_scale=2与Energy flux/int_scale=1真实请求；本地只用相对光子。最大离子电荷0–2，旧energy/max3历史保持原数据及标签。Web传递完整CSV节点，提供真实元素贡献和扫描，失败/取消保留上一成功图谱。
+
+批量页独立控制参数和组成，可上传模板按行顺序执行、指定重复次数。确定计划与逐样本 checkpoint 保存在任务目录；失败/取消后续跑创建新任务，校验版本/哈希并复用已完成样本，旧无计划任务不伪造恢复。支持日间/夜间/跟随系统及持久化主题色，GitHub入口指向本项目。
 
 ```powershell
 & 'E:\Anaconda\envs\simLIBS\python.exe' -B -m unittest discover -s tests -p 'test_*.py' -v

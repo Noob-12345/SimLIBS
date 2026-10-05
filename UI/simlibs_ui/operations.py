@@ -5,7 +5,7 @@ import random
 import shutil
 import numpy as np
 import pandas as pd
-from .storage import save_result, read_manifest, validate_compositions, write_json, write_csv, atomic_write, now
+from .storage import save_result, read_manifest, validate_compositions, write_json, write_csv, atomic_write, now,diagnostic_scope
 
 
 def simulation_function(simulator):
@@ -15,7 +15,12 @@ def simulation_function(simulator):
     return simulate
 
 
-def batch(parameters, settings, spec, compositions, directory, emit, cancelled, simulator=None):
+def batch(parameters, settings, spec, compositions, directory, emit, cancelled, simulator=None,planned=None,resume_checkpoint=None):
+    from .batch_pipeline import run_batch
+    return run_batch(parameters,settings,spec,compositions,directory,emit,cancelled,simulator,planned,resume_checkpoint)
+
+
+def legacy_batch(parameters, settings, spec, compositions, directory, emit, cancelled, simulator=None):
     p, s = parameters.validated(), settings.validated()
     spec = spec.validated(p)
     df = validate_compositions(compositions)
@@ -91,7 +96,7 @@ def scan(parameters, settings, spec, directory, emit, cancelled, simulator=None)
     directory.mkdir(parents=True, exist_ok=True)
     manifest = {'kind': 'scan', 'axis': spec.axis, 'values': values, 'completed_values': [], 'frames': [],
                 'parameters': p.to_dict(), 'partial': True, 'created_at': now(),
-                'origin': {'kind': 'simulation', 'label': '真实 NIST 参数扫描（各帧独立请求）'}}
+                'origin': {'kind': 'simulation', 'label': '离线本地参数扫描（各帧真实计算）' if p.webscraping=='local' else '真实 NIST 参数扫描（各帧独立请求）'}}
     try:
         for i, value in enumerate(values):
             if cancelled():
@@ -99,7 +104,8 @@ def scan(parameters, settings, spec, directory, emit, cancelled, simulator=None)
             actual = replace(p, **{('resolution' if spec.axis == 'R' else spec.axis): value}).validated()
             emit('progress', message=f'{spec.axis} = {value:.8g}，帧 {i + 1}/{len(values)}', current=i, total=len(values),
                  deadline=p.deadline(s))
-            frames, origin = simulate(actual, s) if simulator is not None else simulate(actual,s,cancelled=cancelled,emit=emit)
+            with diagnostic_scope(directory / f'frame_{i + 1:04d}'):
+                frames, origin = simulate(actual, s) if simulator is not None else simulate(actual,s,cancelled=cancelled,emit=emit)
             origin['scan_axis'], origin['scan_value'] = spec.axis, value
             manifest['frames'].append(save_result(directory / f'frame_{i + 1:04d}', frames, origin))
             manifest['completed_values'].append(value)

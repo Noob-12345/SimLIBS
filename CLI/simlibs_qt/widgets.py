@@ -6,10 +6,11 @@ import math
 from PySide6.QtCore import (QEasingCurve, QObject, QPoint, QPropertyAnimation, QRectF,
                             QTimer, Qt, QVariantAnimation, Signal)
 from PySide6.QtGui import QColor, QPainter, QLinearGradient, QPixmap
-from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel,
-                               QProgressBar, QStackedWidget, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QDialog, QFrame, QGraphicsOpacityEffect, QGridLayout,
+                               QHBoxLayout, QLabel, QProgressBar, QStackedWidget,
+                               QVBoxLayout, QWidget)
 
-from .theme_qt import DARK, LIGHT
+from .theme_qt import DARK, LIGHT, THEME_PRESETS, palette_with_accent
 
 
 def field_label(text: str) -> QLabel:
@@ -352,3 +353,105 @@ class EngineCard(QFrame):
     def _is_dark(self) -> bool:
         w = self.window()
         return getattr(w, 'theme_name', 'plasma-dark').endswith('dark')
+
+
+class ThemePreviewCard(QFrame):
+    """单张主题预览卡：日/夜两块迷你界面缩略（侧栏 + 卡片 + 按钮 + 谱线）。"""
+    clicked = Signal(str)
+
+    def __init__(self, preset_key: str, selected: bool = False, parent=None) -> None:
+        super().__init__(parent)
+        self.preset_key = preset_key
+        self.preset = THEME_PRESETS[preset_key]
+        self.selected = selected
+        self.setFixedSize(158, 128)
+        self.setCursor(Qt.PointingHandCursor)
+
+    def mouseReleaseEvent(self, ev) -> None:  # noqa: N802
+        if ev.button() == Qt.LeftButton:
+            self.clicked.emit(self.preset_key)
+
+    def set_selected(self, selected: bool) -> None:
+        self.selected = selected
+        self.update()
+
+    def paintEvent(self, ev) -> None:  # noqa: N802
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        from .theme_qt import palette_with_accent
+        half_w, half_h = (self.width() - 12) / 2, self.height() - 40
+        for i, (base, accent_key) in enumerate(((LIGHT, 'light'), (DARK, 'dark'))):
+            pal = palette_with_accent(base, self.preset[accent_key])
+            ox = 4 + i * (half_w + 4)
+            oy = 4
+            # 面板底
+            p.setPen(Qt.NoPen)
+            p.setBrush(QColor(pal['bg']))
+            p.drawRoundedRect(QRectF(ox, oy, half_w, half_h), 6, 6)
+            # 侧栏
+            p.setBrush(QColor(pal['brd']))
+            p.drawRoundedRect(QRectF(ox + 5, oy + 5, 16, half_h - 10), 3, 3)
+            p.setBrush(QColor(self.preset[accent_key]))
+            p.drawRoundedRect(QRectF(ox + 7, oy + 7, 12, 4), 2, 2)
+            # 标题条 + 两张卡片
+            p.setBrush(QColor(pal['brd']))
+            p.drawRoundedRect(QRectF(ox + 26, oy + 6, half_w - 32, 6), 2, 2)
+            for k in range(2):
+                p.setBrush(QColor(pal['card']))
+                p.drawRoundedRect(QRectF(ox + 26 + k * ((half_w - 34) / 2 + 2), oy + 16,
+                                         (half_w - 38) / 2, 18), 3, 3)
+            # 谱线折线
+            from PySide6.QtGui import QPen, QPolygonF
+            from PySide6.QtCore import QPointF
+            pen = QPen(QColor(self.preset[accent_key]))
+            pen.setWidthF(1.6)
+            p.setPen(pen)
+            xs = [0, 10, 15, 11, 20, 28, 35, 42, 60, 70, 76, 100]
+            ys = [29, 28, 11, 28, 27, 2, 26, 28, 15, 28, 29, 29]
+            scale_x = (half_w - 30) / 100
+            poly = QPolygonF([QPointF(ox + 27 + x * scale_x, oy + half_h - 14 - y * 0.28)
+                              for x, y in zip(xs, ys)])
+            p.drawPolyline(poly)
+        # 标签
+        p.setPen(QColor('#f0ebed' if True else '#000'))
+        p.drawText(QRectF(0, self.height() - 32, self.width(), 28),
+                   Qt.AlignHCenter | Qt.AlignVCenter,
+                   self.preset['name'] + ('  ✓' if self.selected else ''))
+        if self.selected:
+            pen = QPen(QColor(self.preset['light']))
+            pen.setWidthF(1.6)
+            p.setPen(pen)
+            p.setBrush(Qt.NoBrush)
+            p.drawRoundedRect(QRectF(1, 1, self.width() - 2, self.height() - 2), 8, 8)
+
+
+class ThemeCatalogDialog(QDialog):
+    """五种固定页面主题的预览选择。"""
+
+    def __init__(self, parent=None, selected: str = 'violet') -> None:
+        super().__init__(parent)
+        self.setWindowTitle('选择页面主题颜色')
+        self.selected = None
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(16, 14, 16, 12)
+        tip = QLabel('点击选择页面强调色（每张卡片左侧为日间、右侧为夜间预览）')
+        tip.setObjectName('MetaChips')
+        lay.addWidget(tip)
+        row = QWidget()
+        grid = QGridLayout(row)
+        grid.setContentsMargins(0, 4, 0, 4)
+        grid.setSpacing(10)
+        self._cards = []
+        for i, key in enumerate(THEME_PRESETS):
+            card = ThemePreviewCard(key, selected=(key == selected))
+            card.clicked.connect(self._pick)
+            grid.addWidget(card, i // 3, i % 3)
+            self._cards.append(card)
+        lay.addWidget(row)
+        self.setMinimumWidth(540)
+
+    def _pick(self, key: str) -> None:
+        self.selected = key
+        for card in self._cards:
+            card.set_selected(card.preset_key == key)
+        self.accept()

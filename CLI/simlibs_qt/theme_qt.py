@@ -219,3 +219,22 @@ def apply_fusion_palette(app, p: dict) -> None:
 
 def qcolor(key: str, p: dict) -> QColor:
     return QColor(p[key])
+
+
+# 主题色预设（与 Web 版一致）：每种预设提供日间/夜间两档强调色
+THEME_PRESETS = {
+    'violet': {'name': '紫藤', 'light': '#7c3aed', 'dark': '#a78bfa'},
+    'ocean': {'name': '海蓝', 'light': '#2563eb', 'dark': '#60a5fa'},
+    'forest': {'name': '松林', 'light': '#059669', 'dark': '#34d399'},
+    'amber': {'name': '琥珀', 'light': '#c2410c', 'dark': '#fb923c'},
+    'rose': {'name': '玫瑰', 'light': '#be185d', 'dark': '#f472b6'},
+}
+
+
+def palette_with_accent(base: dict, accent: str) -> dict:
+    """基础明/暗令牌 + 指定强调色（accent2 取其加深变体用于渐变终点）。"""
+    c = QColor(accent)
+    p = dict(base)
+    p['accent'] = accent
+    p['accent2'] = c.darker(135).name()
+    return p

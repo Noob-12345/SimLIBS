@@ -75,7 +75,7 @@ class Parameters:
     resolution: int = 1000
     low_w: float = 650.0
     upper_w: float = 660.0
-    max_ion_charge: int = 3
+    max_ion_charge: int = 2
     webscraping: str = 'static'
     mode_version: int = 1
     headless: bool = True
@@ -90,6 +90,15 @@ class Parameters:
     broaden_grid_step: float = 0.005    # 本地合成网格步长 [nm]
     broaden_center_decimals: int | None = None  # 线中心舍入位数；None=保留 Ritz 波长
     broaden_min_rel_int: float = 0.0    # 本地展宽时的选线阈值（建议 0）
+    local_gaussian_nm: float = 0.0
+    local_lorentz_nm: float = 0.0
+    local_temperature_K: float = 0.0
+    local_temperature_mode: str = 'manual'  # absent legacy field keeps independent K=0 semantics
+
+    @property
+    def effective_temperature_K(self):
+        value=float(self.Te)*(1.602176634e-19/1.380649e-23) if self.local_temperature_mode=='linked' else float(self.local_temperature_K)
+        return finite(value,'有效重粒子温度K')
 
     @property
     def points(self):
@@ -111,11 +120,12 @@ class Parameters:
         values = {k: finite(getattr(self, k), k, True) for k in ('Te', 'Ne', 'low_w', 'upper_w', 'step')}
         values['resolution'] = integer(self.resolution, '分辨率 R', 1)
         values['max_ion_charge'] = integer(self.max_ion_charge, '最大离子电荷')
+        if values['max_ion_charge']>2:raise ValueError('新模拟最大离子电荷须为0–2；历史结果保持原记录')
         if values['upper_w'] <= values['low_w']:
             raise ValueError('波长上界必须大于下界')
-        if self.webscraping not in ('static', 'dynamic', 'server', 'client'):
+        if self.webscraping not in ('static', 'dynamic', 'server', 'client','local'):
             raise ValueError('模式必须为 static/dynamic（旧版）或 server/client（v2）')
-        expected_version = 2 if self.webscraping in ('server', 'client') else 1
+        expected_version = 2 if self.webscraping in ('server', 'client','local') else 1
         if integer(self.mode_version, '模式版本', 1) != expected_version:
             raise ValueError('模式字段与版本不一致；server/client 需要 mode_version=2')
         if self.mode_version == 2:
@@ -128,6 +138,12 @@ class Parameters:
                 raise ValueError('服务器 v2 使用官方 JS 约定；Python 展宽高级参数仅适用于客户端')
         if self.intensity_scale not in ('photon','energy'):
             raise ValueError('强度尺度必须为 photon 或 energy（NIST相对通量）')
+        if self.webscraping=='local' and self.intensity_scale!='photon':raise ValueError('本地模拟使用相对photon强度')
+        if self.webscraping=='local' and self.broaden_convention!='physics':raise ValueError('离线本地使用FWHM=lambda/R物理约定')
+        for key in ('local_gaussian_nm','local_lorentz_nm','local_temperature_K'):
+            values[key]=finite(getattr(self,key),key)
+            if values[key]<0:raise ValueError(f'{key}不能为负')
+        if self.local_temperature_mode not in ('linked','manual'):raise ValueError('热Doppler温度模式须为linked/manual')
         if self.broadening not in ('nist', 'local'):
             raise ValueError("broadening 必须为 'nist' 或 'local'")
         if self.broaden_convention not in ('nist', 'physics'):
@@ -141,6 +157,7 @@ class Parameters:
         if type(self.headless) is not bool or type(self.resample) is not bool:
             raise ValueError('headless/resample 必须为布尔值')
         out = replace(self, elements=e, percentages=p, **values)
+        if out.webscraping=='local':out.effective_temperature_K
         # UI 子类在原 static 构造首次 interpolate 时即使用显式步长。
         if out.points > MAX_POINTS:
             raise ValueError(f'单谱最多 {MAX_POINTS} 点；请缩小波长范围或调整步长')
@@ -229,7 +246,7 @@ class BatchSpec:
     seed: int = 42
     batch_size: int = 32
 
-    def validated(self, params):
+    def validated(self, params, check_cells=True):
         p = params.validated()
         if p.webscraping in ('dynamic', 'server') and p.broadening != 'local' and not p.resample:
             raise ValueError('动态批量须主动选择统一重采样网格')
@@ -240,7 +257,7 @@ class BatchSpec:
         vals = {k: finite(getattr(self, k), k, True) for k in ('Te_min', 'Te_max', 'Ne_min', 'Ne_max')}
         if vals['Te_min'] > vals['Te_max'] or vals['Ne_min'] > vals['Ne_max']:
             raise ValueError('采样范围最小值不能大于最大值')
-        if size * p.points > MAX_CELLS:
+        if check_cells and size * p.points > MAX_CELLS:
             raise ValueError('批量最多 5000000 个光谱单元，请减少样本数或网格点数')
         return replace(self, size=size, batch_size=batch_size, seed=integer(self.seed, '随机种子'), **vals)
 

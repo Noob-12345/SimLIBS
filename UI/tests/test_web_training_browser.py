@@ -55,7 +55,7 @@ class WebTrainingBrowserTests(BrowserCase):
         self.assertEqual(field.get_attribute('value'),'Fe')
         self.assertEqual(percent.get_attribute('value'),'','选择元素不能清掉数字草稿')
 
-    def test_numeric_inputs_preserve_exact_values_and_slider_sync_and_presets(self):
+    def test_numeric_inputs_preserve_exact_values_slider_sync_and_manual_composition(self):
         for selector,value in [('#teInput','1.137'),('#neInput','1.23e17'),('#rInput','1234')]:self.edit(selector,value)
         self.assertAlmostEqual(float(self.driver.find_element(By.ID,'teSlider').get_attribute('value')),1.137)
         self.assertAlmostEqual(float(self.driver.find_element(By.ID,'neSlider').get_attribute('value')),17.089905111439398)
@@ -71,7 +71,9 @@ class WebTrainingBrowserTests(BrowserCase):
         self.assertEqual(self.driver.find_element(By.ID,'teInput').get_attribute('value'),'1.5')
         self.assertAlmostEqual(float(self.driver.find_element(By.ID,'neInput').get_attribute('value')),10**16.5,delta=100)
         self.assertEqual(self.driver.find_element(By.ID,'rInput').get_attribute('value'),'4321')
-        self.js("document.querySelector('[data-preset=h]').click()")
+        self.js("state.comp=[{el:'',pct:100}];renderComp();")
+        self.edit('.comp-el','H').send_keys(Keys.TAB)
+        for selector,value in [('#teInput','1'),('#neInput','1e17'),('#rInput','1000')]:self.edit(selector,value).send_keys(Keys.TAB)
         self.assertEqual(self.js('return [currentParams().te,currentParams().ne,currentParams().R]'),[1,1e17,1000])
         self.assertEqual(self.driver.find_element(By.ID,'neInput').get_attribute('value'),'1e17')
 
@@ -81,8 +83,10 @@ class WebTrainingBrowserTests(BrowserCase):
                 self.js('setParameterValues(1,1e17,1000)')
                 self.edit(selector,value or Keys.BACKSPACE)
                 type(self).received.clear()
-                for function in ('runSingle','runBatch','runScan'):self.invoke(function)
-                self.assertFalse(type(self).received,'无效参数不得启动任何模拟')
+                for function in ('runSingle','runScan'):self.invoke(function)
+                self.assertFalse(type(self).received,'单次无效参数不得启动单次/扫描')
+                self.invoke('runBatch')
+                self.assertEqual(type(self).received[-1][0],'/api/simulate/batch','批量独立参数不受单次草稿污染')
                 self.assertEqual(self.driver.find_element(By.CSS_SELECTOR,selector).get_attribute('aria-invalid'),'true')
 
     def test_batch_equal_ranges_pack_estimate_payload_and_old_tasks(self):
@@ -110,7 +114,7 @@ class WebTrainingBrowserTests(BrowserCase):
         self.assertEqual(self.js('return state.batchResultId'),'new')
 
     def test_labels_modes_theme_and_screenshots(self):
-        self.assertEqual([b.text for b in self.driver.find_elements(By.CSS_SELECTOR,'#modeSeg button')],['服务器计算','客户端计算'])
+        self.assertEqual([b.text for b in self.driver.find_elements(By.CSS_SELECTOR,'#modeSeg button')],['离线本地','在线服务器','客户端计算'])
         for mode in ('server','client'):
             self.js("document.querySelector('#modeSeg button[data-v='+arguments[0]+']').click()",mode)
             self.invoke('runSingle');self.assertEqual(type(self).received[-1][1]['params']['mode'],mode)

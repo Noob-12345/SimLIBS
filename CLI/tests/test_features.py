@@ -15,7 +15,6 @@ import simlibs_cli.backend  # noqa: F401,E402  (注入 UI/web 路径，backend_a
 
 import pandas as pd  # noqa: E402
 
-from simlibs_cli.packing import pack_dataset  # noqa: E402
 
 
 def fake_dataset(tmp: Path, n: int = 5) -> Path:
@@ -28,47 +27,6 @@ def fake_dataset(tmp: Path, n: int = 5) -> Path:
     ds = tmp / 'dataset.csv'
     pd.DataFrame(rows).to_csv(ds, index=False)
     return ds
-
-
-class TestPacking(unittest.TestCase):
-    def setUp(self):
-        import tempfile
-        self.tmp = Path(tempfile.mkdtemp())
-
-    def test_basic_packing_reference_format(self):
-        written = pack_dataset(fake_dataset(self.tmp, 5), self.tmp / 'out', batch_size=2)
-        names = sorted(Path(p).name for p in written)
-        self.assertEqual(names, ['Random_contents.csv', 'Random_contents_2.csv',
-                                 'Random_contents_3.csv', 'Random_spectra.csv',
-                                 'Random_spectra_2.csv', 'Random_spectra_3.csv'])
-        lines = (self.tmp / 'out' / 'Random_spectra.csv').read_text().splitlines()
-        self.assertEqual(len(lines), 4, '每条光谱两行 × 每包 2 条')
-        row0 = lines[0].split(',')
-        row1 = lines[1].split(',')
-        self.assertEqual([float(v) for v in row0], [1.0, 2.0, 0.5])   # 强度行
-        self.assertEqual([float(v) for v in row1], [650.0, 650.5, 651.0])  # 波长行
-        ct = pd.read_csv(self.tmp / 'out' / 'Random_contents.csv')
-        self.assertEqual(list(ct.columns), ['H', 'He'])
-        self.assertEqual(len(ct), 2)
-
-    def test_continues_incomplete_batch(self):
-        out = self.tmp / 'out'
-        pack_dataset(fake_dataset(self.tmp, 1), out, batch_size=3)      # batch1: 1/3
-        pack_dataset(fake_dataset(self.tmp, 3), out, batch_size=3)      # 补 2 条 → 满，再开新批
-        self.assertEqual(len((out / 'Random_spectra.csv').read_text().splitlines()), 6)
-        self.assertEqual(len((out / 'Random_spectra_2.csv').read_text().splitlines()), 2)
-        # 续写时沿用已有表头并补零
-        ct = pd.read_csv(out / 'Random_contents_2.csv')
-        self.assertEqual(list(ct.columns), ['H', 'He'])
-
-    def test_rejects_invalid(self):
-        from simlibs_cli.packing import pack_dataset as pack
-        with self.assertRaises(ValueError):
-            pack(fake_dataset(self.tmp), self.tmp / 'o', batch_size=0)
-        bad = self.tmp / 'bad.csv'
-        bad.write_text('name\nabc\n')
-        with self.assertRaises(ValueError):
-            pack(bad, self.tmp / 'o')
 
 
 class TestQtFeatures(unittest.TestCase):
@@ -105,9 +63,12 @@ class TestQtFeatures(unittest.TestCase):
 
     def test_f4_computation_mode_options(self):
         labels = [self.win.s_mode.itemText(i) for i in range(self.win.s_mode.count())]
-        self.assertEqual(len(labels), 2)
-        self.assertIn('服务器计算', labels[0])
-        self.assertIn('客户端计算', labels[1])
+        self.assertEqual(len(labels), 3)
+        self.assertIn('本地模拟', labels[0])
+        self.assertIn('服务器计算', labels[1])
+        self.assertIn('客户端计算', labels[2])
+        self.assertIn('Photon Flux', self.win.s_scale_label.text())
+        self.assertEqual(self.win.s_charge.text(), '2')
 
     def test_f2_element_completer_and_canonicalization(self):
         row = self.win._comp_rows[0]
@@ -174,52 +135,94 @@ class TestQtFeatures(unittest.TestCase):
         self.assertTrue(all(s.get_visible() for s in spines), '四条边线应可见（完整边框）')
         self.pump(0.2)
 
-    def test_popcat_icon(self):
+    def test_brand_icon_and_github(self):
         w = self.win
-        gif = CLI_ROOT / 'assets' / 'popcat.gif'
-        if not gif.is_file():
-            self.skipTest('assets/popcat.gif 未下载')
-        self.assertIsNotNone(getattr(w, '_popcat_movie', None), 'popcat 动画应已加载')
-        self.assertGreaterEqual(w._popcat_movie.frameCount(), 2, '至少两帧（张嘴/闭嘴）')
-        self.assertFalse(w.windowIcon().isNull())
+        self.assertFalse(w.windowIcon().isNull(), 'graduation.jpg 应作为窗口图标')
+        self.assertIn('SimLIBS', w.brand.text())
+        self.assertIn('SPECTRUM WORKBENCH FOR SCNU', w.brand.text())
+        self.assertTrue((CLI_ROOT / 'assets' / 'github.svg').is_file())
 
-    def test_f6_pack_after_batch(self):
-        import tempfile
+    def test_f6_batch_v2_and_training_package(self):
         w = self.win
         self.pump(0.5)
+        w.s_mode.setCurrentIndex(1)
+        w.b_mode.setCurrentIndex(1)
+        w.b_resample.setChecked(True)
         w.batch_use_current()
-        w.start_batch()
-        for _ in range(300):
-            self.pump(0.2)
-            if w._batch_result:
-                break
-        self.assertIsNotNone(w._batch_result)
         w.pk_size.setText('3')
-        # MOCK 引擎不支持 dataset 导出 → 打桩为真实数据集格式（打包逻辑另有单测）
-        from backend_api import ExportPayload
-        ds = fake_dataset(Path(tempfile.gettempdir()), n=8)
-        orig_export = w.backend.export
-        w.backend.export = lambda jid, kind, frame=None: ExportPayload(
-            ds.read_text(encoding='utf-8'), 'text/csv; charset=utf-8', 'dataset.csv')
+        # 服务器模式 + NIST 展宽 + 未勾选统一重采样 → 启动前拦截（后端不应被调用）
+        w.b_resample.setChecked(False)
+        calls = []
+
+        class _Blocked(Exception):
+            pass
+
+        def blocked(req):
+            calls.append(req)
+            raise _Blocked('拦截测试')
+        orig_start = w.backend.start_batch
+        w.backend.start_batch = blocked
         try:
-            with tempfile.TemporaryDirectory() as td:
-                w.b_export_dir.setText(td)
-                w.pack_batches()
-                for _ in range(200):
-                    self.pump(0.2)
-                    files = list(Path(td).glob('Random_*.csv'))
-                    if files:
-                        break
-                self.assertTrue(files, '打包应产出 Random_* 文件')
-                names = {f.name for f in files}
-                self.assertTrue(any('spectra' in n for n in names))
-                self.assertTrue(any('contents' in n for n in names))
-                # 每包样本数生效：spectra 行数 = 2×每包样本数
-                spectra = next(f for f in files if 'spectra' in f.name and '_2' not in f.name)
-                lines = spectra.read_text().splitlines()
-                self.assertEqual(len(lines), 2 * 3)
+            w.start_batch()
+            self.pump(0.3)
+            self.assertEqual(len(calls), 0, '拦截生效时不应调用 backend.start_batch')
         finally:
-            w.backend.export = orig_export
+            w.backend.start_batch = orig_start
+        # 勾选后放行；请求携带 batch_size
+        w.b_resample.setChecked(True)
+        captured = {}
+        w.backend.start_batch = lambda req: (captured.__setitem__('req', req) or orig_start(req))
+        try:
+            w.start_batch()
+            self.pump(0.5)
+            self.assertIn('req', captured)
+            self.assertEqual(captured['req'].batch_size, 3)
+            for _ in range(300):
+                self.pump(0.2)
+                if w._batch_result:
+                    break
+            self.assertIsNotNone(w._batch_result)
+        finally:
+            w.backend.start_batch = orig_start
+        # MOCK 无训练包 → 按钮禁用 + 下载走 unavailable 分支不崩
+        package = w._batch_result.get('training_package') or {}
+        self.assertFalse(package.get('available'))
+        self.assertFalse(w.pk_btn.isEnabled())
+        w.download_training()
+        self.pump(0.3)
+
+    def test_lazy_scan_frames(self):
+        w = self.win
+        lazy = {'kind': 'scan', 'axis': 'te', 'unit': ' eV', 'lazy_frames': True,
+                'job_id': 'testjob', 'intensity_scale': 'photon', 'params_summary': '测试',
+                'frames': [{'value': 1.0, 'loaded': False}, {'value': 2.0, 'loaded': False}]}
+        w._scan_result = lazy
+        w._scan_job_id = 'testjob'
+        w._scan_cache = {}
+        w._scan_fetching = set()
+        w._frame_idx = 0
+        calls = []
+        orig_get = w.backend.get_result
+
+        def fake_get(jid, frame=None):
+            calls.append(frame)
+            return {'xs': [650.0, 651.0, 652.0], 'ys': [1.0, 2.0, 1.0]}
+
+        w.backend.get_result = fake_get
+        try:
+            w.render_frame()
+            self.pump(0.6)
+            self.assertEqual([c for c in calls if c is not None], [0], '懒帧应按帧请求')
+            self.assertIn(0, w._scan_cache)
+            self.assertGreater(len(w.sc_chart._series), 0, '懒帧加载后应绘制')
+            self.assertIn('帧 1/2', str(w.sc_frame_label.text()))
+            w.next_frame()
+            self.pump(0.6)
+            self.assertEqual([c for c in calls if c is not None], [0, 1])
+        finally:
+            w.backend.get_result = orig_get
+        w._scan_result = None
+        w.set_playing(False)
 
 
 if __name__ == '__main__':

@@ -132,18 +132,23 @@ class CommonParams:
     broaden_grid_step: float = DEFAULT_RESAMPLE_STEP
     broaden_center_decimals: Optional[int] = None
     broaden_min_rel_int: float = 0.0
+    local_gaussian_nm: float = 0.0
+    local_lorentz_nm: float = 0.0
+    local_temperature_K: float = 0.0
+    local_temperature_mode: str = 'manual'
 
     @staticmethod
     def from_api(raw: Any) -> "CommonParams":
         d = _require_dict(raw, "params")
         mode = d.get("mode", "dynamic")
-        if mode not in ('static','dynamic','server','client'):
+        if mode not in ('static','dynamic','server','client','local'):
             raise ApiError(400, '无效计算模式', 'validation')
         version = _int(d.get('mode_version',1),'mode_version',1)
-        if version != (2 if mode in ('server','client') else 1):
+        if version != (2 if mode in ('server','client','local') else 1):
             raise ApiError(400,'server/client 需要 mode_version=2；旧模式使用版本1','validation')
         scale=d.get('intensity_scale','photon')
-        if scale not in ('photon','energy'):raise ApiError(400,'intensity_scale须为photon或energy','validation')
+        if scale not in ('photon','energy'):raise ApiError(400,'强度尺度须为photon/energy','validation')
+        if mode=='local' and scale!='photon':raise ApiError(400,'本地模式仅支持相对photon强度','validation')
         p = CommonParams(
             te=_positive(d.get("te"), "params.te"),
             ne=_positive(d.get("ne"), "params.ne"),
@@ -162,7 +167,8 @@ class CommonParams:
             p.resample_step = _positive(d.get("resample_step", DEFAULT_RESAMPLE_STEP), "params.resample_step")
         if not (0 < p.low_w < p.up_w):
             raise ApiError(400, "波长范围需满足 0 < 下界 < 上界", "validation")
-        expected = 'local' if mode=='client' else 'nist'
+        if p.max_ion_charge>2:raise ApiError(400,'最大离子电荷须为0–2','validation')
+        expected = 'local' if mode in ('client','local') else 'nist'
         p.broadening = d.get('broadening', expected)
         if version==2 and p.broadening!=expected:
             raise ApiError(400,'v2 计算模式固定展宽路径，不能独立组合','validation')
@@ -170,16 +176,24 @@ class CommonParams:
             raise ApiError(400,'官方 JS 重算要求 R>=100','validation')
         if p.broadening not in ("nist", "local"):
             raise ApiError(400, "params.broadening 只能是 'nist' 或 'local'", "validation")
-        p.broaden_convention = d.get("broaden_convention", "nist")
+        p.broaden_convention = d.get("broaden_convention", "physics" if mode=='local' else "nist")
         if p.broaden_convention not in ("nist", "physics"):
             raise ApiError(400, "params.broaden_convention 只能是 'nist' 或 'physics'", "validation")
-        p.broaden_grid_step = _positive(d.get('broaden_grid_step',.01 if mode=='client' else DEFAULT_RESAMPLE_STEP),'params.broaden_grid_step')
+        if mode=='local' and p.broaden_convention!='physics':raise ApiError(400,'离线本地使用FWHM=lambda/R物理约定','validation')
+        p.broaden_grid_step = _positive(d.get('broaden_grid_step',.01 if mode in ('client','local') else DEFAULT_RESAMPLE_STEP),'params.broaden_grid_step')
         center = d.get("broaden_center_decimals")
         if center is not None:
             p.broaden_center_decimals = _int(center, "params.broaden_center_decimals", 0)
         p.broaden_min_rel_int = _finite(d.get("broaden_min_rel_int", 0.0), "params.broaden_min_rel_int")
         if p.broaden_min_rel_int < 0:
             raise ApiError(400, "params.broaden_min_rel_int 不能为负", "validation")
+        for key in ('local_gaussian_nm','local_lorentz_nm','local_temperature_K'):
+            value=_finite(d.get(key,0),key)
+            if value<0:raise ApiError(400,f'{key}不能为负','validation')
+            setattr(p,key,value)
+        p.local_temperature_mode=d.get('local_temperature_mode','manual')
+        if p.local_temperature_mode not in ('linked','manual'):raise ApiError(400,'温度模式须为linked/manual','validation')
+        if mode=='local' and p.local_temperature_mode=='linked':_positive(p.te*(1.602176634e-19/1.380649e-23),'有效重粒子温度K')
         if mode=='server' and (p.broaden_convention!='nist' or p.broaden_center_decimals is not None):
             raise ApiError(400,'服务器 v2 使用官方 JS 约定，不能指定 Python 展宽参数','validation')
         return p
@@ -265,11 +279,27 @@ class BatchRequest:
     ne_range: Tuple[float, float]      # 以 10^ 指数表示
     compositions: List[BatchSample]    # 候选组成池（至少 1 个，每行总和须 100%）
     batch_size: int = 32
+    template_plan: Optional[Dict[str, Any]] = None
 
     @staticmethod
     def from_api(raw: Any) -> "BatchRequest":
         d = _require_dict(raw, "body")
         params = CommonParams.from_api(d.get("params"))
+        template_plan=None
+        if d.get('template_csv') is not None:
+            from simlibs_ui.batch_template import parse_template
+            from simlibs_ui.models import Parameters
+            base=Parameters(Te=params.te,Ne=params.ne,resolution=params.resolution,low_w=params.low_w,upper_w=params.up_w,
+                 max_ion_charge=params.max_ion_charge,webscraping=params.mode,mode_version=params.mode_version,
+                 headless=params.headless,resample=params.resample,step=params.resample_step,intensity_scale=params.intensity_scale,
+                 broadening=params.broadening,broaden_convention=params.broaden_convention,broaden_grid_step=params.broaden_grid_step,
+                 broaden_center_decimals=params.broaden_center_decimals,broaden_min_rel_int=params.broaden_min_rel_int,
+                 local_gaussian_nm=params.local_gaussian_nm,local_lorentz_nm=params.local_lorentz_nm,local_temperature_K=params.local_temperature_K,local_temperature_mode=params.local_temperature_mode)
+            try:template_plan=parse_template(d['template_csv'],base,d.get('repeats',1),d.get('name_column','name'))
+            except ValueError as error:raise ApiError(400,str(error),'validation') from error
+            if d.get('n_samples',template_plan['sample_count'])!=template_plan['sample_count']:raise ApiError(400,'模板样本数须与行数×重复一致','validation')
+            d=dict(d,n_samples=template_plan['sample_count'],compositions=[{'name':entry['name'],'items':[{'el':el,'pct':pct} for el,pct in zip(entry['parameters']['elements'],entry['parameters']['percentages'])]} for entry in template_plan['entries']],
+                   te_range=d.get('te_range',[params.te,params.te]),ne_range=d.get('ne_range',[math.log10(params.ne)]*2))
         n = _int(d.get("n_samples"), "n_samples", minimum=1)
         if n > MAX_BATCH_SAMPLES:
             raise ApiError(400, f"n_samples 超过批量上限 {MAX_BATCH_SAMPLES}", "validation")
@@ -306,11 +336,11 @@ class BatchRequest:
             comps.append(BatchSample(name=str(rd.get("name", f"sample-{i+1}")), items=items))
         if not comps:
             raise ApiError(400, "compositions 候选池不能为空", "validation")
-        cells = n * params.points_estimate()
+        cells = sum(Parameters.from_dict(e['parameters']).points for e in template_plan['entries']) if template_plan else n * params.points_estimate()
         if cells > MAX_BATCH_CELLS:
             raise ApiError(400, f"批量光谱单元 {cells:,} 超过上限 {MAX_BATCH_CELLS:,}", "validation")
         return BatchRequest(params=params, n_samples=n, seed=seed,
-                            te_range=te_range, ne_range=ne_range, compositions=comps, batch_size=batch_size)
+                            te_range=te_range, ne_range=ne_range, compositions=comps, batch_size=batch_size,template_plan=template_plan)
 
 
 @dataclass

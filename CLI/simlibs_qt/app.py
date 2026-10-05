@@ -7,14 +7,17 @@ UI/web/real_backend.RealBackend 的进程内包装（专属 worker 子进程、�
 """
 from __future__ import annotations
 
+import json
 import math
 import threading
 import time
 from datetime import datetime
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QTimer, Qt, QThread, Signal
-from PySide6.QtGui import QCloseEvent, QFont, QKeySequence, QShortcut
+from PySide6.QtCore import QObject, QPoint, QTimer, Qt, QThread, Signal
+from PySide6.QtCore import QUrl, QSize
+from PySide6.QtGui import QCloseEvent, QDesktopServices, QFont, QGuiApplication, QIcon, QKeySequence, QShortcut
+from PySide6.QtWidgets import QMenu
 from PySide6.QtWidgets import QCompleter, QSlider
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QComboBox,
                                QDoubleSpinBox, QFrame, QGridLayout, QHBoxLayout, QHeaderView,
@@ -24,10 +27,10 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QComb
 
 from simlibs_cli.backend import CLI_ROOT, create_backend
 from simlibs_cli.history import load_history
-from simlibs_cli.packing import pack_dataset
 from simlibs_qt.chart import SpectrumChart
-from simlibs_qt.theme_qt import (DARK, LIGHT, apply_dark_titlebar, apply_fusion_palette,
-                                 build_qss, chart_palette)
+from simlibs_qt.theme_qt import (DARK, LIGHT, THEME_PRESETS, apply_dark_titlebar,
+                                 apply_fusion_palette, build_qss, chart_palette,
+                                 palette_with_accent)
 from simlibs_qt.widgets import (EngineCard, ShimmerProgress, ToastHost, fade_between,
                                 field_label, make_chip, pulse, stagger_entrance)
 
@@ -127,10 +130,15 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.fade_ms = fade_ms
         self.backend = backend or create_backend()
-        self.theme_name = 'plasma-dark'
+        self.theme_pref = self._load_theme_pref()      # {'mode': dark|light|system, 'preset': key}
+        self.theme_name = f"{self.theme_pref['preset']}-{self.theme_pref['mode']}"
+        self._current_palette = self._build_palette()
         self.current_job: str | None = None
         self._single_result: dict | None = None
         self._scan_result: dict | None = None
+        self._scan_job_id: str | None = None
+        self._scan_cache: dict = {}
+        self._scan_fetching: set = set()
         self._batch_result: dict | None = None
         self._batch_pool: list[dict] = []
         self._frame_idx = 0
@@ -139,12 +147,14 @@ class MainWindow(QMainWindow):
         self._pumps: list[EventPump] = []
         self._threads: list[QThread] = []
         self._last_launch = None
-        self._last_error_msg = '' 
-        self.setWindowTitle('simLIBS Studio')
+        self._last_error_msg = ''
+        self.setWindowTitle('SimLIBS · SPECTRUM WORKBENCH FOR SCNU')
         self.resize(1440, 900)
         self.setMinimumSize(1120, 700)
         self._build_ui()
-        self._apply_theme(self.theme_name)
+        self._apply_theme()
+        self._setup_brand_icon()
+        self._watch_system_scheme()
         for key, fn in (('F2', self._go_single), ('F3', lambda: self._go('batch')),
                         ('F4', lambda: self._go('scan')), ('F5', lambda: self._go('jobs')),
                         ('F6', lambda: self._go('settings'))):
@@ -152,6 +162,60 @@ class MainWindow(QMainWindow):
         QShortcut(QKeySequence('Ctrl+T'), self, activated=self.toggle_theme)
         # 启动逻辑
         QTimer.singleShot(80, self._startup)
+
+    # ================================================================== 主题
+    THEME_FILE = CLI_ROOT / '.ui-theme.json'
+
+    def _load_theme_pref(self) -> dict:
+        pref = {'mode': 'dark', 'preset': 'violet'}
+        try:
+            data = json.loads(self.THEME_FILE.read_text(encoding='utf-8'))
+            if data.get('mode') in ('dark', 'light', 'system'):
+                pref['mode'] = data['mode']
+            if data.get('preset') in THEME_PRESETS:
+                pref['preset'] = data['preset']
+        except Exception:
+            pass
+        return pref
+
+    def _save_theme_pref(self) -> None:
+        try:
+            self.THEME_FILE.write_text(
+                json.dumps(self.theme_pref, ensure_ascii=False), encoding='utf-8')
+        except Exception:
+            pass
+
+    def _effective_dark(self) -> bool:
+        if self.theme_pref['mode'] == 'system':
+            try:
+                scheme = QGuiApplication.styleHints().colorScheme()
+                return scheme != Qt.ColorScheme.Light   # Unknown 视为暗色
+            except Exception:
+                return True
+        return self.theme_pref['mode'] == 'dark'
+
+    def _build_palette(self) -> dict:
+        dark = self._effective_dark()
+        base = DARK if dark else LIGHT
+        accent = THEME_PRESETS[self.theme_pref['preset']]['dark' if dark else 'light']
+        return palette_with_accent(base, accent)
+
+    def _pal(self) -> dict:
+        return self._current_palette
+
+    def _watch_system_scheme(self) -> None:
+        try:
+            hints = QGuiApplication.styleHints()
+            hints.colorSchemeChanged.connect(
+                lambda *_: self.theme_pref['mode'] == 'system' and self._apply_theme())
+        except Exception:
+            pass
+
+    def toggle_theme(self) -> None:
+        # Ctrl+T：在日间/夜间间快速切换（固定为手动模式）
+        self.theme_pref['mode'] = 'light' if self._effective_dark() else 'dark'
+        self._apply_theme()
+        self.toast(f'已切换到{("日间" if self.theme_pref["mode"] == "light" else "夜间")}模式', timeout=2000)
 
     # ================================================================== UI 构建
     def _build_ui(self) -> None:
@@ -167,10 +231,26 @@ class MainWindow(QMainWindow):
         sidebar.setFixedWidth(236)
         side = vlay((16, 16, 12, 12), 4)
         sidebar.setLayout(side)
-        brand = QLabel('⚡ simLIBS <i>Studio</i>')
-        brand.setObjectName('Brand')
-        brand.setTextFormat(Qt.RichText)
-        side.addWidget(brand)
+        # 品牌图标（graduation.jpg 副本）+ 双行品牌文字
+        brand_box = QWidget()
+        brand_lay = vlay((0, 0, 0, 0), 4)
+        brand_box.setLayout(brand_lay)
+        brand_img = QLabel()
+        brand_img.setAlignment(Qt.AlignHCenter)
+        grad = CLI_ROOT / 'assets' / 'graduation.jpg'
+        if grad.is_file():
+            from PySide6.QtGui import QPixmap
+            pm = QPixmap(str(grad)).scaled(
+                72, 72, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            brand_img.setPixmap(pm)
+        brand_lay.addWidget(brand_img)
+        self.brand = QLabel('SimLIBS<br><small style="color:%s;letter-spacing:1px">'
+                            'SPECTRUM WORKBENCH FOR SCNU</small>' % self._pal()['muted'])
+        self.brand.setObjectName('Brand')
+        self.brand.setTextFormat(Qt.RichText)
+        self.brand.setAlignment(Qt.AlignHCenter)
+        brand_lay.addWidget(self.brand)
+        side.addWidget(brand_box)
         side.addSpacing(10)
         self._nav_buttons = {}
         for pid, label in PAGES:
@@ -200,16 +280,36 @@ class MainWindow(QMainWindow):
         self.page_title.setObjectName('PageTitle')
         top.addWidget(self.page_title)
         top.addStretch(1)
-        self.nist_chip = make_chip('NIST 探测中…')
+        self.nist_chip = make_chip('检测中…')
         self.status_chip = make_chip('空闲')
-        theme_btn = QPushButton('☾ / ☀')
-        theme_btn.setObjectName('Ghost')
-        theme_btn.setCursor(Qt.PointingHandCursor)
-        theme_btn.setFixedWidth(64)
-        theme_btn.clicked.connect(self.toggle_theme)
+        # GitHub 仓库按钮（SVG 图标）
+        github_btn = QPushButton()
+        github_btn.setObjectName('Ghost')
+        github_btn.setCursor(Qt.PointingHandCursor)
+        github_btn.setFixedWidth(40)
+        github_btn.setToolTip('打开 SimLIBS GitHub 仓库')
+        from PySide6.QtGui import QIcon
+        github_btn.setIcon(QIcon(str(CLI_ROOT / 'assets' / 'github.svg')))
+        github_btn.setIconSize(QSize(22, 22))
+        github_btn.clicked.connect(lambda: QDesktopServices.openUrl(
+            QUrl('https://github.com/Noob-12345/SimLIBS')))
         top.addWidget(self.nist_chip)
         top.addWidget(self.status_chip)
-        top.addWidget(theme_btn)
+        # 主题色预设（5 张预览卡）+ 日/夜/系统菜单
+        self.theme_catalog_btn = QPushButton('🎨')
+        self.theme_catalog_btn.setObjectName('Ghost')
+        self.theme_catalog_btn.setCursor(Qt.PointingHandCursor)
+        self.theme_catalog_btn.setFixedWidth(40)
+        self.theme_catalog_btn.setToolTip('选择页面主题颜色')
+        self.theme_catalog_btn.clicked.connect(self.open_theme_catalog)
+        self.theme_mode_btn = QPushButton('☾')
+        self.theme_mode_btn.setObjectName('Ghost')
+        self.theme_mode_btn.setCursor(Qt.PointingHandCursor)
+        self.theme_mode_btn.setFixedWidth(40)
+        self.theme_mode_btn.clicked.connect(self.show_theme_mode_menu)
+        top.addWidget(github_btn)
+        top.addWidget(self.theme_catalog_btn)
+        top.addWidget(self.theme_mode_btn)
         main_lay.addWidget(topbar)
 
         # 页面栈
@@ -234,7 +334,7 @@ class MainWindow(QMainWindow):
         line.setLayout(tl)
         self.task_status = QLabel('就绪')
         self.task_status.setMinimumWidth(360)
-        self.task_progress = ShimmerProgress(pal_of(self.theme_name))
+        self.task_progress = ShimmerProgress(self._pal())
         self.cancel_btn = QPushButton('取消任务')
         self.cancel_btn.setObjectName('Danger')
         self.cancel_btn.setCursor(Qt.PointingHandCursor)
@@ -285,9 +385,9 @@ class MainWindow(QMainWindow):
         self.s_te = QLineEdit('1.0')
         self.s_ne = QLineEdit('1e17')
         self.s_r = QLineEdit('1000')
-        self.s_low = QLineEdit('650')
-        self.s_up = QLineEdit('660')
-        self.s_charge = QLineEdit('3')
+        self.s_low = QLineEdit('200')
+        self.s_up = QLineEdit('700')
+        self.s_charge = QLineEdit('2')
         # 滑块 + 数字输入双向同步
         te_to_text = lambda pos: f'{0.5 + pos / 1000 * 9.5:.4g}'                       # 0.5–10 eV
         te_from_text = lambda s: round((self.parse_float(s, 'Te') - 0.5) / 9.5 * 1000)
@@ -316,34 +416,57 @@ class MainWindow(QMainWindow):
         card_lay.addWidget(range_row)
         card_lay.addWidget(field('最大离子电荷', self.s_charge))
         self.s_mode = QComboBox()
-        self.s_mode.addItems(['服务器计算（static）', '客户端计算（dynamic）'])
+        self.s_mode.addItems(['本地模拟（local · 离线谱线库）',
+                              '服务器计算（server · 浏览器内官方 JS 重算）',
+                              '客户端计算（client · NIST 线表 + 本地合成）'])
         self.s_mode.setCurrentIndex(0)
-        self.s_scale = QComboBox()
-        self.s_scale.addItems(['光子通量 (photon)', '能量通量 (energy)'])
-        self.s_broad = QComboBox()
-        self.s_broad.addItems(['NIST 服务端', '本地线表（无需浏览器）'])
+        self.s_mode.currentIndexChanged.connect(self._mode_changed)
+        self.s_scale_label = QLabel('Photon Flux')
+        self.s_scale_label.setObjectName('MetaChips')
         self.s_title = QLineEdit()
         self.s_title.setPlaceholderText('图表标题（可选）')
         card_lay.addWidget(field('计算方式', self.s_mode))
-        card_lay.addWidget(field('强度尺度', self.s_scale))
-        card_lay.addWidget(field('谱线展宽', self.s_broad))
+        card_lay.addWidget(field('强度尺度', self.s_scale_label))
         card_lay.addWidget(field('图表标题', self.s_title))
 
-        adv_lay = card(pl, '高级参数（展宽 / 重采样 / 浏览器）')
+        adv_lay = card(pl, '模式专属参数（随计算方式启用）')
+        # 离线 local 专属
+        self.s_local_gauss = QLineEdit('0')
+        self.s_local_lorentz = QLineEdit('0')
+        self.s_temp_mode = QComboBox()
+        self.s_temp_mode.addItems(['重粒子温度随电子温度（linked）', '独立重粒子温度（manual）'])
+        self.s_temp_k = QLineEdit('0')
+        self._rows_local = [
+            adv_lay.addWidget(field('额外高斯宽度 [nm]', self.s_local_gauss)),
+            adv_lay.addWidget(field('洛伦兹 FWHM [nm]', self.s_local_lorentz)),
+            adv_lay.addWidget(field('重粒子温度模式', self.s_temp_mode)),
+            adv_lay.addWidget(field('重粒子温度 [K]', self.s_temp_k)),
+        ]
+        self.s_temp_mode.currentIndexChanged.connect(
+            lambda i: self.s_temp_k.setEnabled(i == 1))
+        self.s_temp_k.setEnabled(False)
+        # 客户端 client 专属
         self.s_conv = QComboBox()
         self.s_conv.addItems(['NIST：w=λ/R（1/e 半宽）', 'Physics：FWHM=λ/R'])
-        self.s_grid = QLineEdit('0.005')
+        self.s_conv.setCurrentIndex(0)
+        self.s_grid = QLineEdit('0.01')
         self.s_minrel = QLineEdit('0')
+        self._rows_client = [
+            adv_lay.addWidget(field('展宽约定', self.s_conv)),
+            adv_lay.addWidget(field('展宽网格步长', self.s_grid)),
+            adv_lay.addWidget(field('选线阈值', self.s_minrel)),
+        ]
+        # 通用
         self.s_step = QLineEdit('0.005')
         self.s_resample = QCheckBox('本地插值（重采样）')
-        self.s_headless = QCheckBox('headless 浏览器')
+        self.s_headless = QCheckBox('后台抓取')
         self.s_headless.setChecked(True)
-        adv_lay.addWidget(field('展宽约定', self.s_conv))
-        adv_lay.addWidget(field('展宽网格步长', self.s_grid))
-        adv_lay.addWidget(field('选线阈值', self.s_minrel))
-        adv_lay.addWidget(field('重采样步长', self.s_step))
+        self.s_step_row = field('插值目标步长 [nm]', self.s_step)
+        adv_lay.addWidget(self.s_step_row)
         adv_lay.addWidget(self.s_resample)
         adv_lay.addWidget(self.s_headless)
+        self.s_resample.toggled.connect(
+            lambda on: self.s_step_row.setVisible(on))
 
         comp_lay = card(pl, '配比（总和须为 100%，元素区分大小写）')
         self.comp_rows_widget = QWidget()
@@ -363,21 +486,13 @@ class MainWindow(QMainWindow):
         bl.addWidget(norm_btn)
         bl.addStretch(1)
         comp_lay.addWidget(btn_row)
-        self.sum_label = QLabel('总和 0%')
+        self.sum_label = QLabel('✓ 100%')
         self.sum_label.setObjectName('SumLabel')
         comp_lay.addWidget(self.sum_label)
-
-        preset_row = QWidget()
-        prl = hlay((0, 0, 0, 0), 8)
-        preset_row.setLayout(prl)
-        p1 = QPushButton('H 窄波段')
-        p2 = QPushButton('W/Fe/Mo')
-        p1.clicked.connect(self.preset_h)
-        p2.clicked.connect(self.preset_wfm)
-        prl.addWidget(p1)
-        prl.addWidget(p2)
-        prl.addStretch(1)
-        pl.addWidget(preset_row)
+        self.local_capability_label = QLabel('')
+        self.local_capability_label.setObjectName('MetaChips')
+        self.local_capability_label.setWordWrap(True)
+        comp_lay.addWidget(self.local_capability_label)
         pl.addStretch(1)
         self.comp_card_widget = panel
 
@@ -405,7 +520,7 @@ class MainWindow(QMainWindow):
         chart_frame.setObjectName('Card')
         cf = vlay((2, 2, 2, 2), 0)
         chart_frame.setLayout(cf)
-        self.s_chart = SpectrumChart(chart_palette(pal_of(self.theme_name)))
+        self.s_chart = SpectrumChart(chart_palette(self._pal()))
         cf.addWidget(self.s_chart)
         rl2.addWidget(chart_frame, 1)
         self.s_meta = QLabel('')
@@ -419,7 +534,7 @@ class MainWindow(QMainWindow):
         view_row.setLayout(vr)
         vr.addWidget(field_label('视图'))
         self.s_view = QComboBox()
-        self.s_view.addItems(['插值谱', '原始谱', '离子分量'])
+        self.s_view.addItems(['插值谱', '原始谱', '元素贡献'])
         self.s_view.currentIndexChanged.connect(lambda _: self.paint_single())
         self.s_export_dir = QLineEdit(EXPORT_DIR)
         vr.addWidget(self.s_view)
@@ -435,6 +550,7 @@ class MainWindow(QMainWindow):
             er.addWidget(b)
         er.addStretch(1)
         rl2.addWidget(exp_row)
+        self._mode_changed(self.s_mode.currentIndex())
         return page
 
     # ---------------------------------------------------------------- 批量
@@ -454,29 +570,100 @@ class MainWindow(QMainWindow):
         scroll.setWidget(panel)
         lay.addWidget(scroll)
 
-        c1 = card(pl)
+        c1 = card(pl, '批量参数（独立于单次页，模式可任选）')
+        self.b_mode = QComboBox()
+        self.b_mode.addItems(['本地模拟（local · 离线谱线库）',
+                              '服务器计算（server）', '客户端计算（client）'])
+        self.b_mode.setCurrentIndex(0)
+        self.b_te = QLineEdit('1.0')
+        self.b_ne = QLineEdit('1e17')
+        self.b_r = QLineEdit('3000')
+        self.b_low = QLineEdit('200')
+        self.b_up = QLineEdit('700')
+        self.b_charge = QLineEdit('2')
+        self.b_headless = QCheckBox('后台抓取')
+        self.b_headless.setChecked(True)
+        self.b_resample = QCheckBox('本地插值（统一重采样网格）')
+        self.b_step = QLineEdit('0.01')
+        self.b_grid = QLineEdit('0.01')
+        self.b_minrel = QLineEdit('0')
+        self.b_gauss = QLineEdit('0')
+        self.b_lorentz = QLineEdit('0')
+        self.b_temp_mode = QComboBox()
+        self.b_temp_mode.addItems(['重粒子温度随电子温度（linked）', '独立重粒子温度（manual）'])
+        self.b_temp_k = QLineEdit('0')
+        c1.addWidget(field('计算方式', self.b_mode))
+        c1.addWidget(field('Te [eV]', self.b_te))
+        c1.addWidget(field('Ne [cm⁻³]', self.b_ne))
+        c1.addWidget(field('分辨率 R', self.b_r))
+        row_lu = QWidget()
+        rlu = hlay((0, 0, 0, 0), 8)
+        row_lu.setLayout(rlu)
+        rlu.addWidget(field_label('λ 范围 [nm]'), 0)
+        rlu.addWidget(self.b_low, 1)
+        rlu.addWidget(self.b_up, 1)
+        c1.addWidget(row_lu)
+        c1.addWidget(field('最大离子电荷', self.b_charge))
+        c1.addWidget(self.b_headless)
+        c1.addWidget(self.b_resample)
+        self.b_step_row = field('插值目标步长 [nm]', self.b_step)
+        c1.addWidget(self.b_step_row)
+        self.b_step_row.setVisible(False)
+        self.b_resample.toggled.connect(lambda on: self.b_step_row.setVisible(on))
+        c1.addWidget(field('展宽网格步长 [nm]', self.b_grid))
+        self.b_conv = QComboBox()
+        self.b_conv.addItems(['NIST：w=λ/R（1/e 半宽）', 'Physics：FWHM=λ/R'])
+        c1.addWidget(field('展宽约定', self.b_conv))
+        c1.addWidget(field('选线阈值', self.b_minrel))
+        c1.addWidget(field('额外高斯宽度 [nm]', self.b_gauss))
+        c1.addWidget(field('洛伦兹 FWHM [nm]', self.b_lorentz))
+        c1.addWidget(field('重粒子温度模式', self.b_temp_mode))
+        c1.addWidget(field('重粒子温度 [K]', self.b_temp_k))
+        self._batch_mode_changed(self.b_mode.currentIndex())
+        self.b_mode.currentIndexChanged.connect(self._batch_mode_changed)
+
+        c1b = card(pl)
         self.b_n = QLineEdit('10')
         self.b_seed = QLineEdit('0')
         self.b_temin = QLineEdit('1.0')
         self.b_temax = QLineEdit('2.0')
         self.b_nemin = QLineEdit('17')
         self.b_nemax = QLineEdit('18')
-        c1.addWidget(field('样本数', self.b_n))
-        c1.addWidget(field('随机种子', self.b_seed))
+        c1b.addWidget(field('样本总数', self.b_n))
+        c1b.addWidget(field('随机种子', self.b_seed))
         row_te = QWidget()
         r1 = hlay((0, 0, 0, 0), 8)
         row_te.setLayout(r1)
         r1.addWidget(field_label('Te 范围 [eV]'), 0)
         r1.addWidget(self.b_temin, 1)
         r1.addWidget(self.b_temax, 1)
-        c1.addWidget(row_te)
+        c1b.addWidget(row_te)
         row_ne = QWidget()
         r2 = hlay((0, 0, 0, 0), 8)
         row_ne.setLayout(r2)
         r2.addWidget(field_label('Ne 指数 (10^x)'), 0)
         r2.addWidget(self.b_nemin, 1)
         r2.addWidget(self.b_nemax, 1)
-        c1.addWidget(row_ne)
+        c1b.addWidget(row_ne)
+
+        c_tpl = card(pl, '模板 CSV（可选 · 严格按行执行，行内可覆盖参数）')
+        self.b_tpl_path = QLineEdit()
+        self.b_tpl_path.setPlaceholderText('模板 CSV 路径…（元素列/参数列混排）')
+        c_tpl.addWidget(self.b_tpl_path)
+        self.b_repeats = QLineEdit('1')
+        c_tpl.addWidget(field('每行重复次数', self.b_repeats))
+        tpl_row = QWidget()
+        tr = hlay((0, 0, 0, 0), 8)
+        tpl_row.setLayout(tr)
+        tpl_btn = QPushButton('校验模板')
+        tpl_btn.clicked.connect(self.validate_template)
+        tr.addWidget(tpl_btn)
+        tr.addStretch(1)
+        c_tpl.addWidget(tpl_row)
+        self.b_tpl_info = QLabel('')
+        self.b_tpl_info.setObjectName('MetaChips')
+        self.b_tpl_info.setWordWrap(True)
+        c_tpl.addWidget(self.b_tpl_info)
 
         c2 = card(pl, '组成候选池（CSV 元素列 + 可选 name 列）')
         self.b_csv = QLineEdit()
@@ -508,19 +695,23 @@ class MainWindow(QMainWindow):
         run_btn.clicked.connect(self.start_batch)
         c2.addWidget(run_btn)
 
-        c3 = card(pl, '打包（神经网络训练 · 参照 nist_R3000_min0 格式）')
+        c3 = card(pl, '训练数据包（神经网络训练 · 参照 nist_R3000_min0 格式）')
         self.pk_size = QLineEdit('32')
-        self.pk_prefix = QLineEdit('Random')
         c3.addWidget(field('每包样本数', self.pk_size))
-        c3.addWidget(field('文件名前缀', self.pk_prefix))
-        pk_hint = QLabel(' spectra：每条光谱两行（强度/波长，无表头）；contents：固定元素列浓度，'
-                         '满包自动换 _2/_3 编号，未满批次自动续写')
+        self.pk_count = QLabel('预计 1 包 · 末包 10 条')
+        self.pk_count.setObjectName('MetaChips')
+        c3.addWidget(self.pk_count)
+        self.b_n.textChanged.connect(self._update_pack_estimate)
+        self.pk_size.textChanged.connect(self._update_pack_estimate)
+        pk_hint = QLabel(' 批量成功后自动打包：ZIP 内 Random_spectra/contents 系列'
+                         '（光谱两行交替、固定 28 元素标签列）+ package-manifest.json')
         pk_hint.setObjectName('MetaChips')
         pk_hint.setWordWrap(True)
         c3.addWidget(pk_hint)
-        pack_btn = QPushButton('📦 打包导出 batch')
-        pack_btn.clicked.connect(self.pack_batches)
-        c3.addWidget(pack_btn)
+        self.pk_btn = QPushButton('⬇ 下载训练数据包 ZIP')
+        self.pk_btn.setEnabled(False)
+        self.pk_btn.clicked.connect(self.download_training)
+        c3.addWidget(self.pk_btn)
 
         right = QWidget()
         rl = vlay((0, 0, 0, 0), 6)
@@ -538,7 +729,7 @@ class MainWindow(QMainWindow):
         self.b_samples.setAlternatingRowColors(True)
         self.b_samples.verticalHeader().setVisible(False)
         self.b_samples.setStyleSheet('QTableWidget { background: transparent; border: 1px solid %s; border-radius: 12px; }'
-                                     % pal_of(self.theme_name)['brd'])
+                                     % self._pal()['brd'])
         rl.addWidget(self.b_samples, 1)
         self.b_wide = QLabel('')
         self.b_wide.setObjectName('MetaChips')
@@ -621,7 +812,7 @@ class MainWindow(QMainWindow):
         chart_frame.setObjectName('Card')
         cf = vlay((2, 2, 2, 2), 0)
         chart_frame.setLayout(cf)
-        self.sc_chart = SpectrumChart(chart_palette(pal_of(self.theme_name)))
+        self.sc_chart = SpectrumChart(chart_palette(self._pal()))
         cf.addWidget(self.sc_chart)
         rl.addWidget(chart_frame, 1)
         self.sc_meta = QLabel('')
@@ -669,9 +860,12 @@ class MainWindow(QMainWindow):
         refresh_btn.clicked.connect(self.refresh_jobs)
         view_btn = QPushButton('查看结果')
         view_btn.clicked.connect(self.view_selected_job)
+        resume_btn = QPushButton('↻ 续跑')
+        resume_btn.clicked.connect(self.resume_selected_job)
         rr.addWidget(open_btn)
         rr.addWidget(refresh_btn)
         rr.addWidget(view_btn)
+        rr.addWidget(resume_btn)
         pl.addWidget(row)
         self.j_table = QTableWidget(0, 7)
         self.j_table.setHorizontalHeaderLabels(['创建', '类型', '状态', '进度', '耗时', '摘要', 'ID'])
@@ -756,33 +950,34 @@ class MainWindow(QMainWindow):
 
     # ================================================================== 启动
     def _startup(self) -> None:
-        self._setup_popcat_icon()
+        self._setup_brand_icon()
         self.preset_h()
         self.load_settings_form()
         self.refresh_engine()
         self.refresh_jobs()
-        self.log('simLIBS Studio 就绪 · 真实引擎（--mock 切换演示引擎）· 图表：左键框选放大 / 中键或 Shift 平移 / 右键复位')
+        self.log('SimLIBS · SPECTRUM WORKBENCH FOR SCNU 就绪 · 本地/服务器/客户端三路径 · '
+                 '图表：左键框选放大 / 中键或 Shift 平移 / 右键复位')
 
-    def _setup_popcat_icon(self) -> None:
-        """窗口图标 = popcat.gif 逐帧动画（标题栏/任务栏张嘴闭嘴）。"""
-        gif = CLI_ROOT / 'assets' / 'popcat.gif'
-        if not gif.is_file():
-            self.log('[icon] 未找到 assets/popcat.gif，使用默认图标')
+    def _mode_changed(self, idx: int) -> None:
+        """v3：本地/服务器/客户端三路径，按模式启用参数并刷新补全与状态。"""
+        self._rows_local_widget = None
+        local, client = idx == 0, idx == 2
+        for wdg in (self.s_local_gauss, self.s_local_lorentz, self.s_temp_mode, self.s_temp_k):
+            wdg.setEnabled(local)
+        for wdg in (self.s_conv, self.s_grid, self.s_minrel):
+            wdg.setEnabled(client)
+        self._refresh_element_completions()
+        self.refresh_engine()
+
+    def _setup_brand_icon(self) -> None:
+        """窗口/应用图标 = graduation.jpg（与 Web 版同源副本）。"""
+        from PySide6.QtGui import QIcon, QPixmap
+        grad = CLI_ROOT / 'assets' / 'graduation.jpg'
+        if not grad.is_file():
             return
-        from PySide6.QtGui import QMovie, QIcon
-        movie = QMovie(str(gif), parent=self)
-        movie.setSpeed(70)   # 稍放慢，嘴型更清楚
-        movie.setCacheMode(QMovie.CacheAll)
-
-        def frame_changed() -> None:
-            pm = movie.currentPixmap()
-            if not pm.isNull():
-                self.setWindowIcon(QIcon(pm))
-
-        movie.frameChanged.connect(frame_changed)
-        movie.start()
-        frame_changed()
-        self._popcat_movie = movie
+        icon = QIcon(str(grad))
+        self.setWindowIcon(icon)
+        QApplication.instance().setWindowIcon(icon)
 
     def go(self, pid: str) -> None:
         titles = dict(PAGES)
@@ -806,29 +1001,73 @@ class MainWindow(QMainWindow):
         self.go(pid)
 
     # ================================================================== 主题
-    def toggle_theme(self) -> None:
-        self.theme_name = 'plasma-light' if self.theme_name.endswith('dark') else 'plasma-dark'
-        self._apply_theme(self.theme_name)
-        if self.fade_ms > 0:
-            pulse(self.centralWidget(), duration=240, dip=0.3)   # 主题切换呼吸过渡
-        self.toast(f'已切换主题：{self.theme_name}', timeout=2000)
-
-    def _apply_theme(self, theme_name: str) -> None:
-        p = pal_of(theme_name)
+    def _apply_theme(self) -> None:
+        self._current_palette = self._build_palette()
+        self.theme_name = f"{self.theme_pref['preset']}-{('light' if not self._effective_dark() else 'dark')}"
         app = QApplication.instance()
-        apply_fusion_palette(app, p)
-        app.setStyleSheet(build_qss(p))
+        apply_fusion_palette(app, self._pal())
+        app.setStyleSheet(build_qss(self._pal()))
         for chart in (self.s_chart, self.sc_chart):
-            chart.set_palette(chart_palette(p))
-        self.task_progress.set_palette(p)
+            chart.set_palette(chart_palette(self._pal()))
+        self.task_progress.set_palette(self._pal())
         if self._series_spec:
             self._repaint_series_spec()
-        # chip 状态色刷新
         if hasattr(self, '_last_engine'):
             self._update_engine(self._last_engine)
+        self._update_theme_buttons()
+        self._save_theme_pref()
+
+    def _update_theme_buttons(self) -> None:
+        mode = self.theme_pref['mode']
+        icon = {'dark': '☾', 'light': '☀', 'system': '🖥'}.get(mode, '☾')
+        self.theme_mode_btn.setText(icon)
+        if mode == 'system':
+            tip = f'跟随系统 · 当前{"夜间" if self._effective_dark() else "日间"}'
+        else:
+            tip = '夜间' if mode == 'dark' else '日间'
+        self.theme_mode_btn.setToolTip(tip + '，点击选择日间/夜间/跟随系统')
+        name = THEME_PRESETS[self.theme_pref['preset']]['name']
+        self.theme_catalog_btn.setToolTip(f'页面主题颜色：{name}')
+
+    def open_theme_catalog(self) -> None:
+        dlg = ThemeCatalogDialog(self, selected=self.theme_pref['preset'])
+        if dlg.exec() == ThemeCatalogDialog.Accepted and dlg.selected:
+            self.theme_pref['preset'] = dlg.selected
+            self._apply_theme()
+            self.toast(f'页面主题已切换：{THEME_PRESETS[dlg.selected]["name"]}', timeout=2000)
+
+    def show_theme_mode_menu(self) -> None:
+        menu = QMenu(self)
+        for mode_id, label in (('light', '☀ 日间'), ('dark', '☾ 夜间'), ('system', '🖥 跟随系统')):
+            act = menu.addAction(label)
+            act.setCheckable(True)
+            act.setChecked(self.theme_pref['mode'] == mode_id)
+            act.triggered.connect(lambda _=False, m=mode_id: self._set_theme_mode(m))
+        menu.exec(self.theme_mode_btn.mapToGlobal(
+            QPoint(0, self.theme_mode_btn.height())))
+
+    def _set_theme_mode(self, mode: str) -> None:
+        self.theme_pref['mode'] = mode
+        self._apply_theme()
+        self.toast('主题模式：' + {'light': '日间', 'dark': '夜间', 'system': '跟随系统'}[mode],
+                   timeout=2000)
+
+    def toggle_theme(self) -> None:
+        # Ctrl+T：日间/夜间快速切换
+        self.theme_pref['mode'] = 'light' if self._effective_dark() else 'dark'
+        self._apply_theme()
+
+    def _setup_brand_icon(self) -> None:
+        """窗口/应用图标 = graduation.jpg（与 Web 版同源副本）。"""
+        grad = CLI_ROOT / 'assets' / 'graduation.jpg'
+        if not grad.is_file():
+            return
+        icon = QIcon(str(grad))
+        self.setWindowIcon(icon)
+        QApplication.instance().setWindowIcon(icon)
 
     def _repaint_series_spec(self) -> None:
-        p = pal_of(self.theme_name)
+        p = self._pal()
         spec = []
         for s in self._series_spec:
             key = s.get('color_key')
@@ -844,7 +1083,7 @@ class MainWindow(QMainWindow):
         self.toasts.show(message, kind, timeout)
 
     def log(self, message: str, level: str = 'info') -> None:
-        color = pal_of(self.theme_name).get(
+        color = self._pal().get(
             {'info': 'muted', 'ok': 'good', 'warn': 'warn', 'error': 'bad'}.get(level, 'muted'))
         ts = datetime.now().strftime('%H:%M:%S')
         self.task_log.appendPlainText(f'[{ts}] {message}')
@@ -948,8 +1187,11 @@ class MainWindow(QMainWindow):
             self.sum_label.setProperty('class', 'bad')
             self._repolish(self.sum_label)
             return
-        p = pal_of(self.theme_name)
-        self.sum_label.setText(('✓ ' if ok else '✗ ') + f'总和 {total:.6g}%' + ('' if ok else '（须为 100%）'))
+        p = self._pal()
+        if ok:
+            self.sum_label.setText('✓ 100%')
+        else:
+            self.sum_label.setText(f'✗ 总和 {total:.6g}%（须为 100%）')
         self.sum_label.setStyleSheet(f'color: {p["good"] if ok else p["bad"]}; font-size: 12px;')
 
     def comp_normalize(self) -> None:
@@ -977,15 +1219,52 @@ class MainWindow(QMainWindow):
         widget.style().unpolish(widget)
         widget.style().polish(widget)
 
-    def _element_completer(self) -> QCompleter:
+    def _current_mode(self) -> str:
+        return ('local', 'server', 'client')[self.s_mode.currentIndex()]
+
+    def _available_elements(self) -> list[str]:
+        """补全候选：本地模式只列离线谱线库真正可用的元素，在线模式给完整周期表。"""
+        if self._current_mode() == 'local':
+            try:
+                st = self.backend.engine_status('local')
+                elements = (st.get('local') or {}).get('elements') or []
+                if elements:
+                    return [str(e) for e in elements]
+            except Exception:
+                pass
+            return []
         from simlibs_ui.models import ELEMENTS
-        completer = QCompleter(sorted(ELEMENTS), self)
+        return sorted(ELEMENTS)
+
+    def _refresh_element_completions(self) -> None:
+        """模式切换后刷新所有配比输入框的补全候选（本地模式只列库内可用元素）。"""
+        available = self._available_elements()
+        if getattr(self, '_element_model', None) is None:
+            return
+        self._element_model.setStringList(available)
+        if self._current_mode() == 'local':
+            try:
+                local = (getattr(self, '_last_engine', None) or {}).get('local') or {}
+                if local:
+                    self.local_capability_label.setText(
+                        f"本地谱线库：{local.get('csv_count', '?')} CSV · "
+                        f"{len(local.get('elements') or [])} 元素可用")
+            except Exception:
+                pass
+        else:
+            self.local_capability_label.setText('')
+
+    def _element_completer(self) -> QCompleter:
+        if getattr(self, '_element_model', None) is None:
+            from PySide6.QtCore import QStringListModel
+            self._element_model = QStringListModel(self._available_elements())
+        completer = QCompleter(self._element_model, self)
         completer.setCaseSensitivity(Qt.CaseInsensitive)
         completer.setFilterMode(Qt.MatchStartsWith)
         completer.popup().setStyleSheet(
-            f'QListView {{ background: {pal_of(self.theme_name)["card2"]};'
-            f' color: {pal_of(self.theme_name)["text"]};'
-            f' selection-background-color: {pal_of(self.theme_name)["hover"]}; }}')
+            f'QListView {{ background: {self._pal()["card2"]};'
+            f' color: {self._pal()["text"]};'
+            f' selection-background-color: {self._pal()["hover"]}; }}')
         return completer
 
     @staticmethod
@@ -1053,10 +1332,11 @@ class MainWindow(QMainWindow):
 
     # ================================================================== 预设
     def preset_h(self) -> None:
-        self.fill_single(1.0, 1e17, 1000, 650, 660, 3, [('H', 100.0)])
+        """默认参数：Fe 100% · local 模式 · 200–700nm · R3000 · 电荷 2（与 Web 默认一致）。"""
+        self.fill_single(1.0, 1e17, 3000, 200, 700, 2, [('Fe', 100.0)])
 
     def preset_wfm(self) -> None:
-        self.fill_single(1.0, 1e17, 1000, 200, 1000, 3,
+        self.fill_single(1.0, 1e17, 3000, 200, 700, 2,
                          [('W', 50.0), ('Fe', 25.0), ('Mo', 25.0)])
 
     def fill_single(self, te, ne, r, low, up, charge, comp) -> None:
@@ -1097,7 +1377,7 @@ class MainWindow(QMainWindow):
                 w = max(0.3, (up - low) * 0.004)
                 v += math.exp(-((x - c) ** 2) / (2 * w * w))
             ys.append(v)
-        p = pal_of(self.theme_name)
+        p = self._pal()
         self._set_chart(self.s_chart, [{'label': '示意', 'xs': xs, 'ys': ys,
                                         'color': p['muted'], 'dotted': True, 'color_key': 'muted'}])
         self.s_legend.setText('示意预览 · 运行后替换为真实光谱')
@@ -1113,22 +1393,32 @@ class MainWindow(QMainWindow):
     def _single_params_dict(self) -> dict:
         def f(sel, name):
             return self.parse_float(sel.text(), name)
-        broad_local = self.s_broad.currentIndex() == 1
+        mode = ('local', 'server', 'client')[self.s_mode.currentIndex()]
+        charge = self.parse_int(self.s_charge.text(), '最大离子电荷')
+        if not 0 <= charge <= 2:
+            raise ValueError('最大离子电荷须为 0–2（本地谱线库与 NIST v2 均只支持 I/II）')
         resample = self.s_resample.isChecked()
         d = {
             'te': f(self.s_te, 'Te'), 'ne': f(self.s_ne, 'Ne'),
             'resolution': self.parse_int(self.s_r.text(), '分辨率 R'),
             'low_w': f(self.s_low, 'λ 下界'), 'up_w': f(self.s_up, 'λ 上界'),
-            'max_ion_charge': self.parse_int(self.s_charge.text(), '最大离子电荷'),
-            'mode': 'dynamic' if self.s_mode.currentIndex() == 1 else 'static',
+            'max_ion_charge': charge,
+            'mode': mode, 'mode_version': 2,
             'headless': self.s_headless.isChecked(),
             'resample': resample,
-            'intensity_scale': 'energy' if self.s_scale.currentIndex() == 1 else 'photon',
-            'broadening': 'local' if broad_local else 'nist',
+            'intensity_scale': 'photon',   # v3：新请求仅 Photon flux
+            'broadening': 'local' if mode in ('local', 'client') else 'nist',
         }
         if resample:
             d['resample_step'] = f(self.s_step, '重采样步长')
-        if broad_local:
+        if mode == 'local':
+            d['broaden_convention'] = 'physics'   # 离线本地固定 FWHM=λ/R
+            d['local_gaussian_nm'] = f(self.s_local_gauss, '额外高斯宽度')
+            d['local_lorentz_nm'] = f(self.s_local_lorentz, '洛伦兹 FWHM')
+            d['local_temperature_mode'] = ('linked', 'manual')[self.s_temp_mode.currentIndex() == 1]
+            d['local_temperature_K'] = 0.0 if d['local_temperature_mode'] == 'linked' \
+                else f(self.s_temp_k, '重粒子温度')
+        elif mode == 'client':
             d['broaden_convention'] = 'physics' if self.s_conv.currentIndex() == 1 else 'nist'
             d['broaden_grid_step'] = f(self.s_grid, '展宽网格步长')
             d['broaden_min_rel_int'] = f(self.s_minrel, '选线阈值')
@@ -1154,12 +1444,33 @@ class MainWindow(QMainWindow):
         launcher = lambda: self.backend.start_single(req)
         self.watch(jid, f'单次模拟 · {params.summary()}', launcher=launcher)
 
+    @staticmethod
+    def _aggregate_elements(ions: list[dict]) -> list[dict]:
+        """同元素各真实离子贡献求和（排除总谱/Exp/Residual 由调用方过滤）；颜色按元素稳定。"""
+        import re
+        from collections import OrderedDict
+        groups: "OrderedDict[str, list[dict]]" = OrderedDict()
+        for ion in ions or []:
+            label = str(ion.get('label', ''))
+            m = re.match(r'^([A-Z][a-z]?)\s', label + ' ')
+            el = m.group(1) if m else label
+            groups.setdefault(el, []).append(ion)
+        out = []
+        for i, (el, items) in enumerate(groups.items()):
+            xs = items[0]['xs']
+            total = [0.0] * len(xs)
+            for it in items:
+                for j, v in enumerate(it['ys']):
+                    total[j] += float(v)
+            out.append({'label': el, 'xs': xs, 'ys': total})
+        return out
+
     def paint_single(self) -> None:
         result = self._single_result
         if not result:
             return
-        view = self.s_view.currentIndex()   # 0 插值 1 原始 2 离子
-        p = pal_of(self.theme_name)
+        view = self.s_view.currentIndex()   # 0 插值 1 原始 2 元素贡献
+        p = self._pal()
         series = result.get('series') or {}
         if not series and result.get('xs'):   # MOCK 引擎返回顶层 xs/ys
             series = {'interpolated': {'label': 'spectrum', 'xs': result['xs'], 'ys': result['ys']}}
@@ -1168,22 +1479,30 @@ class MainWindow(QMainWindow):
         if view != 1 and main:
             spec.append({'label': '主线', 'xs': main['xs'], 'ys': main['ys'],
                          'color': p['accent'], 'color_key': 'accent'})
-        for i, ion in enumerate(series.get('ions') or []):
-            if view == 1:
-                break
-            key = ION_KEYS[i % len(ION_KEYS)]
-            spec.append({'label': str(ion.get('label')), 'xs': ion['xs'], 'ys': ion['ys'],
-                         'color': p[key], 'color_key': key})
+        if view == 2:
+            # 元素贡献：同元素各离子求和，颜色按元素稳定（总谱/Exp/Residual 已由后端排除）
+            for i, el in enumerate(self._aggregate_elements(series.get('ions') or [])):
+                key = ION_KEYS[i % len(ION_KEYS)]
+                spec.append({'label': str(el.get('label')), 'xs': el['xs'], 'ys': el['ys'],
+                             'color': p[key], 'color_key': key})
+        else:
+            for i, ion in enumerate(series.get('ions') or []):
+                if view == 1:
+                    break
+                key = ION_KEYS[i % len(ION_KEYS)]
+                spec.append({'label': str(ion.get('label')), 'xs': ion['xs'], 'ys': ion['ys'],
+                             'color': p[key], 'color_key': key})
         if view == 1 and series.get('raw'):
             spec.append({'label': 'raw', 'xs': series['raw']['xs'], 'ys': series['raw']['ys'],
                          'color': p['raw'], 'dotted': True, 'color_key': 'raw'})
         self._series_spec = spec
+        # web 约定：实际科学数据不做 morph/reveal 插值动画
         self.s_chart.set_series([{k: v for k, v in s.items() if k != 'color_key'} for s in spec],
-                                 animate=self.fade_ms > 0)
+                                animate=False)
         self.s_legend.setText(self._legend_text(spec, (result.get('meta') or {}).get('intensity_scale')))
 
     def _legend_text(self, spec: list[dict], scale: str | None) -> str:
-        p = pal_of(self.theme_name)
+        p = self._pal()
         name = {'photon': 'Photon flux', 'energy': 'Energy flux'}.get(scale or '', '尺度 unknown')
         parts = [f'<span style="color:{s["color"]}">●</span> {s["label"]}' for s in spec]
         return ' · '.join(parts) + f'　<i>{name} (a.u.)</i>'
@@ -1205,6 +1524,12 @@ class MainWindow(QMainWindow):
         if meta.get('intensity_scale'):
             name = {'photon': 'Photon', 'energy': 'Energy'}.get(meta.get('intensity_scale'), '尺度 unknown')
             bits.append(f'{name} flux (a.u.)')
+        if meta.get('mode') or meta.get('mode_version'):
+            bits.append(f"{meta.get('mode', '')} v{meta.get('mode_version', '')}".strip())
+        if meta.get('requested_resolution') is not None:
+            bits.append(f'请求R={meta["requested_resolution"]}')
+        if meta.get('initial_server_resolution') is not None:
+            bits.append(f'服务器初始R={meta["initial_server_resolution"]}')
         for key, label in (('computation_location', '计算'), ('broadening', '展宽'),
                            ('actual_resolution', '实际R')):
             if meta.get(key) is not None:
@@ -1212,7 +1537,7 @@ class MainWindow(QMainWindow):
         txt = ' · '.join(bits)
         self.s_meta.setText(txt)
         if meta.get('resolution_warning'):
-            self.s_meta.setText(txt + f'<br><span style="color:{pal_of(self.theme_name)["bad"]}">⚠ '
+            self.s_meta.setText(txt + f'<br><span style="color:{self._pal()["bad"]}">⚠ '
                                       f'{meta["resolution_warning"]}</span>')
 
     # ================================================================== 批量
@@ -1300,38 +1625,151 @@ class MainWindow(QMainWindow):
         self.b_comp_table.setItem(0, 2, QTableWidgetItem('100%'))
         self.toast('已用单次模拟页当前配比作为候选池（1 行）', 'success', 2500)
 
-    def start_batch(self) -> None:
-        from backend_api import BatchRequest, BatchSample, CommonParams
+    def _batch_mode_changed(self, idx: int) -> None:
+        """批量三路径按模式启停参数：local 用离线展宽/温度，client 用网格/阈值，server 无展宽参数。"""
+        local, client = idx == 0, idx == 2
+        for wdg in (self.b_gauss, self.b_lorentz, self.b_temp_mode, self.b_temp_k):
+            wdg.setEnabled(local)
+        for wdg in (self.b_grid, self.b_minrel, self.b_conv):
+            wdg.setEnabled(client)
+
+    def _batch_params_dict(self) -> dict:
+        def f(sel, name):
+            return self.parse_float(sel.text(), name)
+        mode = ('local', 'server', 'client')[self.b_mode.currentIndex()]
+        charge = self.parse_int(self.b_charge.text(), '最大离子电荷')
+        if not 0 <= charge <= 2:
+            raise ValueError('最大离子电荷须为 0–2（本地谱线库与 NIST v2 均只支持 I/II）')
+        resample = self.b_resample.isChecked()
+        d = {
+            'te': f(self.b_te, 'Te'), 'ne': f(self.b_ne, 'Ne'),
+            'resolution': self.parse_int(self.b_r.text(), '分辨率 R'),
+            'low_w': f(self.b_low, 'λ 下界'), 'up_w': f(self.b_up, 'λ 上界'),
+            'max_ion_charge': charge,
+            'mode': mode, 'mode_version': 2,
+            'headless': self.b_headless.isChecked(),
+            'resample': resample,
+            'intensity_scale': 'photon',
+            'broadening': 'local' if mode in ('local', 'client') else 'nist',
+        }
+        if resample:
+            d['resample_step'] = f(self.b_step, '插值目标步长')
+        if mode == 'local':
+            d['broaden_convention'] = 'physics'
+            d['local_gaussian_nm'] = f(self.b_gauss, '额外高斯宽度')
+            d['local_lorentz_nm'] = f(self.b_lorentz, '洛伦兹 FWHM')
+            d['local_temperature_mode'] = ('linked', 'manual')[self.b_temp_mode.currentIndex() == 1]
+            d['local_temperature_K'] = 0.0 if d['local_temperature_mode'] == 'linked' \
+                else f(self.b_temp_k, '重粒子温度')
+        elif mode == 'client':
+            d['broaden_convention'] = 'physics' if self.b_conv.currentIndex() == 1 else 'nist'
+            d['broaden_grid_step'] = f(self.b_grid, '展宽网格步长')
+            d['broaden_min_rel_int'] = f(self.b_minrel, '选线阈值')
+        return d
+
+    def _batch_base_parameters(self):
+        from backend_api import CommonParams
+        from simlibs_ui.models import Parameters
+        cp = CommonParams.from_api(self._batch_params_dict())
+        return Parameters(
+            Te=cp.te, Ne=cp.ne, resolution=cp.resolution, low_w=cp.low_w, upper_w=cp.up_w,
+            max_ion_charge=cp.max_ion_charge, webscraping=cp.mode, mode_version=cp.mode_version,
+            headless=cp.headless, resample=cp.resample, step=cp.resample_step,
+            intensity_scale=cp.intensity_scale, broadening=cp.broadening,
+            broaden_convention=cp.broaden_convention, broaden_grid_step=cp.broaden_grid_step,
+            broaden_center_decimals=cp.broaden_center_decimals,
+            broaden_min_rel_int=cp.broaden_min_rel_int,
+            local_gaussian_nm=cp.local_gaussian_nm, local_lorentz_nm=cp.local_lorentz_nm,
+            local_temperature_K=cp.local_temperature_K,
+            local_temperature_mode=cp.local_temperature_mode)
+
+    def validate_template(self) -> None:
+        """校验模板 CSV：行数/计划数/参数覆盖，结果显示在模板卡内。"""
+        from simlibs_ui.batch_template import parse_template
         try:
-            if not self._batch_pool:
-                raise ValueError('组成候选池为空：先导入 CSV 或使用当前配比')
-            params = CommonParams.from_api(self._single_params_dict())
-            params.check_points()
-            n = self.parse_int(self.b_n.text(), '样本数')
-            seed = self.parse_int(self.b_seed.text(), '随机种子')
-            te0 = self.parse_float(self.b_temin.text(), 'Te min')
-            te1 = self.parse_float(self.b_temax.text(), 'Te max')
-            ne0 = self.parse_float(self.b_nemin.text(), 'Ne 指数 min')
-            ne1 = self.parse_float(self.b_nemax.text(), 'Ne 指数 max')
-            if te0 > te1 or ne0 > ne1:
-                raise ValueError('范围的 min 不能大于 max（允许相等=固定值）')
-            req = BatchRequest(
-                params=params, n_samples=n, seed=seed, te_range=(te0, te1), ne_range=(ne0, ne1),
-                compositions=[BatchSample(name=r['name'], items=r['items']) for r in self._batch_pool])
+            text = self._template_text()
+            if text is None:
+                self.b_tpl_info.setText('未填写模板路径')
+                return
+            plan = parse_template(text, self._batch_base_parameters(), self._repeats())
+            els = sorted({el for e in plan['entries'] for el in e['parameters']['elements']})
+            self.b_tpl_info.setText(
+                f"✓ {plan['row_count']} 行 × {self._repeats()} 重复 = {plan['sample_count']} 条 · "
+                f"元素 {' '.join(els)}")
         except Exception as exc:
-            self.toast(str(exc), 'warning', 6000)
+            self.b_tpl_info.setText(f'✗ {exc}')
+        self._repolish(self.b_tpl_info)
+
+    def _template_text(self) -> str | None:
+        path = self.b_tpl_path.text().strip().strip('"')
+        if not path:
+            return None
+        file = Path(path)
+        if not file.is_file():
+            raise ValueError(f'模板文件不存在：{file}')
+        text = file.read_text(encoding='utf-8-sig')
+        if not text.strip():
+            raise ValueError('模板 CSV 为空')
+        return text
+
+    def _repeats(self) -> int:
+        return self.parse_int(self.b_repeats.text(), '每行重复次数')
+
+    def start_batch(self) -> None:
+        from backend_api import BatchRequest
+        try:
+            params_dict = self._batch_params_dict()
+            template_text = self._template_text()
+            raw = {
+                'params': params_dict,
+                'batch_size': self.parse_int(self.pk_size.text(), '每包样本数'),
+                'seed': self.parse_int(self.b_seed.text(), '随机种子'),
+                'te_range': [self.parse_float(self.b_temin.text(), 'Te min'),
+                             self.parse_float(self.b_temax.text(), 'Te max')],
+                'ne_range': [self.parse_float(self.b_nemin.text(), 'Ne 指数 min'),
+                             self.parse_float(self.b_nemax.text(), 'Ne 指数 max')],
+            }
+            if template_text is not None:
+                raw['template_csv'] = template_text
+                raw['repeats'] = self._repeats()
+                raw['name_column'] = 'name'
+            else:
+                if not self._batch_pool:
+                    raise ValueError('组成候选池为空：导入组成 CSV、模板 CSV 或使用当前配比')
+                raw['n_samples'] = self.parse_int(self.b_n.text(), '样本总数')
+                raw['compositions'] = [
+                    {'name': r['name'],
+                     'items': [{'el': it.el, 'pct': it.pct} for it in r['items']]}
+                    for r in self._batch_pool]
+            req = BatchRequest.from_api(raw)
+        except Exception as exc:
+            self.toast(str(exc), 'warning', 7000)
             return
         try:
             jid = self.backend.start_batch(req)
         except Exception as exc:
-            self.toast(str(exc), 'error', 6000)
+            self.toast(str(exc), 'error', 7000)
             return
+        n = req.n_samples
         launcher = lambda: self.backend.start_batch(req)
-        self.watch(jid, f'批量 dataset · {n} 样本 · seed={seed}', launcher=launcher)
+        self.watch(jid, f'批量模拟 · {n} 样本 · 每包 {req.batch_size} · '
+                        f'{req.params.mode}', launcher=launcher)
+
+    def _update_pack_estimate(self, *_):
+        try:
+            n = int(float(self.b_n.text()))
+            bs = int(float(self.pk_size.text()))
+            assert n >= 1 and bs >= 1
+        except (ValueError, AssertionError):
+            self.pk_count.setText('预计 —')
+            return
+        packages = (n + bs - 1) // bs
+        last = n - (packages - 1) * bs
+        self.pk_count.setText(f'预计 {packages} 包 · 末包 {last} 条')
 
     def show_batch(self, result: dict) -> None:
         self._batch_result = result
-        p = pal_of(self.theme_name)
+        p = self._pal()
         table = self.b_samples
         table.setRowCount(0)
         for s in result.get('samples', []):
@@ -1351,45 +1789,42 @@ class MainWindow(QMainWindow):
             f'<span style="color:{p["good"]}">批量完成</span> · 请求 {summary.get("total", 0)} · '
             f'完成 {summary.get("completed", 0)}{partial} · {scale_txt} (a.u.)')
         self.b_wide.setText(str((result.get('wide') or {}).get('note', '')))
+        # 训练包状态
+        package = result.get('training_package') or {}
+        if package.get('available'):
+            self.pk_btn.setEnabled(True)
+            self.pk_btn.setToolTip(f"训练包已生成 · {package.get('packages', '?')} 包"
+                                   f" · {package.get('sample_count', '?')} 样本")
+        else:
+            self.pk_btn.setEnabled(False)
+            self.pk_btn.setToolTip(str(package.get('reason', '此任务没有完整训练包；重新运行批量模拟后可下载')))
 
-    def pack_batches(self) -> None:
-        """把已完成的批量数据集打包成训练 batch（Random_spectra/contents 系列）。"""
-        import uuid
+    def download_training(self) -> None:
         result = self._batch_result
         if not result:
-            self.toast('先完成一次批量模拟，再打包', 'warning')
+            self.toast('先完成一次批量模拟', 'warning')
             return
-        try:
-            batch_size = self.parse_int(self.pk_size.text(), '每包样本数')
-            if batch_size <= 0:
-                raise ValueError('每包样本数必须是正整数')
-        except ValueError as exc:
-            self.toast(str(exc), 'warning', 5000)
+        package = result.get('training_package') or {}
+        if not package.get('available'):
+            self.toast(str(package.get('reason', '此任务没有完整训练包；重新运行批量模拟后可下载')),
+                       'warning', 6000)
             return
-        prefix = self.pk_prefix.text().strip() or 'Random'
-        out_dir = self.b_export_dir.text().strip().strip('"') or EXPORT_DIR
-        self.status_chip.label.setText('● 打包中…')
+        out_dir = Path(self.b_export_dir.text().strip().strip('"') or EXPORT_DIR)
+        self.status_chip.label.setText('● 下载训练包…')
 
         def work():
-            payload = self.backend.export(result['job_id'], 'dataset')
-            tmp = Path(out_dir) / f'_pack_tmp_{uuid.uuid4().hex[:8]}.csv'
-            tmp.parent.mkdir(parents=True, exist_ok=True)
-            data = payload.payload
-            if isinstance(data, str):
-                tmp.write_text(data, encoding='utf-8')
-            else:
-                tmp.write_bytes(data)
-            try:
-                return pack_dataset(tmp, out_dir, batch_size=batch_size, prefix=prefix)
-            finally:
-                tmp.unlink(missing_ok=True)
-        self.run_bg(work, on_done=self._pack_done)
+            payload = self.backend.export(result['job_id'], 'training')
+            out_dir.mkdir(parents=True, exist_ok=True)
+            path = out_dir / (payload.filename or f"{result['job_id']}_training.zip")
+            path.write_bytes(payload.payload)
+            return str(path)
+        self.run_bg(work, on_done=self._training_done)
 
-    def _pack_done(self, paths: list[str]) -> None:
+    def _training_done(self, path: str) -> None:
         self.status_chip.label.setText('● 完成')
-        for pth in paths:
-            self.log(f'[pack] {pth}', 'ok')
-        self.toast('已打包：\n' + '\n'.join(paths), 'success', 8000)
+        self.log(f'[training] {path}', 'ok')
+        self.toast('训练数据包已下载：\n' + path, 'success', 8000)
+
 
     # ================================================================== 扫描
     def _scan_axis_changed(self, idx: int) -> None:
@@ -1430,10 +1865,14 @@ class MainWindow(QMainWindow):
     def show_scan(self, result: dict) -> None:
         self._scan_result = result
         self._frame_idx = 0
-        p = pal_of(self.theme_name)
+        self._scan_job_id = result.get('job_id')
+        self._scan_cache = {}
+        self._scan_fetching = set()
+        p = self._pal()
         self.sc_meta.setText(
             f"扫描轴 {result.get('axis', '')}{result.get('unit', '')} · {result.get('params_summary', '')}"
-            f" · {result.get('intensity_units', 'a.u.')}")
+            f" · {result.get('intensity_units', 'a.u.')}"
+            + ('' if not result.get('lazy_frames') else ' · 按帧加载'))
         self.render_frame(animate=True)
         self.set_playing(len(result.get('frames') or []) > 1)
 
@@ -1449,7 +1888,37 @@ class MainWindow(QMainWindow):
         series = frame.get('series')
         if not series and frame.get('xs'):   # MOCK 引擎的帧直接是 xs/ys
             series = {'interpolated': {'label': 'frame', 'xs': frame['xs'], 'ys': frame['ys']}}
-        p = pal_of(self.theme_name)
+        if not series and result.get('lazy_frames'):
+            # 懒帧：按帧加载全量（最多缓存 3 帧），播放等待当前帧完成
+            cached = self._scan_cache.get(idx)
+            if cached is None:
+                if idx in self._scan_fetching:
+                    return
+                self._scan_fetching.add(idx)
+                self.sc_frame_label.setText(f'帧 {idx + 1}/{len(frames)} · 加载中…')
+                jid = self._scan_job_id
+                self.run_bg(lambda: self.backend.get_result(jid, frame=idx),
+                            on_done=lambda data, i=idx: self._frame_loaded(i, data))
+                return
+            series = cached
+        self._paint_frame(series, result, idx, frame, animate)
+
+    def _frame_loaded(self, idx: int, data: dict) -> None:
+        self._scan_fetching.discard(idx)
+        series = data.get('series')
+        if not series and data.get('xs'):    # 兼容顶层 xs/ys
+            series = {'interpolated': {'label': 'frame', 'xs': data['xs'], 'ys': data['ys']}}
+        self._scan_cache[idx] = series or {}
+        while len(self._scan_cache) > 3:     # 最多缓存 3 个完整帧
+            oldest = next(k for k in self._scan_cache if k != self._frame_idx)
+            self._scan_cache.pop(oldest)
+        if self._scan_result and self._frame_idx == idx:
+            self.render_frame()
+
+    def _paint_frame(self, series: dict, result: dict, idx: int, frame: dict,
+                     animate: bool = False) -> None:
+        total = len(result.get('frames') or [])
+        p = self._pal()
         spec = []
         main = (series or {}).get('interpolated') or (series or {}).get('raw')
         if main:
@@ -1466,7 +1935,7 @@ class MainWindow(QMainWindow):
         unit = str(result.get('unit', ''))
         axis = str(result.get('axis', '')).upper()
         state = '（自动播放中）' if self._playing else ''
-        self.sc_frame_label.setText(f'帧 {idx + 1}/{len(frames)} · {axis}={frame.get("value"):g}{unit}{state}')
+        self.sc_frame_label.setText(f'帧 {idx + 1}/{total} · {axis}={frame.get("value"):g}{unit}{state}')
 
     def set_playing(self, playing: bool) -> None:
         self._playing = playing
@@ -1510,7 +1979,7 @@ class MainWindow(QMainWindow):
     def watch(self, job_id: str, summary: str, launcher=None) -> None:
         self._last_launch = (launcher, summary, 0)
         self.current_job = job_id
-        p = pal_of(self.theme_name)
+        p = self._pal()
         self.status_chip.label.setText('● 运行中')
         self.status_chip.setProperty('class', '')
         self._repolish(self.status_chip)
@@ -1532,7 +2001,7 @@ class MainWindow(QMainWindow):
         pump.start()
 
     def _on_event(self, ev) -> None:
-        p = pal_of(self.theme_name)
+        p = self._pal()
         if getattr(ev, 'message', ''):
             self.log(ev.message, getattr(ev, 'level', 'info'))
             if getattr(ev, 'level', '') == 'error':
@@ -1547,7 +2016,7 @@ class MainWindow(QMainWindow):
     def _finalize(self, status: str) -> None:
         jid, self.current_job = self.current_job, None
         launcher, summary_last, retries = (self._last_launch or (None, '', 0))
-        p = pal_of(self.theme_name)
+        p = self._pal()
         self.task_progress.stop_shimmer()
         if self.fade_ms > 0:
             pulse(self.status_chip, duration=360)
@@ -1625,7 +2094,7 @@ class MainWindow(QMainWindow):
             i = self.j_table.rowCount()
             self.j_table.insertRow(i)
             status = j.get('status', '?')
-            p = pal_of(self.theme_name)
+            p = self._pal()
             styled = {'completed': ('✓ 完成', p['good']), 'running': ('● 运行', p['warn']),
                       'queued': ('◌ 排队', p['muted']), 'failed': ('✗ 失败', p['bad']),
                       'cancelled': ('⊘ 取消', p['warn'])}.get(status, (status, p['muted']))
@@ -1667,6 +2136,31 @@ class MainWindow(QMainWindow):
         except Exception as exc:
             self.toast(f'暂无结果：{exc}', 'warning', 5000)
 
+    def resume_selected_job(self) -> None:
+        """失败/中断的批量任务从 checkpoint 续跑（校验计划/算法/库哈希，由后端完成）。"""
+        row = self.j_table.currentRow()
+        jid = self._jobs_rows.get(row)
+        if not jid:
+            self.toast('先在表格中选择一个任务', 'warning')
+            return
+        try:
+            detail = self.backend.get_job(jid)
+        except Exception as exc:
+            self.toast(f'读取任务失败：{exc}', 'error', 5000)
+            return
+        if not detail.get('resumable'):
+            self.toast(str(detail.get('resume_reason') or '该任务不可续跑'), 'warning', 6000)
+            return
+        try:
+            new_jid = self.backend.resume(jid)
+        except Exception as exc:
+            self.toast(f'续跑失败：{exc}', 'error', 7000)
+            return
+        self.log(f'[resume] 已从 {jid[:8]}… 的 checkpoint 创建续跑任务 {new_jid[:8]}…', 'ok')
+        launcher = lambda: self.backend.resume(jid)
+        self.watch(new_jid, f"续跑 {jid[:8]}… · 已完成{detail.get('completed_samples', '?')}"
+                            f"/{detail.get('total_samples', '?')} 条", launcher=launcher)
+
     def open_history(self) -> None:
         path = self.j_path.text().strip().strip('"')
         if not path:
@@ -1676,7 +2170,7 @@ class MainWindow(QMainWindow):
 
     def _history_loaded(self, loaded: dict) -> None:
         meta = loaded['meta']
-        p = pal_of(self.theme_name)
+        p = self._pal()
         spec = [{'label': s['label'], 'xs': s['xs'], 'ys': s['ys'], 'color': p['info'],
                  'color_key': 'info'} for s in loaded['series']]
         self._series_spec = spec
@@ -1753,7 +2247,7 @@ class MainWindow(QMainWindow):
         self.st['tls_verify'].setChecked(bool(s.get('tls_verify', True)))
         if hasattr(self.backend, 'get_proxy'):
             self.st_proxy.setText(self.backend.get_proxy())
-        p = pal_of(self.theme_name)
+        p = self._pal()
         if hasattr(self.backend, 'settings_path'):
             self.st_info.setText(
                 f'设置文件：{self.backend.settings_path()}<br>'
@@ -1802,18 +2296,36 @@ class MainWindow(QMainWindow):
         self.toast('已恢复默认设置', 'success', 2500)
 
     # ================================================================== 引擎状态
-    def refresh_engine(self) -> None:
-        self.run_bg(self.backend.engine_status, on_done=self._update_engine)
+    def refresh_engine(self, *_args) -> None:
+        mode = self._current_mode() if getattr(self, 's_mode', None) else 'local'
+
+        def probe():
+            try:
+                return self.backend.engine_status(mode)
+            except TypeError:      # MOCK 旧签名
+                return self.backend.engine_status()
+        self.run_bg(probe, on_done=self._update_engine)
 
     def _update_engine(self, st: dict) -> None:
         self._last_engine = st
         self.engine_card.update_status(st)
+        p = self._pal()
+        chip = self.nist_chip
+        if st.get('local') is not None:
+            local = st.get('local') or {}
+            ready = bool(local.get('ready'))
+            chip.setProperty('class', 'good' if ready else 'bad')
+            self._repolish(chip)
+            chip.label.setText(('● 本地库就绪  ' if ready else '● 本地库不可用  ')
+                               + f"{local.get('csv_count', 0)} CSV · "
+                                 f"{len(local.get('elements') or [])} 元素")
+            self._refresh_element_completions()
+            return
         ok = bool(st.get('nist_ok'))
-        p = pal_of(self.theme_name)
-        self.nist_chip.setProperty('class', 'good' if ok else 'bad')
-        self._repolish(self.nist_chip)
+        chip.setProperty('class', 'good' if ok else 'bad')
+        self._repolish(chip)
         label = str(st.get('nist', '')).split('·')[-1].strip()
-        self.nist_chip.label.setText(('● NIST 可达  ' if ok else '● NIST 不可达  ') + label)
+        chip.label.setText(('● NIST 可达  ' if ok else '● NIST 不可达  ') + label)
 
     # ================================================================== 关闭
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802

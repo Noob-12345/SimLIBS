@@ -110,6 +110,9 @@ def resolve_driver(settings):
 
 def simulate(parameters, settings, cancelled=lambda:False, emit=None):
     p, s = parameters.validated(), settings.validated()
+    if p.webscraping=='local':
+        from .offline_engine import local_simulate
+        return local_simulate(p,s,cancelled,emit)
     if p.webscraping=='client':
         from .mode_engine import client_simulate
         return client_simulate(p,s,cancelled,emit)
