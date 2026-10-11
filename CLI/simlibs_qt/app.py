@@ -31,8 +31,9 @@ from simlibs_qt.chart import SpectrumChart
 from simlibs_qt.theme_qt import (DARK, LIGHT, THEME_PRESETS, apply_dark_titlebar,
                                  apply_fusion_palette, build_qss, chart_palette,
                                  palette_with_accent)
-from simlibs_qt.widgets import (EngineCard, ShimmerProgress, ToastHost, fade_between,
-                                field_label, make_chip, pulse, stagger_entrance)
+from simlibs_qt.widgets import (EngineCard, ShimmerProgress, ThemeCatalogDialog, ToastHost,
+                                fade_between, field_label, make_chip, pulse, stagger_entrance,
+                                svg_icon)
 
 PAGES = [('single', '单次模拟'), ('batch', '批量模拟'), ('scan', '扫描动画'),
          ('jobs', '任务记录'), ('settings', '设置')]
@@ -77,6 +78,7 @@ def card(parent_lay, title: str = '') -> QVBoxLayout:
     if title:
         t = QLabel(title)
         t.setObjectName('PanelTitle')
+        t.setWordWrap(True)   # 长标题换行，不撑宽面板（否则窄面板下内容被裁剪）
         lay.addWidget(t)
     parent_lay.addWidget(frame, 0) if isinstance(parent_lay, QHBoxLayout) else parent_lay.addWidget(frame)
     return lay
@@ -237,10 +239,23 @@ class MainWindow(QMainWindow):
         brand_box.setLayout(brand_lay)
         brand_img = QLabel()
         brand_img.setAlignment(Qt.AlignHCenter)
+        brand_img.setMinimumHeight(76)
+        popcat = CLI_ROOT / 'assets' / 'popcat.gif'
         grad = CLI_ROOT / 'assets' / 'graduation.jpg'
-        if grad.is_file():
+        brand_file = popcat if popcat.is_file() else grad
+        if brand_file.suffix.lower() == '.gif':
+            from PySide6.QtGui import QMovie
+            movie = QMovie(str(brand_file), parent=self)
+            movie.setScaledSize(QSize(72, 72))
+            if movie.isValid():
+                self._brand_movie = movie   # 持有引用防 GC；parent=self 便于查找
+                brand_img.setMovie(movie)
+                movie.start()
+            else:
+                brand_file = grad
+        if brand_file.suffix.lower() != '.gif' and brand_file.is_file():
             from PySide6.QtGui import QPixmap
-            pm = QPixmap(str(grad)).scaled(
+            pm = QPixmap(str(brand_file)).scaled(
                 72, 72, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             brand_img.setPixmap(pm)
         brand_lay.addWidget(brand_img)
@@ -302,10 +317,11 @@ class MainWindow(QMainWindow):
         self.theme_catalog_btn.setFixedWidth(40)
         self.theme_catalog_btn.setToolTip('选择页面主题颜色')
         self.theme_catalog_btn.clicked.connect(self.open_theme_catalog)
-        self.theme_mode_btn = QPushButton('☾')
+        self.theme_mode_btn = QPushButton()
         self.theme_mode_btn.setObjectName('Ghost')
         self.theme_mode_btn.setCursor(Qt.PointingHandCursor)
         self.theme_mode_btn.setFixedWidth(40)
+        self.theme_mode_btn.setToolTip('选择日间、夜间或跟随系统')
         self.theme_mode_btn.clicked.connect(self.show_theme_mode_menu)
         top.addWidget(github_btn)
         top.addWidget(self.theme_catalog_btn)
@@ -373,11 +389,11 @@ class MainWindow(QMainWindow):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.NoFrame)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         panel = QWidget()
         pl = vlay((0, 0, 0, 0), 9)
         panel.setLayout(pl)
-        panel.setMaximumWidth(340)
+        panel.setMaximumWidth(350)
         scroll.setWidget(panel)
         llay.addWidget(scroll, 1)
 
@@ -416,25 +432,35 @@ class MainWindow(QMainWindow):
         card_lay.addWidget(range_row)
         card_lay.addWidget(field('最大离子电荷', self.s_charge))
         self.s_mode = QComboBox()
-        self.s_mode.addItems(['本地模拟（local · 离线谱线库）',
-                              '服务器计算（server · 浏览器内官方 JS 重算）',
-                              '客户端计算（client · NIST 线表 + 本地合成）'])
+        self.s_mode.addItems(['本地模拟', '服务器计算', '客户端计算'])
+        for i, tip in enumerate(('离线谱线库 · LTE/Saha 相对光子谱，无需网络/浏览器',
+                                 'NIST 页面数据 + 浏览器内官方 JS 重算（要求 R≥100）',
+                                 'NIST 线表 + Python 高斯核合成，无需浏览器')):
+            self.s_mode.setItemData(i, tip, Qt.ToolTipRole)
         self.s_mode.setCurrentIndex(0)
         self.s_mode.currentIndexChanged.connect(self._mode_changed)
-        self.s_scale_label = QLabel('Photon Flux')
-        self.s_scale_label.setObjectName('MetaChips')
+        self.s_scale = QComboBox()
+        self.s_scale.addItems(['Photon Flux', 'Energy Flux'])
+        self.s_scale.setItemData(0, '相对光子数（local 仅支持此项）', Qt.ToolTipRole)
+        self.s_scale.setItemData(1, '能量通量（仅在线 server/client 可用）', Qt.ToolTipRole)
         self.s_title = QLineEdit()
         self.s_title.setPlaceholderText('图表标题（可选）')
         card_lay.addWidget(field('计算方式', self.s_mode))
-        card_lay.addWidget(field('强度尺度', self.s_scale_label))
+        card_lay.addWidget(field('强度尺度', self.s_scale))
         card_lay.addWidget(field('图表标题', self.s_title))
 
         adv_lay = card(pl, '模式专属参数（随计算方式启用）')
-        # 离线 local 专属
+        # 离线 local 专属（与 Web 同默认：展宽关闭 = 未展宽线谱，R/热/额外宽度均不应用）
+        self.s_broaden = QCheckBox('离线展宽')
+        self.s_broaden.setToolTip('开启后应用仪器 R、热 Doppler 与额外高斯/洛伦兹宽度；'
+                                  '关闭（默认）= 未展宽线谱，R/热/额外宽度均不应用')
+        adv_lay.addWidget(self.s_broaden)
         self.s_local_gauss = QLineEdit('0')
         self.s_local_lorentz = QLineEdit('0')
         self.s_temp_mode = QComboBox()
-        self.s_temp_mode.addItems(['重粒子温度随电子温度（linked）', '独立重粒子温度（manual）'])
+        self.s_temp_mode.addItems(['随电子温度（linked）', '独立温度（manual）'])
+        self.s_temp_mode.setItemData(0, '单温度 LTE 假设：T_h = Te·e/k_B', Qt.ToolTipRole)
+        self.s_temp_mode.setItemData(1, '独立输入重粒子温度 K（0 = 关闭热 Doppler）', Qt.ToolTipRole)
         self.s_temp_k = QLineEdit('0')
         self._rows_local = [
             adv_lay.addWidget(field('额外高斯宽度 [nm]', self.s_local_gauss)),
@@ -442,12 +468,14 @@ class MainWindow(QMainWindow):
             adv_lay.addWidget(field('重粒子温度模式', self.s_temp_mode)),
             adv_lay.addWidget(field('重粒子温度 [K]', self.s_temp_k)),
         ]
-        self.s_temp_mode.currentIndexChanged.connect(
-            lambda i: self.s_temp_k.setEnabled(i == 1))
-        self.s_temp_k.setEnabled(False)
+        self.s_temp_mode.currentIndexChanged.connect(lambda _: self._sync_local_rows())
+        self.s_broaden.toggled.connect(lambda _: self._sync_local_rows())
+        self._sync_local_rows()
         # 客户端 client 专属
         self.s_conv = QComboBox()
-        self.s_conv.addItems(['NIST：w=λ/R（1/e 半宽）', 'Physics：FWHM=λ/R'])
+        self.s_conv.addItems(['NIST：w=λ/R', 'Physics：FWHM=λ/R'])
+        self.s_conv.setItemData(0, 'NIST 官方约定：w=λ/R（1/e 半宽）', Qt.ToolTipRole)
+        self.s_conv.setItemData(1, '物理约定：FWHM=λ/R', Qt.ToolTipRole)
         self.s_conv.setCurrentIndex(0)
         self.s_grid = QLineEdit('0.01')
         self.s_minrel = QLineEdit('0')
@@ -562,8 +590,8 @@ class MainWindow(QMainWindow):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.NoFrame)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll.setFixedWidth(350)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)   # 兜底：内容超宽时可横向滚动
+        scroll.setFixedWidth(410)   # 加宽：右侧结果区不再挤压左侧控件（含 5 列随机规则表）
         panel = QWidget()
         pl = vlay((0, 0, 0, 0), 9)
         panel.setLayout(pl)
@@ -572,8 +600,11 @@ class MainWindow(QMainWindow):
 
         c1 = card(pl, '批量参数（独立于单次页，模式可任选）')
         self.b_mode = QComboBox()
-        self.b_mode.addItems(['本地模拟（local · 离线谱线库）',
-                              '服务器计算（server）', '客户端计算（client）'])
+        self.b_mode.addItems(['本地模拟', '服务器计算', '客户端计算'])
+        for i, tip in enumerate(('离线谱线库 · LTE/Saha 相对光子谱，无需网络/浏览器',
+                                 'NIST 页面数据 + 浏览器内官方 JS 重算（要求 R≥100）',
+                                 'NIST 线表 + Python 高斯核合成，无需浏览器')):
+            self.b_mode.setItemData(i, tip, Qt.ToolTipRole)
         self.b_mode.setCurrentIndex(0)
         self.b_te = QLineEdit('1.0')
         self.b_ne = QLineEdit('1e17')
@@ -590,9 +621,14 @@ class MainWindow(QMainWindow):
         self.b_gauss = QLineEdit('0')
         self.b_lorentz = QLineEdit('0')
         self.b_temp_mode = QComboBox()
-        self.b_temp_mode.addItems(['重粒子温度随电子温度（linked）', '独立重粒子温度（manual）'])
+        self.b_temp_mode.addItems(['随电子温度（linked）', '独立温度（manual）'])
+        self.b_temp_mode.setItemData(0, '单温度 LTE 假设：T_h = Te·e/k_B', Qt.ToolTipRole)
+        self.b_temp_mode.setItemData(1, '独立输入重粒子温度 K（0 = 关闭热 Doppler）', Qt.ToolTipRole)
         self.b_temp_k = QLineEdit('0')
         c1.addWidget(field('计算方式', self.b_mode))
+        self.b_scale = QComboBox()
+        self.b_scale.addItems(['Photon Flux', 'Energy Flux'])
+        c1.addWidget(field('强度尺度', self.b_scale))
         c1.addWidget(field('Te [eV]', self.b_te))
         c1.addWidget(field('Ne [cm⁻³]', self.b_ne))
         c1.addWidget(field('分辨率 R', self.b_r))
@@ -612,15 +648,22 @@ class MainWindow(QMainWindow):
         self.b_resample.toggled.connect(lambda on: self.b_step_row.setVisible(on))
         c1.addWidget(field('展宽网格步长 [nm]', self.b_grid))
         self.b_conv = QComboBox()
-        self.b_conv.addItems(['NIST：w=λ/R（1/e 半宽）', 'Physics：FWHM=λ/R'])
+        self.b_conv.addItems(['NIST：w=λ/R', 'Physics：FWHM=λ/R'])
+        self.b_conv.setItemData(0, 'NIST 官方约定：w=λ/R（1/e 半宽）', Qt.ToolTipRole)
+        self.b_conv.setItemData(1, '物理约定：FWHM=λ/R', Qt.ToolTipRole)
         c1.addWidget(field('展宽约定', self.b_conv))
         c1.addWidget(field('选线阈值', self.b_minrel))
+        self.b_broaden = QCheckBox('离线展宽')
+        self.b_broaden.setToolTip('开启后应用仪器 R、热 Doppler 与额外高斯/洛伦兹宽度；'
+                                  '关闭（默认）= 未展宽线谱，R/热/额外宽度均不应用')
+        c1.addWidget(self.b_broaden)
         c1.addWidget(field('额外高斯宽度 [nm]', self.b_gauss))
         c1.addWidget(field('洛伦兹 FWHM [nm]', self.b_lorentz))
         c1.addWidget(field('重粒子温度模式', self.b_temp_mode))
         c1.addWidget(field('重粒子温度 [K]', self.b_temp_k))
-        self._batch_mode_changed(self.b_mode.currentIndex())
         self.b_mode.currentIndexChanged.connect(self._batch_mode_changed)
+        self.b_temp_mode.currentIndexChanged.connect(lambda _: self._sync_batch_local_rows())
+        self.b_broaden.toggled.connect(lambda _: self._sync_batch_local_rows())
 
         c1b = card(pl)
         self.b_n = QLineEdit('10')
@@ -634,10 +677,12 @@ class MainWindow(QMainWindow):
         row_te = QWidget()
         r1 = hlay((0, 0, 0, 0), 8)
         row_te.setLayout(r1)
-        r1.addWidget(field_label('Te 范围 [eV]'), 0)
+        self._te_label = field_label('Te 范围 [eV]')
+        r1.addWidget(self._te_label, 0)
         r1.addWidget(self.b_temin, 1)
         r1.addWidget(self.b_temax, 1)
         c1b.addWidget(row_te)
+        self._row_te = row_te
         row_ne = QWidget()
         r2 = hlay((0, 0, 0, 0), 8)
         row_ne.setLayout(r2)
@@ -645,8 +690,56 @@ class MainWindow(QMainWindow):
         r2.addWidget(self.b_nemin, 1)
         r2.addWidget(self.b_nemax, 1)
         c1b.addWidget(row_ne)
+        self._row_ne = row_ne
 
-        c_tpl = card(pl, '模板 CSV（可选 · 严格按行执行，行内可覆盖参数）')
+        c_gen = card(pl, '生成方式（固定 / 随机 / CSV 模板，与 Web 版同协议）')
+        self.b_generation = QComboBox()
+        self.b_generation.addItems(['固定组成池', '随机采样', 'CSV 模板'])
+        for i, tip in enumerate(('组成池随机选行 · Te/Ne 在范围内均匀采样',
+                                 'Te/实际 Ne 与逐元素浓度在边界内有界顺序分配（种子确定）',
+                                 '严格按行执行 · 行内参数列可覆盖')):
+            self.b_generation.setItemData(i, tip, Qt.ToolTipRole)
+        c_gen.addWidget(self.b_generation)
+        self.b_rand_te = QCheckBox('随机 Te（用上方 Te 边界）')
+        self.b_rand_te.setToolTip('启用后每个样本的 Te 在上方 Te 范围内均匀采样')
+        c_gen.addWidget(self.b_rand_te)
+        self.b_rand_ne = QCheckBox('随机实际 Ne [cm⁻³]')
+        c_gen.addWidget(self.b_rand_ne)
+        ne_bounds = QWidget()
+        nb = hlay((0, 0, 0, 0), 8)
+        ne_bounds.setLayout(nb)
+        nb.addWidget(field_label('Ne 边界'), 0)
+        self.b_ne_lo = QLineEdit('1e17')
+        self.b_ne_hi = QLineEdit('2e17')
+        nb.addWidget(self.b_ne_lo, 1)
+        nb.addWidget(self.b_ne_hi, 1)
+        c_gen.addWidget(ne_bounds)
+        self._ne_bounds_row = ne_bounds
+        rule_lbl = field_label('逐元素浓度规则（可编辑；随机元素在边界内有界顺序分配，总和恒 100%）')
+        rule_lbl.setWordWrap(True)
+        c_gen.addWidget(rule_lbl)
+        self.b_rand_table = QTableWidget(0, 5)
+        self.b_rand_table.setHorizontalHeaderLabels(['元素', '固定%', '随机', '下界', '上界'])
+        self.b_rand_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        for col, width in ((1, 62), (2, 46), (3, 62), (4, 62)):
+            self.b_rand_table.setColumnWidth(col, width)
+        self.b_rand_table.verticalHeader().setVisible(False)
+        self.b_rand_table.setEditTriggers(QAbstractItemView.DoubleClicked)
+        self.b_rand_table.setMinimumHeight(110)
+        c_gen.addWidget(self.b_rand_table)
+        rand_row = QWidget()
+        rr2 = hlay((0, 0, 0, 0), 8)
+        rand_row.setLayout(rr2)
+        self.b_rand_from_pool = QPushButton('从组成池/当前配比生成规则')
+        self.b_rand_from_pool.clicked.connect(self.batch_random_from_pool)
+        rr2.addWidget(self.b_rand_from_pool)
+        rr2.addStretch(1)
+        c_gen.addWidget(rand_row)
+        self.b_generation.currentIndexChanged.connect(lambda _: self._sync_batch_generation_ui())
+        self.b_rand_te.toggled.connect(lambda _: self._sync_batch_generation_ui())
+        self.b_rand_ne.toggled.connect(lambda _: self._sync_batch_generation_ui())
+
+        c_tpl = card(pl, '模板 CSV（生成方式 = CSV 模板时使用 · 严格按行执行，行内可覆盖参数）')
         self.b_tpl_path = QLineEdit()
         self.b_tpl_path.setPlaceholderText('模板 CSV 路径…（元素列/参数列混排）')
         c_tpl.addWidget(self.b_tpl_path)
@@ -664,6 +757,7 @@ class MainWindow(QMainWindow):
         self.b_tpl_info.setObjectName('MetaChips')
         self.b_tpl_info.setWordWrap(True)
         c_tpl.addWidget(self.b_tpl_info)
+        self._template_widgets = [self.b_tpl_path, self.b_repeats, tpl_btn, self.b_tpl_info]
 
         c2 = card(pl, '组成候选池（CSV 元素列 + 可选 name 列）')
         self.b_csv = QLineEdit()
@@ -689,6 +783,7 @@ class MainWindow(QMainWindow):
         self.b_comp_table.verticalHeader().setVisible(False)
         self.b_comp_table.setMinimumHeight(180)
         c2.addWidget(self.b_comp_table)
+        self._pool_widgets = [self.b_csv, imp_btn, self.b_norm_import, use_btn, self.b_comp_table]
         run_btn = QPushButton('▶  开始批量')
         run_btn.setObjectName('Primary')
         run_btn.setCursor(Qt.PointingHandCursor)
@@ -745,6 +840,21 @@ class MainWindow(QMainWindow):
         b.clicked.connect(lambda: self.do_export(self._batch_result, ['dataset'], self.b_export_dir.text()))
         er.addWidget(b)
         rl.addWidget(exp_row)
+        exp_row2 = QWidget()
+        er2 = hlay((0, 0, 0, 0), 8)
+        self.b_params_btn = QPushButton('下载实际参数 CSV')
+        self.b_params_btn.setEnabled(False)
+        self.b_params_btn.setToolTip('逐样本实际 Te/Ne/浓度/R/网格/温度/展宽开关（仅批量成功后可用）')
+        self.b_params_btn.clicked.connect(lambda: self.do_export(self._batch_result, ['parameters'], self.b_export_dir.text()))
+        self.b_tpl_btn = QPushButton('下载模板 CSV')
+        self.b_tpl_btn.setEnabled(False)
+        self.b_tpl_btn.setToolTip('可再次导入的模板 CSV（仅批量成功后可用）')
+        self.b_tpl_btn.clicked.connect(lambda: self.do_export(self._batch_result, ['template'], self.b_export_dir.text()))
+        er2.addWidget(self.b_params_btn)
+        er2.addWidget(self.b_tpl_btn)
+        er2.addStretch(1)
+        rl.addWidget(exp_row2)
+        self._batch_mode_changed(self.b_mode.currentIndex())
         return page
 
     # ---------------------------------------------------------------- 扫描
@@ -956,28 +1066,29 @@ class MainWindow(QMainWindow):
         self.refresh_engine()
         self.refresh_jobs()
         self.log('SimLIBS · SPECTRUM WORKBENCH FOR SCNU 就绪 · 本地/服务器/客户端三路径 · '
+                 '本地默认未展宽线谱（勾选"离线展宽"应用 R/热/额外宽度） · '
                  '图表：左键框选放大 / 中键或 Shift 平移 / 右键复位')
 
     def _mode_changed(self, idx: int) -> None:
         """v3：本地/服务器/客户端三路径，按模式启用参数并刷新补全与状态。"""
-        self._rows_local_widget = None
         local, client = idx == 0, idx == 2
-        for wdg in (self.s_local_gauss, self.s_local_lorentz, self.s_temp_mode, self.s_temp_k):
-            wdg.setEnabled(local)
+        if local:
+            self.s_scale.setCurrentIndex(0)      # 本地仅相对光子（web 同规则）
+        self.s_scale.setEnabled(not local)
+        self.s_broaden.setEnabled(local)
+        self._sync_local_rows()
         for wdg in (self.s_conv, self.s_grid, self.s_minrel):
             wdg.setEnabled(client)
         self._refresh_element_completions()
         self.refresh_engine()
 
-    def _setup_brand_icon(self) -> None:
-        """窗口/应用图标 = graduation.jpg（与 Web 版同源副本）。"""
-        from PySide6.QtGui import QIcon, QPixmap
-        grad = CLI_ROOT / 'assets' / 'graduation.jpg'
-        if not grad.is_file():
-            return
-        icon = QIcon(str(grad))
-        self.setWindowIcon(icon)
-        QApplication.instance().setWindowIcon(icon)
+    def _sync_local_rows(self) -> None:
+        """离线展宽关闭（或非本地模式）时，宽度/温度参数不可用（web 同语义）。"""
+        on = self.s_mode.currentIndex() == 0 and self.s_broaden.isChecked()
+        self.s_local_gauss.setEnabled(on)
+        self.s_local_lorentz.setEnabled(on)
+        self.s_temp_mode.setEnabled(on)
+        self.s_temp_k.setEnabled(on and self.s_temp_mode.currentIndex() == 1)
 
     def go(self, pid: str) -> None:
         titles = dict(PAGES)
@@ -1019,8 +1130,10 @@ class MainWindow(QMainWindow):
 
     def _update_theme_buttons(self) -> None:
         mode = self.theme_pref['mode']
-        icon = {'dark': '☾', 'light': '☀', 'system': '🖥'}.get(mode, '☾')
-        self.theme_mode_btn.setText(icon)
+        icon_file = {'dark': 'moon.svg', 'light': 'sun.svg', 'system': 'monitor.svg'}.get(mode, 'moon.svg')
+        self.theme_mode_btn.setIcon(
+            svg_icon(CLI_ROOT / 'assets' / icon_file, self._pal()['muted'], size=20))
+        self.theme_mode_btn.setIconSize(QSize(20, 20))
         if mode == 'system':
             tip = f'跟随系统 · 当前{"夜间" if self._effective_dark() else "日间"}'
         else:
@@ -1038,13 +1151,16 @@ class MainWindow(QMainWindow):
 
     def show_theme_mode_menu(self) -> None:
         menu = QMenu(self)
-        for mode_id, label in (('light', '☀ 日间'), ('dark', '☾ 夜间'), ('system', '🖥 跟随系统')):
-            act = menu.addAction(label)
+        menu.setObjectName('ThemeMenu')
+        icons = {'light': 'sun.svg', 'dark': 'moon.svg', 'system': 'monitor.svg'}
+        for mode_id, label in (('light', '日间'), ('dark', '夜间'), ('system', '跟随系统')):
+            act = menu.addAction(
+                svg_icon(CLI_ROOT / 'assets' / icons[mode_id], self._pal()['text'], size=18), label)
             act.setCheckable(True)
             act.setChecked(self.theme_pref['mode'] == mode_id)
             act.triggered.connect(lambda _=False, m=mode_id: self._set_theme_mode(m))
         menu.exec(self.theme_mode_btn.mapToGlobal(
-            QPoint(0, self.theme_mode_btn.height())))
+            QPoint(0, self.theme_mode_btn.height() + 4)))
 
     def _set_theme_mode(self, mode: str) -> None:
         self.theme_pref['mode'] = mode
@@ -1052,19 +1168,16 @@ class MainWindow(QMainWindow):
         self.toast('主题模式：' + {'light': '日间', 'dark': '夜间', 'system': '跟随系统'}[mode],
                    timeout=2000)
 
-    def toggle_theme(self) -> None:
-        # Ctrl+T：日间/夜间快速切换
-        self.theme_pref['mode'] = 'light' if self._effective_dark() else 'dark'
-        self._apply_theme()
-
     def _setup_brand_icon(self) -> None:
-        """窗口/应用图标 = graduation.jpg（与 Web 版同源副本）。"""
-        grad = CLI_ROOT / 'assets' / 'graduation.jpg'
-        if not grad.is_file():
-            return
-        icon = QIcon(str(grad))
-        self.setWindowIcon(icon)
-        QApplication.instance().setWindowIcon(icon)
+        """窗口/应用图标 = popcat.gif（缺失时回退 graduation.jpg）。"""
+        for name in ('popcat.gif', 'graduation.jpg'):
+            file = CLI_ROOT / 'assets' / name
+            if not file.is_file():
+                continue
+            icon = QIcon(str(file))
+            self.setWindowIcon(icon)
+            QApplication.instance().setWindowIcon(icon)
+            break
 
     def _repaint_series_spec(self) -> None:
         p = self._pal()
@@ -1398,6 +1511,7 @@ class MainWindow(QMainWindow):
         if not 0 <= charge <= 2:
             raise ValueError('最大离子电荷须为 0–2（本地谱线库与 NIST v2 均只支持 I/II）')
         resample = self.s_resample.isChecked()
+        broaden = self.s_broaden.isChecked() if mode == 'local' else True
         d = {
             'te': f(self.s_te, 'Te'), 'ne': f(self.s_ne, 'Ne'),
             'resolution': self.parse_int(self.s_r.text(), '分辨率 R'),
@@ -1406,18 +1520,26 @@ class MainWindow(QMainWindow):
             'mode': mode, 'mode_version': 2,
             'headless': self.s_headless.isChecked(),
             'resample': resample,
-            'intensity_scale': 'photon',   # v3：新请求仅 Photon flux
+            'intensity_scale': 'photon' if mode == 'local'
+                else ('photon', 'energy')[self.s_scale.currentIndex()],
             'broadening': 'local' if mode in ('local', 'client') else 'nist',
+            'local_broadening_enabled': broaden,
         }
         if resample:
             d['resample_step'] = f(self.s_step, '重采样步长')
         if mode == 'local':
             d['broaden_convention'] = 'physics'   # 离线本地固定 FWHM=λ/R
-            d['local_gaussian_nm'] = f(self.s_local_gauss, '额外高斯宽度')
-            d['local_lorentz_nm'] = f(self.s_local_lorentz, '洛伦兹 FWHM')
-            d['local_temperature_mode'] = ('linked', 'manual')[self.s_temp_mode.currentIndex() == 1]
-            d['local_temperature_K'] = 0.0 if d['local_temperature_mode'] == 'linked' \
-                else f(self.s_temp_k, '重粒子温度')
+            if broaden:
+                d['local_gaussian_nm'] = f(self.s_local_gauss, '额外高斯宽度')
+                d['local_lorentz_nm'] = f(self.s_local_lorentz, '洛伦兹 FWHM')
+                d['local_temperature_mode'] = ('linked', 'manual')[self.s_temp_mode.currentIndex() == 1]
+                d['local_temperature_K'] = 0.0 if d['local_temperature_mode'] == 'linked' \
+                    else f(self.s_temp_k, '重粒子温度')
+            else:
+                d['local_gaussian_nm'] = 0.0
+                d['local_lorentz_nm'] = 0.0
+                d['local_temperature_mode'] = 'linked'
+                d['local_temperature_K'] = 0.0
         elif mode == 'client':
             d['broaden_convention'] = 'physics' if self.s_conv.currentIndex() == 1 else 'nist'
             d['broaden_grid_step'] = f(self.s_grid, '展宽网格步长')
@@ -1534,6 +1656,8 @@ class MainWindow(QMainWindow):
                            ('actual_resolution', '实际R')):
             if meta.get(key) is not None:
                 bits.append(f'{label}={meta[key]}')
+        if meta.get('local_broadening_enabled') is False:
+            bits.append(f'<span style="color:{self._pal()["warn"]}">未展宽 · R未应用</span>')
         txt = ' · '.join(bits)
         self.s_meta.setText(txt)
         if meta.get('resolution_warning'):
@@ -1628,10 +1752,141 @@ class MainWindow(QMainWindow):
     def _batch_mode_changed(self, idx: int) -> None:
         """批量三路径按模式启停参数：local 用离线展宽/温度，client 用网格/阈值，server 无展宽参数。"""
         local, client = idx == 0, idx == 2
-        for wdg in (self.b_gauss, self.b_lorentz, self.b_temp_mode, self.b_temp_k):
-            wdg.setEnabled(local)
+        if local:
+            self.b_scale.setCurrentIndex(0)      # 本地仅相对光子（web 同规则）
+        self.b_scale.setEnabled(not local)
+        self.b_broaden.setEnabled(local)
+        self._sync_batch_local_rows()
         for wdg in (self.b_grid, self.b_minrel, self.b_conv):
             wdg.setEnabled(client)
+        self._sync_batch_generation_ui()
+
+    def _sync_batch_local_rows(self) -> None:
+        """离线展宽关闭（或非本地模式）时，宽度/温度参数不可用（web 同语义）。"""
+        on = self.b_mode.currentIndex() == 0 and self.b_broaden.isChecked()
+        self.b_gauss.setEnabled(on)
+        self.b_lorentz.setEnabled(on)
+        self.b_temp_mode.setEnabled(on)
+        self.b_temp_k.setEnabled(on and self.b_temp_mode.currentIndex() == 1)
+
+    def _sync_batch_generation_ui(self) -> None:
+        """生成方式三选：固定=组成池+均匀范围；随机=逐元素规则；模板=CSV。"""
+        gen = self.b_generation.currentIndex()   # 0 固定 1 随机 2 模板
+        fixed, rand, tpl = gen == 0, gen == 1, gen == 2
+        self.b_rand_te.setEnabled(rand)
+        self.b_rand_ne.setEnabled(rand)
+        ne_on = rand and self.b_rand_ne.isChecked()
+        self.b_ne_lo.setEnabled(ne_on)
+        self.b_ne_hi.setEnabled(ne_on)
+        self._ne_bounds_row.setEnabled(ne_on)
+        self.b_rand_table.setEnabled(rand)
+        self.b_rand_from_pool.setEnabled(rand)
+        rand_te_on = rand and self.b_rand_te.isChecked()
+        self._row_te.setEnabled(fixed or rand_te_on)
+        self._te_label.setText('随机 Te 边界 [eV]' if rand_te_on else 'Te 范围 [eV]')
+        self._row_ne.setEnabled(fixed)
+        for wdg in self._pool_widgets:
+            wdg.setEnabled(fixed)
+        for wdg in self._template_widgets:
+            wdg.setEnabled(tpl)
+        if rand and self.b_rand_table.rowCount() == 0:
+            self._fill_rand_table_from_sources(quiet=True)
+
+    def batch_random_from_pool(self) -> None:
+        if not self._fill_rand_table_from_sources():
+            return
+        self.toast('已生成逐元素浓度规则（可编辑固定值/随机边界）', 'success', 2500)
+
+    def _fill_rand_table_from_sources(self, quiet: bool = False) -> bool:
+        if self._batch_pool:
+            items = [(it.el, it.pct) for it in self._batch_pool[0]['items']]
+            source = '组成池'
+        else:
+            try:
+                items = self.comp_values()
+            except ValueError:
+                items = []
+            source = '当前配比'
+        if not items:
+            if not quiet:
+                self.toast('先导入组成 CSV 或使用当前配比，再生成随机规则', 'warning')
+            return False
+        table = self.b_rand_table
+        table.setRowCount(0)
+        for el, pct in items:
+            row = table.rowCount()
+            table.insertRow(row)
+            el_item = QTableWidgetItem(el)
+            el_item.setFlags(el_item.flags() & ~Qt.ItemIsEditable)
+            table.setItem(row, 0, el_item)
+            table.setItem(row, 1, QTableWidgetItem(f'{pct:g}'))
+            chk = QCheckBox()
+            wrap = QWidget()
+            wl = hlay((0, 0, 0, 0), 0)
+            wl.addWidget(chk)
+            wl.setAlignment(chk, Qt.AlignCenter)
+            wrap.setLayout(wl)
+            table.setCellWidget(row, 2, wrap)
+            table.setItem(row, 3, QTableWidgetItem('0'))
+            table.setItem(row, 4, QTableWidgetItem('100'))
+        if not quiet:
+            self.log(f'[batch] 已从{source}生成 {len(items)} 条随机浓度规则')
+        return True
+
+    def _generation_rules(self) -> dict:
+        """从随机规则表构造 generation 请求体（kind=random，web generationPayload 同校验）。"""
+        concentrations = []
+        lo_sum = hi_sum = 0.0
+        table = self.b_rand_table
+        for row in range(table.rowCount()):
+            el = (table.item(row, 0).text() or '').strip()
+            if not el:
+                raise ValueError('随机规则表存在空元素行')
+            enabled = bool(table.cellWidget(row, 2) and
+                           table.cellWidget(row, 2).findChild(QCheckBox) and
+                           table.cellWidget(row, 2).findChild(QCheckBox).isChecked())
+            if enabled:
+                lo = self.parse_float(table.item(row, 3).text(), f'{el} 浓度下界')
+                hi = self.parse_float(table.item(row, 4).text(), f'{el} 浓度上界')
+                if not (0 <= lo <= hi <= 100):
+                    raise ValueError(f'{el} 浓度边界须满足 0 ≤ 下界 ≤ 上界 ≤ 100')
+                concentrations.append({'el': el, 'enabled': True, 'min': lo, 'max': hi})
+                lo_sum += lo
+                hi_sum += hi
+            else:
+                fixed = self.parse_float(table.item(row, 1).text(), f'{el} 固定浓度')
+                if not (0 <= fixed <= 100):
+                    raise ValueError(f'{el} 固定浓度须在 0–100%')
+                concentrations.append({'el': el, 'enabled': False, 'fixed': fixed})
+                lo_sum += fixed
+                hi_sum += fixed
+        if not concentrations:
+            raise ValueError('随机浓度规则为空：先从组成池/当前配比生成规则')
+        if lo_sum > 100 + 1e-9 or hi_sum < 100 - 1e-9:
+            raise ValueError('浓度边界不能容纳 100%：请检查固定值和上下界')
+        te: dict = {'enabled': self.b_rand_te.isChecked()}
+        if te['enabled']:
+            te['min'] = self.parse_float(self.b_temin.text(), '随机 Te 下界')
+            te['max'] = self.parse_float(self.b_temax.text(), '随机 Te 上界')
+        ne: dict = {'enabled': self.b_rand_ne.isChecked()}
+        if ne['enabled']:
+            ne['min'] = self.parse_float(self.b_ne_lo.text(), '随机实际 Ne 下界')
+            ne['max'] = self.parse_float(self.b_ne_hi.text(), '随机实际 Ne 上界')
+        for rule, label in ((te, 'Te'), (ne, '实际 Ne')):
+            if rule['enabled'] and rule['min'] > rule['max']:
+                raise ValueError(f'随机{label}下界不能大于上界')
+        if self.b_mode.currentIndex() == 0:   # 本地模式：正含量元素须在离线谱线库内
+            try:
+                st = self.backend.engine_status('local')
+                available = {str(e) for e in (st.get('local') or {}).get('elements') or []}
+            except Exception:
+                available = set()
+            if available:
+                for c in concentrations:
+                    minimum = c['min'] if c['enabled'] else c['fixed']
+                    if minimum > 0 and c['el'] not in available:
+                        raise ValueError(f'{c["el"]} 缺少可用本地谱线；不会向 NIST 回退')
+        return {'kind': 'random', 'te': te, 'ne': ne, 'concentrations': concentrations}
 
     def _batch_params_dict(self) -> dict:
         def f(sel, name):
@@ -1641,6 +1896,7 @@ class MainWindow(QMainWindow):
         if not 0 <= charge <= 2:
             raise ValueError('最大离子电荷须为 0–2（本地谱线库与 NIST v2 均只支持 I/II）')
         resample = self.b_resample.isChecked()
+        broaden = self.b_broaden.isChecked() if mode == 'local' else True
         d = {
             'te': f(self.b_te, 'Te'), 'ne': f(self.b_ne, 'Ne'),
             'resolution': self.parse_int(self.b_r.text(), '分辨率 R'),
@@ -1649,18 +1905,26 @@ class MainWindow(QMainWindow):
             'mode': mode, 'mode_version': 2,
             'headless': self.b_headless.isChecked(),
             'resample': resample,
-            'intensity_scale': 'photon',
+            'intensity_scale': 'photon' if mode == 'local'
+                else ('photon', 'energy')[self.b_scale.currentIndex()],
             'broadening': 'local' if mode in ('local', 'client') else 'nist',
+            'local_broadening_enabled': broaden,
         }
         if resample:
             d['resample_step'] = f(self.b_step, '插值目标步长')
         if mode == 'local':
             d['broaden_convention'] = 'physics'
-            d['local_gaussian_nm'] = f(self.b_gauss, '额外高斯宽度')
-            d['local_lorentz_nm'] = f(self.b_lorentz, '洛伦兹 FWHM')
-            d['local_temperature_mode'] = ('linked', 'manual')[self.b_temp_mode.currentIndex() == 1]
-            d['local_temperature_K'] = 0.0 if d['local_temperature_mode'] == 'linked' \
-                else f(self.b_temp_k, '重粒子温度')
+            if broaden:
+                d['local_gaussian_nm'] = f(self.b_gauss, '额外高斯宽度')
+                d['local_lorentz_nm'] = f(self.b_lorentz, '洛伦兹 FWHM')
+                d['local_temperature_mode'] = ('linked', 'manual')[self.b_temp_mode.currentIndex() == 1]
+                d['local_temperature_K'] = 0.0 if d['local_temperature_mode'] == 'linked' \
+                    else f(self.b_temp_k, '重粒子温度')
+            else:
+                d['local_gaussian_nm'] = 0.0
+                d['local_lorentz_nm'] = 0.0
+                d['local_temperature_mode'] = 'linked'
+                d['local_temperature_K'] = 0.0
         elif mode == 'client':
             d['broaden_convention'] = 'physics' if self.b_conv.currentIndex() == 1 else 'nist'
             d['broaden_grid_step'] = f(self.b_grid, '展宽网格步长')
@@ -1681,7 +1945,8 @@ class MainWindow(QMainWindow):
             broaden_min_rel_int=cp.broaden_min_rel_int,
             local_gaussian_nm=cp.local_gaussian_nm, local_lorentz_nm=cp.local_lorentz_nm,
             local_temperature_K=cp.local_temperature_K,
-            local_temperature_mode=cp.local_temperature_mode)
+            local_temperature_mode=cp.local_temperature_mode,
+            local_broadening_enabled=cp.local_broadening_enabled)
 
     def validate_template(self) -> None:
         """校验模板 CSV：行数/计划数/参数覆盖，结果显示在模板卡内。"""
@@ -1718,8 +1983,8 @@ class MainWindow(QMainWindow):
     def start_batch(self) -> None:
         from backend_api import BatchRequest
         try:
+            gen = self.b_generation.currentIndex()   # 0 固定 1 随机 2 模板
             params_dict = self._batch_params_dict()
-            template_text = self._template_text()
             raw = {
                 'params': params_dict,
                 'batch_size': self.parse_int(self.pk_size.text(), '每包样本数'),
@@ -1729,10 +1994,16 @@ class MainWindow(QMainWindow):
                 'ne_range': [self.parse_float(self.b_nemin.text(), 'Ne 指数 min'),
                              self.parse_float(self.b_nemax.text(), 'Ne 指数 max')],
             }
-            if template_text is not None:
+            if gen == 2:
+                template_text = self._template_text()
+                if template_text is None:
+                    raise ValueError('生成方式为 CSV 模板：请先填写模板路径')
                 raw['template_csv'] = template_text
                 raw['repeats'] = self._repeats()
                 raw['name_column'] = 'name'
+            elif gen == 1:
+                raw['n_samples'] = self.parse_int(self.b_n.text(), '样本总数')
+                raw['generation'] = self._generation_rules()
             else:
                 if not self._batch_pool:
                     raise ValueError('组成候选池为空：导入组成 CSV、模板 CSV 或使用当前配比')
@@ -1751,8 +2022,9 @@ class MainWindow(QMainWindow):
             self.toast(str(exc), 'error', 7000)
             return
         n = req.n_samples
+        gen_label = ('固定', '随机', '模板')[gen]
         launcher = lambda: self.backend.start_batch(req)
-        self.watch(jid, f'批量模拟 · {n} 样本 · 每包 {req.batch_size} · '
+        self.watch(jid, f'批量模拟({gen_label}) · {n} 样本 · 每包 {req.batch_size} · '
                         f'{req.params.mode}', launcher=launcher)
 
     def _update_pack_estimate(self, *_):
@@ -1783,12 +2055,15 @@ class MainWindow(QMainWindow):
         summary = result.get('summary') or {}
         scale = result.get('intensity_scale')
         scale_txt = {'photon': 'Photon flux', 'energy': 'Energy flux'}.get(scale, '尺度 unknown')
+        is_partial = bool(summary.get('partial'))
         partial = (' · <span style="color:%s">partial（部分样本未完成）</span>' % p['warn']) \
-            if summary.get('partial') else ''
+            if is_partial else ''
         self.b_meta.setText(
             f'<span style="color:{p["good"]}">批量完成</span> · 请求 {summary.get("total", 0)} · '
             f'完成 {summary.get("completed", 0)}{partial} · {scale_txt} (a.u.)')
         self.b_wide.setText(str((result.get('wide') or {}).get('note', '')))
+        self.b_params_btn.setEnabled(bool(result.get('actual_parameters_available')) and not is_partial)
+        self.b_tpl_btn.setEnabled(bool(result.get('template_csv_available')) and not is_partial)
         # 训练包状态
         package = result.get('training_package') or {}
         if package.get('available'):
@@ -1935,7 +2210,11 @@ class MainWindow(QMainWindow):
         unit = str(result.get('unit', ''))
         axis = str(result.get('axis', '')).upper()
         state = '（自动播放中）' if self._playing else ''
-        self.sc_frame_label.setText(f'帧 {idx + 1}/{total} · {axis}={frame.get("value"):g}{unit}{state}')
+        unbroadened = (frame.get('meta') or result.get('meta') or {}) \
+            .get('local_broadening_enabled') is False
+        tag = ' · 未展宽 · R未应用' if unbroadened else ''
+        self.sc_frame_label.setText(
+            f'帧 {idx + 1}/{total} · {axis}={frame.get("value"):g}{unit}{state}{tag}')
 
     def set_playing(self, playing: bool) -> None:
         self._playing = playing

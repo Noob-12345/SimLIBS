@@ -1,0 +1,45 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/spectrum.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#171b22" />
+    <meta name="description" content="SimLIBS 光谱工作台 · 示意数据" />
+    <title>SimLIBS · 光谱工作台</title>
+    <style>
+      #app{opacity:0;transition:opacity .18s ease}
+      body[data-boot-ready=true] #app{opacity:1}
+      .startup{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:var(--bg,#f5f4f1);color:var(--text,#242933);font-family:var(--font-ui,"Microsoft YaHei UI","Microsoft YaHei","Segoe UI",system-ui,sans-serif);text-align:center;transition:opacity .18s ease}
+      :root[data-theme=dark] .startup{background:var(--bg,#11151c);color:var(--text,#e8edf4)}
+      .startup strong{display:block;font-size:24px;font-weight:600}
+      .startup svg{width:180px;height:54px;margin:22px auto 16px;color:var(--accent,#e5a327)}
+      .startup path{stroke-dasharray:320;stroke-dashoffset:320;animation:startup-line 1s ease-in-out infinite alternate}
+      .startup p{font-size:13px;margin:0;color:var(--muted,#717680)}
+      .startup button{margin-top:18px;min-height:36px;padding:7px 16px;border:1px solid var(--border,#ddd);border-radius:7px;background:var(--panel,#fff);color:inherit;font:inherit;cursor:pointer}
+      .startup [hidden]{display:none!important}
+      .startup[data-phase=leaving]{opacity:0}
+      .startup[data-phase=error] path{animation:none;stroke-dashoffset:0}
+      @keyframes startup-line{to{stroke-dashoffset:0}}
+      @media(prefers-reduced-motion:reduce){.startup,.startup path,#app{animation:none!important;transition:none!important;stroke-dashoffset:0}}
+      :root[data-reduced-motion=true] .startup,:root[data-reduced-motion=true] .startup path,:root[data-reduced-motion=true] #app{animation:none!important;transition:none!important;stroke-dashoffset:0}
+    </style>
+  </head>
+  <body>
+    <div id="startup" class="startup" data-phase="loading" role="status" aria-live="polite"><div><strong>SimLIBS</strong><svg viewBox="0 0 180 54" fill="none" aria-hidden="true"><path d="M2 40h24l8-20 9 26 13-39 12 33h24l7-14 7 14h24l8-23 9 23h31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" /></svg><p id="startup-message">正在准备工作台</p><button id="startup-retry" type="button" hidden>重新载入</button></div></div>
+    <div id="app" inert aria-hidden="true" aria-busy="true"></div>
+    <script>
+      (() => {
+        const root=document.documentElement, splash=document.getElementById('startup'), app=document.getElementById('app'), message=document.getElementById('startup-message'), retry=document.getElementById('startup-retry');
+        try { const p=JSON.parse(localStorage.getItem('simlibs-vue-preferences-v1')||'{}'); root.dataset.theme=p.mode==='dark'||p.mode==='system'&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';root.dataset.reducedMotion=String(p.reducedMotion===true); } catch {}
+        let phase='loading',initialized=false,finishTimer,fadeTimer;const startedAt=performance.now();
+        const fail=()=>{if(phase!=='loading')return;phase='error';clearTimeout(watchdog);clearTimeout(finishTimer);clearTimeout(fadeTimer);splash.dataset.phase='error';message.textContent='界面未能载入，请重新载入。';retry.hidden=false;};
+        const watchdog=setTimeout(fail,8000);
+        const ready=()=>{if(initialized||phase!=='loading')return;initialized=true;const reduced=root.dataset.reducedMotion==='true'||matchMedia('(prefers-reduced-motion: reduce)').matches;const remaining=Math.max(0,(reduced?140:900)-(performance.now()-startedAt));finishTimer=setTimeout(()=>{if(phase!=='loading')return;clearTimeout(watchdog);phase='ready';splash.dataset.phase='leaving';document.body.dataset.bootReady='true';fadeTimer=setTimeout(()=>{app.removeAttribute('inert');app.removeAttribute('aria-hidden');app.setAttribute('aria-busy','false');splash.remove();},reduced?0:180);},remaining);};
+        retry.addEventListener('click',()=>location.reload());window.addEventListener('error',fail);window.addEventListener('unhandledrejection',fail);
+        window.__SIMLIBS_BOOT__={ready,fail,get phase(){return phase;},startedAt};
+      })();
+    </script>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

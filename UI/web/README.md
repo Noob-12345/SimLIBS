@@ -10,6 +10,8 @@ Te [eV]、实际Ne [cm⁻³]（如1.23e17）、整数R支持直接输入与滑�
 
 ## 真正离线 local v2
 
+新UI和GET /api/params明确local_broadening_enabled=false；旧请求/配置缺少该字段仍按true，旧结果只读。关闭时是未卷积线权重谱，R/热/额外宽度均不应用（实际R/effective temperature记录null）。raw保留精确跃迁波长、重合线求和及零边界标记；interpolated是对目标均匀网格按最近节点直接累加权重，保持各离子总权重，不连相邻线、不做核卷积或连续插值。采样步长与线位分开；选择统一网格时用独立目标步长重新投影。CSV/元素求和/共同归一化、Canvas与PNG/GIF用真实节点竖线。raw线表仍保留原文件/行来源。开启“展宽”才使用下面的仪器、额外与热展宽。local/off且尚未运行时空白待运行，不把示意高斯当真实谱；已有成功谱保持到下一次成功。
+
 默认Fe100%，仅读取../Linedatabase的62个CSV/31种元素及simlibs-atomic-metadata.json，无HTTP/TCP状态探针，无Chrome，缺库元素拒绝且不向NIST回退。解析真实成对上下能级，识别普通头/单位头/Unnamed真实列及空行，不固定跳两行；Å转nm，Aki的10^8/s转s^-1，cm^-1乘hc/e转eV。缺Aki排除并记录文件/行/原因；可用能级按(能量,g)去重用于有限分区函数。
 
 使用U=Σg·exp(-E/Te)、I↔II Saha（Ne从cm^-3转m^-3），线面积为原子比例×态分数×g_upper/U×exp(-E_upper/Te)×Aki，不乘光子能量、不用原Intensity排名。静态原子质量和第一至第三电离能核对Royal Society of Chemistry，各元素URL/响应SHA保存在独立JSON；runtime没有下载器。[LTE/Saha教材依据](https://www.astro.uvic.ca/~tatum/stellatm/atm8.pdf)。这是光学薄、有限已知I/II能级的相对光子近似，态分数在I/II归一；max_charge过滤可用发射态，不制造缺失III。缺绝对标定、Stark系数与完整高态库，来源和UI明确覆盖局限。
@@ -37,6 +39,12 @@ Web 不再做单次6000/扫描2000显示抽样，raw/interpolated 各自传递�
 元素谱来自同元素各真实离子贡献之和，排除总谱、Exp/Residual 等列。默认显示总谱和元素彩色叠加，颜色按元素稳定，图例可隐藏/显示，两主题均可读；所有曲线共用当前总谱的归一化因子，tooltip 显示实际总谱及元素值。历史只有总谱时明确不提供分量。旧 `static/dynamic + mode_version=1` 请求和已有记录继续原语义，旧物理算法/参数不重写；新界面不再允许独立展宽开关组合出违背两路径定义的路线。
 
 ## 批量模拟与训练 ZIP
+
+单次/批量控件由controls.js生成同一布局，controls_logic.js复用精确输入/滑块、模式、强度、展宽、插值、补全和比例逻辑，数值/草稿相互独立。local唯一Photon Flux选框，在线Photon flux/Energy flux的选择在切换local后返回时保留，旧曲线不重标。后台抓取仅server显示；交互提示文案删除，但框选/平移/复原仍可用。
+
+生成方式明确为固定/随机/CSV模板。固定忽略所有隐藏随机草稿；随机Te和实际Ne以线性标量均匀采样（Ne边界为cm^-3实际科学计数值），各元素随机开关/下上界独立，关闭保留固定浓度。Decimal核算固定余量与可行区间，打乱随机元素顺序后逐项在可行条件区间内取值，末项分配精确剩余量；不裁剪/归一化超边界，也不声称联合均匀分布。不可行/非有限/结构错误400，样本≤5000、计划总谱单元≤5000000，生成与投影检查取消。完整seed/规则/实际参数计划先保存；失败/取消/新进程续跑只补余项，实际科学helper纳入版本SHA。
+
+CSV模板严格原行/参数顺序，随机开关不覆盖模板。每成功样本更新actual_parameters.csv：index/name、实际Te[eV]/Ne[cm^-3]、所有*_at%实际浓度、R/波段/网格/温度/展宽开关及source_manifest；完整宽表和训练标签也取同一真实origin。template.csv使用可导入列供复用，broaden/resample接受true/false，step[nm]为统一目标步长。显式linked时独立T_h[K]空值表示没有独立覆盖；有数值与linked冲突仍拒绝。两份CSV加入训练ZIP，成功后可分别下载。原成对Random_spectra/Random_contents格式、28元素顺序与余数分包保持。
 
 “批量模拟”有独立local/server/client、Te/实际Ne/R/波段/合成步长/按需插值/离子/通量/离线宽度与温度模式及组成，不读取单次草稿。插值未选时label/input隐藏并忽略旧草稿；服务器批量需明确勾选统一网格。样本与每包均1–5000整数、余数保留，B>N只一包。无模板保留组成池随机选行和均匀Te/Ne，有模板严格行优先/行内重复。裸Ne、Te为元素；参数列Te[eV]、Ne[cm^-3]、R、low_w[nm]、upper_w[nm]、grid_step[nm]、max_ion_charge、T_h[K]、doppler_mode、intensity_scale。*_at%、name/samples有效，空值/非有限/非100%拒绝，网格不一致拒绝打包。上传文件名独立省略显示且title完整，实际文件选择、替换、校验和清除保留。
 
@@ -102,6 +110,7 @@ E:\Anaconda\envs\simLIBS\python.exe -B server.py
 | GET | `/api/jobs/{id}/events` | **SSE 事件流**（status/log/progress，含重放与心跳） |
 | GET | `/api/jobs/{id}/result[?frame=N]` | 单次全量节点；批量摘要；扫描帧目录或指定帧全量数据 |
 | GET | `/api/jobs/{id}/export?kind=csv\|json\|png\|gif\|dataset\|training[&frame=N]` | 导出下载：全量 CSV、manifest JSON、PNG、GIF、批量宽表、已生成训练 ZIP |
+| GET | `/api/jobs/{id}/export?kind=parameters\|template` | 成功批量的逐样本实际参数/浓度CSV、可再次导入的模板CSV |
 | POST | `/api/jobs/{id}/cancel` | 协作式取消 |
 | GET/POST | `/api/settings` | 设置读取 / 保存 |
 

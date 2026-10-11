@@ -91,14 +91,16 @@ class WebTrainingBrowserTests(BrowserCase):
 
     def test_batch_equal_ranges_pack_estimate_payload_and_old_tasks(self):
         self.js("switchPage('batch')")
-        for id,value in [('batchCount','5'),('batchSize','2'),('batchTeA','1'),('batchTeB','1'),('batchNeA','17'),('batchNeB','17')]:
+        for id,value in [('batchCount','5'),('batchSize','2'),('batchTe','1'),('batchNe','1e17')]:
             self.edit('#'+id,value)
+        self.js("$('#batchPackageEstimate').scrollIntoView({block:'center'})")
+        self.driver.execute_async_script("const done=arguments[0];Promise.all(document.getAnimations().filter(a=>a.effect.getTiming().iterations!==Infinity).map(a=>a.finished.catch(()=>{}))).then(()=>requestAnimationFrame(()=>requestAnimationFrame(done)));")
         self.assertIn('3 包',self.driver.find_element(By.ID,'batchPackageEstimate').text)
         self.assertIn('末包 1',self.driver.find_element(By.ID,'batchPackageEstimate').text)
         self.invoke('runBatch')
         payload=type(self).received[-1][1]
         self.assertEqual([payload['n_samples'],payload['batch_size']],[5,2])
-        self.assertEqual(payload['te_range'],[1,1]);self.assertEqual(payload['ne_range'],[17,17])
+        self.assertFalse(payload['generation']['te']['enabled']);self.assertFalse(payload['generation']['ne']['enabled']);self.assertEqual(payload['params']['ne'],1e17)
         self.js("state.mode='client';updateModePath();document.querySelector('#resample').checked=false;")
         self.invoke('runBatch');self.assertFalse(type(self).received[-1][1]['params']['resample'])
         for id,value in [('batchCount','1.2'),('batchCount',''),('batchSize','0'),('batchSize','2.2'),('batchSize','5001')]:

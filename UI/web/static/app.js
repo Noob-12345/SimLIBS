@@ -156,14 +156,15 @@ function drawSpectrum(cv, spec, opts) {
   function line(s, color, widthPx, glow) {
     const nPts=opts.reveal!==undefined?Math.min(s.xs.length,Math.max(1,Math.round(s.xs.length*opts.reveal))):s.xs.length;
     ctx.beginPath();
-    for (let i = 0; i < nPts; i++) { const x = X(s.xs[i]), y = Y(s.ys[i]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    for (let i = 0; i < nPts; i++) { const x = X(s.xs[i]), y = Y(s.ys[i]); if(spec.meta?.spectrum_style==='sticks'){ctx.moveTo(x,Y(0));ctx.lineTo(x,y);}else{i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);} }
     ctx.strokeStyle = color; ctx.lineWidth = widthPx; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     if (glow) { ctx.shadowColor = color; ctx.shadowBlur = 3; }
     ctx.stroke(); ctx.shadowBlur = 0;
   }
   ctx.save();ctx.beginPath();ctx.rect(pad.l,pad.t,cw,ch);ctx.clip();
   for(const s of lines){
-    if(s.style==='raw'){
+    if(spec.meta?.spectrum_style==='sticks'){line(s,s.style==='element'?s.color:s.style==='raw'?C.raw:C.main,1.3,false);}
+    else if(s.style==='raw'){
       ctx.fillStyle=C.raw;ctx.globalAlpha=.75;
       for(let i=0;i<s.xs.length;i++){ctx.beginPath();ctx.arc(X(s.xs[i]),Y(s.ys[i]),1.2,0,7);ctx.fill();}
       ctx.globalAlpha=1;
@@ -176,7 +177,7 @@ function drawSpectrum(cv, spec, opts) {
   const original=physical.find(s=>s.xs===basis.xs)||physical[0];
   cv._plot = { pad,cw,ch,xs:basis.xs,ys:basis.ys,actualYs:original?.ys||basis.ys,elements:physical.filter(s=>s.style==='element'),divisor,ymax,xmin,xmax,fullMin,fullMax,norm:!!opts.norm,
                drawn_nodes:lines.map(s=>({label:s.label||s.style,count:s.xs.length})) };
-  if(cv===specCanvas)$('#nodeInfo').textContent=`${main.label||'当前视图'}：原数据 ${main.xs.length}/${main.total_points||main.xs.length} 实际节点 · 当前视口 ${basis.xs.length} 节点 · 实际 R ${spec.meta?.actual_resolution??'未知'}`;
+  if(cv===specCanvas)$('#nodeInfo').textContent=`${main.label||'当前视图'}：原数据 ${main.xs.length}/${main.total_points||main.xs.length} 实际节点 · 当前视口 ${basis.xs.length} 节点 · ${spec.meta?.local_broadening_enabled===false?'未展宽 · R未应用':'实际 R '+(spec.meta?.actual_resolution??'未知')}`;
 }
 function drawEmpty(cv, text) {
   drawSpectrum(cv, null, { views: {}, emptyText: text });
@@ -251,6 +252,7 @@ async function fetchPreview() {
   $('#legend [data-view=ion]').style.display = state.hasResult?specData&&specData.series&&specData.series.ions.length?'':'none':'none';
   // 已有真实结果：保留图谱直到下次运行（与桌面版“保留上一成功图谱”语义一致）
   if (state.hasResult) return;
+  if(state.mode==='local'&&!$('#localBroadenEnabled').checked){drawEmpty(specCanvas,'未展宽线谱 · 运行后显示真实谱线');specData=null;$('#nodeInfo').textContent='未展宽 · 待运行';return;}
   if(!Number.isFinite(p.te)||p.te<=0||!Number.isFinite(p.ne)||p.ne<=0||!Number.isSafeInteger(p.R)||p.R<=0) {
     drawEmpty(specCanvas,'请填写有效的 Te、Ne 和 R');return;
   }
@@ -537,26 +539,26 @@ function attachChartInteractions(cv, redraw) {
 const ELEMENT_SYMBOLS='H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og'.split(' ');
 let elementMap=new Map(ELEMENT_SYMBOLS.map(e=>[e.toLowerCase(),e]));
 function canonicalElement(value){return elementMap.get(String(value).trim().toLowerCase())||null;}
-function bindElementPicker(input,list,c,idx) {
+function bindElementPicker(input,list,c,idx,entries=state.comp,mode=()=>state.mode,changed=()=>{updateSum();schedulePreview();}) {
   let options=[],active=-1;
   const close=()=>{list.hidden=true;input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');};
-  const choose=el=>{c.el=el;input.value=el;close();input.focus();updateSum();schedulePreview();};
+  const choose=el=>{c.el=el;input.value=el;close();input.focus();changed();};
   const mark=()=>{Array.from(list.children).forEach((b,i)=>b.setAttribute('aria-selected',String(i===active)));if(active>=0){input.setAttribute('aria-activedescendant',list.children[active].id);list.children[active].scrollIntoView({block:'nearest'});}};
   const show=()=>{
-    const prefix=input.value.trim().toLowerCase(),used=new Set(state.comp.filter((_,i)=>i!==idx).map(x=>canonicalElement(x.el)));
-    options=Array.from(elementMap.values()).filter(el=>el.toLowerCase().startsWith(prefix)&&!used.has(el)&&(state.mode!=='local'||state.localSymbols.includes(el)));
+    const prefix=input.value.trim().toLowerCase(),used=new Set(entries.filter((_,i)=>i!==idx).map(x=>canonicalElement(x.el)));
+    options=Array.from(elementMap.values()).filter(el=>el.toLowerCase().startsWith(prefix)&&!used.has(el)&&(mode()!=='local'||state.localSymbols.includes(el)));
     active=-1;list.replaceChildren();
     options.forEach((el,i)=>{const button=document.createElement('button');button.type='button';button.role='option';button.id=list.id+'-'+i;button.tabIndex=-1;button.textContent=el;button.setAttribute('aria-selected','false');button.addEventListener('pointerdown',e=>e.preventDefault());button.addEventListener('click',()=>choose(el));list.appendChild(button);});
     list.hidden=!options.length;input.setAttribute('aria-expanded',String(options.length>0));
   };
   input.addEventListener('focus',show);
-  input.addEventListener('input',()=>{c.el=input.value;show();updateSum();schedulePreview();});
+  input.addEventListener('input',()=>{c.el=input.value;show();changed();});
   input.addEventListener('keydown',e=>{
     if(e.key==='Escape'){close();return;}
     if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(list.hidden)show();if(options.length){active=active<0?(e.key==='ArrowDown'?0:options.length-1):(active+(e.key==='ArrowDown'?1:-1)+options.length)%options.length;mark();}}
     if(e.key==='Enter'&&!list.hidden&&options.length){e.preventDefault();choose(options[active<0?0:active]);}
   });
-  input.addEventListener('blur',()=>{const valid=canonicalElement(c.el);if(valid){c.el=valid;input.value=valid;}close();updateSum();});
+  input.addEventListener('blur',()=>{const valid=canonicalElement(c.el);if(valid){c.el=valid;input.value=valid;}close();changed();});
 }
 function compositionPayload(entries=state.comp,mode=state.mode){
   const seen=new Set();
@@ -773,35 +775,7 @@ async function finalizeFromJob(j) {
 }
 
 /* ---------- 单次模拟：运行 ---------- */
-function broadeningPayload() {
-  const local = ['client','local'].includes(state.mode);
-  const centerRaw = $('#bCenter').value.trim();
-  return {
-    broadening: local?'local':'nist',
-    broaden_convention: state.mode==='local'?'physics':local?$('#bConvention').value:'nist',
-    broaden_grid_step: local ? numericInput('bGridStep','合成网格步长') : 0.005,
-    broaden_center_decimals: state.mode==='client' && centerRaw !== '' ? numericInput('bCenter','线中心舍入位',true,0) : null,
-    broaden_min_rel_int: state.mode==='client' ? numericInput('bMinRel','选线阈值',false,0) : 0,
-  };
-}
-function commonParamsPayload() {
-  const p = currentParams();
-  numericInput('teInput','Te');numericInput('neInput','实际 Ne');numericInput('rInput','R',true);
-  numericInput('lowW','波长下界');numericInput('upW','波长上界');
-  if(p.low>=p.up)throw new Error('波长上界须大于下界');
-  return {
-    te: p.te, ne: p.ne, resolution: p.R, low_w: p.low, up_w: p.up,
-    max_ion_charge: parseInt($('#maxIon').value) || 0,
-    mode: state.mode, mode_version:2, headless: $('#headless').checked, resample: $('#resample').checked,
-    resample_step:$('#resample').checked?numericInput('resampleStep','插值步长'):.01,
-    intensity_scale:state.mode==='local'?'photon':$('#intensityScale').value,
-    local_gaussian_nm:state.mode==='local'?numericInput('localGaussian','额外高斯宽度',false,0):0,
-    local_lorentz_nm:state.mode==='local'?numericInput('localLorentz','洛伦兹宽度',false,0):0,
-    local_temperature_mode:state.mode==='local'?$('#localTemperatureMode').value:'manual',
-    local_temperature_K:state.mode==='local'&&$('#localTemperatureMode').value==='manual'?numericInput('localTemperature','重粒子温度',false,0):0,
-    ...broadeningPayload(),
-  };
-}
+function commonParamsPayload(){return controlsPayload('single');}
 async function runSingle() {
   if (state.currentJob) { // 运行中 → 取消
     try { await api('POST', '/api/jobs/' + state.currentJob.id + '/cancel'); }
@@ -810,7 +784,7 @@ async function runSingle() {
   }
   let composition;try{composition=compositionPayload();}catch(e){toast('err','无法启动',e.message);return;}
   if (!updateSum()) { toast('err', '无法启动', '元素占比总和必须为 100%（当前 ' + compSum().toFixed(1) + '%）'); return; }
-  if (state.offline) { toast('err', '后端不可用', '请通过 start_web.cmd 或 server.py 启动后再运行模拟'); return; }
+  if (state.offline) { toast('err', '未检测到后端服务'); return; }
   $('#logbox').innerHTML = '';
   appendLog('[ui] 提交单次模拟任务…', 'info');
   try {
@@ -857,7 +831,7 @@ function renderSingleResult(jobId, result) {
     chips.push(`<span class="chip" title="线强计算位置">${loc}</span>`);
   }
   if (m.broadening) {
-    const b = m.broadening === 'local' ? '展宽：本地（线表）' : '展宽：NIST';
+    const b = m.broadening === 'none' ? '展宽：关闭' : m.broadening === 'local' ? '展宽：本地（线表）' : '展宽：NIST';
     chips.push(`<span class="chip" title="${m.broadening === 'local' && m.line_table_rows ? '线表 ' + m.line_table_rows + ' 行' : '服务端/页面展宽'}">${b}</span>`);
   }
   if (m.actual_resolution != null) {
@@ -896,53 +870,17 @@ async function downloadExport(jobId, kind, extra) {
 /* ================================================================
    批量模拟
    ================================================================ */
-async function runBatch() {
-  if (state.currentJob) { toast('warn', '已有任务在运行', '请等待完成或先取消'); return; }
-  try {
-    const teA=numericInput('batchTeA','Te 下限'),teB=numericInput('batchTeB','Te 上限');
-    const neA=numericInput('batchNeA','Ne 指数下限',false,-Number.MAX_VALUE),neB=numericInput('batchNeB','Ne 指数上限',false,-Number.MAX_VALUE);
-    if(teA>teB||neA>neB)throw new Error('Te / Ne 范围须 min ≤ max（相等可固定值）');
-    if([10**neA,10**neB].some(n=>!Number.isFinite(n)||n<=0))throw new Error('Ne 指数产生非有限或非正密度');
-    const n=numericInput('batchCount','样本数',true),batchSize=numericInput('batchSize','每 batch 光谱数',true),seed=numericInput('batchSeed','随机种子',true,0);
-    if(n>5000||batchSize>5000)throw new Error('样本数和每 batch 光谱数均须 ≤5000');
-    const pp = batchParamsPayload();
-    const r = await api('POST', '/api/simulate/batch', {
-      params: pp,
-      n_samples: n, batch_size: batchSize, seed,
-      te_range: [teA, teB], ne_range: [neA, neB],
-      compositions: state.templateText===null?[{name:'current',items:compositionPayload(state.batchComp,pp.mode)}]:[],
-      ...(state.templateText===null?{}:{template_csv:state.templateText,repeats:numericInput('templateRepeat','每行重复次数',true),name_column:$('#templateNameColumn').value}),
-    });
-    state.batchJobId = r.job_id;
-    $('#batchJobId').textContent = r.job_id;
-    $('#batchLive').hidden = false;
-    $('#batchProgress').style.width = '0%';
-    $('#batchLiveMeta').textContent = '排队中…';
-    attachJob(r.job_id, '批量模拟');
-    setRunningUI(true);
-    $('#batchLive').hidden = false;
-    $('#batchCancel').hidden = false;
-  } catch (e) { toast('err', e.status === 400 ? '参数校验未通过' : '提交失败', e.message); }
+async function runBatch(){
+  if(state.currentJob)return toast('warn','已有任务在运行','请等待或取消');
+  try{const params=controlsPayload('batch'),kind=$('#batchGeneration').value;
+    const body={params,n_samples:numericInput('batchCount','样本数',true),batch_size:numericInput('batchSize','每包谱数',true),seed:numericInput('batchSeed','种子',true,0)};
+    if(body.n_samples>5000||body.batch_size>5000)throw new Error('样本数和每包谱数均须≤5000');
+    if(kind==='template'){if(state.templateText===null)throw new Error('请导入CSV模板');Object.assign(body,{template_csv:state.templateText,repeats:numericInput('templateRepeat','重复次数',true),name_column:$('#templateNameColumn').value});}
+    else body.generation=generationPayload();
+    const result=await api('POST','/api/simulate/batch',body);state.batchJobId=result.job_id;$('#batchJobId').textContent=result.job_id;$('#batchLive').hidden=false;$('#batchProgress').style.width='0%';$('#batchLiveMeta').textContent='排队中…';attachJob(result.job_id,'批量模拟');setRunningUI(true);$('#batchCancel').hidden=false;
+  }catch(error){toast('err','无法开始批量',error.message);}
 }
-
-function batchParamsPayload(){
-  const mode=$('#batchMode').value;
-  return {mode,mode_version:2,te:numericInput('batchTe','批量Te'),ne:numericInput('batchNe','批量实际Ne'),resolution:numericInput('batchR','批量R',true),
-          low_w:numericInput('batchLow','批量波长下界'),up_w:numericInput('batchUp','批量波长上界'),max_ion_charge:Number($('#batchMaxIon').value),
-          intensity_scale:mode==='local'?'photon':$('#batchIntensityScale').value,headless:true,broadening:mode==='server'?'nist':'local',broaden_convention:mode==='local'?'physics':'nist',
-          broaden_grid_step:mode==='server'?.005:numericInput('batchGrid','批量合成步长'),resample:$('#batchResample').checked,resample_step:$('#batchResample').checked?numericInput('batchStep','批量插值步长'):.01,
-          local_gaussian_nm:mode==='local'?numericInput('batchGaussian','高斯宽度',false,0):0,local_lorentz_nm:mode==='local'?numericInput('batchLorentz','洛伦兹宽度',false,0):0,
-          local_temperature_mode:mode==='local'?$('#batchTemperatureMode').value:'manual',local_temperature_K:mode==='local'&&$('#batchTemperatureMode').value==='manual'?numericInput('batchTemperature','重粒子温度',false,0):0};
-}
-function renderBatchComposition(){
-  const box=$('#batchCompRows');box.replaceChildren();
-  const list=document.createElement('datalist');list.id='batchElementOptions';
-  for(const el of ($('#batchMode').value==='local'?state.localSymbols:Array.from(elementMap.values()))){const option=document.createElement('option');option.value=el;list.appendChild(option);}box.appendChild(list);
-  state.batchComp.forEach((c,i)=>{const row=document.createElement('div');row.className='comp-row';
-    const el=document.createElement('input');el.className='batch-el';el.setAttribute('list',list.id);el.value=c.el;el.addEventListener('input',()=>{c.el=el.value;updateLocalNotices();});el.addEventListener('blur',()=>{const canonical=canonicalElement(el.value);if(canonical){c.el=canonical;el.value=canonical;}updateLocalNotices();});
-    const pct=document.createElement('input');pct.type='number';pct.className='batch-pct';pct.value=c.pct;pct.step='any';pct.addEventListener('input',()=>{c.pct=pct.value;updateLocalNotices();});
-    const label=document.createElement('span');label.textContent='%';const remove=document.createElement('button');remove.textContent='✕';remove.className='btn sm';remove.addEventListener('click',()=>{state.batchComp.splice(i,1);renderBatchComposition();});row.append(el,pct,label,remove);box.appendChild(row);});
-}
+function batchParamsPayload(){return controlsPayload('batch');}
 async function validateTemplate(){
   if(state.templateText===null)return;
   try{const params=batchParamsPayload();const result=await api('POST','/api/templates/validate',{params,template_csv:state.templateText,repeats:numericInput('templateRepeat','重复次数',true),name_column:$('#templateNameColumn').value,batch_size:numericInput('batchSize','包大小',true)});
@@ -984,7 +922,7 @@ function renderBatchResult(jobId, result) {
   state.batchResultId=jobId;
   $('#datasetDownload').disabled=!!s.partial;
   const training=result.training_package;
-  $('#trainingDownload').disabled=!training?.available||!!s.partial;
+  $('#trainingDownload').disabled=!training?.available||!!s.partial;$('#parametersDownload').disabled=!result.actual_parameters_available||!!s.partial;$('#templateDownload').disabled=!result.template_csv_available||!!s.partial;
   $('#trainingPackageNote').textContent=training?.available?`${training.packages} 包 · 每 batch ${training.batch_size} 谱 · 完整光谱和元素标签已配对 · ${training.source}`:training?.reason||'此任务没有训练包；重新运行批量模拟后可下载。';
 }
 function updateBatchPackageEstimate() {
@@ -1049,7 +987,7 @@ async function drawScanFrame(mode = 'instant') {
   const axUnit = { te: ' eV', ne: '×10^x cm⁻³', r: '' }[cache.axis];
   const valStr = cache.axis === 'ne' ? '10' + sup(fr.value) : (cache.axis === 'r' ? Math.round(fr.value) : fr.value.toFixed(3));
   const selected=(state.views.interp!==false?fr.series?.interpolated:fr.series?.raw)||fr.series?.raw||fr;
-  $('#frameInfo').textContent = `${axName} = ${valStr}${axUnit} · ${i + 1} / ${cache.frames.length} · ${selected.label||'当前视图'} 完整 ${selected.xs.length}/${selected.xs.length} 节点 · 实际 R ${fr.meta?.actual_resolution??fr.actual_resolution??'未知'} · 缓存≤3帧`;
+  $('#frameInfo').textContent = `${axName} = ${valStr}${axUnit} · ${i + 1} / ${cache.frames.length} · ${selected.label||'当前视图'} 完整 ${selected.xs.length}/${selected.xs.length} 节点 · ${fr.meta?.local_broadening_enabled===false?'未展宽 · R未应用':'实际 R '+(fr.meta?.actual_resolution??fr.actual_resolution??'未知')} · 缓存≤3帧`;
   $('#scanTip').textContent = `帧 ${i + 1} / ${cache.frames.length} · ${axName} = ${valStr}${axUnit}`;
   $$('#scanVals span').forEach((el, k) => el.classList.toggle('cur', k === i));
 }
@@ -1181,7 +1119,7 @@ function setOffline(off) {
     ['#stNist', '#stPy', '#stChrome', '#stEngine'].forEach(s => $(s).textContent = '—');
     $('#stNistDot').className = 'dot off';
     $('#mockBadge').hidden = true;
-    toast('warn', '离线示意模式', '未检测到后端服务，图表使用本地示意数据');
+    toast('warn', '未检测到后端服务');
   }
 }
 
@@ -1246,11 +1184,7 @@ applyTheme(false);
 
 /* 单次模拟页绑定 */
 ['lowW','upW'].forEach(id=>$('#'+id).addEventListener('input',schedulePreview));
-for(const [slider,input] of [['teSlider','teInput'],['neSlider','neInput'],['rSlider','rInput']]) {
-  $('#'+slider).addEventListener('input',()=>{const n=Number($('#'+slider).value);$('#'+input).value=slider==='neSlider'?formatDensity(Number((10**n).toPrecision(15))):n;updateParamLabels();schedulePreview();});
-  $('#'+input).addEventListener('input',()=>{syncParameterSliders();updateParamLabels();schedulePreview();});
-}
-$('#neInput').addEventListener('blur',()=>{const n=currentParams().ne;if(Number.isFinite(n)&&n>0)$('#neInput').value=formatDensity(n);});
+bindControlSliders('single');bindControlSliders('batch');
 $('#intensityScale').addEventListener('change',()=>{schedulePreview();if(state.hasResult)toast('ok','下次运行尺度已选择','当前成功结果仍保持原尺度与原数据');});
 $$('#legend .chip').forEach(ch => ch.addEventListener('click', () => {
   const v = ch.dataset.view;
@@ -1263,22 +1197,13 @@ function updateLocalNotices(){
   const problem=(entries,mode)=>{if(mode!=='local')return '';const c=state.localCapabilities;if(!c)return '';if(!c.ready)return c.error||'本地库不可用';const missing=entries.filter(e=>Number(e.pct)>0&&!state.localSymbols.includes(canonicalElement(e.el))).map(e=>canonicalElement(e.el)).filter(Boolean);return missing.map(el=>el+'：'+(c.issues?.[el]?.join('；')||'缺少可用本地谱线')).join('；');};
   for(const [id,entries,mode] of [['localCapability',state.comp,state.mode],['batchLocalError',state.batchComp,$('#batchMode').value]]){const text=problem(entries,mode);$('#'+id).textContent=text;$('#'+id).hidden=!text;}
 }
-function updateOptionalControls(){
-  $('#resampleControl').hidden=!$('#resample').checked;$('#batchResampleControl').hidden=!$('#batchResample').checked;
-  for(const [modeId,inputId,hintId,te] of [['localTemperatureMode','localTemperatureInput','localLinkedTemperature',currentParams().te],['batchTemperatureMode','batchTemperatureInput','batchLinkedTemperature',Number($('#batchTe').value)]]){const linked=$('#'+modeId).value==='linked';$('#'+inputId).hidden=linked;$('#'+hintId).hidden=!linked;const kelvin=te*1.602176634e-19/1.380649e-23;$('#'+hintId).textContent=Number.isFinite(kelvin)&&kelvin>0?'Tₕ = '+kelvin.toExponential(4)+' K':'';}
+for(const scope of ['single','batch']){
+ const ids=CONTROL_IDS[scope];$$('#'+ids.seg+' button').forEach(button=>button.addEventListener('click',()=>{
+   $('#'+ids.mode).value=button.dataset.v;$('#'+ids.mode).dispatchEvent(new Event('change'));
+ }));
+ for(const key of ['broad','resample','temperatureMode'])$('#'+ids[key]).addEventListener('change',()=>{updateOptionalControls();if(scope==='single')schedulePreview();});
 }
-function updateModePath(){const local=['client','local'].includes(state.mode);state.broadening=local?'local':'nist';$('#broadenParams').hidden=!local;$('#modePath').textContent=state.mode==='local'?'用户线库 · 本地计算':state.mode==='client'?'NIST线表 · Python展宽':'NIST数据 · 官方JS重算';$('#bConvention').disabled=state.mode==='local';if(state.mode==='local')$('#bConvention').value='physics';for(const id of ['bCenter','bMinRel'])$('#'+id).disabled=state.mode==='local';$('#localWidths').hidden=state.mode!=='local';$('#localThermalControl').hidden=state.mode!=='local';$('#nistIntensityControl').hidden=state.mode==='local';$('#localIntensity').hidden=state.mode!=='local';$('#broadeningNote').hidden=true;updateLocalNotices();updateOptionalControls();}
-function updateBatchMode(){const mode=$('#batchMode').value;$('#batchModePath').textContent=mode==='local'?'用户线库 · 本地计算':mode==='client'?'NIST线表 · Python展宽':'NIST数据 · 官方JS重算';$('#batchNistIntensity').hidden=mode==='local';$('#batchLocalIntensity').hidden=mode!=='local';$('#batchThermalControl').hidden=mode!=='local';$('#batchLocalWidths').hidden=mode!=='local';$('#batchGridControl').hidden=mode==='server';updateLocalNotices();updateOptionalControls();}
-$$('#modeSeg button').forEach(b => b.addEventListener('click', () => {
-  $$('#modeSeg button').forEach(x => x.classList.remove('on')); b.classList.add('on');
-  state.mode = b.dataset.v;updateModePath();schedulePreview();api('GET','/api/status?mode='+state.mode).then(applyStatus).catch(()=>{});
-}));
-$$('#broadSeg button').forEach(b => b.addEventListener('click', () => {
-  $$('#broadSeg button').forEach(x => x.classList.remove('on')); b.classList.add('on');
-  state.broadening = b.dataset.v;
-  $('#broadenParams').hidden = state.broadening !== 'local';
-  schedulePreview();
-}));
+$('#singleMode').addEventListener('change',()=>{state.mode=$('#singleMode').value;updateModePath();updateSum();schedulePreview();api('GET','/api/status?mode='+state.mode).then(applyStatus).catch(()=>{});});
 $('#addEl').addEventListener('click', () => {
   if (state.comp.length >= 32) return toast('warn', '已达上限', '最多 32 个元素行');
   state.comp.push({ el: '', pct: 0 }); renderComp();
@@ -1298,16 +1223,16 @@ $('#batchRun').addEventListener('click', runBatch);
 $('#batchResume').addEventListener('click',()=>resumeBatch());
 $('#batchMode').addEventListener('change',()=>{renderBatchComposition();updateBatchMode();api('GET','/api/status?mode='+$('#batchMode').value).then(applyStatus).catch(()=>{});});
 $('#batchAddElement').addEventListener('click',()=>{if(state.batchComp.length>=32)return;state.batchComp.push({el:'',pct:0});renderBatchComposition();});
-$('#batchBalance').addEventListener('click',()=>{const prefix=state.batchComp.slice(0,-1).reduce((a,c)=>a+Number(c.pct),0);if(!Number.isFinite(prefix)||prefix>100||prefix<0)return toast('err','配比无效','请修正前项');if(state.batchComp.length)state.batchComp.at(-1).pct=100-prefix;renderBatchComposition();});
+
 $('#templateChoose').addEventListener('click',()=>$('#templateFile').click());
-$('#templateFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;state.templateText=await file.text();state.templateName=file.name;$('#templateFileName').textContent=file.name;$('#templateFileName').title=file.name;await validateTemplate();});
+$('#templateFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;state.templateText=await file.text();state.templateName=file.name;$('#batchGeneration').value='template';updateGeneration();$('#templateFileName').textContent=file.name;$('#templateFileName').title=file.name;await validateTemplate();});
 $('#templateValidate').addEventListener('click',validateTemplate);$('#templateRepeat').addEventListener('change',validateTemplate);
 $('#templateClear').addEventListener('click',()=>{state.templateText=null;state.templateName=null;$('#templateFile').value='';$('#templateFileName').textContent='未选择文件';$('#templateFileName').title='未选择文件';$('#templateInfo').textContent='模板已清除；使用批量独立组成';});
 $('#templateExample').addEventListener('click',()=>{const text='name,Fe_at%,Al_at%,Te[eV],Ne[cm^-3],R\nFe-only,100,0,1,1e17,1000\nFe-Al,50,50,1.2,2e17,2000\nAl-only,0,100,1,1e17,1000\n';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'}));a.download='SimLIBS-template.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);});
-$('#batchTe').addEventListener('change',()=>{const n=Number($('#batchTe').value);if(Number.isFinite(n)&&n>0){$('#batchTeA').value=n;$('#batchTeB').value=n;}});
-$('#batchNe').addEventListener('change',()=>{const n=Number($('#batchNe').value);if(Number.isFinite(n)&&n>0){$('#batchNeA').value=Math.log10(n);$('#batchNeB').value=Math.log10(n);}});
-for(const id of ['resample','batchResample','localTemperatureMode','batchTemperatureMode'])$('#'+id).addEventListener('change',updateOptionalControls);
-for(const id of ['teInput','teSlider','batchTe'])$('#'+id).addEventListener('input',updateOptionalControls);
+for(const selector of ['batchGeneration','randomTe','randomNe'])$('#'+selector).addEventListener('change',updateGeneration);
+$$('#batchGenerationSeg button').forEach(button=>button.addEventListener('click',()=>{$('#batchGeneration').value=button.dataset.v;updateGeneration();}));
+['batchTeA','batchTeB','batchNeA','batchNeB'].forEach(id=>$('#'+id).addEventListener('input',updateBatchSum));
+$('#parametersDownload').addEventListener('click',()=>downloadExport(state.batchResultId,'parameters'));$('#templateDownload').addEventListener('click',()=>downloadExport(state.batchResultId,'template'));
 ['batchCount','batchSize'].forEach(id=>$('#'+id).addEventListener('input',updateBatchPackageEstimate));
 $('#trainingDownload').addEventListener('click',()=>downloadExport(state.batchResultId,'training'));
 $('#datasetDownload').addEventListener('click',()=>downloadExport(state.batchResultId,'dataset'));
@@ -1406,10 +1331,10 @@ window.addEventListener('resize', () => { if(state.hasResult)drawSingle(specData
     state.localSymbols=params.local_capabilities?.elements||st.local?.elements||[];
     state.localCapabilities=params.local_capabilities||st.local;
     updateSum();
-    $('#localTemperatureMode').value=params.params?.local_temperature_mode||'linked';$('#localTemperature').value=params.params?.local_temperature_K||0;
+    $('#localBroadenEnabled').checked=params.params?.local_broadening_enabled??false;$('#localTemperatureMode').value=params.params?.local_temperature_mode||'linked';$('#localTemperature').value=params.params?.local_temperature_K||0;
     updateModePath();
     renderBatchComposition();
-    updateLocalNotices();updateBatchMode();
+    updateLocalNotices();updateBatchMode();updateGeneration();
     if (params.title) $('#chartTitle').value = params.title;
     updateParamLabels();
     fetchPreview();

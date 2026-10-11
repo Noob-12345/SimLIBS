@@ -31,6 +31,7 @@ class PolishBrowserTests(BrowserCase):
         self.assertNotIn('62 CSV',self.js('return document.body.innerText'))
         self.assertEqual(self.driver.find_element(By.ID,'localTemperatureMode').get_attribute('value'),'linked')
         self.assertFalse(self.driver.find_element(By.ID,'localTemperatureInput').is_displayed())
+        switch=self.driver.find_element(By.ID,'localBroadenEnabled').find_element(By.XPATH,'..');self.js("arguments[0].scrollIntoView({block:'center'})",switch);switch.click()
         input=self.driver.find_element(By.ID,'teInput');input.send_keys(Keys.CONTROL,'a');input.send_keys('2');input.send_keys(Keys.TAB)
         self.assertIn('2.3209e+4',self.driver.find_element(By.ID,'localLinkedTemperature').text)
         self.invoke('runSingle');body=type(self).received[-1][1]['params']

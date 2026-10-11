@@ -14,19 +14,23 @@ rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'DejaVu Sans']
 rcParams['axes.unicode_minus'] = False
 
 
-def draw(ax, frame, view='interpolated', title='Simulated LIBS', color='#2563eb', normalize=False, intensity_scale='unknown'):
+def draw(ax, frame, view='interpolated', title='Simulated LIBS', color='#2563eb', normalize=False, intensity_scale='unknown',sticks=False):
     ax.clear()
     if view == 'ion':
         x = frame['Wavelength (nm)'].to_numpy()
         columns = [c for c in frame if c not in ('Wavelength (nm)', 'Sum(calc)')]
-        maximum = float(frame[columns].to_numpy().max()) if columns else 0
+        maximum = float(frame['Sum(calc)'].max()) if 'Sum(calc)' in frame else float(frame[columns].to_numpy().max()) if columns else 0
         for column in columns:
             y = frame[column].to_numpy()
-            ax.plot(x, y / maximum if normalize and maximum > 0 else y, label=column, linewidth=1)
+            value=y / maximum if normalize and maximum > 0 else y
+            if sticks:ax.vlines(x,0,value,label=column,linewidth=1)
+            else:ax.plot(x,value,label=column,linewidth=1)
     else:
         x, y = frame['wavelength'].to_numpy(), frame['intensity'].to_numpy()
         maximum = float(np.max(y))
-        ax.plot(x, y / maximum if normalize and maximum > 0 else y, label=view, color=color, linewidth=1.4)
+        value=y / maximum if normalize and maximum > 0 else y
+        if sticks:ax.vlines(x,0,value,label=view,color=color,linewidth=1.4)
+        else:ax.plot(x,value,label=view,color=color,linewidth=1.4)
     label={'photon':'Photon flux [a.u.]','energy':'Energy flux [a.u.]'}.get(intensity_scale,'Intensity [a.u.; scale unknown]')
     ax.set(title=title, xlabel='Wavelength [nm]', ylabel='Normalized intensity' if normalize else label)
     ax.grid(alpha=.25)
@@ -40,7 +44,7 @@ def figure_for(manifest, view, title, color, normalize):
     frame = pd.read_csv(files[view])
     figure = Figure(figsize=(9, 5), dpi=110, layout='constrained')
     FigureCanvasAgg(figure)
-    draw(figure.add_subplot(111), frame, view, title, color, normalize,intensity_scale_from_origin(manifest.get('origin')))
+    draw(figure.add_subplot(111), frame, view, title, color, normalize,intensity_scale_from_origin(manifest.get('origin')),manifest.get('origin',{}).get('spectrum_style')=='sticks')
     return figure
 
 

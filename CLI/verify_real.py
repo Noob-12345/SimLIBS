@@ -1,7 +1,7 @@
 """simLIBS Studio Qt —— 真实引擎联机冒烟（显式复验，不代表独立验收）。
 
 用法（E:\\Anaconda\\envs\\simLIBS\\python.exe）：
-    python verify_real.py                       # H 窄波段 · static + 本地展宽（无需浏览器）
+    python verify_real.py                       # H 窄波段 · local 离线（默认未展宽线谱，无需浏览器）
     python verify_real.py --wfe-mo              # W/Fe/Mo 200–1000 nm 宽波段
     python verify_real.py --output <dir>        # 自定义输出目录
 
@@ -110,8 +110,11 @@ def run_verification(output: Path, wfe_mo: bool) -> dict:
         'meta_source': bool(meta.get('source')),
         'sha256': bool(meta.get('sha256')),
         'mode_local': (origin.get('mode') or meta.get('mode')) == 'local',
-        'photon_only': (origin.get('parameters') or {}).get('intensity_scale') == 'photon',
-        'broadening_local': meta.get('broadening') == 'local',
+        'photon_only': meta.get('intensity_scale') == 'photon',
+        # 新界面默认未展宽（origin.broadening='none'）；勾选展宽后为 'local'，两者都合法
+        'broadening_local': meta.get('broadening') in ('local', 'none'),
+        'unbroadened_by_default': meta.get('local_broadening_enabled') is False
+                                  and meta.get('broadening') == 'none',
     }
     report['steps'].append({'step': 'run', 'ok': all(checks.values()), 'elapsed': round(elapsed, 1),
                             'checks': checks, 'meta_source': str(meta.get('source')),

@@ -1,0 +1,19 @@
+# .NET 构建产物
+src/SimlibsStudio/bin/
+src/SimlibsStudio/obj/
+
+# 项目内 .NET SDK（用户级安装，可删除；见 README）
+.dotnet/
+.tooling/
+
+# 运行时产物
+logs/
+output/
+last-crash.log
+
+# 用户设置（与 Qt 版 .cli-settings.json 互不影响）
+.wpf-settings.json
+.wpf-proxy.json
+.wpf-ui.json
+
+*.user

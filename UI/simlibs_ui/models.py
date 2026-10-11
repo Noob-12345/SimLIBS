@@ -94,6 +94,7 @@ class Parameters:
     local_lorentz_nm: float = 0.0
     local_temperature_K: float = 0.0
     local_temperature_mode: str = 'manual'  # absent legacy field keeps independent K=0 semantics
+    local_broadening_enabled: bool = True  # missing legacy field keeps the already-broadened path
 
     @property
     def effective_temperature_K(self):
@@ -157,7 +158,8 @@ class Parameters:
         if type(self.headless) is not bool or type(self.resample) is not bool:
             raise ValueError('headless/resample 必须为布尔值')
         out = replace(self, elements=e, percentages=p, **values)
-        if out.webscraping=='local':out.effective_temperature_K
+        if type(out.local_broadening_enabled) is not bool:raise ValueError('离线展宽开关须为布尔值')
+        if out.webscraping=='local' and out.local_broadening_enabled:out.effective_temperature_K
         # UI 子类在原 static 构造首次 interpolate 时即使用显式步长。
         if out.points > MAX_POINTS:
             raise ValueError(f'单谱最多 {MAX_POINTS} 点；请缩小波长范围或调整步长')

@@ -53,7 +53,7 @@ class LocalBrowserTests(BrowserCase):
             self.choose('batchMode',mode);self.invoke('runBatch');payload=type(self).received[-1][1]
             self.assertEqual(payload['params']['mode'],mode);self.assertEqual(payload['params']['resample_step'],.03)
             self.assertTrue(payload['params']['resample']);self.assertEqual(payload['params']['te'],1.25);self.assertEqual(payload['params']['resolution'],1234)
-            self.assertEqual(payload['compositions'][0]['items'],[{'el':'Fe','pct':100}]);self.assertEqual(payload['te_range'],[1.25,1.25])
+            self.assertEqual(payload['generation']['concentrations'],[{'el':'Fe','enabled':False,'fixed':100}]);self.assertFalse(payload['generation']['te']['enabled'])
     def test_uploaded_template_order_repeats_ignores_composition_drafts(self):
         self.js("switchPage('batch');state.comp=[{el:'bad',pct:''}];state.batchComp=[{el:'',pct:''}];renderBatchComposition();")
         path=Path(type(self).temp.name)/'actual-template.csv';path.write_text('samples,Fe_at%,Al_at%,Te[eV],Ne[cm^-3],R\nfirst,100,0,1,1e17,1000\nsecond,50,50,1.2,2e17,2000\n',encoding='utf-8')
@@ -62,7 +62,7 @@ class LocalBrowserTests(BrowserCase):
         self.edit('templateRepeat','2')
         WebDriverWait(self.driver,5).until(lambda d:'计划4谱' in self.driver.find_element(By.ID,'templateInfo').text)
         self.invoke('runBatch');payload=type(self).received[-1][1]
-        self.assertEqual(payload['n_samples'],4);self.assertEqual(payload['repeats'],2);self.assertEqual(payload['compositions'],[])
+        self.assertEqual(payload['n_samples'],4);self.assertEqual(payload['repeats'],2);self.assertNotIn('generation',payload)
         self.assertIn('first,100,0',payload['template_csv']);self.assertIn('second,50,50',payload['template_csv'])
         self.js("$('#templateClear').click()");self.assertIsNone(self.js('return state.templateText'))
     def test_resume_sends_no_new_parameters_and_keeps_previous_spectrum(self):

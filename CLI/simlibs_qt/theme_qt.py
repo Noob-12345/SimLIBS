@@ -10,12 +10,12 @@ DARK = dict(
     ion='#f59e0b', ion2='#a78bfa', good='#34d399', warn='#fbbf24', bad='#fb7185',
     info='#60a5fa', raw='#8a8589', input_bg='#0d0e12', hover='#1a1b21',
 )
-# Light：青色方案（设计稿 Light 变体）
+# Light：青色方案（设计稿 Light 变体）；输入区用暖灰 inset 与白卡片区分（Web 同思路）
 LIGHT = dict(
     bg='#f4f3f1', card='#ffffff', card2='#faf9f7', brd='#d9d5d2', brd_hover='#9ecfd9',
     text='#1c1a19', muted='#6f6a67', accent='#0891b2', accent2='#0e7490',
     ion='#b45309', ion2='#7c3aed', good='#059669', warn='#b45309', bad='#e11d48',
-    info='#2563eb', raw='#8a8589', input_bg='#ffffff', hover='#efece9',
+    info='#2563eb', raw='#8a8589', input_bg='#efede9', hover='#efece9',
 )
 
 ION_CYCLE = ('ion', 'ion2', 'info', 'good')
@@ -31,6 +31,12 @@ def chart_palette(p: dict) -> dict:
     }
 
 
+def soft_rgba(hex_color: str, alpha: float = 0.14) -> str:
+    """强调色的半透明变体（Web --accent-soft 的 QSS 等价物）。"""
+    c = QColor(hex_color)
+    return f'rgba({c.red()}, {c.green()}, {c.blue()}, {int(round(alpha * 255))})'
+
+
 def build_qss(p: dict) -> str:
     return f"""
 * {{ font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif; font-size: 13px; color: {p['text']}; }}
@@ -42,13 +48,12 @@ QWidget#Sidebar {{ background: {p['bg']}; border-right: 1px solid {p['brd']}; }}
 QLabel#Brand {{ color: {p['accent']}; font-size: 17px; font-weight: 800; padding: 2px; }}
 QLabel#Brand i {{ color: {p['accent2']}; font-style: italic; font-weight: 400; }}
 QPushButton[nav="true"] {{
-    background: transparent; border: none; border-left: 3px solid transparent;
-    color: {p['muted']}; text-align: left; padding: 10px 14px; font-size: 14px; border-radius: 0;
+    background: transparent; border: none; color: {p['muted']};
+    text-align: left; padding: 10px 14px; font-size: 14px; border-radius: 9px;
 }}
-QPushButton[nav="true"]:hover {{ background: {p['card']}; color: {p['text']}; }}
+QPushButton[nav="true"]:hover {{ background: {p['card2']}; color: {p['text']}; }}
 QPushButton[nav="true"]:checked {{
-    background: {p['card']}; color: {p['accent']}; border-left: 3px solid {p['accent']};
-    font-weight: 600;
+    background: {soft_rgba(p['accent'], .14)}; color: {p['accent']}; font-weight: 600;
 }}
 QFrame#EngineCard {{
     background: {p['card']}; border: 1px solid {p['brd']}; border-radius: 10px;
@@ -119,6 +124,23 @@ QPushButton#Primary:disabled {{ background: {p['brd']}; color: {p['muted']}; }}
 QPushButton#Danger {{ background: transparent; border: 1px solid {p['bad']}; color: {p['bad']}; }}
 QPushButton#Danger:hover {{ background: {p['bad']}; color: #ffffff; }}
 QPushButton#Ghost {{ background: transparent; }}
+
+/* ---------- 弹出菜单（日/夜/系统主题菜单等，替代系统默认亮色样式） ---------- */
+QMenu {{
+    background: {p['card2']}; color: {p['text']}; border: 1px solid {p['brd']};
+    border-radius: 10px; padding: 7px;
+}}
+QMenu::item {{
+    padding: 8px 20px 8px 10px; border-radius: 7px; margin: 1px 2px;
+    background: transparent; color: {p['text']};
+}}
+QMenu::item:selected {{ background: {soft_rgba(p['accent'], .14)}; color: {p['accent']}; }}
+QMenu#ThemeMenu {{ width: 185px; }}
+QMenu#ThemeMenu::indicator {{
+    width: 14px; height: 14px; border-radius: 7px; margin-left: 4px;
+    border: 1px solid {p['brd']}; background: {p['input_bg']};
+}}
+QMenu#ThemeMenu::indicator:checked {{ background: {p['accent']}; border-color: {p['accent']}; }}
 
 /* ---------- 表格/日志 ---------- */
 QTableWidget, QTableView {{

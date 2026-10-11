@@ -67,7 +67,11 @@ class TestQtFeatures(unittest.TestCase):
         self.assertIn('本地模拟', labels[0])
         self.assertIn('服务器计算', labels[1])
         self.assertIn('客户端计算', labels[2])
-        self.assertIn('Photon Flux', self.win.s_scale_label.text())
+        # 强度尺度：Photon/Energy 可选；本地模式禁用并固定 Photon
+        self.assertEqual(self.win.s_scale.count(), 2)
+        self.assertIn('Photon', self.win.s_scale.itemText(0))
+        self.assertIn('Energy', self.win.s_scale.itemText(1))
+        self.assertFalse(self.win.s_scale.isEnabled(), '本地模式下强度尺度应禁用并固定 Photon')
         self.assertEqual(self.win.s_charge.text(), '2')
 
     def test_f2_element_completer_and_canonicalization(self):

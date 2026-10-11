@@ -1,0 +1,38 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- 浅色基础底色（强调色见 Themes/Accents/*.xaml，可切换） -->
+
+    <SolidColorBrush x:Key="Bg.Window" Color="#eef1f4"/>
+    <SolidColorBrush x:Key="Bg.Side" Color="#ffffff"/>
+    <SolidColorBrush x:Key="Bg.Card" Color="#ffffff"/>
+    <SolidColorBrush x:Key="Bg.Card2" Color="#f8fafc"/>
+    <SolidColorBrush x:Key="Bg.Field" Color="#f1f5f9"/>
+    <SolidColorBrush x:Key="Bg.Hover" Color="#e2e8f0"/>
+    <SolidColorBrush x:Key="Bg.Plot" Color="#ffffff"/>
+    <SolidColorBrush x:Key="Bg.GridLine" Color="#e8ecf1"/>
+    <SolidColorBrush x:Key="Bg.RowAlt" Color="#f7fafc"/>
+    <SolidColorBrush x:Key="Bg.ScrollThumb" Color="#c3ccd6"/>
+    <SolidColorBrush x:Key="Bg.Popup" Color="#ffffff"/>
+    <SolidColorBrush x:Key="Bg.NavActive" Color="#edf1f6"/>
+    <SolidColorBrush x:Key="Bg.Overlay" Color="#C8eef1f4"/>
+
+    <SolidColorBrush x:Key="Line.Subtle" Color="#e3e8ee"/>
+    <SolidColorBrush x:Key="Line.Strong" Color="#c9d3dd"/>
+
+    <SolidColorBrush x:Key="Text.Primary" Color="#101828"/>
+    <SolidColorBrush x:Key="Text.Secondary" Color="#475467"/>
+    <SolidColorBrush x:Key="Text.Faint" Color="#98a2b3"/>
+    <SolidColorBrush x:Key="Text.OnAccent" Color="#ffffff"/>
+
+    <SolidColorBrush x:Key="State.Ok" Color="#16a34a"/>
+    <SolidColorBrush x:Key="State.Warn" Color="#d97706"/>
+    <SolidColorBrush x:Key="State.Error" Color="#dc2626"/>
+    <SolidColorBrush x:Key="State.Running" Color="#0891b2"/>
+
+    <DropShadowEffect x:Key="Fx.Card" BlurRadius="14" ShadowDepth="1" Direction="270"
+                      Opacity="0.10" Color="#5b6b7b"/>
+    <DropShadowEffect x:Key="Fx.Popup" BlurRadius="20" ShadowDepth="3" Direction="270"
+                      Opacity="0.18" Color="#334155"/>
+
+</ResourceDictionary>

@@ -111,6 +111,69 @@ class TestQtApp(QtCase):
         self.pump(lambda: w._batch_result is not None, timeout_s=60)
         self.assertIn('批量完成', self.text_of(w.b_meta))
 
+    def test_local_broadening_toggle_and_scale(self):
+        w = self.win
+        # 默认：本地 + 未展宽（与 Web 新界面同默认），宽度/温度参数禁用
+        d = w._single_params_dict()
+        self.assertEqual(d['mode'], 'local')
+        self.assertIs(d['local_broadening_enabled'], False)
+        self.assertEqual(d['intensity_scale'], 'photon')
+        self.assertFalse(w.s_local_gauss.isEnabled(), '未展宽时宽度参数应禁用')
+        # 勾选展宽 → 参数可用并随请求发送
+        w.s_broaden.setChecked(True)
+        self.pump(lambda: w.s_local_gauss.isEnabled())
+        w.s_local_gauss.setText('0.05')
+        w.s_temp_mode.setCurrentIndex(1)
+        w.s_temp_k.setText('4500')
+        d = w._single_params_dict()
+        self.assertIs(d['local_broadening_enabled'], True)
+        self.assertEqual(d['local_gaussian_nm'], 0.05)
+        self.assertEqual(d['local_temperature_mode'], 'manual')
+        self.assertEqual(d['local_temperature_K'], 4500.0)
+        # client 模式：强度尺度可选 energy；在线模式展宽开关语义固定 True
+        w.s_mode.setCurrentIndex(2)
+        self.pump(lambda: w.s_scale.isEnabled())
+        w.s_scale.setCurrentIndex(1)
+        d = w._single_params_dict()
+        self.assertEqual(d['intensity_scale'], 'energy')
+        self.assertIs(d['local_broadening_enabled'], True)
+        # 回到本地：尺度强制回 photon；取消勾选后回到未展宽
+        w.s_mode.setCurrentIndex(0)
+        self.pump(lambda: not w.s_scale.isEnabled())
+        self.assertEqual(w._single_params_dict()['intensity_scale'], 'photon')
+        w.s_broaden.setChecked(False)
+        self.assertIs(w._single_params_dict()['local_broadening_enabled'], False)
+
+    def test_batch_random_generation(self):
+        w = self.win
+        w.go('batch')
+        self.pump(0.3)
+        w.batch_use_current()                     # 当前配比（Fe 100）→ 组成池
+        w.b_generation.setCurrentIndex(1)         # 随机 → 自动从池生成规则
+        self.pump(lambda: w.b_rand_table.rowCount() == 1, timeout_s=5)
+        self.assertEqual(w.b_rand_table.item(0, 0).text(), 'Fe')
+        # 固定浓度非法 → 启动前拦截
+        w.b_n.setText('3')
+        w.b_rand_table.item(0, 1).setText('110')
+        before = len(w.backend.list_jobs())
+        w.start_batch()
+        self.assertEqual(len(w.backend.list_jobs()), before, '固定浓度>100% 必须在启动前拦截')
+        # 多元素随机浓度 + 随机 Te → 端到端
+        w.preset_wfm()
+        w.batch_use_current()
+        self.assertTrue(w._fill_rand_table_from_sources(quiet=True))
+        self.assertEqual(w.b_rand_table.rowCount(), 3)
+        from PySide6.QtWidgets import QCheckBox
+        for row in range(3):
+            w.b_rand_table.cellWidget(row, 2).findChild(QCheckBox).setChecked(True)
+        w.b_rand_te.setChecked(True)
+        w.start_batch()
+        self.pump(lambda: w._batch_result is not None, timeout_s=60)
+        self.assertIn('批量完成', self.text_of(w.b_meta))
+        # parameters/template 导出按钮存在；MOCK 无真实产物 → 保持禁用
+        self.assertFalse(w.b_params_btn.isEnabled())
+        self.assertFalse(w.b_tpl_btn.isEnabled())
+
     def test_export(self):
         import tempfile
         w = self.win

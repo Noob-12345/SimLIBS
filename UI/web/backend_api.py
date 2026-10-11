@@ -136,6 +136,7 @@ class CommonParams:
     local_lorentz_nm: float = 0.0
     local_temperature_K: float = 0.0
     local_temperature_mode: str = 'manual'
+    local_broadening_enabled: bool = True
 
     @staticmethod
     def from_api(raw: Any) -> "CommonParams":
@@ -193,7 +194,8 @@ class CommonParams:
             setattr(p,key,value)
         p.local_temperature_mode=d.get('local_temperature_mode','manual')
         if p.local_temperature_mode not in ('linked','manual'):raise ApiError(400,'温度模式须为linked/manual','validation')
-        if mode=='local' and p.local_temperature_mode=='linked':_positive(p.te*(1.602176634e-19/1.380649e-23),'有效重粒子温度K')
+        p.local_broadening_enabled=_bool(d.get('local_broadening_enabled',True),'local_broadening_enabled')
+        if mode=='local' and p.local_broadening_enabled and p.local_temperature_mode=='linked':_positive(p.te*(1.602176634e-19/1.380649e-23),'有效重粒子温度K')
         if mode=='server' and (p.broaden_convention!='nist' or p.broaden_center_decimals is not None):
             raise ApiError(400,'服务器 v2 使用官方 JS 约定，不能指定 Python 展宽参数','validation')
         return p
@@ -286,7 +288,7 @@ class BatchRequest:
         d = _require_dict(raw, "body")
         params = CommonParams.from_api(d.get("params"))
         template_plan=None
-        if d.get('template_csv') is not None:
+        if d.get('template_csv') is not None or d.get('generation') is not None:
             from simlibs_ui.batch_template import parse_template
             from simlibs_ui.models import Parameters
             base=Parameters(Te=params.te,Ne=params.ne,resolution=params.resolution,low_w=params.low_w,upper_w=params.up_w,
@@ -294,8 +296,14 @@ class BatchRequest:
                  headless=params.headless,resample=params.resample,step=params.resample_step,intensity_scale=params.intensity_scale,
                  broadening=params.broadening,broaden_convention=params.broaden_convention,broaden_grid_step=params.broaden_grid_step,
                  broaden_center_decimals=params.broaden_center_decimals,broaden_min_rel_int=params.broaden_min_rel_int,
-                 local_gaussian_nm=params.local_gaussian_nm,local_lorentz_nm=params.local_lorentz_nm,local_temperature_K=params.local_temperature_K,local_temperature_mode=params.local_temperature_mode)
-            try:template_plan=parse_template(d['template_csv'],base,d.get('repeats',1),d.get('name_column','name'))
+                 local_gaussian_nm=params.local_gaussian_nm,local_lorentz_nm=params.local_lorentz_nm,local_temperature_K=params.local_temperature_K,local_temperature_mode=params.local_temperature_mode,local_broadening_enabled=params.local_broadening_enabled)
+            try:
+                if d.get('template_csv') is not None:
+                    if d.get('generation') is not None:raise ValueError('CSV模板不能同时应用随机规则')
+                    template_plan=parse_template(d['template_csv'],base,d.get('repeats',1),d.get('name_column','name'))
+                else:
+                    from simlibs_ui.batch_random import generate_plan
+                    template_plan=generate_plan(base,d.get('n_samples'),d.get('seed',0),d['generation'])
             except ValueError as error:raise ApiError(400,str(error),'validation') from error
             if d.get('n_samples',template_plan['sample_count'])!=template_plan['sample_count']:raise ApiError(400,'模板样本数须与行数×重复一致','validation')
             d=dict(d,n_samples=template_plan['sample_count'],compositions=[{'name':entry['name'],'items':[{'el':el,'pct':pct} for el,pct in zip(entry['parameters']['elements'],entry['parameters']['percentages'])]} for entry in template_plan['entries']],

@@ -40,6 +40,11 @@ def build_training_package(directory, manifest, cancelled=lambda: False):
 
     with tempfile.TemporaryDirectory(prefix='.training-', dir=directory) as temporary:
         staging = Path(temporary)
+        for key in ('actual_parameters','template_csv'):
+            source=manifest.get(key)
+            if source:
+                check_cancel();path=Path(source);shutil.copyfile(path,staging/path.name)
+                metadata[key]={'filename':path.name,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
         for start in range(0, len(samples), size):
             check_cancel()
             ordinal = start // size + 1

@@ -31,6 +31,9 @@ def ion_fractions(states,meta,te,ne):
 
 
 def local_simulate(p,s,cancelled=lambda:False,emit=None):
+    if not p.local_broadening_enabled:
+        from .offline_lines import simulate_lines
+        return simulate_lines(p,s,cancelled)
     library=load_library(s.line_database,{el for el,pct in zip(p.elements,p.percentages) if pct>0});axis=grid_for(p,p.broaden_grid_step)
     pairs=[(el,pct) for el,pct in zip(p.elements,p.percentages) if pct>0]
     temperature=p.effective_temperature_K
@@ -75,6 +78,7 @@ def local_simulate(p,s,cancelled=lambda:False,emit=None):
             'actual_Ne':p.Ne,'intensity_scale':'photon','intensity_units':'a.u. (relative photon emission weights)',
             'library':library['signature'],'atomic_sources':{el:library['metadata']['elements'][el] for el,_ in pairs},
             'ion_fractions':populations,'coverage':coverage,'created_at':now(),'network_used':False,
+            'local_broadening_enabled':True,'spectrum_style':'continuous',
             'thermal_model_version':2,'thermal_temperature_mode':p.local_temperature_mode,'effective_heavy_temperature_K':temperature,
             'broadening_params':{'convention':'physics','grid_step':p.broaden_grid_step,'gaussian_FWHM_nm':p.local_gaussian_nm,
                                  'lorentz_FWHM_nm':p.local_lorentz_nm,'heavy_particle_temperature_mode':p.local_temperature_mode,'heavy_particle_temperature_K':temperature},

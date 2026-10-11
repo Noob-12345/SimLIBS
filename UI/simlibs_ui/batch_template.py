@@ -7,7 +7,8 @@ from .models import ELEMENTS,composition,integer,Parameters,MAX_CELLS
 
 PARAMETER_COLUMNS={'Te[eV]':'Te','Ne[cm^-3]':'Ne','R':'resolution','low_w[nm]':'low_w','upper_w[nm]':'upper_w',
                    'grid_step[nm]':'broaden_grid_step','max_ion_charge':'max_ion_charge',
-                   'T_h[K]':'local_temperature_K','doppler_mode':'local_temperature_mode','intensity_scale':'intensity_scale'}
+                   'T_h[K]':'local_temperature_K','doppler_mode':'local_temperature_mode','intensity_scale':'intensity_scale',
+                   'broaden':'local_broadening_enabled','resample':'resample','step[nm]':'step'}
 
 
 def parse_template(text,parameters,repeats=1,name_column='name'):
@@ -35,7 +36,13 @@ def parse_template(text,parameters,repeats=1,name_column='name'):
         try:
             elements,pcts=composition(tuple(element_columns.values()),[row[c] for c in element_columns])
             values={attr:row[col] for col,attr in overrides.items()}
+            if values.get('local_temperature_mode')=='linked' and values.get('local_temperature_K')=='':values.pop('local_temperature_K')
             if any(not str(value).strip() for value in values.values()):raise ValueError('参数覆盖列不能为空')
+            for key in ('local_broadening_enabled','resample'):
+                if key in values:
+                    text=values[key].strip().lower()
+                    if text not in ('true','false','1','0'):raise ValueError(key+'须为true/false或1/0')
+                    values[key]=text in ('true','1')
             if 'local_temperature_K' in values:
                 if values.get('local_temperature_mode')=='linked':raise ValueError('T_h[K]独立温度与linked冲突；选择manual')
                 values['local_temperature_mode']='manual'

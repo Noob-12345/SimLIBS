@@ -22,7 +22,9 @@ matplotlib.use('qtagg')
 matplotlib.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg  # noqa: E402
+from matplotlib.colors import to_rgba  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
+from matplotlib.patches import Rectangle  # noqa: E402
 
 
 def sample_series(xs, ys, budget=6000):
@@ -56,6 +58,7 @@ class SpectrumChart(FigureCanvasQTAgg):
         self._mode = ''                    # '' | 'zoom' | 'pan'
         self._anchor = None                # (x, y) 数据坐标
         self._moved = False
+        self._band: Rectangle | None = None   # 框选橡皮筋选框
         self._reveal = 1.0                 # 画入动画进度（1=完整）
         self._reveal_timer = QTimer(self)
         self._reveal_timer.setInterval(16)
@@ -181,6 +184,8 @@ class SpectrumChart(FigureCanvasQTAgg):
             ax.set_ylim(self._y0, self._y1)
         span = x1 - x0 + 2 * pad
         ax.set_xlim(x0 - pad, x0 - pad + span * max(1e-6, self._reveal))
+        if self._mode == 'zoom' and self._band is not None:
+            ax.add_patch(self._band)   # 拖拽中发生重绘（如滚轮缩放）时恢复选框
         self.draw_idle()
 
     def _y_range(self):
@@ -214,6 +219,13 @@ class SpectrumChart(FigureCanvasQTAgg):
         self._moved = False
         if self._mode == 'zoom':
             self.ax.set_facecolor(self._pal['bg'])
+            edge = to_rgba(self._pal['accent'], 0.9)
+            fill = to_rgba(self._pal['accent'], 0.10)
+            # 选框始终占满整个绘图区高度（x=数据坐标，y=坐标区比例 0..1）
+            self._band = Rectangle((ev.xdata, 0), 0, 1, facecolor=fill,
+                                   edgecolor=edge, linewidth=1.1, linestyle=(0, (4, 3)),
+                                   zorder=5, transform=self.ax.get_xaxis_transform())
+            self.ax.add_patch(self._band)
 
     def _on_motion(self, ev) -> None:
         if not self._mode or ev.xdata is None or self._anchor is None:
@@ -227,18 +239,28 @@ class SpectrumChart(FigureCanvasQTAgg):
             self._x0, self._x1 = new0, new0 + span
             self._anchor = (ev.xdata, ev.ydata)
             self.redraw()
+        elif self._band is not None:   # zoom：全高选框随光标水平伸缩
+            xa = self._anchor[0]
+            self._band.set_xy((min(xa, ev.xdata), 0))
+            self._band.set_width(abs(ev.xdata - xa))
+            self.draw_idle()
 
     def _on_release(self, ev) -> None:
         if ev.button == 3 and not self._moved and not self._mode:
             self.reset_view()
             return
+        if self._band is not None:
+            try:
+                self._band.remove()
+            except (ValueError, RuntimeError):
+                pass
+            self._band = None
         if self._mode == 'zoom' and self._anchor and ev.xdata is not None:
             xa, xb = sorted((self._anchor[0], ev.xdata))
-            ya, yb = sorted((self._anchor[1], ev.ydata))
             span = self._x1 - self._x0
-            if (xb - xa) > span * 1e-3 and (yb - ya) > 1e-300:
+            if (xb - xa) > span * 1e-3:
                 self._x0, self._x1 = xa, xb
-                self._y0, self._y1 = ya, yb
+                self._y0 = self._y1 = None   # y 轴按可见数据自适应（Web 同约定）
         self._mode, self._anchor, self._moved = '', None, False
         if self._series:
             self.redraw()

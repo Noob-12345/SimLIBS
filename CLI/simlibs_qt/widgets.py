@@ -19,6 +19,25 @@ def field_label(text: str) -> QLabel:
     return lbl
 
 
+def svg_icon(path, color: str, size: int = 20):
+    """按主题色渲染 SVG 图标（文件内使用 currentColor 占位）。"""
+    from pathlib import Path as _Path
+    from PySide6.QtCore import QByteArray
+    from PySide6.QtGui import QIcon
+    try:
+        from PySide6.QtSvg import QSvgRenderer
+        text = _Path(path).read_text(encoding='utf-8').replace('currentColor', color)
+        renderer = QSvgRenderer(QByteArray(text.encode('utf-8')))
+        pm = QPixmap(size * 2, size * 2)   # 2x 位图，HiDPI 下仍清晰
+        pm.fill(Qt.transparent)
+        p = QPainter(pm)
+        renderer.render(p)
+        p.end()
+        return QIcon(pm)
+    except Exception:
+        return QIcon()
+
+
 def make_chip(text: str, chip_id: str = '') -> QFrame:
     chip = QFrame()
     chip.setObjectName('Chip')
@@ -120,7 +139,11 @@ class ToastHost(QObject):
         self.relayout()
 
     def relayout(self, animate_new: bool = False) -> None:
-        y = self._win.height() - self.MARGIN
+        try:
+            y = self._win.height() - self.MARGIN
+        except RuntimeError:      # 窗口 C++ 对象已销毁（关闭后的 toast 定时器竞态）
+            self._active.clear()
+            return
         for toast in reversed(self._active):          # 最新在最下
             if not toast.isVisible():
                 continue
@@ -343,12 +366,19 @@ class EngineCard(QFrame):
         ok = bool(st.get('nist_ok'))
         p = DARK if self._is_dark() else LIGHT
         dot = f'<span style="color:{p["good"]}">●</span>' if ok else f'<span style="color:{p["bad"]}">●</span>'
+        local = st.get('local')
         self.lines.setTextFormat(Qt.RichText)
-        self.lines.setText(
-            f'Python&nbsp;&nbsp;{st.get("python", "?")}<br>'
-            f'NIST&nbsp;&nbsp;&nbsp;&nbsp;{dot} {st.get("nist", "?")}<br>'
-            f'Chrome&nbsp;&nbsp;{st.get("chrome", "?")}<br>'
-            f'运行中&nbsp;&nbsp;{st.get("jobs_running", 0)} 个任务')
+        lines = []
+        if local is not None:
+            ready = bool(local.get('ready'))
+            ldot = f'<span style="color:{p["good"] if ready else p["bad"]}">●</span>'
+            lines.append(f'本地库&nbsp;&nbsp;{ldot} {local.get("csv_count", 0)} CSV · '
+                         f'{len(local.get("elements") or [])} 元素')
+        else:
+            lines.append(f'NIST&nbsp;&nbsp;&nbsp;&nbsp;{dot} {st.get("nist", "?")}')
+        lines.append(f'Python&nbsp;&nbsp;{st.get("python", "?")}')
+        lines.append(f'运行中&nbsp;&nbsp;{st.get("jobs_running", 0)} 个任务')
+        self.lines.setText('<br>'.join(lines))
 
     def _is_dark(self) -> bool:
         w = self.window()

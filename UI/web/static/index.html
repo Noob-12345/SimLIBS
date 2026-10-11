@@ -87,8 +87,7 @@
     <div id="content">
       <div id="offlineBanner" hidden>
         <span>⚠</span>
-        <span><b>未检测到后端服务</b> · 当前为纯前端示意模式：请通过 <b>start_web.cmd</b> 或
-        <span class="mono">python server.py</span> 启动（UI/web 目录）。</span>
+        <span><b>未检测到后端服务</b></span>
       </div>
 
       <!-- ============ 页 1：单次模拟 ============ -->
@@ -97,69 +96,7 @@
           <div class="card">
             <h3>共同参数</h3>
 
-            <label class="f" for="teInput">电子温度 Te [eV]<span class="val" id="teVal">1 eV</span></label>
-            <div class="param-control"><input type="range" id="teSlider" aria-label="电子温度滑块" min="0.5" max="2.5" step="any" value="1.0"><input type="text" inputmode="decimal" id="teInput" value="1" aria-describedby="paramError"></div>
-
-            <label class="f" for="neInput">电子密度 Ne [cm⁻³]<span class="val" id="neVal">1e17 cm⁻³</span></label>
-            <div class="param-control"><input type="range" id="neSlider" aria-label="电子密度对数滑块" min="14" max="18" step="any" value="17"><input type="text" inputmode="decimal" id="neInput" value="1e17" aria-describedby="paramError"></div>
-
-            <label class="f" for="rInput">光谱分辨率 R<span class="val" id="rVal">5000</span></label>
-            <div class="param-control"><input type="range" id="rSlider" aria-label="分辨率滑块" min="500" max="10000" step="1" value="5000"><input type="text" inputmode="numeric" id="rInput" value="5000" aria-describedby="paramError"></div>
-            <div id="paramError" class="input-error" role="status" aria-live="polite"></div>
-
-            <label class="f">波长范围 [nm]</label>
-            <div class="row2">
-              <input type="number" id="lowW" value="350" min="10" max="2000" step="1">
-              <input type="number" id="upW" value="560" min="20" max="2500" step="1">
-            </div>
-
-            <label class="f">最大离子电荷</label>
-            <select id="maxIon"><option>0</option><option>1</option><option selected>2</option></select>
-            <div id="nistIntensityControl" hidden><label class="f">NIST 强度尺度</label><select id="intensityScale"><option value="photon">Photon flux</option><option value="energy">Energy flux</option></select></div><div id="localIntensity" class="hint">相对光子强度</div>
-
-            <label class="f">计算模式</label>
-            <div class="seg" id="modeSeg">
-              <button data-v="local" class="on">离线本地</button>
-              <button data-v="server">在线服务器</button>
-              <button data-v="client">客户端计算</button>
-            </div>
-
-            <label class="f">固定处理路径 · v2</label>
-            <div class="seg" id="broadSeg">
-              <span id="modePath">NIST 数据 + 官方 JavaScript Recalculate</span>
-            </div>
-            <div id="broadenParams" hidden style="margin-top:10px;padding:12px;border:1px dashed var(--border2);border-radius:10px;background:var(--inset)">
-              <div id="localCapability" class="local-error" role="alert" hidden></div>
-              <div class="row2" id="localWidths"><div><label class="f">额外高斯FWHM [nm]</label><input type="number" id="localGaussian" min="0" step="any" value="0"></div><div><label class="f">洛伦兹FWHM [nm]</label><input type="number" id="localLorentz" min="0" step="any" value="0"></div></div>
-              <div id="localThermalControl"><label class="f">热 Doppler 温度</label><select id="localTemperatureMode"><option value="linked">随 Te（单温度 LTE）</option><option value="manual">独立重粒子温度</option></select><div id="localLinkedTemperature" class="hint"></div><div id="localTemperatureInput" hidden><label class="f">重粒子温度 [K]（0关闭热展宽）</label><input type="number" id="localTemperature" min="0" step="any" value="0"></div></div>
-              <label class="f">高斯约定</label>
-              <select id="bConvention">
-                <option value="nist">严格复刻 NIST（w=λ/R，1/e 半宽）</option>
-                <option value="physics">物理约定（FWHM=λ/R）</option>
-              </select>
-              <label class="f">合成网格步长 [nm]</label>
-              <input type="number" id="bGridStep" value="0.01" min="0.0005" max="1" step="any">
-              <div class="row2" style="margin-top:10px">
-                <div><label class="f">线中心舍入位</label><input type="number" id="bCenter" placeholder="不舍入" min="0" step="1"></div>
-                <div><label class="f">选线阈值 min_rel_int</label><input type="number" id="bMinRel" value="0" min="0" step="0.001"></div>
-              </div>
-              <div id="broadeningNote" style="color:var(--faint);font-size:11px;margin-top:8px"></div>
-            </div>
-
-            <div style="margin-top:12px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-              <label class="switch"><input type="checkbox" id="headless" checked><span class="track"></span><span>后台抓取</span></label>
-              <label class="switch"><input type="checkbox" id="resample"><span class="track"></span><span>本地插值</span></label>
-            </div>
-
-            <div id="resampleControl" hidden><label class="f" for="resampleStep">插值目标步长 [nm]</label><input type="number" id="resampleStep" value="0.01" min="0.000001" step="any"></div>
-            <h3 style="margin-top:22px">元素配比 <span class="hint">总原子数密度占比</span></h3>
-            <div id="compRows"></div>
-            <div class="sum-row ok" id="sumRow">
-              <b class="mono" id="sumVal" style="color:var(--good)">100% ✓</b>
-            </div>
-            <div class="composition-actions">
-              <button class="btn sm ghost" id="addEl">＋ 添加元素</button>
-            </div>
+            <div id="singleControls"></div>
 
             <button class="btn primary" id="runBtn" style="width:100%;margin-top:18px;padding:11px">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
@@ -186,7 +123,7 @@
                 <canvas id="specChart"></canvas>
                 <div id="tooltip"></div>
                 <span class="preview-tag" id="previewTag">示意预览 · 尚未运行</span>
-                <span class="zoom-hint">左键框选放大 · 中键拖动 · 右键复原</span>
+
               </div>
               <div class="meta-chips" id="metaChips"></div>
               <div style="display:flex;gap:9px;margin-top:13px;flex-wrap:wrap">
@@ -237,18 +174,18 @@
           <div>
             <div class="card">
               <h3>采样设置</h3>
-              <label class="f">批量独立计算模式</label><select id="batchMode"><option value="local">离线本地</option><option value="server">在线服务器 · 官方JS</option><option value="client">在线客户端 · NIST线表</option></select>
-              <div id="batchModePath" class="hint">本地用户线库</div><div id="batchLocalError" class="local-error" role="alert" hidden></div><div id="batchNistIntensity" hidden><label class="f">NIST 强度尺度</label><select id="batchIntensityScale"><option value="photon">Photon flux</option><option value="energy">Energy flux</option></select></div><div id="batchLocalIntensity" class="hint">相对光子强度</div>
-              <div class="row2"><div><label class="f">Te [eV]</label><input id="batchTe" type="text" value="1"></div><div><label class="f">实际Ne [cm⁻³]</label><input id="batchNe" type="text" value="1e17"></div></div>
-              <div class="row2"><div><label class="f">R</label><input id="batchR" type="number" value="1000" min="1" step="1"></div><div><label class="f">最大离子电荷0–2</label><select id="batchMaxIon"><option>0</option><option>1</option><option selected>2</option></select></div></div>
-              <div class="row2"><div><label class="f">波长下界[nm]</label><input id="batchLow" type="number" value="200" step="any"></div><div><label class="f">上界[nm]</label><input id="batchUp" type="number" value="500" step="any"></div></div>
-              <div id="batchGridControl"><label class="f">目标合成步长[nm]</label><input id="batchGrid" type="number" value="0.01" step="any"></div>
-              <div class="row2" id="batchLocalWidths"><div><label class="f">额外高斯FWHM[nm]</label><input id="batchGaussian" type="number" value="0" min="0" step="any"></div><div><label class="f">洛伦兹FWHM[nm]</label><input id="batchLorentz" type="number" value="0" min="0" step="any"></div></div>
-              <div id="batchThermalControl"><label class="f">热 Doppler 温度</label><select id="batchTemperatureMode"><option value="linked">随 Te（单温度 LTE）</option><option value="manual">独立重粒子温度</option></select><div id="batchLinkedTemperature" class="hint"></div><div id="batchTemperatureInput" hidden><label class="f">重粒子温度[K]（0关闭）</label><input id="batchTemperature" type="number" value="0" min="0" step="any"></div></div>
-              <h3>批量独立组成 / 模板</h3><div id="batchCompRows"></div><button class="btn sm" id="batchAddElement">＋元素</button><button class="btn sm" id="batchBalance">末项补足100%</button>
+              <div id="batchControls"></div>
+              <h3>生成方式</h3><input id="batchGeneration" type="hidden" value="fixed"><div class="seg" id="batchGenerationSeg"><button data-v="fixed" class="on">固定</button><button data-v="random">随机</button><button data-v="template">CSV模板</button></div>
+              <div id="batchFixedControls" class="generation-panel"></div>
+              <div id="batchRandomControls" class="generation-panel" hidden>
+                <label class="switch"><input id="randomTe" type="checkbox"><span class="track"></span><span>随机 Te [eV]</span></label><div id="randomTeBounds" class="row2" hidden><input id="batchTeA" type="text" value="1"><input id="batchTeB" type="text" value="2"></div>
+                <label class="switch"><input id="randomNe" type="checkbox"><span class="track"></span><span>随机实际 Ne [cm⁻³]</span></label><div id="randomNeBounds" class="row2" hidden><input id="batchNeA" type="text" value="1e17"><input id="batchNeB" type="text" value="2e17"></div>
+                <div id="batchRandomComposition"></div><div class="hint">种子可复现；有界顺序分配浓度，不表示联合均匀分布。</div>
+              </div><div id="batchTemplateControls" class="generation-panel" hidden>
               <div class="template-upload"><button class="btn sm" id="templateExample">下载示例模板</button><button class="btn sm" id="templateChoose" type="button">导入CSV</button><input type="file" id="templateFile" accept=".csv,text/csv" hidden><span id="templateFileName" title="未选择文件">未选择文件</span></div>
               <div class="row2"><div><label class="f">名称列</label><input id="templateNameColumn" value="name" type="text"></div><div><label class="f">每行重复次数</label><input id="templateRepeat" type="number" value="1" min="1" step="1"></div></div>
               <button class="btn sm" id="templateValidate">校验模板</button><button class="btn sm" id="templateClear">清除模板</button><div id="templateInfo" class="hint" role="status">裸Ne、Te为元素；参数列使用Te[eV]/Ne[cm^-3]/R。按行顺序，行内重复。</div>
+              </div>
               <div class="row2">
                 <div><label class="f">样本数（≤5000）</label><input type="number" id="batchCount" value="48" min="1" max="5000"></div>
                 <div><label class="f">随机种子</label><input type="number" id="batchSeed" value="42"></div>
@@ -256,18 +193,10 @@
               <label class="f" for="batchSize">每个 batch 的光谱数（≤5000）</label>
               <input type="number" id="batchSize" value="32" min="1" max="5000" step="1">
               <div id="batchPackageEstimate" class="hint" aria-live="polite"></div>
-              <div class="row2" style="margin-top:12px">
-                <div><label class="f">Te 采样范围（可相等）</label><div class="row2"><input type="number" id="batchTeA" value="1" step="any"><input type="number" id="batchTeB" value="1" step="any"></div></div>
-                <div><label class="f">Ne 采样范围 (10^，可相等)</label><div class="row2"><input type="number" id="batchNeA" value="17" step="any"><input type="number" id="batchNeB" value="17" step="any"></div></div>
-              </div>
-              <div style="margin-top:14px">
-                <label class="switch"><input type="checkbox" id="batchResample"><span class="track"></span><span>批量按需线性插值（在线服务器批量必须；使用本页步长）</span></label>
-              </div>
-              <div id="batchResampleControl" hidden><label class="f">插值步长[nm]</label><input id="batchStep" type="number" value="0.01" step="any"></div>
               <button class="btn primary" style="width:100%;margin-top:16px" id="batchRun">开始批量模拟</button>
               <button class="btn" id="batchResume" style="width:100%;margin-top:10px" disabled>续跑选定任务（复用已完成样本）</button><div id="resumeInfo" class="hint"></div>
               <button class="btn" style="width:100%;margin-top:10px" id="trainingDownload" disabled>下载训练数据包 ZIP</button>
-              <button class="btn sm" style="width:100%;margin-top:8px" id="datasetDownload" disabled>下载完整宽表 CSV</button>
+              <button class="btn sm" style="width:100%;margin-top:8px" id="datasetDownload" disabled>下载完整宽表 CSV</button><button class="btn sm" style="width:100%;margin-top:8px" id="parametersDownload" disabled>下载实际参数 / 浓度 CSV</button><button class="btn sm" style="width:100%;margin-top:8px" id="templateDownload" disabled>下载复用模板 CSV</button>
               <div id="trainingPackageNote" class="hint" role="status" style="margin-top:8px">成功后可下载：每谱两行 + 配对元素标签 + 来源清单。</div>
               <div style="color:var(--faint);font-size:11.5px;margin-top:9px">批量参数和组成独立于单次页；模板不随机抽行，空值/非法比例不自动归一化。</div>
             </div>
@@ -324,7 +253,7 @@
             <div class="chart-wrap">
               <canvas id="scanChart" style="height:360px"></canvas>
               <div id="scanTip" class="mono" style="position:absolute;top:12px;left:14px;font-size:12px;color:var(--accent);font-weight:650"></div>
-              <span class="zoom-hint">左键框选放大 · 中键拖动 · 右键复原</span>
+
             </div>
             <div class="playbar">
               <button class="pbtn" id="framePrev" title="上一帧"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 5v14L8 12z"/><rect x="5" y="5" width="2.2" height="14" rx="1"/></svg></button>
@@ -389,6 +318,8 @@
 </div>
 
 <div id="toasts"></div>
+<script src="controls.js"></script>
+<script src="controls_logic.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

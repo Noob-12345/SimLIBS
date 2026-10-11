@@ -16,7 +16,7 @@ def file_sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 def source_version(settings,entries):
     root=Path(__file__).parent
-    version={'algorithm':{name:file_sha(root/name) for name in ('models.py','adapter.py','mode_engine.py','offline_engine.py','offline_database.py','batch_pipeline.py','batch_template.py','operations.py','storage.py','training.py')}}
+    version={'algorithm':{name:file_sha(root/name) for name in ('models.py','adapter.py','mode_engine.py','offline_engine.py','offline_lines.py','offline_database.py','batch_pipeline.py','batch_random.py','batch_records.py','batch_template.py','operations.py','storage.py','training.py')}}
     if any(e['parameters']['webscraping']=='local' for e in entries):
         from .offline_database import library_signature
         version['library']=library_signature(settings.line_database)
@@ -84,6 +84,8 @@ def run_batch(p,s,spec,compositions,directory,emit,cancelled,simulator=None,plan
     def persist():
         manifest['completed']=len(records);manifest['samples']=[r['manifest'] for r in records]
         manifest['preview']=[dict({el:row[len(grid)+i] for i,el in enumerate(elements)},name=row[-3],**{'Te[eV]':row[-2],'Ne[cm^-3]':row[-1]}) for row in rows[:100]] if rows else []
+        from .batch_records import write_actual_parameters
+        manifest.update(write_actual_parameters(directory,plan,records))
         write_json(directory/'checkpoint.json',checkpoint);write_json(directory/'manifest.json',manifest)
     persist()
     try:

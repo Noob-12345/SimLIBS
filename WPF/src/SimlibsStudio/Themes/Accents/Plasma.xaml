@@ -1,0 +1,30 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- 强调色主题：等离子（默认，红橙渐变 · 等离子体热辐射意象） -->
+
+    <Color x:Key="Color.AccentA">#ef4444</Color>
+    <Color x:Key="Color.AccentB">#f97316</Color>
+    <Color x:Key="Color.AccentC">#22d3ee</Color>
+
+    <SolidColorBrush x:Key="Accent.A" Color="#ef4444"/>
+    <SolidColorBrush x:Key="Accent.B" Color="#f97316"/>
+    <SolidColorBrush x:Key="Accent.C" Color="#22d3ee"/>
+    <SolidColorBrush x:Key="Accent.Faint" Color="#33ef4444"/>
+
+    <LinearGradientBrush x:Key="Gradient.Primary" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#ef4444" Offset="0"/>
+        <GradientStop Color="#f97316" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Gradient.Title" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#f87171" Offset="0"/>
+        <GradientStop Color="#fb923c" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Gradient.Area" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#66f97316" Offset="0"/>
+        <GradientStop Color="#00f97316" Offset="1"/>
+    </LinearGradientBrush>
+
+    <DropShadowEffect x:Key="Fx.Glow" BlurRadius="14" ShadowDepth="0" Opacity="0.55" Color="#f97316"/>
+
+</ResourceDictionary>

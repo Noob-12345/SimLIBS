@@ -188,6 +188,7 @@ class RealBackend:
                 'broaden_center_decimals': p.broaden_center_decimals,
                 'broaden_min_rel_int': p.broaden_min_rel_int,
                 'local_temperature_mode':'linked','local_temperature_K':0,
+                'local_broadening_enabled':False,
             },
             'composition': [{'el': e, 'pct': pct} for e, pct in zip(p.elements, p.percentages)],
             'element_symbols': sorted(ELEMENTS),
@@ -219,7 +220,7 @@ class RealBackend:
             broaden_grid_step=params.broaden_grid_step,
             broaden_center_decimals=params.broaden_center_decimals,
             broaden_min_rel_int=params.broaden_min_rel_int,
-            local_gaussian_nm=params.local_gaussian_nm,local_lorentz_nm=params.local_lorentz_nm,local_temperature_K=params.local_temperature_K,local_temperature_mode=params.local_temperature_mode,
+            local_gaussian_nm=params.local_gaussian_nm,local_lorentz_nm=params.local_lorentz_nm,local_temperature_K=params.local_temperature_K,local_temperature_mode=params.local_temperature_mode,local_broadening_enabled=params.local_broadening_enabled,
         )
 
     def start_single(self, req: SingleRequest) -> str:
@@ -540,6 +541,7 @@ class RealBackend:
             'mode_version':origin.get('mode_version',1),'mode':origin.get('mode'),
             'resolution_warning': origin.get('resolution_warning'),
             'line_table_rows': origin.get('line_table_rows'),
+            'spectrum_style':origin.get('spectrum_style','continuous'),'local_broadening_enabled':origin.get('local_broadening_enabled'),
         }
         return {'kind': 'single', 'xs': xs, 'ys': ys, 'yi': [], 'series': series, 'meta': meta}
 
@@ -605,6 +607,7 @@ class RealBackend:
                                   if k not in ('archive', 'manifest')}
                                  if not manifest.get('partial') and manifest.get('training_package')
                                  else {'available': False, 'reason': '此任务没有完整训练包；重新运行批量模拟后可下载'}),
+            'actual_parameters_available':bool(manifest.get('actual_parameters')),'template_csv_available':bool(manifest.get('template_csv')),
         }
 
     # ------------------------------------------------------------------
@@ -618,6 +621,10 @@ class RealBackend:
         if job['status'] != 'completed' or not job.get('result_path'):
             raise ApiError(409, '只有成功完成的任务才能导出', 'no_result')
         manifest, result_path = job['manifest'], job['result_path']
+        if kind in ('parameters','template'):
+            key='actual_parameters' if kind=='parameters' else 'template_csv';path=manifest.get(key)
+            if not path or manifest.get('partial'):raise ApiError(409,'此任务没有完整实际参数CSV','no_result')
+            return ExportPayload(Path(path).read_bytes(),'text/csv; charset=utf-8',f'{job_id}_{key}.csv')
         if kind == 'training':
             package = manifest.get('training_package') or {}
             archive = Path(package.get('archive', ''))
