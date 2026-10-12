@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onUnmounted } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import AppIcon from './components/AppIcon.vue'
 import ThemeMenu from './components/ThemeMenu.vue'
 import SinglePage from './pages/SinglePage.vue'
@@ -8,18 +9,27 @@ import ScanPage from './pages/ScanPage.vue'
 import JobsPage from './pages/JobsPage.vue'
 import SettingsPage from './pages/SettingsPage.vue'
 import { disposeTimers, page, tasks } from './lib/workbench'
-import { disposePreferences, preferences, setPalette, setThemeMode } from './lib/preferences'
+import { disposePreferences, nativeThemeError, preferences, setPalette, setThemeMode } from './lib/preferences'
 import type { Page } from './lib/model'
 import './styles.css'
 const pages: { id: Page; label: string; subtitle: string }[] = [
   { id: 'single', label: '单次模拟', subtitle: '' },
-  { id: 'batch', label: '批量模拟', subtitle: '设置生成方式，查看示意样本。' },
-  { id: 'scan', label: '参数扫描', subtitle: '设置扫描范围，查看示意光谱。' },
-  { id: 'jobs', label: '任务记录', subtitle: '查看本次应用会话的演示任务。' },
-  { id: 'settings', label: '设置', subtitle: '调整外观与连接配置。' }
+  { id: 'batch', label: '批量模拟', subtitle: '' },
+  { id: 'scan', label: '参数扫描', subtitle: '' },
+  { id: 'jobs', label: '任务记录', subtitle: '' },
+  { id: 'settings', label: '设置', subtitle: '' }
 ]
 const current = computed(() => pages.find(p => p.id === page.value)!)
 const runningCount = computed(() => tasks.filter(t => t.status === 'running').length)
+const repositoryUrl = 'https://github.com/Noob-12345/SimLIBS'
+const repositoryOpening = ref(false), repositoryError = ref('')
+async function openRepository() {
+  if (repositoryOpening.value) return
+  repositoryOpening.value = true; repositoryError.value = ''
+  try { await openUrl(repositoryUrl) }
+  catch { repositoryError.value = '无法打开系统浏览器，请重试' }
+  finally { repositoryOpening.value = false }
+}
 onUnmounted(() => { disposeTimers(); disposePreferences() })
 </script>
 <template>
@@ -31,10 +41,9 @@ onUnmounted(() => { disposeTimers(); disposePreferences() })
       <div class="sidebar-bottom"><h4>运行状态</h4><p>计算引擎未接入</p><small>SimLIBS · SCNU</small></div>
     </aside>
     <main class="main-shell">
-      <header class="topbar"><span>工作空间 <b>/</b> {{ current.label }}</span><div><span v-if="runningCount" class="badge neutral">{{ runningCount }} 项演示任务进行中</span><ThemeMenu :mode="preferences.mode" :palette="preferences.palette" @select="setThemeMode" @palette="setPalette" /></div></header>
-      <div class="workspace"><div class="page-heading"><div><h1>{{ current.label }}</h1><p v-if="current.subtitle">{{ current.subtitle }}</p></div></div>
+      <header class="topbar"><span>工作空间 <b>/</b> {{ current.label }}</span><div><span v-if="runningCount" class="badge neutral">{{ runningCount }} 项演示任务进行中</span><div class="topbar-actions"><ThemeMenu :mode="preferences.mode" :palette="preferences.palette" @select="setThemeMode" @palette="setPalette" /><div class="repository-control"><button type="button" class="icon-btn theme-trigger" aria-label="打开 GitHub 项目" title="GitHub 项目" :disabled="repositoryOpening" @click="openRepository"><AppIcon name="github" :size="18" /></button><p v-if="repositoryError" class="repository-feedback" role="status">{{ repositoryError }}</p></div></div></div></header>
+      <div class="workspace"><p v-if="nativeThemeError" class="error-text" role="alert">{{ nativeThemeError }}</p><div class="page-heading"><div><h1>{{ current.label }}</h1><p v-if="current.subtitle">{{ current.subtitle }}</p></div></div>
         <Transition name="page" mode="out-in"><SinglePage v-if="page === 'single'" /><BatchPage v-else-if="page === 'batch'" /><ScanPage v-else-if="page === 'scan'" /><JobsPage v-else-if="page === 'jobs'" /><SettingsPage v-else /></Transition>
-        <footer class="workspace-footer"><span>SimLIBS 光谱工作台</span></footer>
       </div>
     </main>
   </div>

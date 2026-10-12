@@ -1,4 +1,6 @@
 import { computed, reactive, ref, watch } from 'vue'
+import { isTauri } from '@tauri-apps/api/core'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type Palette = 'amber' | 'ocean' | 'violet' | 'forest' | 'rose'
 export interface Preferences { mode: ThemeMode; palette: Palette; reducedMotion: boolean; endpoint: string; pythonPath: string; driverPath: string }
@@ -15,12 +17,31 @@ const media = window.matchMedia('(prefers-color-scheme: dark)'), systemDark = re
 const listener = () => { systemDark.value = media.matches }; media.addEventListener('change', listener)
 export const actualDark = computed(() => preferences.mode === 'dark' || preferences.mode === 'system' && systemDark.value)
 export const preferenceDirty = computed(() => JSON.stringify(preferences) !== JSON.stringify(savedPreferences.value))
+export const nativeThemeError = ref('')
+let nativeBusy = false, disposed = false, themeRevision = 0
+let requestedMode: ThemeMode = preferences.mode
+async function syncNativeTheme() {
+  if (nativeBusy || disposed || !isTauri()) return
+  nativeBusy = true
+  try {
+    while (!disposed) {
+      const revision = themeRevision, theme = requestedMode === 'system' ? null : requestedMode
+      try { await getCurrentWindow().setTheme(theme); if (!disposed && revision === themeRevision) nativeThemeError.value = '' }
+      catch { if (!disposed && revision === themeRevision) nativeThemeError.value = '原生标题栏主题同步失败' }
+      if (revision === themeRevision) break
+    }
+  } finally { nativeBusy = false }
+}
+// Media changes update CSS only. Native requests depend solely on the selected mode.
+const stopNative = watch(() => preferences.mode, mode => { requestedMode = mode; themeRevision++; void syncNativeTheme() }, { immediate: true, flush: 'sync' })
 function apply() {
   const dark = actualDark.value, palette = palettes.find(p => p.id === preferences.palette) ?? palettes[0]!, root = document.documentElement
   root.dataset.theme = dark ? 'dark' : 'light'; root.dataset.reducedMotion = String(preferences.reducedMotion)
   root.style.setProperty('--accent', palette.color); root.style.setProperty('--chart', dark ? palette.dark : palette.text)
   root.style.setProperty('--accent-text', dark ? palette.dark : palette.text)
   root.style.setProperty('--accent-soft', `color-mix(in srgb, ${palette.color} ${dark ? '12%' : '11%'}, var(--panel))`)
+  const switchPalette = palettes[(palettes.indexOf(palette) + 1) % palettes.length]!
+  root.style.setProperty('--switch-text', dark ? switchPalette.dark : switchPalette.text)
 }
 const stop = watch([preferences, actualDark], apply, { deep: true, immediate: true })
 export function savePreferences(): boolean { try { localStorage.setItem(key, JSON.stringify(preferences)); savedPreferences.value = { ...preferences }; storageMessage.value = '外观与配置已保存到本地'; return true } catch { storageMessage.value = '本地存储不可用，偏好尚未保存'; return false } }
@@ -34,4 +55,4 @@ export function setPalette(palette: Palette) {
   preferences.palette = palette
   try { const next = { ...savedPreferences.value, palette }; localStorage.setItem(key, JSON.stringify(next)); savedPreferences.value = next; storageMessage.value = '' } catch { storageMessage.value = '配色仅在当前应用生效，本地保存失败' }
 }
-export function disposePreferences() { stop(); media.removeEventListener('change', listener) }
+export function disposePreferences() { disposed = true; stopNative(); stop(); media.removeEventListener('change', listener) }

@@ -1,15 +1,17 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Main desktop window: file access only to dialog-selected files via dynamic scope",
+  "description": "Main desktop window: dialog-selected files and the fixed SimLIBS GitHub URL",
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "core:window:allow-set-theme",
     "dialog:allow-open",
     "dialog:allow-save",
     "fs:allow-read-text-file",
     "fs:allow-write-text-file",
     "fs:allow-write-file",
-    "fs:allow-stat"
+    "fs:allow-stat",
+    { "identifier": "opener:allow-open-url", "allow": [{ "url": "https://github.com/Noob-12345/SimLIBS" }] }
   ]
 }
