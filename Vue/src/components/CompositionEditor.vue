@@ -2,13 +2,19 @@
 import { computed, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
 import ElementCandidate from './ElementCandidate.vue'
+import { compositionIssues, issueAttrs } from '../lib/issues'
 import { balance, canonical, elementColor, elementDraft, errorOf, symbols, validateComposition, type ElementDraft } from '../lib/model'
 const model = defineModel<ElementDraft[]>({ required: true })
 const props = defineProps<{ scope: string; random?: boolean; disabled?: boolean }>()
+const emit = defineEmits<{ issue: [message: string] }>()
 const adding = ref(''), addError = ref('')
 const availableSymbols = computed(() => symbols.filter(symbol => !model.value.some(element => canonical(element.symbol) === symbol)))
 const total = computed(() => model.value.reduce((sum, e) => sum + (e.pct.trim() ? Number(e.pct) : NaN), 0))
 const error = computed(() => props.random ? '' : errorOf(() => validateComposition(model.value)))
+const issues = computed(() => compositionIssues(model.value, props.random))
+const attrs = (key: string) => issueAttrs(issues.value[key], `${props.scope}-draft-error`)
+watch([addError, error, issues], () => emit('issue', addError.value || error.value || Object.values(issues.value)[0] || ''), { immediate: true })
+watch(adding, value => { const symbol = canonical(value); if (symbol && !model.value.some(row => canonical(row.symbol) === symbol) && model.value.length < 32) addError.value = '' })
 watch(() => [props.random, ...model.value.slice(0, -1).map(e => e.pct), model.value.length], () => { if (!props.random) balance(model.value) })
 function add() {
   const symbol = canonical(adding.value)
@@ -26,13 +32,12 @@ function remove(id: number) { if (model.value.length <= 1) return; model.value.s
     <div v-if="!random" class="composition-bar"><span v-for="e in model" :key="e.id" :style="{ width: `${Math.max(0, Math.min(100, Number(e.pct) || 0))}%`, background: elementColor(e.symbol) }" /></div>
     <TransitionGroup name="element" tag="div" class="composition-rows">
       <div v-for="(e, i) in model" :key="e.id" class="composition-entry">
-        <div class="composition-row"><span class="element-tile" :style="{ '--el-color': elementColor(e.symbol) }">{{ e.symbol }}</span><label class="pct-field"><span class="sr-only">{{ e.symbol }} 占比（%）</span><input v-model="e.pct" type="text" inputmode="decimal" :readonly="!random && i === model.length - 1" :disabled="random && e.random" :aria-label="`${e.symbol} 占比（%）`" /><span>%</span></label><button class="icon-btn remove-btn" type="button" :disabled="model.length === 1" :aria-label="`删除元素 ${e.symbol}`" @click="remove(e.id)"><AppIcon name="close" :size="14" /></button></div>
+        <div class="composition-row"><span class="element-tile" :style="{ '--el-color': elementColor(e.symbol) }">{{ e.symbol }}</span><label class="pct-field"><span class="sr-only">{{ e.symbol }} 占比（%）</span><input :id="`${scope}-pct-${e.id}`" v-model="e.pct" type="text" inputmode="decimal" :readonly="!random && i === model.length - 1" :disabled="random && e.random" :aria-label="`${e.symbol} 占比（%）`" v-bind="attrs(`${e.id}.pct`)" /><span>%</span></label><button class="icon-btn remove-btn" type="button" :disabled="model.length === 1" :aria-label="`删除元素 ${e.symbol}`" @click="remove(e.id)"><AppIcon name="close" :size="14" /></button></div>
         <label v-if="random" class="switch small-switch"><input v-model="e.random" type="checkbox" /><span class="switch-track" />{{ e.symbol }} 浓度随机</label>
-        <div v-if="random && e.random" class="row2"><label class="field compact">下界 / %<input v-model="e.min" type="text" inputmode="decimal" /></label><label class="field compact">上界 / %<input v-model="e.max" type="text" inputmode="decimal" /></label></div>
+        <div v-if="random && e.random" class="row2"><label class="field compact">下界 / %<input :id="`${scope}-min-${e.id}`" v-model="e.min" type="text" inputmode="decimal" v-bind="attrs(`${e.id}.min`)" /></label><label class="field compact">上界 / %<input :id="`${scope}-max-${e.id}`" v-model="e.max" type="text" inputmode="decimal" v-bind="attrs(`${e.id}.max`)" /></label></div>
       </div>
     </TransitionGroup>
     <div v-if="!random" :class="['sum-row', { invalid: !!error }]"><span>总占比</span><b class="mono">{{ Number.isFinite(total) ? `${Number(total.toFixed(5))}%` : '无效' }} {{ error ? '!' : '✓' }}</b></div>
-    <div class="add-element"><ElementCandidate :id="`${scope}-add-element`" v-model="adding" :symbols="availableSymbols" :disabled="disabled || model.length >= 32" /><button type="button" class="btn sm" :disabled="model.length >= 32" @click="add"><AppIcon name="plus" :size="13" />添加</button></div>
-    <p v-if="addError || error" class="error-text" role="alert">{{ addError || error }}</p>
+    <div class="add-element"><ElementCandidate :id="`${scope}-add-element`" v-model="adding" :symbols="availableSymbols" :disabled="disabled || model.length >= 32" :issue="addError" :issue-id="`${scope}-draft-error`" /><button type="button" class="btn sm" :disabled="model.length >= 32" @click="add"><AppIcon name="plus" :size="13" />添加</button></div>
   </fieldset>
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 const model = defineModel<string>({ required: true })
-const props = defineProps<{ id: string; symbols: readonly string[]; disabled?: boolean }>()
+const props = defineProps<{ id: string; symbols: readonly string[]; disabled?: boolean; issue?: string; issueId?: string }>()
 const root = ref<HTMLElement>(), input = ref<HTMLInputElement>(), items = ref<HTMLButtonElement[]>([])
 const open = ref(false), above = ref(false), active = ref(-1), menuHeight = ref(180)
 const candidates = computed(() => props.symbols.filter(symbol => symbol.toLowerCase().startsWith(model.value.trim().toLowerCase())))
@@ -39,7 +39,7 @@ onUnmounted(() => document.removeEventListener('pointerdown', outside))
 <template>
   <div ref="root" class="element-candidate" @focusout="focusOut">
     <label class="sr-only" :for="id">添加元素符号</label>
-    <input :id="id" ref="input" v-model="model" type="text" role="combobox" aria-autocomplete="list" :aria-expanded="open" :aria-controls="`${id}-candidates`" :aria-activedescendant="open && active >= 0 ? `${id}-candidate-${candidates[active]}` : undefined" placeholder="元素符号，如 Al" autocomplete="off" :disabled="disabled" @input="typed" @focus="show" @keydown="key" />
+    <input :id="id" ref="input" v-model="model" type="text" role="combobox" :aria-invalid="!!issue" :aria-describedby="issue ? issueId : undefined" :data-issue="issue || undefined" aria-autocomplete="list" :aria-expanded="open" :aria-controls="`${id}-candidates`" :aria-activedescendant="open && active >= 0 ? `${id}-candidate-${candidates[active]}` : undefined" placeholder="元素符号，如 Al" autocomplete="off" :disabled="disabled" @input="typed" @focus="show" @keydown="key" />
     <div v-if="open" :id="`${id}-candidates`" :class="['element-candidates', { above }]" :style="{ maxHeight: menuHeight + 'px' }" role="listbox" aria-label="可添加元素">
       <button v-for="(symbol, index) in candidates" :id="`${id}-candidate-${symbol}`" :key="symbol" :ref="element => items[index] = element as HTMLButtonElement" type="button" role="option" :aria-selected="index === active" :class="{ selected: index === active }" tabindex="-1" @mousedown.prevent @click="choose(symbol)">{{ symbol }}</button>
     </div>

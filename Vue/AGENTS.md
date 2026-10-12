@@ -27,6 +27,8 @@
 
 最新 `.ai-workflow/20261012-welcome-theme-cards/` 七项已完成，状态及独立验收见state.json/review.md：高级开关说明、本机时间启动问候、主题模糊过渡、单次三横排方形输入卡，以及收起左/展开右、2.5加粗且完全不叠面板的侧缘按钮。原编号1/2/3/4/5/6/8。plan完整21项实际release和27项保护哈希通过，根目录EXE/中文NSIS已更新。基于edge-focus-lines保留实线/删除文案/下拉高亮/居中滚动；模型/任务/I/O/Rust/权限/依赖不变，存储/原生主题串行和数据边界保持。原plan/code和固定根目录交付不变，源码/产物冻结，旧I/O任务仍暂停。
 
+最新 `.ai-workflow/20261012-output-validation-layout/` 十项已完成，状态及独立验收见state.json/review.md：单次数值居中/标题单位、默认Vue/outputs及设置、三等大摘要卡、删计时字/ready后额外1s、批量尾单位/展宽对齐、字段红色抖动及活动提示、同排随机开关/CSV红清除绿文件名。plan完整18项实际release与18项保护哈希通过，根目录EXE/中文NSIS已更新，outputs已创建并native读回；CSV post-import是实际File/控制器证据，原生I/O完整验收仍暂停。只新增main固定默认目录命令，不接路径参数/新依赖/通配权限，核心生成/校验/随机/扫描保持。原plan/code、每步最多3业务文件和固定根目录交付不变，源码/产物冻结。
+
 ## 项目边界
 
 上述20261012十项任务现已完成，最终状态与独立验收见 `.ai-workflow/20261012-compact-controls/state.json`、`review.md`。根目录EXE/中文NSIS已更新且与最终十项release哈希一致；plan 24项实际桌面检查通过，单次成功收起/悬停箭头展开、减少动态和GitHub原生打开均已核对。后续保持本根目录交付约定，不自动恢复旧任务或历史版本产物。

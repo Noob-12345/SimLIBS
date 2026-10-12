@@ -2,6 +2,8 @@ import { ref } from 'vue'
 import { isTauri } from '@tauri-apps/api/core'
 import { open, save } from '@tauri-apps/plugin-dialog'
 import { readTextFile, stat, writeFile, writeTextFile } from '@tauri-apps/plugin-fs'
+import { savedPreferences } from './preferences'
+import { defaultOutputDirectory, ensureDefaultOutputDirectory, outputDefaultPath, outputDirectoryIssue } from './outputDirectory'
 
 export const desktopHost = typeof window !== 'undefined' && isTauri()
 export type SaveResult = { status: 'saved'; path: string; bytes: number } | { status: 'cancelled' } | { status: 'failed'; message: string } | { status: 'browser-download' }
@@ -44,7 +46,12 @@ export async function saveDemoFile(filename: string, content: string | Blob, mim
     }
     const extension = filename.split('.').pop()?.toLowerCase()
     if (!extension || !['csv', 'json', 'png'].includes(extension)) throw new Error('仅支持演示 CSV、JSON、PNG 保存')
-    const path = await save({ title: '另存为演示文件', defaultPath: filename, filters: [{ name: `${extension.toUpperCase()} 演示文件`, extensions: [extension] }] })
+    const directory = savedPreferences.value.outputDirectory
+    const directoryError = outputDirectoryIssue(directory)
+    if (directoryError) throw new Error(directoryError)
+    const isDefault = directory.replace(/\\/g, '/').replace(/\/$/, '').toLowerCase() === defaultOutputDirectory.toLowerCase()
+    const initialDirectory = isDefault ? await ensureDefaultOutputDirectory() : directory
+    const path = await save({ title: '另存为演示文件', defaultPath: outputDefaultPath(initialDirectory, filename), filters: [{ name: `${extension.toUpperCase()} 演示文件`, extensions: [extension] }] })
     if (path === null) return { status: 'cancelled' }
     // Do not append an extension or rewrite the path: dynamic scope grants this exact selection.
     let bytes: number

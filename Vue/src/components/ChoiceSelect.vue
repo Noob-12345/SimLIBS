@@ -2,7 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
 const model = defineModel<T>({ required: true })
-const props = defineProps<{ label: string; options: readonly { value: T; label: string; description?: string }[]; disabled?: boolean }>()
+const props = defineProps<{ label: string; options: readonly { value: T; label: string; description?: string }[]; disabled?: boolean; issue?: string; issueId?: string }>()
 const selected = computed(() => props.options.find(option => option.value === model.value) ?? props.options[0]!)
 const open = ref(false), above = ref(false), activeIndex = ref(0), helpIndex = ref<number | null>(null)
 const root = ref<HTMLElement>(), trigger = ref<HTMLButtonElement>(), items = ref<HTMLButtonElement[]>([])
@@ -58,7 +58,7 @@ onUnmounted(() => document.removeEventListener('pointerdown', outside))
 <template>
   <div ref="root" class="mode-select field" @focusout="focusOut">
     <label :id="`${id}-label`" :for="`${id}-trigger`">{{ label }}</label>
-    <button :id="`${id}-trigger`" ref="trigger" class="mode-select-trigger" type="button" :disabled="disabled" aria-haspopup="menu" :aria-expanded="open" :aria-controls="`${id}-menu`" :aria-labelledby="`${id}-label ${id}-value`" @click="toggle" @keydown="triggerKey"><span :id="`${id}-value`">{{ selected.label }}</span><AppIcon name="chevron" :size="14" /></button>
+    <button :id="`${id}-trigger`" ref="trigger" class="mode-select-trigger" type="button" :disabled="disabled" :aria-invalid="!!issue" :aria-describedby="issue ? issueId : undefined" :data-issue="issue || undefined" aria-haspopup="menu" :aria-expanded="open" :aria-controls="`${id}-menu`" :aria-labelledby="`${id}-label ${id}-value`" @click="toggle" @keydown="triggerKey"><span :id="`${id}-value`">{{ selected.label }}</span><AppIcon name="chevron" :size="14" /></button>
     <Transition name="popover">
       <div v-if="open" :id="`${id}-menu`" :class="['mode-select-menu', { above }]" role="menu" :aria-label="label" @keydown="menuKey">
         <div v-for="(option, index) in props.options" :key="option.value" :class="['mode-choice-row', { 'plain-choice-row': !option.description }]" role="none">

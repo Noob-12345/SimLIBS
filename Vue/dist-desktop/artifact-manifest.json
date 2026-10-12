@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "deliveryDirectory": "dist-desktop",
-  "collectedAt": "2026-10-12T07:24:39.366Z",
+  "collectedAt": "2026-10-12T10:59:59.987Z",
   "runtime": "Windows x64 / system WebView2",
   "frontend": "embedded static dist",
   "scientificSource": "frontend_demo / illustrative",
@@ -11,15 +11,15 @@
       "kind": "windows-x64-application",
       "file": "SimLIBS.exe",
       "source": "src-tauri\\target\\release\\simlibs-vue.exe",
-      "bytes": 5023744,
-      "sha256": "9f173e309f45368e925c0d7087386a003a5e5278d57d16855968013e00738e4b"
+      "bytes": 5026816,
+      "sha256": "7bec629cdf67f014409c46d9e59447763d70f14198d1c5d3e1a510033999024d"
     },
     {
       "kind": "nsis-installer",
       "file": "SimLIBS-Setup.exe",
       "source": "src-tauri\\target\\release\\bundle\\nsis\\SimLIBS_0.1.0_x64-setup.exe",
-      "bytes": 1580631,
-      "sha256": "136dcf5046adfbbd66fd03c23af179680dd14947273fd54127d43958885ca379"
+      "bytes": 1583413,
+      "sha256": "5121da2002befba0325aa6ed769760ea283ed7a80ee1d3d749d397373c1760b7"
     }
   ]
 }
