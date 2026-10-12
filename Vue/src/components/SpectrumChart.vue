@@ -41,12 +41,12 @@ function draw() {
   // Every source node is rendered. Canvas size never determines data density.
   const curve = (ys: number[], stroke: string, total = false) => {
     ctx.beginPath(); spec.value.xs.forEach((x, i) => { const px = xPos(x), py = yPos(ys[i]!); i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py) })
-    ctx.strokeStyle = stroke; ctx.lineWidth = total ? 1.5 : 1; ctx.setLineDash(total ? [] : [3, 3]); ctx.stroke(); ctx.setLineDash([])
+    ctx.strokeStyle = stroke; ctx.lineWidth = total ? 1.5 : 1; ctx.setLineDash([]); ctx.stroke(); ctx.setLineDash([])
     if (total) { ctx.lineTo(xPos(spec.value.xs[spec.value.xs.length - 1]!), base); ctx.lineTo(xPos(spec.value.xs[0]!), base); ctx.closePath(); ctx.globalAlpha = .06; ctx.fillStyle = stroke; ctx.fill(); ctx.globalAlpha = 1 }
   }
   spec.value.elements.filter(e => !hidden.value.includes(e.symbol)).forEach(e => curve(e.ys, elementColor(e.symbol)))
   if (!hidden.value.includes('total')) curve(spec.value.total, color('--chart'), true)
-  if (hover.value !== null) { const x = xPos(spec.value.xs[hover.value]!); ctx.strokeStyle = color('--muted'); ctx.setLineDash([3,4]); ctx.beginPath(); ctx.moveTo(x, g.top); ctx.lineTo(x, base); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = color('--chart'); ctx.beginPath(); ctx.arc(x, yPos(spec.value.total[hover.value]!), 3, 0, Math.PI * 2); ctx.fill() }
+  if (hover.value !== null) { const x = xPos(spec.value.xs[hover.value]!); ctx.strokeStyle = color('--muted'); ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(x, g.top); ctx.lineTo(x, base); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = color('--chart'); ctx.beginPath(); ctx.arc(x, yPos(spec.value.total[hover.value]!), 3, 0, Math.PI * 2); ctx.fill() }
   if (drag.value && !drag.value.pan) { ctx.globalAlpha = .14; ctx.fillStyle = color('--accent'); const a = xPos(drag.value.start), b = xPos(drag.value.now); ctx.fillRect(Math.min(a,b), g.top, Math.abs(b - a), ph); ctx.globalAlpha = 1 }
   ctx.restore(); ctx.font = `${metadataSize} ${fontFamily}`; ctx.fillStyle = color('--muted'); ctx.textAlign = 'left'; ctx.fillText('frontend_demo / illustrative', g.left, g.h - 3)
 }

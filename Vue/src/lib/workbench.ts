@@ -23,7 +23,7 @@ export function runDemo(kind: TaskKind, summary: string, complete: () => DemoTas
       if (kind === 'single') single.result = task.result as Spectrum
       if (kind === 'batch') batch.result = task.result as BatchSample[]
       if (kind === 'scan') { scan.result = task.result as ScanResult; scan.frame = 0 }
-      task.status = 'completed'; task.progress = 100; task.detail = '界面演示已完成；记录的是本次界面流程与示意数据，不是真实模拟结果。'
+      task.status = 'completed'; task.progress = 100; task.detail = ''
     } catch (e) { task.status = 'failed'; task.detail = e instanceof Error ? e.message : '演示生成失败' }
     task.endedAt = Date.now()
   }, 120)
