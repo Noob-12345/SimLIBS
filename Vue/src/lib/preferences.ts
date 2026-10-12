@@ -15,7 +15,14 @@ export const savedPreferences = ref(load())
 export const preferences = reactive<Preferences>({ ...savedPreferences.value })
 const media = window.matchMedia('(prefers-color-scheme: dark)'), systemDark = ref(media.matches)
 const listener = () => { systemDark.value = media.matches }; media.addEventListener('change', listener)
-export const actualDark = computed(() => preferences.mode === 'dark' || preferences.mode === 'system' && systemDark.value)
+const reduceMedia = window.matchMedia('(prefers-reduced-motion: reduce)'), systemReduced = ref(reduceMedia.matches)
+const reduceListener = () => { systemReduced.value = reduceMedia.matches }; reduceMedia.addEventListener('change', reduceListener)
+function appearanceSnapshot() { return { mode: preferences.mode, palette: preferences.palette, dark: preferences.mode === 'dark' || preferences.mode === 'system' && systemDark.value } }
+const appliedAppearance = reactive(appearanceSnapshot())
+export const actualDark = computed(() => appliedAppearance.dark)
+export const appearancePhase = ref<'idle' | 'blurring' | 'clearing'>('idle')
+let appearanceInitialized = false, appearanceRevision = 0
+let blurTimer: ReturnType<typeof setTimeout> | undefined, clearTimer: ReturnType<typeof setTimeout> | undefined
 export const preferenceDirty = computed(() => JSON.stringify(preferences) !== JSON.stringify(savedPreferences.value))
 export const nativeThemeError = ref('')
 let nativeBusy = false, disposed = false, themeRevision = 0
@@ -33,9 +40,9 @@ async function syncNativeTheme() {
   } finally { nativeBusy = false }
 }
 // Media changes update CSS only. Native requests depend solely on the selected mode.
-const stopNative = watch(() => preferences.mode, mode => { requestedMode = mode; themeRevision++; void syncNativeTheme() }, { immediate: true, flush: 'sync' })
+const stopNative = watch(() => appliedAppearance.mode, mode => { requestedMode = mode; themeRevision++; void syncNativeTheme() }, { immediate: true, flush: 'sync' })
 function apply() {
-  const dark = actualDark.value, palette = palettes.find(p => p.id === preferences.palette) ?? palettes[0]!, root = document.documentElement
+  const dark = actualDark.value, palette = palettes.find(p => p.id === appliedAppearance.palette) ?? palettes[0]!, root = document.documentElement
   root.dataset.theme = dark ? 'dark' : 'light'; root.dataset.reducedMotion = String(preferences.reducedMotion)
   root.style.setProperty('--accent', palette.color); root.style.setProperty('--chart', dark ? palette.dark : palette.text)
   root.style.setProperty('--accent-text', dark ? palette.dark : palette.text)
@@ -43,7 +50,33 @@ function apply() {
   const switchPalette = palettes[(palettes.indexOf(palette) + 1) % palettes.length]!
   root.style.setProperty('--switch-text', dark ? switchPalette.dark : switchPalette.text)
 }
-const stop = watch([preferences, actualDark], apply, { deep: true, immediate: true })
+function clearAppearanceTimers() { clearTimeout(blurTimer); clearTimeout(clearTimer) }
+function commitAppearance(snapshot: ReturnType<typeof appearanceSnapshot>) { Object.assign(appliedAppearance, snapshot); apply() }
+function requestAppearance() {
+  const snapshot = appearanceSnapshot(), boot = window.__SIMLIBS_BOOT__
+  document.documentElement.dataset.reducedMotion = String(preferences.reducedMotion)
+  const same = snapshot.mode === appliedAppearance.mode && snapshot.palette === appliedAppearance.palette && snapshot.dark === appliedAppearance.dark
+  if (!appearanceInitialized || boot && boot.phase !== 'ready' || preferences.reducedMotion || systemReduced.value) {
+    appearanceInitialized = true; appearanceRevision++; clearAppearanceTimers(); commitAppearance(snapshot); appearancePhase.value = 'idle'; return
+  }
+  if (same && appearancePhase.value === 'idle') return
+  const revision = ++appearanceRevision; clearAppearanceTimers()
+  // setTheme(null) can refresh the system media query just after the peak.
+  // Commit that resolved system color under the existing veil, without replaying it.
+  if (!same && appearancePhase.value === 'clearing' && snapshot.mode === 'system' && appliedAppearance.mode === 'system' && snapshot.palette === appliedAppearance.palette) {
+    commitAppearance(snapshot); clearTimer = setTimeout(() => { if (revision === appearanceRevision) appearancePhase.value = 'idle' }, 180); return
+  }
+  if (same) {
+    appearancePhase.value = 'clearing'; clearTimer = setTimeout(() => { if (revision === appearanceRevision) appearancePhase.value = 'idle' }, 180); return
+  }
+  appearancePhase.value = 'blurring'
+  blurTimer = setTimeout(() => {
+    if (disposed || revision !== appearanceRevision) return
+    commitAppearance(snapshot); appearancePhase.value = 'clearing'
+    clearTimer = setTimeout(() => { if (!disposed && revision === appearanceRevision) appearancePhase.value = 'idle' }, 180)
+  }, 200)
+}
+const stop = watch([() => preferences.mode, () => preferences.palette, () => preferences.mode === 'system' && systemDark.value, () => preferences.reducedMotion, systemReduced], requestAppearance, { immediate: true, flush: 'sync' })
 export function savePreferences(): boolean { try { localStorage.setItem(key, JSON.stringify(preferences)); savedPreferences.value = { ...preferences }; storageMessage.value = '外观与配置已保存到本地'; return true } catch { storageMessage.value = '本地存储不可用，偏好尚未保存'; return false } }
 export function discardPreferences() { Object.assign(preferences, savedPreferences.value); storageMessage.value = '已恢复上次保存的偏好' }
 export function setThemeMode(mode: ThemeMode) {
@@ -55,4 +88,4 @@ export function setPalette(palette: Palette) {
   preferences.palette = palette
   try { const next = { ...savedPreferences.value, palette }; localStorage.setItem(key, JSON.stringify(next)); savedPreferences.value = next; storageMessage.value = '' } catch { storageMessage.value = '配色仅在当前应用生效，本地保存失败' }
 }
-export function disposePreferences() { disposed = true; stopNative(); stop(); media.removeEventListener('change', listener) }
+export function disposePreferences() { disposed = true; appearanceRevision++; clearAppearanceTimers(); appearancePhase.value = 'idle'; stopNative(); stop(); media.removeEventListener('change', listener); reduceMedia.removeEventListener('change', reduceListener) }

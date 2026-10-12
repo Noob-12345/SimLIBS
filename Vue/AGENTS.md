@@ -25,6 +25,8 @@
 
 最新任务 `.ai-workflow/20261012-edge-focus-lines/` 五项已完成，状态及独立验收见state.json/review.md：视口居中的面板侧缘收起/展开按钮、删除指定长完成段落、下拉聚焦高亮与光谱实线。plan 19项实际release检查、22项保护哈希通过，正式EXE/中文NSIS已直接更新dist-desktop根目录。基于已完成controls-unify，保留最新统一控件、无滑条及原生标题栏主题。用户本次明确要求删除完成长段落，workbench.ts唯一差异为该detail文案；其余数据/任务/进度/I/O/权限/依赖保持。原plan/code与固定根目录交付约定不变，源码和产物冻结，旧I/O任务仍暂停。
 
+最新 `.ai-workflow/20261012-welcome-theme-cards/` 七项已完成，状态及独立验收见state.json/review.md：高级开关说明、本机时间启动问候、主题模糊过渡、单次三横排方形输入卡，以及收起左/展开右、2.5加粗且完全不叠面板的侧缘按钮。原编号1/2/3/4/5/6/8。plan完整21项实际release和27项保护哈希通过，根目录EXE/中文NSIS已更新。基于edge-focus-lines保留实线/删除文案/下拉高亮/居中滚动；模型/任务/I/O/Rust/权限/依赖不变，存储/原生主题串行和数据边界保持。原plan/code和固定根目录交付不变，源码/产物冻结，旧I/O任务仍暂停。
+
 ## 项目边界
 
 上述20261012十项任务现已完成，最终状态与独立验收见 `.ai-workflow/20261012-compact-controls/state.json`、`review.md`。根目录EXE/中文NSIS已更新且与最终十项release哈希一致；plan 24项实际桌面检查通过，单次成功收起/悬停箭头展开、减少动态和GitHub原生打开均已核对。后续保持本根目录交付约定，不自动恢复旧任务或历史版本产物。

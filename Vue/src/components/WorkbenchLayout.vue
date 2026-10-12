@@ -18,9 +18,8 @@ function positionEdge() {
   const height = Math.min(96, bottom - top)
   if (height < 32) { edgePosition.value.visible = false; return }
   const center = Math.max(top + height / 2, Math.min(window.innerHeight / 2, bottom - height / 2))
-  const expandedWidth = controls.value?.getBoundingClientRect().width ?? panel.width
-  const fraction = expandedWidth > 22 ? Math.max(0, Math.min(1, (panel.width - 22) / (expandedWidth - 22))) : 0
-  const left = panel.right - 22 + 11 * fraction
+  const gap = parseFloat(getComputedStyle(workbench.value!).columnGap) || 40
+  const left = panel.right + Math.max(0, (gap - 22) / 2)
   edgePosition.value = { left: Math.max(0, Math.min(window.innerWidth - 22, left)), top: center - height / 2, height, stripTop: top, stripHeight: bottom - top, visible: true }
 }
 function schedulePosition() { if (!frame) frame = requestAnimationFrame(() => { frame = 0; positionEdge() }) }

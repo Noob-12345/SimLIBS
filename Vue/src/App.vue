@@ -9,7 +9,7 @@ import ScanPage from './pages/ScanPage.vue'
 import JobsPage from './pages/JobsPage.vue'
 import SettingsPage from './pages/SettingsPage.vue'
 import { disposeTimers, page, tasks } from './lib/workbench'
-import { disposePreferences, nativeThemeError, preferences, setPalette, setThemeMode } from './lib/preferences'
+import { appearancePhase, disposePreferences, nativeThemeError, preferences, setPalette, setThemeMode } from './lib/preferences'
 import type { Page } from './lib/model'
 import './styles.css'
 const pages: { id: Page; label: string; subtitle: string }[] = [
@@ -47,4 +47,5 @@ onUnmounted(() => { disposeTimers(); disposePreferences() })
       </div>
     </main>
   </div>
+  <Teleport to="body"><div :class="['theme-veil', { 'is-blurring': appearancePhase === 'blurring' }]" :data-phase="appearancePhase" aria-hidden="true" /></Teleport>
 </template>

@@ -16,6 +16,7 @@
       .startup svg{width:180px;height:54px;margin:22px auto 16px;color:var(--accent,#e5a327)}
       .startup path{stroke-dasharray:320;stroke-dashoffset:320;animation:startup-line 1s ease-in-out infinite alternate}
       .startup p{font-size:13px;margin:0;color:var(--muted,#717680)}
+      .startup .startup-greeting{margin:12px 0 0;font-size:14px;font-weight:500;color:inherit}
       .startup button{margin-top:18px;min-height:36px;padding:7px 16px;border:1px solid var(--border,#ddd);border-radius:7px;background:var(--panel,#fff);color:inherit;font:inherit;cursor:pointer}
       .startup [hidden]{display:none!important}
       .startup[data-phase=leaving]{opacity:0}
@@ -26,10 +27,11 @@
     </style>
   </head>
   <body>
-    <div id="startup" class="startup" data-phase="loading" role="status" aria-live="polite"><div><strong>SimLIBS</strong><svg viewBox="0 0 180 54" fill="none" aria-hidden="true"><path d="M2 40h24l8-20 9 26 13-39 12 33h24l7-14 7 14h24l8-23 9 23h31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" /></svg><p id="startup-message">正在准备工作台</p><button id="startup-retry" type="button" hidden>重新载入</button></div></div>
+    <div id="startup" class="startup" data-phase="loading" role="status" aria-live="polite"><div><strong>SimLIBS</strong><p id="startup-greeting" class="startup-greeting">夜深人静了，早点休息。</p><svg viewBox="0 0 180 54" fill="none" aria-hidden="true"><path d="M2 40h24l8-20 9 26 13-39 12 33h24l7-14 7 14h24l8-23 9 23h31" stroke="currentColor" stroke-width="2" stroke-linejoin="round" /></svg><p id="startup-message">正在准备工作台</p><button id="startup-retry" type="button" hidden>重新载入</button></div></div>
     <div id="app" inert aria-hidden="true" aria-busy="true"></div>
     <script>
       (() => {
+        const hour=new Date().getHours();document.getElementById('startup-greeting').textContent=hour>=6&&hour<11?'早上好，开启新的一天。':hour>=11&&hour<14?'午安，记得适时休息。':hour>=14&&hour<18?'下午好，愿今天进展顺利。':'夜深人静了，早点休息。';
         const root=document.documentElement, splash=document.getElementById('startup'), app=document.getElementById('app'), message=document.getElementById('startup-message'), retry=document.getElementById('startup-retry');
         try { const p=JSON.parse(localStorage.getItem('simlibs-vue-preferences-v1')||'{}'); root.dataset.theme=p.mode==='dark'||p.mode==='system'&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';root.dataset.reducedMotion=String(p.reducedMotion===true); } catch {}
         let phase='loading',initialized=false,finishTimer,fadeTimer;const startedAt=performance.now();
