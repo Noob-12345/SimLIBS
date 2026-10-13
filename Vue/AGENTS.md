@@ -1,5 +1,11 @@
 # SimLIBS Vue 项目协作约定
 
+2026-10-13最新 `.ai-workflow/20261013-revert-parameter-height/` 已完成，见state/review。用户明确要求完整回退“左侧参数区过长”对应的高度方案及全部配套，本指令撤销sidebar-height第二项：三页恢复自然长高／整页滚动／controls末尾生成按钮，内部scroll／限高／sticky／footer和定位helper撤销；七组件／页面与核实的fffe3cd高度前修订一致，工作台样式匹配前快照，README仅删相关段。日间导航与后续独立设置预览／sticky保存栏／Jobs统一筛选保留，Settings／Jobs源hash不动，仅Jobs局部对齐旧相对菜单。原plan/code、每步最多三业务文件、dist-desktop根目录交付保持；code四组与Windows EXE/中文NSIS，plan七项实际release、37保护／参考hash及恢复／冻结核对通过。最终根目录EXE为ba0f0b98版；源码／产物冻结，不自动恢复已撤销高度方案，不恢复旧原生I/O任务。历史完成记录仅代表当时事实。
+
+2026-10-12最新 `.ai-workflow/20261012-desktop-front-refine/` 已完成，state.json/review.md为最终状态。用户选择继续桌面前端，本轮三项：设置日间缩略导航与实际主题一致、sticky可见保存／放弃操作条并避开聚焦字段与解释、Jobs类型／状态统一ChoiceSelect。原三明暗模式及图标完整保留，只改三个指定业务文件；code五组自查／根目录Windows EXE与中文NSIS完成，plan七项实际release、43项保护／参考与三冻结源hash通过。正式根目录EXE最终460ec188版，无新版交付子目录；沿用原plan/code、每步最多三业务文件。源码／产物冻结，旧原生I/O任务不恢复，未接真实引擎。
+
+2026-10-12最新任务 `.ai-workflow/20261012-sidebar-height/` 已完成，最终状态与独立验收见state.json/review.md。日间完整左侧导航随日夜／五配色；用户明确确认三页参数面板内滚动、窗口限高／sticky与固定底部生成按钮，模式／高级不折叠，弹层不裁切。原plan/code、每步最多3业务文件与dist-desktop根目录交付保持。首版的箭头过渡重叠及实际EXE首次scroll footer下移8px已返工；code完成业务修正／自查后遇服务capacity，plan仅完成最终构建／独立验收，不写业务源码。最终8bfd144版根目录EXE／中文NSIS已更新，16项实际release、24项保护及10项冻结hash通过；本任务plan-ready/review为最终交付依据，旧code-ready首版4f71已被替代。源码和产物冻结，旧原生I/O任务不恢复。
+
 项目根目录：`D:\LIBS\SimLIBS\Vue`。技术栈：Tauri 2、Vue 3、TypeScript、Vite、npm。
 
 ## 两角色工作流
