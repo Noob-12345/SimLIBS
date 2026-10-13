@@ -31,13 +31,13 @@ function densityBlur() { const n = Number(model.value.ne); if (Number.isFinite(n
   </section>
   <section class="parameter-section"><h2>计算模式</h2><ProcessingModeSelect v-model="model.mode" :disabled="disabled" /><ChoiceSelect v-if="model.mode !== 'local'" v-model="model.flux" label="强度尺度" :options="fluxChoices" :disabled="disabled" /><div v-else class="local-flux"><span>强度尺度</span><b>光子通量</b></div></section>
   <section class="parameter-section"><h2>高级选项</h2>
-    <SwitchHint v-if="model.mode === 'local'" v-model="model.broaden" label="启用本地展宽" description="本地展宽配置连续线形，可设置高斯/洛伦兹宽度与重粒子温度。" :disabled="disabled" />
+    <SwitchHint v-if="model.mode === 'local'" v-model="model.broaden" label="启用本地展宽" description="设置高斯／洛伦兹线宽与重粒子温度。" :disabled="disabled" />
     <Transition name="expand"><div v-if="model.mode === 'local' && model.broaden" class="optional-box">
       <div class="row2 broadening-row"><label class="field compact"><span>高斯 FWHM / nm</span><input :id="`${scope}-gaussian`" v-model="model.gaussian" type="text" inputmode="decimal" v-bind="attrs('gaussian')" /></label><label class="field compact"><span>洛伦兹 FWHM / nm</span><input :id="`${scope}-lorentz`" v-model="model.lorentz" type="text" inputmode="decimal" v-bind="attrs('lorentz')" /></label></div>
       <ChoiceSelect v-model="model.temperatureMode" label="重粒子温度" :options="temperatureChoices" :disabled="disabled" /><label v-if="model.temperatureMode === 'manual'" class="field">重粒子温度 / K<input :id="`${scope}-temperature`" v-model="model.temperature" type="text" inputmode="decimal" v-bind="attrs('temperature')" /></label><p v-else class="hint mono">{{ format(Number(model.te) * 11604.518) }} K · 随 Te 换算</p>
     </div></Transition>
     <div v-if="model.mode === 'client'" class="optional-box"><ChoiceSelect v-model="model.convention" label="高斯约定" :options="conventionChoices" :disabled="disabled" /><div class="row2"><label class="field compact">线中心舍入位<input :id="`${scope}-center`" v-model="model.center" type="text" placeholder="不舍入" inputmode="numeric" v-bind="attrs('center')" /></label><label class="field compact">选线阈值 / 0–1<input :id="`${scope}-threshold`" v-model="model.threshold" type="text" inputmode="decimal" v-bind="attrs('threshold')" /></label></div></div>
-    <SwitchHint v-if="model.mode === 'server'" v-model="model.headless" label="后台抓取" description="预留无界面在线获取配置，当前未接入计算引擎。" :disabled="disabled" />
-    <SwitchHint v-model="model.resample" label="插值 / 统一网格" description="将波长节点映射到统一网格用于对齐和比较；不创造新谱线，也不增加物理分辨率。" :disabled="disabled" /><Transition name="expand"><label v-if="model.resample" class="field">目标网格步长 / nm<input :id="`${scope}-resampleStep`" v-model="model.resampleStep" type="text" inputmode="decimal" v-bind="attrs('resampleStep')" /></label></Transition>
+    <SwitchHint v-if="model.mode === 'server'" v-model="model.headless" label="后台抓取" description="使用无界面浏览器获取谱线数据。" :disabled="disabled" />
+    <SwitchHint v-model="model.resample" label="插值 / 统一网格" description="将光谱插值到统一波长网格，不增加物理分辨率。" :disabled="disabled" /><Transition name="expand"><label v-if="model.resample" class="field">目标网格步长 / nm<input :id="`${scope}-resampleStep`" v-model="model.resampleStep" type="text" inputmode="decimal" v-bind="attrs('resampleStep')" /></label></Transition>
   </section>
 </fieldset></template>

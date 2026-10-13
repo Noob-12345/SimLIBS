@@ -1,5 +1,7 @@
 # SimLIBS Vue 项目协作约定
 
+2026-10-13最新 `.ai-workflow/20261013-startup-export-polish/` 五项已完成，见state/review。启动光谱外圆环按模块／挂载／字体／首帧四真实节点25/50/75/100推进，0隐藏、完成补圈并保持额外1s，失败冻结/重载/inert/减少动态；单次三单位第二行，三色文件内CSV/JSON/PNG导出图标，三摘要标题/内容加大，模式按用户本地库／NIST服务器／NIST谱线本地强度展宽定义改文案。七文件按小步由原code完成／自查；plan协调接手最终根目录Windows EXE/中文NSIS及八项实际release，40保护／参考与七冻结hash通过。最终EXE为ae88a867版，源码／产物冻结。**已撤销的参数限高/内scroll/sticky生成布局继续保持撤销，不得恢复**；原plan/code、每步最多三业务文件、根目录交付、旧原生I/O暂停不变。CSV/JSON/PNG仅浏览器分支真实下载核对，未重试原生导出对话框、未接真实NIST引擎。
+
 2026-10-13最新 `.ai-workflow/20261013-revert-parameter-height/` 已完成，见state/review。用户明确要求完整回退“左侧参数区过长”对应的高度方案及全部配套，本指令撤销sidebar-height第二项：三页恢复自然长高／整页滚动／controls末尾生成按钮，内部scroll／限高／sticky／footer和定位helper撤销；七组件／页面与核实的fffe3cd高度前修订一致，工作台样式匹配前快照，README仅删相关段。日间导航与后续独立设置预览／sticky保存栏／Jobs统一筛选保留，Settings／Jobs源hash不动，仅Jobs局部对齐旧相对菜单。原plan/code、每步最多三业务文件、dist-desktop根目录交付保持；code四组与Windows EXE/中文NSIS，plan七项实际release、37保护／参考hash及恢复／冻结核对通过。最终根目录EXE为ba0f0b98版；源码／产物冻结，不自动恢复已撤销高度方案，不恢复旧原生I/O任务。历史完成记录仅代表当时事实。
 
 2026-10-12最新 `.ai-workflow/20261012-desktop-front-refine/` 已完成，state.json/review.md为最终状态。用户选择继续桌面前端，本轮三项：设置日间缩略导航与实际主题一致、sticky可见保存／放弃操作条并避开聚焦字段与解释、Jobs类型／状态统一ChoiceSelect。原三明暗模式及图标完整保留，只改三个指定业务文件；code五组自查／根目录Windows EXE与中文NSIS完成，plan七项实际release、43项保护／参考与三冻结源hash通过。正式根目录EXE最终460ec188版，无新版交付子目录；沿用原plan/code、每步最多三业务文件。源码／产物冻结，旧原生I/O任务不恢复，未接真实引擎。

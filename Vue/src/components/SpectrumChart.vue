@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
+import FileFormatIcon from './FileFormatIcon.vue'
 import { elementColor, format, type Spectrum } from '../lib/model'
 import { spectrumCsv } from '../lib/demo'
 import { useFileSave } from '../lib/fileAccess'
@@ -106,6 +107,6 @@ onUnmounted(() => { resize?.disconnect(); themeObserver?.disconnect(); window.re
       <div v-if="hoverValues && !drag" class="chart-tooltip"><b class="mono">{{ format(hoverValues.x) }} nm</b><span>原始示意节点 · {{ hover }}</span><div><span>总谱 / a.u.</span><strong class="mono">{{ format(hoverValues.total) }}</strong></div><div v-if="normalized"><span>共同归一化</span><strong class="mono">{{ format(hoverValues.total / max) }}</strong></div><div v-for="e in hoverValues.elements" :key="e.symbol"><span :style="{ color: elementColor(e.symbol) }">{{ e.symbol }} / a.u.</span><strong class="mono">{{ format(e.value) }}</strong></div></div>
     </div>
     <div class="chart-bottom"><div class="legend"><button :aria-pressed="!hidden.includes('total')" :class="{ 'legend-off': hidden.includes('total') }" @click="toggle('total')"><i style="background:var(--chart)" />总谱</button><button v-for="e in spec.elements" :key="e.symbol" :aria-pressed="!hidden.includes(e.symbol)" :class="{ 'legend-off': hidden.includes(e.symbol) }" @click="toggle(e.symbol)"><i :style="{ background: elementColor(e.symbol) }" />{{ e.symbol }}</button></div><label class="inline-check"><input v-model="normalized" type="checkbox" />共同归一化</label></div>
-    <div class="export-row"><div><button class="btn sm" :disabled="saving" @click="exportFile('csv')">保存 CSV</button><button class="btn sm" :disabled="saving" @click="exportFile('json')">保存来源 JSON</button><button class="btn sm" :disabled="saving" @click="exportFile('png')">保存 PNG</button></div></div><p v-if="saveFeedback" :class="saveFailed ? 'error-text' : 'hint'" style="overflow-wrap:anywhere" role="status">{{ saveFeedback }}</p>
+    <div class="export-row"><div><button type="button" class="file-export-btn format-csv" :disabled="saving" title="保存 CSV" aria-label="保存 CSV" @click="exportFile('csv')"><FileFormatIcon format="csv" /></button><button type="button" class="file-export-btn format-json" :disabled="saving" title="保存来源 JSON" aria-label="保存来源 JSON" @click="exportFile('json')"><FileFormatIcon format="json" /></button><button type="button" class="file-export-btn format-png" :disabled="saving" title="保存 PNG" aria-label="保存 PNG" @click="exportFile('png')"><FileFormatIcon format="png" /></button></div></div><p v-if="saveFeedback" :class="saveFailed ? 'error-text' : 'hint'" style="overflow-wrap:anywhere" role="status">{{ saveFeedback }}</p>
   </section>
 </template>

@@ -51,6 +51,7 @@ small,.hint,.muted,.run-hint,.balance-hint,.range-labels,.chart-bottom,.legend b
 .field.precise-field.parameter-card{min-width:0;aspect-ratio:1;margin:0;padding:4px;border:1px solid var(--border);border-radius:8px;background:var(--input);display:flex;flex-direction:column;justify-content:center;gap:4px;text-align:center}
 .parameter-card>label{font-size:var(--text-aux);font-weight:600;white-space:normal;line-height:1.2;min-height:29px}
 .card-title-unit{font-size:var(--text-meta);font-weight:400;display:inline-block;white-space:nowrap;float:none!important;color:var(--muted)}
+.parameter-card .card-title-unit{display:block;margin-top:2px}
 .card-value{display:flex;align-items:baseline;gap:2px;min-width:0}
 .field .card-value>input[type=text]{flex:1;width:0;min-width:0;min-height:24px;height:24px;margin:0;padding:2px 0;border:0;border-radius:0;background:transparent;font-size:14px;text-align:center;line-height:1.3}
 .card-value>.card-unit{flex:none;font-size:var(--text-meta);line-height:1.2;color:var(--muted);float:none;white-space:nowrap}
@@ -71,6 +72,10 @@ input[data-issue],button[data-issue],textarea[data-issue],.template-box[data-iss
 .precise-row>.input-with-unit{margin:0}
 .spectrum-metrics{grid-template-columns:repeat(3,minmax(0,1fr))!important;align-items:stretch}
 .spectrum-metrics>.metric{height:100%;overflow-wrap:anywhere}
+.spectrum-metrics>.metric>span{font-size:16px;font-weight:700;color:var(--text)}
+.spectrum-metrics .summary-parameters dt{font-size:13px;font-weight:500}
+.spectrum-metrics .summary-parameters dd{font-size:22px;font-weight:500}
+.spectrum-metrics .summary-elements>.element-tile{width:38px;min-width:38px;height:38px;font-size:16px;font-weight:600}
 .summary-parameters{margin:12px 0 0;font-size:var(--text-aux)}
 .summary-parameters>div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 6px;margin:5px 0}
 .summary-parameters dt{color:var(--muted);font-size:var(--text-meta)}
@@ -348,6 +353,14 @@ input[type=range]{width:100%;accent-color:var(--accent);height:16px;cursor:point
 .chart-instructions{display:flex;justify-content:space-between;gap:12px;color:var(--faint);margin-top:10px;flex-wrap:wrap}
 .export-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--border);margin-top:15px;padding-top:13px;flex-wrap:wrap}
 .export-row>div{display:flex;gap:5px}
+.file-export-btn{--format-color:#247451;display:grid;place-items:center;width:52px;height:52px;flex:none;padding:3px;border:1px solid var(--border);border-radius:8px;background:var(--panel);color:var(--format-color)}
+.file-export-btn.format-json{--format-color:#326baf}
+.file-export-btn.format-png{--format-color:#8051ab}
+.file-export-btn:hover:not(:disabled),.file-export-btn:focus-visible{background:color-mix(in srgb,var(--format-color) 9%,var(--panel));border-color:var(--format-color)}
+.file-format-icon{font-family:var(--font-ui)}
+:root[data-theme=dark] .file-export-btn.format-csv{--format-color:#88d4aa}
+:root[data-theme=dark] .file-export-btn.format-json{--format-color:#91bdf4}
+:root[data-theme=dark] .file-export-btn.format-png{--format-color:#c3a0ef}
 .element-move,.element-enter-active,.element-leave-active{transition:opacity .2s,transform .25s cubic-bezier(.22,1,.36,1)}
 .element-enter-from,.element-leave-to{opacity:0;transform:translateX(-8px)}
 .element-leave-active{position:absolute}
