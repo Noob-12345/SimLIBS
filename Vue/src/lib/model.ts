@@ -1,5 +1,5 @@
-export type Page = 'single' | 'batch' | 'scan' | 'jobs' | 'settings'
-export type TaskKind = 'single' | 'batch' | 'scan'
+export type Page = 'single' | 'batch' | 'scan' | 'advanced' | 'jobs' | 'settings'
+export type TaskKind = 'single' | 'batch' | 'scan' | 'advanced'
 export type Mode = 'local' | 'server' | 'client'
 export interface ParameterDraft {
   te: string; ne: string; resolution: string; low: string; high: string; step: string; charge: string
@@ -12,19 +12,22 @@ export interface Composition { symbol: string; pct: number }
 export interface ValidParams {
   te: number; ne: number; resolution: number; low: number; high: number; step: number; charge: number
   mode: Mode; flux: 'photon' | 'energy'; broaden: boolean; gaussian: number; lorentz: number
-  temperature: number; convention: 'physics' | 'nist'; center: number | null; threshold: number
+  temperature: number; temperatureMode?: 'linked' | 'manual'; convention: 'physics' | 'nist'; center: number | null; threshold: number
   resample: boolean; resampleStep: number | null; headless: boolean
 }
 export interface Spectrum {
+  comparison?: { thin: number[]; nominal: number[] }
   id: string; title: string; xs: number[]; total: number[]; elements: { symbol: string; ys: number[] }[]
-  params: ValidParams; composition: Composition[]; source: { kind: 'frontend_demo'; illustrative: true; description: string; generatedAt: string; nodes: number; samplingNote: string }
+  params: ValidParams; composition: Composition[]; source: { kind: string; illustrative: boolean; description: string; generatedAt: string; nodes: number; samplingNote: string; origin?: Record<string, unknown>; manifest?: Record<string, unknown>; style?: string }; jobId?: string
 }
 export interface BatchSample { name: string; params: ValidParams; composition: Composition[] }
-export interface ScanResult { axis: 'te' | 'ne' | 'resolution'; frames: { value: number; spectrum: Spectrum }[] }
+export interface ScanResult { axis: 'te' | 'ne' | 'resolution'; frames: { value: number; spectrum?: Spectrum }[]; jobId?: string }
 export interface DemoTask {
   id: string; kind: TaskKind; status: 'running' | 'completed' | 'cancelled' | 'failed'; progress: number
   startedAt: number; endedAt?: number; summary: string; detail: string
   result?: Spectrum | BatchSample[] | ScanResult
+  resumable?: boolean; events?: string[]; duration?: string
+  resultError?: string
 }
 export const symbols = 'H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og'.split(' ')
 let nextElement = 1
@@ -50,7 +53,8 @@ export function validateParams(p: ParameterDraft, overrides: Partial<Record<'te'
     gaussian: p.mode === 'local' && broaden ? numeric(p.gaussian, '高斯 FWHM', 0, 100) : 0,
     lorentz: p.mode === 'local' && broaden ? numeric(p.lorentz, '洛伦兹 FWHM', 0, 100) : 0,
     temperature: p.mode === 'local' && broaden ? p.temperatureMode === 'linked' ? te * 11604.518 : numeric(p.temperature, '重粒子温度', 0, 1e8) : 0,
-    convention: p.mode === 'client' ? p.convention : 'physics',
+    temperatureMode: p.temperatureMode,
+    convention: p.mode === 'client' ? p.convention : p.mode === 'server' ? 'nist' : 'physics',
     center: p.mode === 'client' && p.center.trim() ? numeric(p.center, '线中心舍入位', 0, 12, true) : null,
     threshold: p.mode === 'client' ? numeric(p.threshold, '选线阈值', 0, 1) : 0,
     resample: p.resample, resampleStep: p.resample ? numeric(p.resampleStep, '统一网格步长', .000001, high - low) : null, headless: p.mode === 'server' && p.headless }
@@ -75,5 +79,5 @@ export function balance(rows: ElementDraft[]) {
 export function errorOf(fn: () => unknown): string { try { fn(); return '' } catch (e) { return e instanceof Error ? e.message : '输入无效' } }
 export function format(value: number): string { return Math.abs(value) >= 1e5 || (Math.abs(value) < .001 && value !== 0) ? value.toExponential(3) : Number(value.toPrecision(6)).toString() }
 export function elementColor(symbol: string): string { const index = Math.max(0, symbols.indexOf(symbol)); return symbol === 'Fe' ? '#ca962e' : ['#548ccc','#ae75c9','#439f98','#d77c59','#83974e','#c8759c'][index % 6]! }
-export const kindLabels: Record<TaskKind, string> = { single: '单次模拟', batch: '批量模拟', scan: '参数扫描' }
-export const statusLabels: Record<DemoTask['status'], string> = { running: '演示运行中', completed: '演示已完成', cancelled: '演示已取消', failed: '演示失败' }
+export const kindLabels: Record<TaskKind, string> = { single: '单次模拟', batch: '批量模拟', scan: '参数扫描', advanced: '高级模拟' }
+export const statusLabels: Record<DemoTask['status'], string> = { running: '运行中', completed: '已完成', cancelled: '已取消', failed: '失败' }

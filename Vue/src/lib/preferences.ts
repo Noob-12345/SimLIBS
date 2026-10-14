@@ -4,16 +4,16 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { defaultOutputDirectory, ensureDefaultOutputDirectory } from './outputDirectory'
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type Palette = 'amber' | 'ocean' | 'violet' | 'forest' | 'rose'
-export interface Preferences { mode: ThemeMode; palette: Palette; reducedMotion: boolean; endpoint: string; pythonPath: string; driverPath: string; outputDirectory: string }
+export interface Preferences { mode: ThemeMode; palette: Palette; reducedMotion: boolean; endpoint: string; backendToken: string; pythonPath: string; driverPath: string; outputDirectory: string }
 const key = 'simlibs-vue-preferences-v1'
-const defaults: Preferences = { mode: 'light', palette: 'amber', reducedMotion: false, endpoint: 'http://127.0.0.1:8517', pythonPath: '', driverPath: '', outputDirectory: defaultOutputDirectory }
+const defaults: Preferences = { mode: 'light', palette: 'amber', reducedMotion: false, endpoint: '', backendToken: '', pythonPath: '', driverPath: '', outputDirectory: defaultOutputDirectory }
 export const palettes: { id: Palette; label: string; color: string; dark: string; text: string }[] = [
   { id: 'amber', label: '琥珀', color: '#e5a327', dark: '#efbb58', text: '#94600d' }, { id: 'ocean', label: '海蓝', color: '#73b1e4', dark: '#83bff0', text: '#326a96' }, { id: 'violet', label: '鸢尾', color: '#ac92da', dark: '#bda1ee', text: '#7250a0' }, { id: 'forest', label: '松绿', color: '#80b9a1', dark: '#85c9ac', text: '#386b55' }, { id: 'rose', label: '蔷薇', color: '#da92a0', dark: '#eea6b4', text: '#965367' }
 ]
 export const storageMessage = ref('')
-function load(): Preferences { try { const raw = JSON.parse(localStorage.getItem(key) || '{}') as Partial<Preferences>; return { mode: ['light','dark','system'].includes(raw.mode ?? '') ? raw.mode! : 'light', palette: palettes.some(p => p.id === raw.palette) ? raw.palette! : 'amber', reducedMotion: raw.reducedMotion === true, endpoint: typeof raw.endpoint === 'string' ? raw.endpoint : defaults.endpoint, pythonPath: typeof raw.pythonPath === 'string' ? raw.pythonPath : '', driverPath: typeof raw.driverPath === 'string' ? raw.driverPath : '', outputDirectory: typeof raw.outputDirectory === 'string' && raw.outputDirectory.trim() ? raw.outputDirectory : defaultOutputDirectory } } catch { storageMessage.value = '本地偏好无法读取，已采用默认外观'; return { ...defaults } } }
+function load(): Preferences { try { const raw = JSON.parse(localStorage.getItem(key) || '{}') as Partial<Preferences>; return { mode: ['light','dark','system'].includes(raw.mode ?? '') ? raw.mode! : 'light', palette: palettes.some(p => p.id === raw.palette) ? raw.palette! : 'amber', reducedMotion: raw.reducedMotion === true, endpoint: typeof raw.endpoint === 'string' && raw.endpoint !== 'http://127.0.0.1:8517' ? raw.endpoint : defaults.endpoint, backendToken: typeof raw.backendToken === 'string' ? raw.backendToken : '', pythonPath: typeof raw.pythonPath === 'string' ? raw.pythonPath : '', driverPath: typeof raw.driverPath === 'string' ? raw.driverPath : '', outputDirectory: typeof raw.outputDirectory === 'string' && raw.outputDirectory.trim() ? raw.outputDirectory : defaultOutputDirectory } } catch { storageMessage.value = '本地偏好无法读取，已采用默认外观'; return { ...defaults } } }
 export const outputDirectoryError = ref('')
-void ensureDefaultOutputDirectory().catch(() => { outputDirectoryError.value = '默认输出目录无法创建，请检查目录权限' })
+void ensureDefaultOutputDirectory().then(path => { if (savedPreferences.value.outputDirectory === defaultOutputDirectory) savedPreferences.value = {...savedPreferences.value, outputDirectory: path}; if (preferences.outputDirectory === defaultOutputDirectory) preferences.outputDirectory = path }).catch(() => { outputDirectoryError.value = '默认输出目录无法创建，请检查目录权限' })
 export const savedPreferences = ref(load())
 export const preferences = reactive<Preferences>({ ...savedPreferences.value })
 const media = window.matchMedia('(prefers-color-scheme: dark)'), systemDark = ref(media.matches)

@@ -27,17 +27,41 @@ for (const [source, name, kind] of [
   if (hash(original) !== hash(copied)) throw new Error(`复制后 SHA256 不一致：${name}`)
   artifacts.push({ kind, file: name, source: path.relative(root, source), bytes: copied.length, sha256: hash(copied) })
 }
+// Match the explicit production bundle allowlist; never collect test/cache/output files.
+const backendFiles = []
+for (const [directory, accept] of [
+  ['simlibs_ui', name => name.endsWith('.py')],
+  ['web', name => ['server.py', 'backend_api.py', 'real_backend.py', 'sampling.py'].includes(name)],
+  ['source/simLIBS', name => name.endsWith('.py') || name === 'py.typed'],
+  ['source', name => name.startsWith('LICENSE')],
+  ['Linedatabase', name => /\.(csv|json|md)$/i.test(name)],
+  ['', name => name === 'README.md']
+]) {
+  for (const name of await fs.readdir(path.join(root, 'backend', directory))) {
+    if (!accept(name)) continue
+    const relative = path.posix.join('backend', directory, name)
+    const source = path.join(root, relative), destination = path.join(out, relative)
+    await fs.mkdir(path.dirname(destination), { recursive: true }); await fs.copyFile(source, destination)
+    const data = await fs.readFile(destination), original = await fs.readFile(source)
+    const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex')
+    if (hash(data) !== hash(original)) throw new Error(`backend 复制校验失败：${relative}`)
+    backendFiles.push({ kind: 'python-backend-resource', file: relative, bytes: data.length, sha256: hash(data) })
+  }
+}
+artifacts.push(...backendFiles)
 const instructions = `SimLIBS Windows 桌面软件 · ${pkg.version}\r\n交付目录：${relativeOut}\r\n\r\n` +
-  `直接使用：双击 SimLIBS.exe，或“启动 SimLIBS.cmd”。不需要打开浏览器、启动 Vite 或运行 Python。\r\n` +
+  `直接使用：双击 SimLIBS.exe，或“启动 SimLIBS.cmd”。程序自动启动本程序拥有的 Python 后端，无需手工启动服务。EXE 必须与同目录 backend 文件夹一起分发。\r\n` +
   `安装使用：自行双击 SimLIBS-Setup.exe，按向导安装到当前 Windows 用户。生成者没有执行或安装此安装包。\r\n` +
   `要求：Windows x64，系统 WebView2 Runtime。安装包使用 Tauri 默认的 WebView2 检测/引导策略，缺少运行时可能需联网。\r\n` +
-  `这是界面演示阶段，全部图谱/任务/导出标为 frontend_demo / illustrative。尚未接入 Python/NIST 真实计算引擎。\r\n` +
-  `CSV 打开及 CSV/JSON/PNG 另存为使用 Windows 原生对话框；取消不写文件，保存失败在界面说明。\r\n` +
+  `已接入真实 Python 后端，local=本地 LTE/Saha；client=NIST 计算线强+Python展宽；server=NIST官方页面。默认空谱，失败不回退示意结果。\r\n` +
+  `未打包 Python runtime：需配置具有原后端依赖的 Python 3.11 环境。本机默认 E:/Anaconda/envs/simLIBS/python.exe，可用 SIMLIBS_UI_PYTHON 或设置指定解释器。安装包不自动安装 Python/全局依赖，不保证跨机器免 Python。\r\n` +
+  `配置/session/驱动缓存/默认任务输出写入当前用户 app_local_data_dir；backend 资源只读。关闭应用只清理 owned 后端和所属 worker/Chrome，不影响其他服务。\r\n` +
+  `CSV 打开及 CSV/JSON/PNG/GIF/ZIP 另存为沿用 Windows 原生对话框动态scope；取消不写文件，保存失败在界面说明。\r\n` +
   `程序前端静态资源嵌入 EXE。正式运行不启动 1420 服务。\r\n` +
   `此构建未配置代码签名。安装程序未实际安装验收，原生对话框实际点击与独立桌面验收见本项目任务 review.md。\r\n` +
   `SHA256SUMS.txt 和 artifact-manifest.json 提供源产物路径、字节数与 SHA256。\r\n`
 await fs.writeFile(path.join(out, '使用说明.txt'), '\uFEFF' + instructions, 'utf8')
 await fs.writeFile(path.join(out, '启动 SimLIBS.cmd'), '@echo off\r\ncd /d "%~dp0"\r\nstart "" "%~dp0SimLIBS.exe"\r\n', 'ascii')
 await fs.writeFile(path.join(out, 'SHA256SUMS.txt'), artifacts.map(a => `${a.sha256}  ${a.file}`).join('\r\n') + '\r\n', 'ascii')
-await fs.writeFile(path.join(out, 'artifact-manifest.json'), JSON.stringify({ version: pkg.version, deliveryDirectory: relativeOut, collectedAt: new Date().toISOString(), runtime: 'Windows x64 / system WebView2', frontend: 'embedded static dist', scientificSource: 'frontend_demo / illustrative', installerExecuted: false, artifacts }, null, 2), 'utf8')
+await fs.writeFile(path.join(out, 'artifact-manifest.json'), JSON.stringify({ version: pkg.version, deliveryDirectory: relativeOut, collectedAt: new Date().toISOString(), runtime: 'Windows x64 / system WebView2 / external Python 3.11', frontend: 'embedded static dist', scientificSource: 'real Python / local LTE-Saha / NIST', installerExecuted: false, artifacts }, null, 2), 'utf8')
 console.log(JSON.stringify({ directory: out, artifacts }, null, 2))

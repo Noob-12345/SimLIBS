@@ -31,7 +31,7 @@ onMounted(() => {
   window.addEventListener('scroll', schedulePosition, true); window.addEventListener('resize', schedulePosition); schedulePosition()
 })
 onUnmounted(() => { observer?.disconnect(); window.removeEventListener('scroll', schedulePosition, true); window.removeEventListener('resize', schedulePosition); if (frame) cancelAnimationFrame(frame) })
-const label = computed(() => ({ single: '单次', batch: '批量', scan: '扫描' })[props.kind])
+const label = computed(() => ({ single: '单次', batch: '批量', scan: '扫描', advanced:'高级' })[props.kind])
 const disabled = computed(() => collapsed.value || running.value)
 async function collapseControls(restoreFocus = false) {
   collapsed.value = true

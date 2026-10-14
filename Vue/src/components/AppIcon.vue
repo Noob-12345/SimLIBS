@@ -4,6 +4,7 @@ const paths: Record<string, string> = {
   single: 'M9 3h6M10 3v6L4 18a2 2 0 0 0 1.7 3h12.6a2 2 0 0 0 1.7-3l-6-9V3M7.5 15h9',
   batch: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
   scan: 'M2 12h4l3-8 4 16 3-8h6',
+  advanced: 'M12 3 3 8l9 5 9-5-9-5M3 12l9 5 9-5M3 16l9 5 9-5',
   jobs: 'M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9M12 7v5l3 2',
   settings: 'M4 6h16M4 12h16M4 18h16M9 3v6M15 9v6M8 15v6',
   plus: 'M12 5v14M5 12h14', minus: 'M5 12h14', close: 'M6 6l12 12M18 6 6 18',

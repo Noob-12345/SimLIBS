@@ -2,23 +2,35 @@
 import { computed, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
 import ElementCandidate from './ElementCandidate.vue'
+import { service } from '../lib/backend'
+import { single, batch, scan } from '../lib/workbench'
 import { compositionIssues, issueAttrs } from '../lib/issues'
 import { balance, canonical, elementColor, elementDraft, errorOf, symbols, validateComposition, type ElementDraft } from '../lib/model'
 const model = defineModel<ElementDraft[]>({ required: true })
 const props = defineProps<{ scope: string; random?: boolean; disabled?: boolean }>()
 const emit = defineEmits<{ issue: [message: string] }>()
 const adding = ref(''), addError = ref('')
-const availableSymbols = computed(() => symbols.filter(symbol => !model.value.some(element => canonical(element.symbol) === symbol)))
+const mode = computed(() => (props.scope === 'single' ? single : props.scope === 'batch' ? batch : scan).params.mode)
+const supportedSymbols = computed(() => mode.value === 'local' ? service.capabilities?.elements ?? [] : symbols)
+const localError = computed(() => {
+  if (mode.value !== 'local') return ''
+  if (!service.capabilities?.ready) return service.capabilities?.error || '本地谱线能力尚未就绪'
+  const missing = model.value.filter(e => (props.random && e.random ? Number(e.max) > 0 : Number(e.pct) > 0) && !supportedSymbols.value.includes(canonical(e.symbol)))
+  return missing.length ? `本地库不支持：${missing.map(e => e.symbol).join('、')}` : ''
+})
+const availableSymbols = computed(() => supportedSymbols.value.filter(symbol => !model.value.some(element => canonical(element.symbol) === symbol)))
 const total = computed(() => model.value.reduce((sum, e) => sum + (e.pct.trim() ? Number(e.pct) : NaN), 0))
 const error = computed(() => props.random ? '' : errorOf(() => validateComposition(model.value)))
 const issues = computed(() => compositionIssues(model.value, props.random))
 const attrs = (key: string) => issueAttrs(issues.value[key], `${props.scope}-draft-error`)
-watch([addError, error, issues], () => emit('issue', addError.value || error.value || Object.values(issues.value)[0] || ''), { immediate: true })
+watch([addError, error, issues, localError], () => emit('issue', addError.value || localError.value || error.value || Object.values(issues.value)[0] || ''), { immediate: true })
+watch(mode, () => { addError.value = '' })
 watch(adding, value => { const symbol = canonical(value); if (symbol && !model.value.some(row => canonical(row.symbol) === symbol) && model.value.length < 32) addError.value = '' })
 watch(() => [props.random, ...model.value.slice(0, -1).map(e => e.pct), model.value.length], () => { if (!props.random) balance(model.value) })
 function add() {
   const symbol = canonical(adding.value)
   if (!symbol) { addError.value = '请输入有效元素符号，例如 Fe、Al、Cu'; return }
+  if (!supportedSymbols.value.includes(symbol)) { addError.value = mode.value === 'local' ? `本地库不支持 ${symbol}` : '无效元素'; return }
   if (model.value.some(e => canonical(e.symbol) === symbol)) { addError.value = `${symbol} 已在组成中`; return }
   if (model.value.length >= 32) { addError.value = '最多支持 32 个元素'; return }
   model.value.push(elementDraft(symbol, '0')); if (!props.random) balance(model.value)

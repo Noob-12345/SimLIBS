@@ -30,7 +30,21 @@
       "icons/icon.ico",
       "icons/icon.png"
     ],
-    "shortDescription": "SimLIBS 光谱工作台（界面演示）",
+    "resources": {
+      "../backend/simlibs_ui/*.py": "backend/simlibs_ui/",
+      "../backend/web/server.py": "backend/web/server.py",
+      "../backend/web/backend_api.py": "backend/web/backend_api.py",
+      "../backend/web/real_backend.py": "backend/web/real_backend.py",
+      "../backend/web/sampling.py": "backend/web/sampling.py",
+      "../backend/source/simLIBS/*.py": "backend/source/simLIBS/",
+      "../backend/source/simLIBS/py.typed": "backend/source/simLIBS/py.typed",
+      "../backend/source/LICENSE*": "backend/source/",
+      "../backend/Linedatabase/*.csv": "backend/Linedatabase/",
+      "../backend/Linedatabase/*.json": "backend/Linedatabase/",
+      "../backend/Linedatabase/*.md": "backend/Linedatabase/",
+      "../backend/README.md": "backend/README.md"
+    },
+    "shortDescription": "SimLIBS 真实光谱工作台",
     "windows": {
       "nsis": {
         "installMode": "currentUser",

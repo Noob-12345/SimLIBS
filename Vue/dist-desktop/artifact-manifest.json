@@ -1,25 +1,589 @@
 {
   "version": "0.1.0",
   "deliveryDirectory": "dist-desktop",
-  "collectedAt": "2026-10-13T10:04:39.440Z",
-  "runtime": "Windows x64 / system WebView2",
+  "collectedAt": "2026-10-13T17:55:11.988Z",
+  "runtime": "Windows x64 / system WebView2 / external Python 3.11",
   "frontend": "embedded static dist",
-  "scientificSource": "frontend_demo / illustrative",
+  "scientificSource": "real Python / local LTE-Saha / NIST",
   "installerExecuted": false,
   "artifacts": [
     {
       "kind": "windows-x64-application",
       "file": "SimLIBS.exe",
       "source": "src-tauri\\target\\release\\simlibs-vue.exe",
-      "bytes": 5028864,
-      "sha256": "ae88a867f89c6de85a4420fb82d7253a8251c5180989b10e6a8d813946c01224"
+      "bytes": 5100544,
+      "sha256": "faf22d97fca95eddfb190301fe4635678e6795faac10a69e147cd7f19a0bdcf3"
     },
     {
       "kind": "nsis-installer",
       "file": "SimLIBS-Setup.exe",
       "source": "src-tauri\\target\\release\\bundle\\nsis\\SimLIBS_0.1.0_x64-setup.exe",
-      "bytes": 1585272,
-      "sha256": "54c2f3e7d84fb8c6644fc5fbc54ae9a24fcee0c70ea800bbd2e078f7085502a1"
+      "bytes": 1699778,
+      "sha256": "80bcddb95c966ab77d4cbe6f0c49df442e620bd00d26ea2ff332484f5018cae9"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/adapter.py",
+      "bytes": 24366,
+      "sha256": "887bbb7a28c03d725032f37f5e81e0dc725d7580785b415d9ea43d70824488c2"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/advanced.py",
+      "bytes": 12240,
+      "sha256": "ce1487530034dd85e9e4a39800156de9096098bfe5343393b1826a6951373a35"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/batch_pipeline.py",
+      "bytes": 9458,
+      "sha256": "0eecd726a0eb0ddce04c186d260f01038004864cc308ddae959fa1c34e81135d"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/batch_random.py",
+      "bytes": 4382,
+      "sha256": "e63b41cb97a72cb642cd13c868a3f0db27ade8b5c22c206ddad1228412620f2d"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/batch_records.py",
+      "bytes": 1785,
+      "sha256": "6c0c4f82d254242c6ef6a70dd429b4b9055d8284de484b73e8cd41d5870ac1ef"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/batch_template.py",
+      "bytes": 4648,
+      "sha256": "13b5caf50468e6bb1dc198804dc9d3d0711dee8bb5e09acc611bf1aa6cc708d4"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/jobs.py",
+      "bytes": 9341,
+      "sha256": "92e2898c521d4e0720024fa7aeb771fd1a860c1987889ff6fd7fd1e286137b2f"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/models.py",
+      "bytes": 14665,
+      "sha256": "a86297d95497142d87d9e06322fc47ab40829d85fa7e4add597b30b026a7dc25"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/mode_engine.py",
+      "bytes": 8761,
+      "sha256": "c64d81d8981e85b6fd7970e6adc86ec72912d21f77b4b18d86023034707bd44b"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/nist_recon.py",
+      "bytes": 9016,
+      "sha256": "35c9fd896cfea9927b23f306074417e87b48f9c4a4bd4e0ddb62826c1212e973"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/offline_database.py",
+      "bytes": 8989,
+      "sha256": "b61f2bf62cdf6124ac40520930cf8ca70f95de725af976fc250d0e8801827dc4"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/offline_engine.py",
+      "bytes": 6924,
+      "sha256": "02b33db7b4f0be4b56815ceadd60d755bd9eff6015c27ee1ce987c85d8e41302"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/offline_lines.py",
+      "bytes": 4932,
+      "sha256": "9f80a71687acb9c6dc1dc5290d8ff350b85222c84f4f99a20607773a00897bae"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/operations.py",
+      "bytes": 9581,
+      "sha256": "810591b946b128e30ecbfb414de01138399770ba85859db7b5e00f7e2338d4ad"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/plotting.py",
+      "bytes": 3888,
+      "sha256": "3843cb3394d00dc17ae52260c6d8258d7ad915fa3364b54168208a05fcb892f6"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/settings.py",
+      "bytes": 3155,
+      "sha256": "02925b9e36bd8f932f7ba88c340eebd0eebb29f17ed80e5a8d56a620204495bc"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/storage.py",
+      "bytes": 8946,
+      "sha256": "310c22fde41d4c77973686d4edfa43186506da71713dcb9853a580bc685ad686"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/training.py",
+      "bytes": 8408,
+      "sha256": "c2563dd12b5ec48e426fb38498b3986e7136a7f55ef4f911b0d62bcc50507097"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/worker.py",
+      "bytes": 5006,
+      "sha256": "e86e9c248d393efdc9f125ce7c3e70383428c588654109264a314b4d57e60740"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/__init__.py",
+      "bytes": 136,
+      "sha256": "9e97e6ed141a0f8cfe011547770c4af93bf442b91abd4d2b388fde51dd3a842a"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/web/backend_api.py",
+      "bytes": 23862,
+      "sha256": "611aec5976d9f786c9a1903ce53e27aaa32768cdf396abfc2b0879b35c9f3794"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/web/real_backend.py",
+      "bytes": 42130,
+      "sha256": "a6b15f67a27d2b0719668221210406a3726665817a862465305ac4a27834da3d"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/web/sampling.py",
+      "bytes": 3831,
+      "sha256": "1cb35ff13a0af747c55e2b3c1f41f0c55e0930a18ed25b9dd6e2b784a874df52"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/web/server.py",
+      "bytes": 14752,
+      "sha256": "f954deaac914116d2017680e2de79ffacdc49f61b4c0af9ccdb5a6b82cac0c61"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/source/simLIBS/animation.py",
+      "bytes": 4041,
+      "sha256": "f4f19f24e6728098785fc69ef9a68187ebb2dcac0468d118c05fa6039d24cd52"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/source/simLIBS/py.typed",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/source/simLIBS/simulation.py",
+      "bytes": 14466,
+      "sha256": "be07b5e12cc04108c998e3bcc1324ee33685e0aab8520f7610f4c00dff6b69cb"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/source/simLIBS/__init__.py",
+      "bytes": 104,
+      "sha256": "aecb185a232d75420da4586bc50333e40680a8dad034be32d8082a0189da8c28"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/source/LICENSE.md",
+      "bytes": 1091,
+      "sha256": "77b4a7fcffb2582e4212efb4c5dc7db2ab23ef6ca67e493dea536993acb5b866"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/AlI.csv",
+      "bytes": 694,
+      "sha256": "ecb0b7bec8287c7911cb04924093d63d18649d5bb1c6d433a88a83701752e682"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/AlII.csv",
+      "bytes": 982,
+      "sha256": "4d4ae93dfd2e665245190ce241906f1179be305ef5d10467867bf22b8dbf6b2f"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/CaI.csv",
+      "bytes": 1308,
+      "sha256": "6a72a48fe01e3ae3f39dc48b764c3e42ccefdb95e08b6772d2b3c2d16419e526"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/CaII.csv",
+      "bytes": 571,
+      "sha256": "da084f3732ee4d10280712276a349428c83b27e1190bc3f2240691975484bfa5"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/CeI.csv",
+      "bytes": 1179,
+      "sha256": "40dbbc55fc766d69680efd6d8ffa949458ca694b47b4af8ce2313139eb466c20"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/CeII.csv",
+      "bytes": 3118,
+      "sha256": "0b88ce0f4d618625033be91a17a8da856e93bb4bad6a6386180a736b21d695fb"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/CrI.csv",
+      "bytes": 948,
+      "sha256": "3ae5a01084d923598f965d015306f4e57a34ad7a6e66fe6e7575f668c717431e"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/CrII.csv",
+      "bytes": 774,
+      "sha256": "60d8e52f491385d8e1a7069a832fbc00ed2cfc5763d9c089f2c7f9ffe52a84f4"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/CuI.csv",
+      "bytes": 1232,
+      "sha256": "3bfa71d05c0ba33dee5ba2a51c24a74e1dd67d876b25e2ebb360264f0934905c"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/CuII.csv",
+      "bytes": 678,
+      "sha256": "d55c737c9ed073ce2de08dcf183463c9fd1a210ba3c2b59803b32949cd916a47"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/DyI.csv",
+      "bytes": 1275,
+      "sha256": "7bb6d404f8459aeb1b4da7fbb0d531217234c0b19df6b2a815fed0a047ff0e19"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/DyII.csv",
+      "bytes": 2327,
+      "sha256": "71153734440bd2ab97a0f3f76e62d3d87d2f991bf670059ba762e083610e9a90"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/ErI.csv",
+      "bytes": 1378,
+      "sha256": "59dee1b304f0b5eff0034577392f49af4ee5231b703ba2d560a03f1f2a4db993"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/ErII.csv",
+      "bytes": 1618,
+      "sha256": "669b18b86d57a62954beb4a05f3eebd7aba5d842178fd017c3e2f160f1d2bdb6"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/EuI.csv",
+      "bytes": 1101,
+      "sha256": "efc19c4605a020607e57180253d3c8069493d7ec20b060d8e2e9cc1942320c0c"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/EuII.csv",
+      "bytes": 1607,
+      "sha256": "24b2d754379041fcb2fbf46b42b2e716adab101bec202abcd9760e5cdb0f57a7"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/FeI.csv",
+      "bytes": 2103,
+      "sha256": "d79e4c89ccda8f901622473584ded8f9c1346228b1454acdeca736b6e6898834"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/FeII.csv",
+      "bytes": 1517,
+      "sha256": "2f04c76ec4cd68bc71197f66d21af2ff9070020bb1d89ced81c38ea5b9cbb7e2"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/GdI.csv",
+      "bytes": 2362,
+      "sha256": "4f83246cb9bf817215384ad225ca6ee4305603ce7e8e6ffb30daa8185e3f7909"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/GdII.csv",
+      "bytes": 2154,
+      "sha256": "bc2658d942908e0a99fe5b6d7a3836d896a7d390e4453e79314311d6c21aaeb1"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/HoI.csv",
+      "bytes": 1652,
+      "sha256": "176d07f53a5363722186240d3883d199f091ef96c34666d0cb4cc2a64379d332"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/HoII.csv",
+      "bytes": 1666,
+      "sha256": "d3df2f7b0e52d8bad02db1e288c0674a881d992784519ae15064505ba3eaf91a"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/KI.csv",
+      "bytes": 846,
+      "sha256": "7ee9eb8792af5c21993b78d87f5005651c6852d1fb1a83b5bf56cba5816369b9"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/KII.csv",
+      "bytes": 166,
+      "sha256": "3b7fdb628324f7a394f8f2f791c6ffd2204ef87172384404a6dc85950333834c"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/LaI.csv",
+      "bytes": 2266,
+      "sha256": "6a7427384b7b2d6c9aaa6a8be1aa87eadceffd350b99a900083d896292fee25d"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/LaII.csv",
+      "bytes": 1972,
+      "sha256": "0511e4d3a7e01dd009dc98e851308e3eefdc5f24a76340e62e2b3e92fb5ea9cf"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/LiI.csv",
+      "bytes": 1001,
+      "sha256": "7f81dc5ce760c8cd606b484d6cbe189790acbc222398f61ab2cb8cfefbe5fd95"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/LiII.csv",
+      "bytes": 573,
+      "sha256": "44e90c0e96495aeadb2995bc1e0bbc4bfb134f63d6b11e61573a792ba49b3a99"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/LuI.csv",
+      "bytes": 1502,
+      "sha256": "4f20532534e013833055aa2242ea2c93da09fde3b15784b1c0e1cf1571f0defb"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/LuII.csv",
+      "bytes": 1543,
+      "sha256": "bded7ead8bb13ba001a24ac462225a31c6f621b9a6f44a55c3157c19f7883725"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/MgI.csv",
+      "bytes": 961,
+      "sha256": "4c8f7bf86c3d1149edcc166e881a3f337ec1c704bbd64a6ca5214ffc77a525f8"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/MgII.csv",
+      "bytes": 969,
+      "sha256": "2cae4e40ca86c4eca568ca5bfa4cdbfd00b48fcd007cc432f3dcd18c3d5885d0"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/MnI.csv",
+      "bytes": 689,
+      "sha256": "f399c7d1a59ed96c89b15498e77a4d16e12445c7fab9afd89a044a7ca543a664"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/MnII.csv",
+      "bytes": 910,
+      "sha256": "2428eeed7d9ae28e0833633b8f724bcc6f49a791d0385a69d6616b7849831767"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/MoI.csv",
+      "bytes": 1526,
+      "sha256": "6850df3c0fdee4a9da61002aa46dad22a82e6cfd92dedc143b5cc0a1c9601bcf"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/MoII.csv",
+      "bytes": 1040,
+      "sha256": "06acb00f233d80008f053168b3a044afca8d3272baf7c47d71b0a0c43b863281"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/NaI.csv",
+      "bytes": 853,
+      "sha256": "479bc8b46687db7a6df9383fc114c636a489f749573f43a76c9a1ebbd2358ee4"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/NaII.csv",
+      "bytes": 241,
+      "sha256": "988efd34a2c00ec359f7c13f4abb93047617befbacab001b055f883788dc7c8c"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/NdI.csv",
+      "bytes": 882,
+      "sha256": "3ab455f665bf886cef919c9e3dc7648f23784f1812d6559ee0da5c37f06b9963"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/NdII.csv",
+      "bytes": 2487,
+      "sha256": "7607279c1b38829670a7d00e4a0d779c84425d9a868665239809c77cc3b922fe"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/NiI.csv",
+      "bytes": 1196,
+      "sha256": "f6147260f519842c286df700027c8a08ea746b2c3b120e929303e0de8625f3c5"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/NiII.csv",
+      "bytes": 713,
+      "sha256": "a578b6b67db0f7b5c5910c84d245063a0342f5401a44f6431ac4cdb454735486"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/PbI.csv",
+      "bytes": 1254,
+      "sha256": "5b07a47905e9ca7bbd06fff959d6b6544850312ae53ceb708c2dbac37fce2020"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/PbII.csv",
+      "bytes": 358,
+      "sha256": "bd213d6e23d68a87e6cd31c0e74f7dacd81fcc8a5994c1483dda956609905ae9"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/PrI.csv",
+      "bytes": 1069,
+      "sha256": "4b7ace2a15b353dcbb3ef8b80a45f8843ae5a695d68a4c038f8642cd3d754ca7"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/PrII.csv",
+      "bytes": 1711,
+      "sha256": "8e945034e6549a9a04c7df33545354e4dc8f64334813fc192db0a26e85e6f396"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/Readme.md",
+      "bytes": 122,
+      "sha256": "fbdcbf4b730d2a155eaa8a05d52d19ec59be62928bbc5586e881a9072ea28a19"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/SiI.csv",
+      "bytes": 1996,
+      "sha256": "46aada762bb8ee570fb9c4d11e39f54ecc8336b7cea02dd18309596f08f13b88"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/SiII.csv",
+      "bytes": 1191,
+      "sha256": "a22010c1d2f1b6a13c8e15baf76658f1e342627dc5e9d71921110b40b58231c7"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/simlibs-atomic-metadata.json",
+      "bytes": 19867,
+      "sha256": "332d12067e79d192ae70080b15a33c8d7322a8df08944ca7ef2c5af500dba52d"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/SmI.csv",
+      "bytes": 1153,
+      "sha256": "550ed95e55a4677ba49ee32e2376fbc7267ded53249213c4d1299d2d8f63fe28"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/SmII.csv",
+      "bytes": 1583,
+      "sha256": "0b86c1e5c9e37c482c025f7a8418671480d2dec4a7215236cc4a2e2e035ef164"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/TbI.csv",
+      "bytes": 1198,
+      "sha256": "2e7332864e05e045e6b5ed593033bd8375f04a498054577dcaef4029b3de4c04"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/TbII.csv",
+      "bytes": 2248,
+      "sha256": "9815bf39a41ad5eebf7f02e87c89bee7468bcb72b790c88f1580bb9074d3bda4"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/TiI.csv",
+      "bytes": 1602,
+      "sha256": "73dd8cb6b94171ace3d36bc932183026824d5d131eccc245b15c2b7a6c2b58dc"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/TiII.csv",
+      "bytes": 1275,
+      "sha256": "a06511e3ac9426a626a840d850f5a1f183abdd8c840ef498052ba88691393f17"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/TmI.csv",
+      "bytes": 1792,
+      "sha256": "d4971dd0567372e005d6a7272bb72122aa04183c2e6535db014919501cc16940"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/TmII.csv",
+      "bytes": 1556,
+      "sha256": "b1c8c24a02d8a719304ea98d16b83dd25ad1f9ce69268db11962712ddee93cde"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/YbI.csv",
+      "bytes": 1048,
+      "sha256": "8cf861098d04c22e8106bd4c1e2f0e0244cce889e4a009ff9fab98d7ece7e6cc"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/YbII.csv",
+      "bytes": 1285,
+      "sha256": "b0c31fb62a35e8866c0fb0dbb479b8e56f94307896cc101de96fdc943b8b5666"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/YI.csv",
+      "bytes": 501,
+      "sha256": "8723183983402a2fe9c58a6d3e1f14c6b2a40ca2e62cb3c8b0158cc5571a2ee0"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/YII.csv",
+      "bytes": 1471,
+      "sha256": "4ea8868963660d44df363b2d2f826ad8fb633e3ae8ff81191314313bf8d64f31"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/ZnI.csv",
+      "bytes": 844,
+      "sha256": "7ae416bc1924756e9446f2a6b99124d8bb3b50cbbcb4d23abd0b0ad55f6f86b0"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/Linedatabase/ZnII.csv",
+      "bytes": 547,
+      "sha256": "e2a24834cd06714e4b26c75b722b73771905cb5d5d03f97d158e740253df7938"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/README.md",
+      "bytes": 1579,
+      "sha256": "cc5316f81b78e28f20abf8e3d0cb19e1bcd031034cfbadc0f09662604bbdc732"
     }
   ]
 }

@@ -1,5 +1,9 @@
 # SimLIBS Vue 项目协作约定
 
+2026-10-14 当前任务 `.ai-workflow/20261014-advanced-batch-scan/`：用户已授权在真实后端基础上优化批量/扫描竞态并实现高级单次。高级页已替换历史占位，采用有限能级 LTE slab 自吸收与明确未标定的参数化元素响应/等离子体条件，独立任务、三谱共同尺度和完整导出；功能原理见根目录 PROJECT_FUNCTIONS_AND_PRINCIPLES.md。code 完成实现、自测与根目录正式交付后以本轮 code-ready/files 冻结交 plan；最终验收仅由原 plan 写 review。每步最多3业务文件、源 UI/源库/线库只读、自然长页面和根目录交付约定不变。以下历史“占位/未接引擎/冻结”仅表示对应旧任务当时状态，不能覆盖本轮授权和当前事实。
+
+2026-10-13最新 `.ai-workflow/20261013-advanced-placeholder/` 已完成，见state/review。参数扫描后新增高级模拟导航，内容仅“内容待定”，属于SCNU模拟组；软件日志仍在Jobs前，以id定位。只改App.vue、AppIcon.vue和model.ts的Page类型，TaskKind／其余模型不动；code类型与范围核对，plan根目录Windows EXE/中文NSIS及三项实际点击验收通过，37保护／三冻结hash一致。最终EXE为1b0410fb版，高级业务内容待用户定义；源码／产物冻结，原plan/code、每步最多三业务文件、根目录交付、已回退自然布局及旧I/O暂停不变。
+
 2026-10-13最新 `.ai-workflow/20261013-startup-export-polish/` 五项已完成，见state/review。启动光谱外圆环按模块／挂载／字体／首帧四真实节点25/50/75/100推进，0隐藏、完成补圈并保持额外1s，失败冻结/重载/inert/减少动态；单次三单位第二行，三色文件内CSV/JSON/PNG导出图标，三摘要标题/内容加大，模式按用户本地库／NIST服务器／NIST谱线本地强度展宽定义改文案。七文件按小步由原code完成／自查；plan协调接手最终根目录Windows EXE/中文NSIS及八项实际release，40保护／参考与七冻结hash通过。最终EXE为ae88a867版，源码／产物冻结。**已撤销的参数限高/内scroll/sticky生成布局继续保持撤销，不得恢复**；原plan/code、每步最多三业务文件、根目录交付、旧原生I/O暂停不变。CSV/JSON/PNG仅浏览器分支真实下载核对，未重试原生导出对话框、未接真实NIST引擎。
 
 2026-10-13最新 `.ai-workflow/20261013-revert-parameter-height/` 已完成，见state/review。用户明确要求完整回退“左侧参数区过长”对应的高度方案及全部配套，本指令撤销sidebar-height第二项：三页恢复自然长高／整页滚动／controls末尾生成按钮，内部scroll／限高／sticky／footer和定位helper撤销；七组件／页面与核实的fffe3cd高度前修订一致，工作台样式匹配前快照，README仅删相关段。日间导航与后续独立设置预览／sticky保存栏／Jobs统一筛选保留，Settings／Jobs源hash不动，仅Jobs局部对齐旧相对菜单。原plan/code、每步最多三业务文件、dist-desktop根目录交付保持；code四组与Windows EXE/中文NSIS，plan七项实际release、37保护／参考hash及恢复／冻结核对通过。最终根目录EXE为ba0f0b98版；源码／产物冻结，不自动恢复已撤销高度方案，不恢复旧原生I/O任务。历史完成记录仅代表当时事实。
@@ -44,7 +48,7 @@
 - `src/` 为 Vue 前端，`src-tauri/` 为 Tauri Rust 外壳、配置和权限。
 - 项目命令在本目录执行；如果当前会话启动目录仍为同级 UI，显式指定本项目 workdir 和绝对文件路径。
 - 保留 package-lock.json，以本项目 README 和实际配置为准。
-- 当前已完成五页 Vue 前端重写，数据及任务为明确标注的 frontend_demo / illustrative。连接 Python/NIST 后台与真实数据另按用户后续需求规划，不将示意数据当作科学结果。
+- 当前五页 Vue 前端已接入 Vue/backend 内复制的真实 Python 后端，覆盖 local 本地 LTE/Saha、client NIST 线强与 Python 展宽、server NIST 官方页面；默认空谱、无示意结果回退。2026-10-14 正在按 `.ai-workflow/20261014-backend-connect/plan.md` 补齐迁移与自测，最终验收仍由原 plan 负责，不能将历史 implementing 或 code 自测当作最终通过。高级模拟仍仅“内容待定”。Python runtime 未打包，旧原生文件对话框完整点击任务仍暂停。
 - 保留用户未提交修改；同级 UI、CLI、WPF、源库、线库和已有结果不在本项目修改范围。
 - 数据及来源必须真实；官方演示和示例命令不能当作实际 LIBS 计算结果。
 - 完成后停止业务修改并交回 plan。尚未验证的桌面构建、启动或依赖状态必须如实记录。

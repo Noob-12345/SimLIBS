@@ -1,5 +1,5 @@
-import { canonical, defaults, errorOf, numeric, type ElementDraft, type ParameterDraft } from './model'
-import { validateTemplate, type RandomRules } from './demo'
+import { canonical, numeric, type ElementDraft, type ParameterDraft } from './model'
+import { type RandomRules } from './demo'
 export type Issues = Record<string, string>
 function numberIssue(out: Issues, key: string, value: string | number, label: string, min: number, max: number, integer = false): number | undefined {
   try { return numeric(value, label, min, max, integer) } catch (error) { out[key] = error instanceof Error ? error.message : '输入无效'; return undefined }
@@ -44,9 +44,9 @@ export function compositionIssues(rows: ElementDraft[], random = false): Issues 
   return out
 }
 export function batchIssues(mode: string, count: string, packageSize: string, seed: string, rules: RandomRules, text: string): Issues {
-  const out: Issues = {}; numberIssue(out, 'packageSize', packageSize, '每包数', 1, 500, true)
-  if (mode === 'template') { const error = text ? errorOf(() => validateTemplate(text, defaults())) : '请选择本地 CSV 模板'; if (error) out.template = error; return out }
-  numberIssue(out, 'count', count, '演示样本数', 1, 500, true)
+  const out: Issues = {}; numberIssue(out, 'packageSize', packageSize, '每包数', 1, 5000, true)
+  if (mode === 'template') { const error = text ? '' : '请选择本地 CSV 模板'; if (error) out.template = error; return out }
+  numberIssue(out, 'count', count, '样本数', 1, 5000, true)
   if (mode === 'random') {
     numberIssue(out, 'seed', seed, '随机种子', 0, 4294967295, true)
     for (const key of ['te', 'ne'] as const) if (rules[key]) {
@@ -60,6 +60,6 @@ export function batchIssues(mode: string, count: string, packageSize: string, se
 export function scanIssues(axis: 'te' | 'ne' | 'resolution', from: string, to: string, count: string): Issues {
   const out: Issues = {}, min = axis === 'te' ? .01 : axis === 'ne' ? 1e10 : 1, max = axis === 'te' ? 100 : axis === 'ne' ? 1e23 : 1000000
   const a = numberIssue(out, 'from', from, '扫描起点', min, max, axis === 'resolution'), b = numberIssue(out, 'to', to, '扫描终点', min, max, axis === 'resolution')
-  if (a !== undefined && b !== undefined && a === b) out.to = '扫描起点与终点须不同'
-  numberIssue(out, 'count', count, '帧数', 2, 80, true); return out
+  if (a !== undefined && b !== undefined && a >= b) out.to = '扫描终点须大于起点'
+  numberIssue(out, 'count', count, '帧数', 2, 200, true); return out
 }

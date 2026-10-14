@@ -19,7 +19,7 @@ function validateCsv(name: string, size: number) {
 export async function openCsvTemplate(): Promise<OpenResult> {
   try {
     if (!desktopHost) throw new Error('开发辅助模式请使用文件选择控件')
-    const path = await open({ title: '打开演示 CSV 模板', directory: false, multiple: false, filters: [{ name: 'CSV 模板', extensions: ['csv'] }] })
+    const path = await open({ title: '打开 CSV 模板', directory: false, multiple: false, filters: [{ name: 'CSV 模板', extensions: ['csv'] }] })
     if (path === null) return { status: 'cancelled' }
     const info = await stat(path)
     if (!info.isFile) throw new Error('请选择 CSV 文件，不能选择文件夹')
@@ -45,13 +45,13 @@ export async function saveDemoFile(filename: string, content: string | Blob, mim
       return { status: 'browser-download' }
     }
     const extension = filename.split('.').pop()?.toLowerCase()
-    if (!extension || !['csv', 'json', 'png'].includes(extension)) throw new Error('仅支持演示 CSV、JSON、PNG 保存')
+    if (!extension || !['csv', 'json', 'png', 'gif', 'zip'].includes(extension)) throw new Error('仅支持 CSV、JSON、PNG、GIF、ZIP 保存')
     const directory = savedPreferences.value.outputDirectory
     const directoryError = outputDirectoryIssue(directory)
     if (directoryError) throw new Error(directoryError)
     const isDefault = directory.replace(/\\/g, '/').replace(/\/$/, '').toLowerCase() === defaultOutputDirectory.toLowerCase()
     const initialDirectory = isDefault ? await ensureDefaultOutputDirectory() : directory
-    const path = await save({ title: '另存为演示文件', defaultPath: outputDefaultPath(initialDirectory, filename), filters: [{ name: `${extension.toUpperCase()} 演示文件`, extensions: [extension] }] })
+    const path = await save({ title: '另存为结果文件', defaultPath: outputDefaultPath(initialDirectory, filename), filters: [{ name: `${extension.toUpperCase()} 文件`, extensions: [extension] }] })
     if (path === null) return { status: 'cancelled' }
     // Do not append an extension or rewrite the path: dynamic scope grants this exact selection.
     let bytes: number
