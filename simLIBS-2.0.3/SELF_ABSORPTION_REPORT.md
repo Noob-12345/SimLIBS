@@ -1,5 +1,7 @@
 # SimLIBS 论文逐线自吸收模型：原理、实现与验证
 
+> 历史模型说明：本文描述保留在 `self_absorption.simulate_paper_spectrum()` 中的离线论文模型。当前 `SimulatedLIBS(static, self_absorption=True)` 已改为 NIST 全部返回谱线 + 逐线自吸收；最新入口、Stark 补充方式和限制见 README 的“Static self-absorption”节。本文旧版核心调用示例不再适用于当前入口；离线示例脚本已改为直接调用独立函数。
+
 日期：2026-10-15。适用代码：原始 `simLIBS-2.0.3` 核心与 Vue 高级模拟后端。
 
 本文说明本次实际实现的算法、数据和验证结果。代码依据 John 与 Anoop 的论文方程建立逐线模型；论文未公开的配分函数清单、程序源代码、线形归一化与宽度迭代细节，不以猜测补成“作者原始实现”。

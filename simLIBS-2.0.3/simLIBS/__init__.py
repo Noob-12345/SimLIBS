@@ -1,3 +1,4 @@
 from simLIBS.simulation import validate_simulated_libs
 
 from simLIBS.simulation import SimulatedLIBS
+from simLIBS.nist_self_absorption import NISTSelfAbsorptionConfig, MissingStarkDataError

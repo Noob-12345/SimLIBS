@@ -39,6 +39,29 @@ Parameters:
 
 
 ### Static websraping
+Static mode retrieves NIST's **calculated, unbroadened `dataSticksArray`**
+and synthesizes the spectrum locally, using the same Gaussian kernel as
+`Cross_attention/Dataset/datagen.py`. It does not use `dataDopplerArray`.
+NIST still calculates line strengths from composition, Te and Ne.
+
+- Requests use `min_rel_int=0`, 500 nm core bands and 2 nm internal overlap.
+  Line tables are merged before broadening; no per-band normalization is applied.
+- Each line has area equal to its calculated strength, with
+  `I = strength / (width * sqrt(pi)) * exp(-((wavelength-center)/width)**2)`.
+  Here `width = center / resolution` is the Gaussian **1/e half-width**,
+  not FWHM. The profile is evaluated within six widths of the center.
+- The default output grid is approximately 0.005 nm, including both endpoints.
+  The point count is `round((upper_w-low_w)/step)+1` (at least two);
+  `linspace` adjusts the actual step if the range is not evenly divisible.
+- `libs.line_table` retains the merged calculated line table.
+  `raw_spectrum` contains the locally synthesized initial spectrum.
+- With `self_absorption=False`, static mode uses this NIST line-table path.
+  With `self_absorption=True`, static mode applies per-transition self absorption
+  to the same NIST line strengths (see below).
+  Dynamic mode always uses the browser result and ignores the self-absorption
+  switch and its configuration. The instance's `self_absorption` attribute
+  records whether self-absorption is actually enabled.
+
 ```python
 libs = SimulatedLIBS(Te=1.0,
                      Ne=10**17,
@@ -50,6 +73,87 @@ libs = SimulatedLIBS(Te=1.0,
                      max_ion_charge=3,
                      webscraping='static')
 ```
+
+### Static self-absorption / 静态逐线自吸收
+
+`static + self_absorption=True` now requests NIST first. It preserves every
+returned nonzero stick contribution, obtains transition energies and `g_upper*Aki`
+from `lines`, and levels/statistical weights/ionization energies from
+`levels`, `gValues`, and `ips`. JavaScript is parsed as data, never executed.
+Coincident transitions share the NIST stick area according to their
+`gA*exp(-E_upper/Te)` weights; their individual absorption is then calculated.
+
+布居使用 NIST 页面提供的全部电离阶段和能级集合（含裸核阶段），不再限定
+JSON 中的 I/II/III。总密度未指定时通过电荷守恒反推；组分按原子数百分比处理，
+总和须为 100。线强始终保留 NIST `int_scale=2` 的光子权重，不作分段归一化。
+
+**Stark coefficients are still required for every transition.** The built-in
+JSON is only a coefficient lookup, not a line selection list. Its air-wavelength
+records are matched using both level energies (0.002 eV tolerance) and `gA`
+(3% tolerance); ambiguous matches raise an error. User coefficients take priority.
+No default Stark value is invented and missing lines are never silently skipped.
+
+```python
+from simLIBS import SimulatedLIBS, MissingStarkDataError
+
+try:
+    libs = SimulatedLIBS(
+        Te=1.0, Ne=1e17, elements=['Mg'], percentages=[100],
+        low_w=280, upper_w=290, resolution=3000,
+        webscraping='static', self_absorption=True,
+        self_absorption_config={'path_length_m': 0.001},
+    )
+except MissingStarkDataError as error:
+    # 导出全部缺失谱线；依据有出处的逐线数据填入 stark_width_nm 后重新运行。
+    error.missing_lines.to_csv('missing_stark.csv', index=False)
+```
+
+Use `self_absorption_config={'stark_data': dataframe_or_list, ...}` to supply
+coefficients. Each record needs `element`, zero-based `charge`,
+`wavelength_nm` (**vacuum**, matched within 1e-6 nm), `stark_width_nm`
+and optionally `stark_reference_ne_cm3` (default 1e16) and `source`.
+Instead of wavelength, both `lower_eV` and `upper_eV` can identify a transition
+(matched within 1e-6 eV). When both identifiers are given, both must match.
+For unresolved lines, include the energies to distinguish transitions.
+`stark_width_nm` is W in **FWHM = 2*W*Ne/Ne_ref**, not a measured FWHM itself.
+Convert source FWHM values to this convention before supplying them.
+
+Defaults: `path_length_m=0.01`, `wavelength_step_nm=0.005`,
+`total_number_density_cm3=None`, `instrument_broadening=True`.
+`NISTSelfAbsorptionConfig` is also accepted instead of a dictionary.
+
+The center attenuation is `(1-exp(-tau))/tau`; intrinsic width is multiplied
+by `SA**(-0.54)` and NIST line area by `SA**0.46`. Final profiles are Voigt
+profiles with Gaussian sigma `wavelength/(R*sqrt(2))`, consistent with the
+ordinary static Gaussian convention. Instrument width never enters opacity.
+This is an independent-line empirical model, not coupled radiative transfer.
+Stark coefficients are scaled by electron density; no temperature law is inferred.
+
+`unabsorbed_raw_spectrum` is the same NIST/Stark/Voigt model with absorption
+removed. Because it includes intrinsic Stark width, it is not identical to
+the Gaussian-only `self_absorption=False` spectrum. Diagnostics retain each
+transition's original NIST area, coefficient source, tau, SA, width and area.
+`interpolate()` reuses cached transitions and coefficients without network access.
+Large line-count × grid-size jobs raise a resource-limit error; increase the
+sampling step or narrow the window instead of silently dropping lines.
+
+The old offline model remains explicitly available as
+`simLIBS.self_absorption.simulate_paper_spectrum`. Its `PaperSelfAbsorptionConfig`,
+`line_data`, `atomic_data` and `intensity_scale` settings belong to that standalone
+function, not the new `SimulatedLIBS` path. The old paper demo/report describe
+that standalone model. `dynamic` still ignores all self-absorption settings.
+
+Run the NIST example from this project directory:
+
+```bash
+python examples/nist_self_absorption_demo.py --output output/nist_self_absorption
+```
+
+The default vacuum window, 285.27–285.33 nm, contains one Mg transition with
+an available built-in Stark coefficient. A broader window can require additional
+coefficients: use `--low 280 --high 290` to export the missing-line CSV template,
+then supply the completed file with `--stark-csv path/to/coefficients.csv`.
+
 
 ### Plot
 ```python
@@ -63,17 +167,28 @@ libs.save_to_csv('filename.csv')
 ```
 
 ### Interpolated spectrum
-SimulatedLIBS interpolates retrieved data from NIST with cubic splines.
+For static mode this returns the locally synthesized spectrum. To change
+its sampling step, evaluate the retained lines on a new grid without
+another network request or spline interpolation:
+```python
+libs.interpolate(resolution=0.01)  # sampling step [nm], NOT spectrometer R
+```
+The existing method name is retained for compatibility. Dynamic mode still
+returns the browser CSV directly at initialization; an explicit call to
+`interpolate()` on dynamic data retains the legacy cubic-spline behavior.
 ```python
 libs.get_interpolated_spectrum()
 ```
 
 ### Raw spectrum
-Raw retrieved data from NIST
+Static: the initially synthesized local spectrum. Dynamic: the total
+spectrum retrieved from NIST's browser CSV.
 ```python
 libs.get_raw_spectrum()
 ```
 ### Dynamic webscraping
+Unchanged: Chrome opens the official NIST page, recalculates at the requested
+resolution, and reads the exported total spectrum and ion components.
 ```python
 libs = SimulatedLIBS(Te=1.0,
                      Ne=10**17,

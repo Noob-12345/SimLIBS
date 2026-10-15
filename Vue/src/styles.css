@@ -70,16 +70,18 @@ input[data-issue],button[data-issue],textarea[data-issue],.template-box[data-iss
 .input-with-unit>input:focus{outline:none;box-shadow:none!important}
 .broadening-row .field>span{display:block;min-height:40px;float:none;font-size:var(--text-body);color:var(--text)}
 .precise-row>.input-with-unit{margin:0}
-.spectrum-metrics{grid-template-columns:repeat(3,minmax(0,1fr))!important;align-items:stretch}
-.spectrum-metrics>.metric{height:100%;overflow-wrap:anywhere}
+.metrics-row.spectrum-metrics{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));align-items:stretch}
+.spectrum-metrics>.metric{height:100%}
 .spectrum-metrics>.metric>span{font-size:16px;font-weight:700;color:var(--text)}
 .spectrum-metrics .summary-parameters dt{font-size:13px;font-weight:500}
 .spectrum-metrics .summary-parameters dd{font-size:22px;font-weight:500}
 .spectrum-metrics .summary-elements>.element-tile{width:38px;min-width:38px;height:38px;font-size:16px;font-weight:600}
 .summary-parameters{margin:12px 0 0;font-size:var(--text-aux)}
 .summary-parameters>div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 6px;margin:5px 0}
-.summary-parameters dt{color:var(--muted);font-size:var(--text-meta)}
-.summary-parameters dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.summary-parameters dt{color:var(--muted);font-size:var(--text-meta);white-space:nowrap}
+.summary-parameters dd{margin:0;min-width:0;white-space:nowrap}
+.spectrum-metrics .summary-wavelength{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .15em}
+.summary-wavelength>span{white-space:nowrap}
 .summary-elements{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .summary-elements>.element-tile{flex:none;display:grid;place-items:center;min-width:32px;width:32px;height:32px;font-size:var(--text-aux)}
 .draft-error{margin:8px 0 14px}
@@ -277,8 +279,8 @@ input[type=range]{width:100%;accent-color:var(--accent);height:16px;cursor:point
 .chart-tools{gap:2px}
 .spectrum-panel{padding:17px 12px}
 .metrics-row{grid-template-columns:1fr 1fr}
-.metric:last-child{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
-.metric:last-child strong{margin:0}
+.metrics-row:not(.spectrum-metrics)>.metric:last-child{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
+.metrics-row:not(.spectrum-metrics)>.metric:last-child strong{margin:0}
 .workspace-footer span:last-child{display:none}
 .chart-surface{height:270px}
 }

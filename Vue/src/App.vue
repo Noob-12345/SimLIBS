@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import AppIcon from './components/AppIcon.vue'
 import ThemeMenu from './components/ThemeMenu.vue'
+import RuntimeStatus from './components/RuntimeStatus.vue'
 import SinglePage from './pages/SinglePage.vue'
 import BatchPage from './pages/BatchPage.vue'
 import ScanPage from './pages/ScanPage.vue'
@@ -43,7 +44,7 @@ onUnmounted(() => { disposeTimers(); disposePreferences() })
       <div class="brand"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M3 26h6l3-12 4 17 5-26 4 21h8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" /></svg><div><strong>SimLIBS</strong><small>光谱工作台</small></div></div>
       <div class="sidebar-caption">SCNU</div>
       <nav aria-label="主导航"><template v-for="item in pages" :key="item.id"><div v-if="item.id === 'jobs'" class="sidebar-caption nav-group-caption">软件日志</div><button :class="['nav-item', { active: page === item.id }]" :aria-label="item.label" :aria-current="page === item.id ? 'page' : undefined" :title="item.label" @click="page = item.id"><AppIcon :name="item.id" class="nav-symbol" :size="19" /><span class="nav-text">{{ item.label }}</span><AppIcon v-if="page === item.id" name="chevron" class="nav-arrow" :size="14" /></button></template></nav>
-      <div class="sidebar-bottom"><h4>运行状态</h4><p>{{ service.label }}</p><small>SimLIBS · SCNU</small></div>
+      <RuntimeStatus />
     </aside>
     <main class="main-shell">
       <header class="topbar"><span>工作空间 <b>/</b> {{ current.label }}</span><div><span v-if="runningCount" class="badge neutral">{{ runningCount }} 项任务进行中</span><div class="topbar-actions"><ThemeMenu :mode="preferences.mode" :palette="preferences.palette" @select="setThemeMode" @palette="setPalette" /><div class="repository-control"><button type="button" class="icon-btn theme-trigger" aria-label="打开 GitHub 项目" title="GitHub 项目" :disabled="repositoryOpening" @click="openRepository"><AppIcon name="github" :size="18" /></button><p v-if="repositoryError" class="repository-feedback" role="status">{{ repositoryError }}</p></div></div></div></header>

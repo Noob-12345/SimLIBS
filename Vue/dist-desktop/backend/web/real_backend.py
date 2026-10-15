@@ -253,10 +253,11 @@ class RealBackend:
         req=SingleRequest.from_api(body)
         p=self._to_parameters(req.params, req.composition)
         try:
-            q,config,_=effective(p,body.get('advanced',{}))
-            self._validate_local(p);self._validate_local(q)
+            # The paper engine has its own Stark/I-II-III coverage contract;
+            # ordinary local-library preflight cannot validate these inputs.
+            _,config,_=effective(p,body.get('advanced',{}))
         except (ValueError,TypeError) as error:raise ApiError(400,str(error),'validation') from error
-        return self._launch('高级模拟','advanced',{'parameters':p.to_dict(),'advanced':config},'高级本地 LTE slab · 自吸收 / 参数化基体（未标定）')
+        return self._launch('高级模拟','advanced',{'parameters':p.to_dict(),'advanced':config},'高级论文 Eq.7 · Stark逐线自吸收 / 参数化基体（未标定）')
 
     def start_batch(self, req: BatchRequest) -> str:
         p = self._to_parameters(req.params, req.compositions[0].items)
@@ -580,7 +581,11 @@ class RealBackend:
             import pandas as pd
             reference=pd.read_csv(origin['thin_reference'],float_precision='round_trip')
             result['comparison']={'xs':reference['wavelength'].tolist(),'thin':reference['intensity'].tolist(),'nominal':reference['nominal_intensity'].tolist()}
-            result['origin']=dict(origin,line_diagnostics=pd.read_csv(origin['line_table'],float_precision='round_trip').to_dict(orient='records'))
+            # Optional paper metadata (e.g. unreported Stark temperature) is
+            # exported as an empty CSV cell and must round-trip to JSON null.
+            diagnostics=pd.read_csv(origin['line_table'],float_precision='round_trip').astype(object)
+            diagnostics=diagnostics.where(pd.notna(diagnostics),None)
+            result['origin']=dict(origin,line_diagnostics=diagnostics.to_dict(orient='records'))
         return result
 
     def _scan_result(self, job: Dict[str, Any], manifest: Dict[str, Any]) -> Dict[str, Any]:
@@ -670,7 +675,10 @@ class RealBackend:
             from matplotlib.figure import Figure
             fig=Figure(figsize=(10,5),dpi=140);ax=fig.subplots()
             for ys,label,color in [(result['comparison']['nominal'],'Nominal thin','#777777'),(result['comparison']['thin'],'Matrix thin','#d078ad'),(result['ys'],'Corrected','#317aa3')]:ax.plot(result['xs'],ys,label=label,color=color)
-            ax.set(xlabel='Wavelength / nm',ylabel='Model photon radiance / (s m² sr nm) — uncalibrated',title='Finite-level LTE slab: shared absolute scale');ax.legend();fig.tight_layout()
+            advanced_version=manifest['origin'].get('model_version')
+            title=('Paper Eq.7 / Stark per-line self-absorption: shared scale'
+                   if advanced_version=='paper-eq7-stark-sa-1' else 'Saved advanced model: shared scale')
+            ax.set(xlabel='Wavelength / nm',ylabel=manifest['origin'].get('intensity_units','Model photon intensity per nm; uncalibrated'),title=title);ax.legend();fig.tight_layout()
             stream=io.BytesIO();fig.savefig(stream,format='png');return ExportPayload(stream.getvalue(),'image/png',f'{job_id}_advanced.png')
         if kind in ('parameters','template'):
             key='actual_parameters' if kind=='parameters' else 'template_csv';path=manifest.get(key)

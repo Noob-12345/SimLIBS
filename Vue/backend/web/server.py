@@ -144,6 +144,9 @@ class Handler(BaseHTTPRequestHandler):
             q = parse_qs(url.query)
             if parts == ["api", "status"]:
                 self._json(BACKEND.engine_status(q.get('mode',['local'])[0]))
+            elif parts == ['api', 'diagnostics']:
+                from simlibs_ui.runtime_diagnostics import inspect_runtime
+                self._json(inspect_runtime(BACKEND.engine_status('local').get('local'), BACKEND.get_settings()))
             elif parts == ["api", "params"]:
                 self._json(BACKEND.default_params())
             elif parts == ["api", "settings"]:

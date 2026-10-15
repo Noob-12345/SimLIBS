@@ -1,0 +1,53 @@
+{
+  "command": [
+    "E:\\Anaconda\\envs\\simLIBS\\python.exe",
+    "verify_real.py"
+  ],
+  "engine": "real",
+  "steps": [
+    {
+      "step": "params",
+      "label": "H 650–660nm · static+local"
+    },
+    {
+      "step": "run",
+      "ok": true,
+      "elapsed": 4.0,
+      "checks": {
+        "kind_single": true,
+        "points_finite": true,
+        "canvas_rendered": true,
+        "meta_source": true,
+        "sha256": true,
+        "nist_url": true,
+        "broadening_local": true
+      },
+      "meta_source": "本次真实 NIST / SimulatedLIBS 模拟",
+      "points": "2001/interpolated：2,001/2,001 CSV点（保峰预算 6000）"
+    },
+    {
+      "step": "export",
+      "ok": true,
+      "files": [
+        "78b681c7db5842a8846291a8a5551489_interpolated.csv",
+        "78b681c7db5842a8846291a8a5551489_manifest.json",
+        "78b681c7db5842a8846291a8a5551489_spectrum.png",
+        "d9c0667b18864288a4ce0982e8668da4_interpolated.csv",
+        "d9c0667b18864288a4ce0982e8668da4_manifest.json"
+      ]
+    },
+    {
+      "step": "snapshots",
+      "ok": true,
+      "files": [
+        "batch-dark.svg",
+        "jobs-dark.svg",
+        "scan-dark.svg",
+        "settings-dark.svg",
+        "single-result-dark.svg",
+        "single-result-light.svg"
+      ]
+    }
+  ],
+  "independent_acceptance": false
+}
