@@ -4,6 +4,7 @@ import AppIcon from '../components/AppIcon.vue'
 import ParameterEditor from '../components/ParameterEditor.vue'
 import CompositionEditor from '../components/CompositionEditor.vue'
 import SpectrumChart from '../components/SpectrumChart.vue'
+import EmptyStateArt from '../components/EmptyStateArt.vue'
 import TaskActivity from '../components/TaskActivity.vue'
 import WorkbenchLayout from '../components/WorkbenchLayout.vue'
 import { activeTask, runReal, single } from '../lib/workbench'
@@ -21,7 +22,7 @@ async function run() {
 </script>
 <template><WorkbenchLayout kind="single">
   <template #controls="{ disabled }"><ParameterEditor v-model="single.params" scope="single" cards :disabled="disabled" /><div class="divider" /><CompositionEditor v-model="single.composition" scope="single" :disabled="disabled" @issue="compositionError = $event" /><button class="btn primary full" :disabled="!!running || !!inputError" @click="run"><AppIcon name="play" :size="16" />{{ single.result ? '重新生成' : '生成光谱' }}</button></template>
-  <div v-if="dirty" class="draft-notice"><span>草稿已更改</span>运行后更新图谱。</div><SpectrumChart v-if="spectrum" :spectrum="spectrum" label="真实结果" /><section v-else class="panel empty-state"><h3>尚无光谱</h3><p>运行真实计算后显示结果。</p></section>
+  <div v-if="dirty" class="draft-notice"><span>草稿已更改</span>运行后更新图谱。</div><SpectrumChart v-if="spectrum" :spectrum="spectrum" label="真实结果" /><section v-else class="panel empty-state"><EmptyStateArt /><h3>尚无光谱</h3><p>运行真实计算后显示结果。</p></section>
   <div v-if="spectrum" class="metrics-row spectrum-metrics">
     <div class="panel metric"><span>实验参数</span><dl class="summary-parameters"><div><dt>Te / eV</dt><dd>{{ format(spectrum.params.te) }}</dd></div><div><dt>Ne / cm⁻³</dt><dd>{{ format(spectrum.params.ne) }}</dd></div><div><dt>R</dt><dd>{{ spectrum.params.resolution }}</dd></div></dl></div>
     <div class="panel metric"><span>波长窗口</span><strong class="summary-wavelength"><span>{{ format(spectrum.params.low) }}</span><span>–{{ format(spectrum.params.high) }} <small>nm</small></span></strong></div>

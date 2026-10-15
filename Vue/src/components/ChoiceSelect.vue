@@ -59,7 +59,7 @@ onUnmounted(() => document.removeEventListener('pointerdown', outside))
   <div ref="root" class="mode-select field" @focusout="focusOut">
     <label :id="`${id}-label`" :for="`${id}-trigger`">{{ label }}</label>
     <button :id="`${id}-trigger`" ref="trigger" class="mode-select-trigger" type="button" :disabled="disabled" :aria-invalid="!!issue" :aria-describedby="issue ? issueId : undefined" :data-issue="issue || undefined" aria-haspopup="menu" :aria-expanded="open" :aria-controls="`${id}-menu`" :aria-labelledby="`${id}-label ${id}-value`" @click="toggle" @keydown="triggerKey"><span :id="`${id}-value`">{{ selected.label }}</span><AppIcon name="chevron" :size="14" /></button>
-    <Transition name="popover">
+    <Transition name="choice-popover">
       <div v-if="open" :id="`${id}-menu`" :class="['mode-select-menu', { above }]" role="menu" :aria-label="label" @keydown="menuKey">
         <div v-for="(option, index) in props.options" :key="option.value" :class="['mode-choice-row', { 'plain-choice-row': !option.description }]" role="none">
           <button :ref="element => setItem(element, index)" class="mode-choice" type="button" role="menuitemradio" :disabled="disabled" :aria-checked="model === option.value" :tabindex="activeIndex === index ? 0 : -1" :class="{ selected: model === option.value }" @focus="activeIndex = index" @click="choose(index)"><span>{{ option.label }}</span><AppIcon v-if="model === option.value" name="check" :size="14" /></button>
