@@ -1,0 +1,7 @@
+{
+  "request_url": "https://physics.nist.gov/cgi-bin/ASD/energy1.pl?spectrum=Mg+III&units=1&format=1&output=0&page_size=10000&multiplet_ordered=1&conf_out=on&term_out=on&level_out=on&j_out=on&g_out=on&ids_out=1&unc_out=1&submit=Retrieve+Data",
+  "retrieved_utc": "2026-10-15T02:09:16.656838+00:00",
+  "response_sha256": "f9cdf9a20bf444d46247ca6716434f4af3be3d1ee15d6949c443c4c9a8eb9ce1",
+  "http_status": 200,
+  "response_bytes": 35307
+}

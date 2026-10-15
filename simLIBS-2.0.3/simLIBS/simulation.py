@@ -13,6 +13,8 @@ import os
 from scipy.interpolate import CubicSpline
 from concurrent.futures import ThreadPoolExecutor
 import math
+from copy import deepcopy
+from dataclasses import replace
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium import webdriver
@@ -21,6 +23,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 import urllib3
+
+from .self_absorption import PaperSelfAbsorptionConfig, simulate_paper_spectrum
 
 urllib3.disable_warnings()
 
@@ -73,6 +77,9 @@ class SimulatedLIBS(object):
         headless: bool = True,
         keep_browser_open: bool = False,
         detach_browser: bool = False,
+        self_absorption: bool = False,
+        optical_depth=None,
+        self_absorption_config=None,
     ):
         """
 
@@ -102,8 +109,30 @@ class SimulatedLIBS(object):
             Keep browser session open after dynamic scraping (useful for debugging)
         detach_browser : bool
             Detach Chrome from driver so browser can stay open after script exits
+        self_absorption : bool
+             Use the offline paper-based LTE/Saha/Stark line model (default False).
+        optical_depth : deprecated
+             Manual tau is no longer accepted when enabling the paper model.
+        self_absorption_config : dict or PaperSelfAbsorptionConfig
+             Physical/data settings, including path_length_m, optional total density,
+             wavelength_step_nm, optional instrument response, and custom line/atomic data.
+             Default built-in line coverage is Mg/Ca/Zn, with real I/II/III populations.
 
         """
+
+        if type(self_absorption) is not bool:
+            raise ValueError("self_absorption must be a boolean")
+        if self_absorption and optical_depth is not None:
+            raise ValueError("manual optical_depth has been replaced by the paper model; use self_absorption_config")
+        self.self_absorption = self_absorption
+        self.optical_depth = None
+        self.self_absorption_config = None
+        self.self_absorption_metadata = None
+        self._paper_request = None
+        self.unabsorbed_raw_spectrum = None
+        self.unabsorbed_interpolated_spectrum = None
+        self.unabsorbed_ion_spectra = None
+        self.self_absorption_diagnostics = None
 
         validate_simulated_libs(
             Te, Ne, elements, percentages, low_w, upper_w, max_ion_charge
@@ -124,6 +153,22 @@ class SimulatedLIBS(object):
         self.interpolated_spectrum = pd.DataFrame({"wavelength": [], "intensity": []})
         self.webscraping = webscraping
 
+        if self.self_absorption:
+            if isinstance(self_absorption_config, PaperSelfAbsorptionConfig):
+                config = self_absorption_config
+            elif self_absorption_config is None or isinstance(self_absorption_config, dict):
+                try:
+                    config = PaperSelfAbsorptionConfig(**(self_absorption_config or {}))
+                except TypeError as error:
+                    raise ValueError("invalid self_absorption_config: {}".format(error)) from None
+            else:
+                raise ValueError("self_absorption_config must be a dictionary or PaperSelfAbsorptionConfig")
+            self.self_absorption_config = deepcopy(config)
+            self._paper_request = dict(Te=Te, Ne=Ne, elements=tuple(elements), percentages=tuple(percentages),
+                                       low_w=low_w, upper_w=upper_w, resolution=resolution, max_ion_charge=max_ion_charge)
+            self._render_paper_model()
+            return
+
         match webscraping:
             case "static":
                 self.retrieve_data_static()
@@ -143,7 +188,21 @@ class SimulatedLIBS(object):
                 finally:
                     if not keep_browser_open:
                         self.driver.quit()
- 
+
+    def _render_paper_model(self, step=None):
+        """Generate line profiles afresh; no cumulative total-spectrum multiplier."""
+        config = self.self_absorption_config
+        if step is not None:
+            config = replace(config, wavelength_step_nm=step)
+        result = simulate_paper_spectrum(**self._paper_request, config=config)
+        self.raw_spectrum = result.spectrum.copy(deep=True)
+        self.interpolated_spectrum = result.spectrum.copy(deep=True)
+        self.ion_spectra = result.ion_spectrum.copy(deep=True)
+        self.unabsorbed_raw_spectrum = result.thin_spectrum.copy(deep=True)
+        self.unabsorbed_interpolated_spectrum = result.thin_spectrum.copy(deep=True)
+        self.unabsorbed_ion_spectra = result.thin_ion_spectrum.copy(deep=True)
+        self.self_absorption_diagnostics = result.line_diagnostics.copy(deep=True)
+        self.self_absorption_metadata = deepcopy(result.metadata)
 
     def __repr__(self):
         return f"simLIBS(Te={self.Te:.2f} eV, Ne={self.Ne:.3e} cm^-3, elements={', '.join(self.elements)}, percentages={', '.join([str(p) for p in self.percentages])}, resolution={self.resolution}, low_w={self.low_w}, upper_w={self.upper_w}, max_ion_charge={self.max_ion_charge})"
@@ -279,18 +338,23 @@ class SimulatedLIBS(object):
 
     def interpolate(self, resolution: float = 0.005):
         """
-        interpolation of intensity with given resolution using CubicSpline
+        Interpolate with CubicSpline; resolution here is the sampling step in nm.
+        The paper path evaluates analytical line profiles on the new grid.
         """
+        if self.self_absorption:
+            self._render_paper_model(step=resolution)
+            return
+        source = self.raw_spectrum
         cs = CubicSpline(
-            self.raw_spectrum["wavelength"],
-            self.raw_spectrum["intensity"],
+            source["wavelength"],
+            source["intensity"],
             bc_type="natural",
         )
         x = np.arange(self.low_w, self.upper_w, resolution)
         y = np.clip(cs(x), 0, np.inf)
 
-        self.interpolated_spectrum["wavelength"] = np.round(x, 8)
-        self.interpolated_spectrum["intensity"] = np.round(y, 8)
+        interpolated = pd.DataFrame({"wavelength": np.round(x, 8), "intensity": np.round(y, 8)})
+        self.interpolated_spectrum = interpolated
 
     def plot(
         self,
@@ -325,7 +389,7 @@ class SimulatedLIBS(object):
 
     def get_ion_spectra(self):
 
-        if self.webscraping == "dynamic" and self.ion_spectra is not None:
+        if (self.self_absorption or self.webscraping == "dynamic") and self.ion_spectra is not None:
             return self.ion_spectra
         else:
             raise ValueError(
@@ -343,6 +407,9 @@ class SimulatedLIBS(object):
         Ne_min: float,
         Ne_max: float,
         webscraping: str,
+        self_absorption: bool = False,
+        optical_depth=None,
+        self_absorption_config=None,
     ):
         seed = random.randrange(len(input_df))
         percentages = input_df.iloc[seed].values[:-1]
@@ -356,6 +423,9 @@ class SimulatedLIBS(object):
             elements=elements,
             percentages=percentages,
             webscraping=webscraping,
+            self_absorption=self_absorption,
+            optical_depth=optical_depth,
+            self_absorption_config=self_absorption_config,
         ).get_interpolated_spectrum()
 
         return {
@@ -377,6 +447,9 @@ class SimulatedLIBS(object):
         Ne_min: float = 10**17,
         Ne_max: float = 10**18,
         webscraping: str = "static",
+        self_absorption: bool = False,
+        optical_depth=None,
+        self_absorption_config=None,
     ) -> pd.DataFrame:
         """
 
@@ -396,6 +469,12 @@ class SimulatedLIBS(object):
             Maximal random electron density Ne[cm^-3]
         webscraping : str
             Webscraping type 'static' or 'dynamic'
+        self_absorption : bool
+             Enable the paper line model for every generated sample.
+        optical_depth : deprecated
+             Manual optical depth is rejected when self_absorption is enabled.
+        self_absorption_config : dict or PaperSelfAbsorptionConfig
+             Shared physical/data settings; populations and SA are recomputed for each sample.
 
         Returns
         -------
@@ -411,6 +490,9 @@ class SimulatedLIBS(object):
                 Ne_min,
                 Ne_max,
                 webscraping,
+                self_absorption,
+                optical_depth,
+                self_absorption_config,
             )
             for _ in range(size)
         ]

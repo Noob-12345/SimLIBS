@@ -1,0 +1,6 @@
+{
+  "request_url": "https://physics.nist.gov/cgi-bin/ASD/energy1.pl?de=0&spectrum=Mg+I&units=1&format=2&output=0&page_size=10000&multiplet_ordered=1&conf_out=on&term_out=on&level_out=on&j_out=on&g_out=on&ids_out=1&unc_out=1&submit=Retrieve+Data",
+  "retrieved_utc": "2026-10-15T02:07:32.158392+00:00",
+  "response_sha256": "fc13fd1a19cac82ad4905681cf5aecfd341cbcde4acdd6097159f0854902d3ab",
+  "http_status": 200
+}

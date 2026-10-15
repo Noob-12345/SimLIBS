@@ -1,0 +1,380 @@
+<!DOCTYPE html
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+<title>NIST ASD Levels Output</title>
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="start" title="ASD 5.0" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="ASD 4" title="ASD 4.0" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="ASD 3" title="ASD 3.0" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="ASD 2" title="ASD 2.0" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="ASD 1" title="ASD 1.3" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="Author" title="Yuri Ralchenko" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="Author" title="Alexander Kramida" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="Author" title="Joseph Reader" />
+<link href="https://physics.nist.gov/PhysRefData/ASD/Html/verhist.shtml" rel="Version" title="Version History" />
+<link href="https://www.nist.gov/" rel="bookmark" title="NIST Main Page" />
+<link href="https://physics.nist.gov/" rel="bookmark" title="NIST Physical Measurement Lab" />
+<link href="https://pml.nist.gov/data " rel="bookmark" title="Physical Reference Data" />
+<meta content="text/javascript" http-equiv="Content-Script-Type" />
+<link rel="stylesheet" type="text/css" href="https://physics.nist.gov/PhysRefData/ASD/Scripts/1.css" />
+<!-- Google Analtyics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9SLN1VEEJ2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9SLN1VEEJ2');
+</script>
+<!-- End of Google Analytics 4 -->
+<SCRIPT async id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&amp;subagency=NIST&amp;pua=UA-37115410-46&amp;yt=false&amp;exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c" type="text/javascript"></script>
+<script type="text/javascript">//<![CDATA[
+
+function setFocus() {
+  var de = document.getElementById("de");
+  var idsSp = document.getElementById("ids_sp");
+  var dom = document.domain;
+  var href = document.location.href;
+  if ( href.match(/^http:\/\/ekron\.nist\.gov\/ASD\/DataEntry\/.*/i) ) {
+    de.value = 1;
+  }
+  if ( dom.match(/^ekron\.nist\.gov$/i) ) {
+    idsSp.style.display="inline";
+  }
+  document.levels.spectrum.disabled = true;
+}
+function submit_update() {
+  var submitRetrieve = document.getElementById("submit_retrieve");
+  var spCrit = document.getElementById("spectrum_crit");
+  if ( (spCrit != null) && (submitRetrieve != null) ) {
+    var spPrev = spCrit.innerHTML;
+    spPrev = spPrev.toLowerCase().replace(/  /gm,"");
+    spPrev = spPrev.replace(/<b>/gm,"");
+    spPrev = spPrev.replace(/<\/b>/gm,"");
+    var sp = document.getElementById("spectrum").value;
+    sp = sp.toLowerCase().replace(/  /gm,"");
+    if ( sp != spPrev ) {
+      submitRetrieve.value = "Update Criteria";
+    } else {
+        document.levels.spectrum.disabled = false;
+      submitRetrieve.value = "Retrieve Data";
+    }
+  }
+  return true;
+}
+
+//]]></script>
+<script src="/js/clickjack.js" type="text/javascript"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+</head>
+<body bgcolor="white" onload="setFocus()">
+<script type="text/javascript" src="https://physics.nist.gov/PhysRefData/ASD/Scripts/balloon.js"></script>
+<script type="text/javascript" src="https://physics.nist.gov/PhysRefData/ASD/Scripts/setup.js"></script>
+<script type="text/javascript" src="https://physics.nist.gov/PhysRefData/ASD/Scripts/go.js"></script>
+<span>
+<a href="#start"><img src="/Images/dot_t.gif" width="1" height="1" style="border:0;margin-top:0;margin-bottom:0" alt="[skip navigation]" /></a>
+</span>
+<table style="width:100%; border:0; margin-top:0">
+<tr><td style="text-align:left"><a href="https://physics.nist.gov/PhysRefData/ASD/index.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/ASD-sm.gif" style="border:0" width="100" height="47"
+alt="[ASD Home]" title="ASD Home"></a><a href="https://physics.nist.gov/PhysRefData/ASD/lines_form.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/Lines.gif" style="border:0" width="70" height="47"
+alt="[Lines Query]" title="Lines Query"></a><a href="https://physics.nist.gov/PhysRefData/ASD/levels_form.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/Levels.gif" style="border:0" width="79" height="47"
+alt="[Levels Query]" title="Levels Query"></a><a href="https://www.nist.gov/pml/atomic-spectra-database-contents"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/List.gif" style="border:0" width="77" height="47"
+alt="[List of Spectra]" title="List of Spectra"></a><a href="https://physics.nist.gov/PhysRefData/ASD/ionEnergy.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/GS-IE.gif" style="border:0" width="124" height="47"
+alt="[Ground States and Ionization Energies]" title="Ground States and Ionization Energies"></a><a
+href="https://physics.nist.gov/PhysRefData/ASBib1/index.html"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/Bib.gif" style="border:0"
+width="98" height="47" alt="[Bibliography]" title="Bibliography"></a><a
+href="https://physics.nist.gov/PhysRefData/ASD/Html/help.html"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/Help.gif" style="border:0"
+width="55" height="47" alt="[Help]" title="Help"/></a></td>
+<td style="text-align:right"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/nist-pl-black.gif" style="border:0" width="136" height="68"
+usemap="#NIST-PL" alt="NIST Physical Measurement Laboratory"/></td>
+</tr></table>
+
+<map name="NIST-PL" id="NIST-PL">
+  <area shape="rect" coords="1,1,135,48" href="https://www.nist.gov" alt="National Institute of Standards and Technology" title="National Institute of Standards and Technology"/>
+  <area shape="rect" coords="1,50,135,67" href="https://www.nist.gov/pml" alt="NIST Physical Measurement Laboratory" title="NIST Physical Measurement Laboratory"/>
+</map>
+<a id="start"><!-- filler --></a>
+<script type="text/javascript">
+<!-- //
+var newwindow
+//var n
+function popdef(n){
+newwindow = window.open(n,"data1","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=600,height=450");
+if (window.focus) {newwindow.focus()}
+return true;
+}
+function popbib(n){
+newwindow = window.open(n,"data2","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=950,height=800");
+if (window.focus) {newwindow.focus()}
+return true;
+}
+function popded(n){
+//newwindow = window.open(n,"data3","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=640,height=250");
+newwindow = window.open(n,"data3","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=800,height=320");if (window.focus) {newwindow.focus()}
+return true;
+}
+function popdiag(n){
+newwindow = window.open(n,"data3","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=800,height=1000");if (window.focus) {newwindow.focus()}
+return true;
+}
+// -->
+</script>
+
+<table style="width:100%">
+  <tr>
+    <td style="color:#223388; font-size:150%; vertical-align:middle"><span style="color:black; font-weight:600">NIST Atomic Spectra Database Levels Data</span><p>
+      <sup></sup>Mg  III &nbsp;&nbsp;114 Levels Found<br />
+<b><font size="+1"><i>Z</i> = 12, Ne isoelectronic sequence</font></b><span style="font-size=300%">&nbsp;</span></p>
+    </td>
+    <td style="text-align:right; vertical-align:middle">
+<div class='ref'>
+<b>Example of how to reference these results:</b><br />
+
+Kramida,&nbsp;A., Ralchenko,&nbsp;Yu., Reader,&nbsp;J., and NIST ASD Team (2024).
+  <i>NIST Atomic Spectra Database</i> (ver.&nbsp;5.12),
+  [Online]. Available: <span style="color:#0000cc;">https://physics.nist.gov/asd</span>
+  [2026, October 14].
+  National Institute of Standards and Technology, Gaithersburg, MD.
+    DOI: <span style="color:#0000cc;">https://doi.org/10.18434/T4W30F</span>
+<br />
+<div style="text-align: right; font-size: x-small">
+<a href="javascript:void(0)" onclick="popdef('/cgi-bin/ASD/bibtex.pl?y=2026&amp;m=October&amp;d=14');return true" target="_top">BibTex Citation</a> (new window)
+</div>
+</div>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="2" style="color:#655665; font-family: helvetica,arial; font-size:80%"><b></b></td>
+  </tr>
+</table>
+<br>
+<PRE>
+---------------------------------------------------------------------------------------------------------------------
+Configuration          | Term      |   J |    g |             Level (eV)  |   Uncertainty (eV) |     Level ID       |
+-----------------------|-----------|-----|------|-------------------------|--------------------|--------------------|
+                       |           |     |      |                         |                    |                    |
+2s2.2p6                | 1S        |   0 |    1 |         0.0000          |            0       |      012003.000001 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3s             | 3P*       |   2 |    5 |        52.77267         |                    |      012003.000002 |
+                       |           |   1 |    3 |        52.92490         |                    |      012003.000003 |
+                       |           |   0 |    1 |        53.04690         |                    |      012003.000004 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3s             | 1P*       |   1 |    3 |        53.50290         |                    |      012003.000005 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3p             | 3S        |   1 |    3 |        57.94755         |                    |      012003.000006 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3p             | 3D        |   3 |    7 |        58.77511         |                    |      012003.000007 |
+                       |           |   2 |    5 |        58.84972         |                    |      012003.000008 |
+                       |           |   1 |    3 |        58.95485         |                    |      012003.000009 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3p             | 1D        |   2 |    5 |        59.19448         |                    |      012003.000010 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3p             | 1P        |   1 |    3 |        59.31088         |                    |      012003.000011 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3p             | 3P        |   2 |    5 |        59.36935         |                    |      012003.000012 |
+                       |           |   0 |    1 |        59.42132         |                    |      012003.000013 |
+                       |           |   1 |    3 |        59.44497         |                    |      012003.000014 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3p             | 1S        |   0 |    1 |        61.49766         |                    |      012003.000015 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3d             | 3P*       |   0 |    1 |        65.73372         |                    |      012003.000016 |
+                       |           |   1 |    3 |        65.76377         |                    |      012003.000017 |
+                       |           |   2 |    5 |        65.83101         |                    |      012003.000018 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3d             | 3F*       |   4 |    9 |        65.90541         |                    |      012003.000019 |
+                       |           |   3 |    7 |        65.93890         |                    |      012003.000020 |
+                       |           |   2 |    5 |        66.04957         |                    |      012003.000021 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3d             | 1F*       |   3 |    7 |        66.08001         |                    |      012003.000022 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3d             | 3D*       |   1 |    3 |        66.23207         |                    |      012003.000023 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3d             | 1D*       |   2 |    5 |        66.30389         |                    |      012003.000024 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3d             | 3D*       |   3 |    7 |        66.32207         |                    |      012003.000025 |
+                       |           |   2 |    5 |        66.35381         |                    |      012003.000026 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.3d             | 1P*       |   1 |    3 |        66.47438         |                    |      012003.000027 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4s  | 2[3/2]*   |   2 |    5 |        67.67310         |                    |      012003.000028 |
+                       |           |   1 |    3 |        67.76128         |                    |      012003.000029 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).4s  | 2[1/2]*   |   0 |    1 |        67.94761         |                    |      012003.000030 |
+                       |           |   1 |    3 |        68.03270         |                    |      012003.000031 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4p  | 2[1/2]    |   1 |    3 |        69.42955         |                    |      012003.000032 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4p  | 2[5/2]    |   3 |    7 |        69.65416         |                    |      012003.000033 |
+                       |           |   2 |    5 |        69.69599         |                    |      012003.000034 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4p  | 2[3/2]    |   1 |    3 |        69.75775         |                    |      012003.000035 |
+                       |           |   2 |    5 |        69.79560         |                    |      012003.000036 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).4p  | 2[3/2]    |   1 |    3 |        69.96302         |                    |      012003.000037 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4p  | 2[1/2]    |   0 |    1 |        69.96428         |                    |      012003.000038 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).4p  | 2[3/2]    |   2 |    5 |        70.00949         |                    |      012003.000039 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).4p  | 2[1/2]    |   1 |    3 |        70.01779         |                    |      012003.000040 |
+                       |           |   0 |    1 |        70.68498         |                    |      012003.000041 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4d  | 2[1/2]*   |   0 |    1 |        72.10518         |                    |      012003.000042 |
+                       |           |   1 |    3 |        72.12591         |                    |      012003.000043 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4d  | 2[3/2]*   |   2 |    5 |        72.16803         |                    |      012003.000044 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4d  | 2[7/2]*   |   4 |    9 |        72.17552         |                    |      012003.000045 |
+                       |           |   3 |    7 |        72.19477         |                    |      012003.000046 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4d  | 2[5/2]*   |   2 |    5 |        72.25146         |                    |      012003.000047 |
+                       |           |   3 |    7 |        72.26291         |                    |      012003.000048 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4d  | 2[3/2]*   |   1 |    3 |        72.33864         |                    |      012003.000049 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4f  | 2[3/2]    |   1 |    3 |        72.44963         |                    |      012003.000050 |
+                       |           |   2 |    5 |        72.45067         |                    |      012003.000051 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4f  | 2[9/2]    |   5 |   11 |        72.46410         |                    |      012003.000052 |
+                       |           |   4 |    9 |        72.46424         |                    |      012003.000053 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4f  | 2[5/2]    |   3 |    7 |        72.47669         |                    |      012003.000054 |
+                       |           |   2 |    5 |        72.47758         |                    |      012003.000055 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).4d  | 2[5/2]*   |   2 |    5 |        72.48470         |                    |      012003.000056 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).4f  | 2[7/2]    |   3 |    7 |        72.49206         |                    |      012003.000057 |
+                       |           |   4 |    9 |        72.49222         |                    |      012003.000058 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).4d  | 2[5/2]*   |   3 |    7 |        72.49770         |                    |      012003.000059 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).4d  | 2[3/2]*   |   2 |    5 |        72.49826         |                    |      012003.000060 |
+                       |           |   1 |    3 |        72.58856         |                    |      012003.000061 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).4f  | 2[7/2]    |   3 |    7 |        72.75119         |                    |      012003.000062 |
+                       |           |   4 |    9 |        72.75139         |                    |      012003.000063 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).4f  | 2[5/2]    |   3 |    7 |        72.75208         |                    |      012003.000064 |
+                       |           |   2 |    5 |        72.75289         |                    |      012003.000065 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).5s  | 2[3/2]*   |   2 |    5 |        72.99804         |                    |      012003.000066 |
+                       |           |   1 |    3 |        73.04241         |                    |      012003.000067 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).5s  | 2[1/2]*   |   0 |    1 |        73.27270         |                    |      012003.000068 |
+                       |           |   1 |    3 |        73.30202         |                    |      012003.000069 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).5d  | 2[1/2]*   |   1 |    3 |        75.0546          |                    |      012003.000070 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).5d  | 2[3/2]*   |   1 |    3 |        75.1652          |                    |      012003.000071 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).5f  | 2[3/2]    |   1 |    3 |        75.22284         |                    |      012003.000072 |
+                       |           |   2 |    5 |        75.22362         |                    |      012003.000073 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).5f  | 2[9/2]    |   5 |   11 |        75.23045         |                    |      012003.000074 |
+                       |           |   4 |    9 |        75.23056         |                    |      012003.000075 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).5f  | 2[5/2]    |   3 |    7 |        75.23742         |                    |      012003.000076 |
+                       |           |   2 |    5 |        75.23791         |                    |      012003.000077 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).5g  | 2[5/2]*   |   3 |    7 |        75.23881         |                    |      012003.000078 |
+                       |           |   2 |    5 |        75.23881         |                    |      012003.000079 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).5g  | 2[11/2]*  |   6 |   13 |        75.24117         |                    |      012003.000080 |
+                       |           |   5 |   11 |        75.24117         |                    |      012003.000081 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).5f  | 2[7/2]    |   3 |    7 |        75.24491         |                    |      012003.000082 |
+                       |           |   4 |    9 |        75.24499         |                    |      012003.000083 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).5g  | 2[7/2]*   |   4 |    9 |        75.24561         |                    |      012003.000084 |
+                       |           |   3 |    7 |        75.24561         |                    |      012003.000085 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).5g  | 2[9/2]*   |   5 |   11 |        75.24807         |                    |      012003.000086 |
+                       |           |   4 |    9 |        75.24807         |                    |      012003.000087 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).5d  | 2[3/2]*   |   1 |    3 |        75.4190          |                    |      012003.000088 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).5f  | 2[5/2]    |   3 |    7 |        75.51198         |                    |      012003.000089 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).5f  | 2[7/2]    |   3 |    7 |        75.51201         |                    |      012003.000090 |
+                       |           |   4 |    9 |        75.51204         |                    |      012003.000091 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).5f  | 2[5/2]    |   2 |    5 |        75.51264         |                    |      012003.000092 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).5g  | 2[9/2]*   |   5 |   11 |        75.52019         |                    |      012003.000093 |
+                       |           |   4 |    9 |        75.52019         |                    |      012003.000094 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).5g  | 2[7/2]*   |   4 |    9 |        75.52021         |                    |      012003.000095 |
+                       |           |   3 |    7 |        75.52021         |                    |      012003.000096 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).6s  | 2[3/2]*   |   1 |    3 |        75.5389          |                    |      012003.000097 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).6s  | 2[1/2]*   |   1 |    3 |        75.8026          |                    |      012003.000098 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).6d  | 2[3/2]*   |   1 |    3 |        76.6967          |                    |      012003.000099 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).6d  | 2[3/2]*   |   1 |    3 |        76.9572          |                    |      012003.000100 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).7d  | 2[3/2]*   |   1 |    3 |        77.6157          |                    |      012003.000101 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).7d  | 2[3/2]*   |   1 |    3 |        77.8806          |                    |      012003.000102 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).8d  | 2[3/2]*   |   1 |    3 |        78.2126          |                    |      012003.000103 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<1/2>).8d  | 2[3/2]*   |   1 |    3 |        78.4805          |                    |      012003.000104 |
+                       |           |     |      |                         |                    |                    |
+2s2.2p5.(2P*<3/2>).9d  | 2[3/2]*   |   1 |    3 |        78.6197          |                    |      012003.000105 |
+-----------------------|-----------|-----|------|-------------------------|--------------------|--------------------|
+-----------------------|-----------|-----|------|-------------------------|--------------------|--------------------|
+Mg IV (2p5 2P*<3/2>)   | Limit     | --- |      |        80.1436          |            0.0006  |      012003.Lim001 |
+-----------------------|-----------|-----|------|-------------------------|--------------------|--------------------|
+-----------------------|-----------|-----|------|-------------------------|--------------------|--------------------|
+Mg IV (2p5 2P*<1/2>)   | Limit     | --- |      |        80.4200          |                    |      012003.Lim002 |
+                       |           |     |      |                         |                    |                    |
+2s.2p6.3p              | 1P*       |   1 |    3 |        98.01            |                    |      012003.000108 |
+                       |           |     |      |                         |                    |                    |
+2s.2p6.4p              | 1P*       |   1 |    3 |       108.45            |                    |      012003.000109 |
+                       |           |     |      |                         |                    |                    |
+2s.2p6.5p              | 1P*       |   1 |    3 |       112.58            |                    |      012003.000110 |
+                       |           |     |      |                         |                    |                    |
+2s.2p6.6p              | 1P*       |   1 |    3 |       114.71            |                    |      012003.000111 |
+                       |           |     |      |                         |                    |                    |
+2s.2p6.7p              | 1P*       |   1 |    3 |       115.89            |                    |      012003.000112 |
+                       |           |     |      |                         |                    |                    |
+2s.2p6.8p              | 1P*       |   1 |    3 |       116.63            |                    |      012003.000113 |
+-----------------------|-----------|-----|------|-------------------------|--------------------|--------------------|
+-----------------------|-----------|-----|------|-------------------------|--------------------|--------------------|
+Mg IV (2s.2p6 2S<1/2>) | Limit     | --- |      |       118.7687          |                    |      012003.Lim003 |
+---------------------------------------------------------------------------------------------------------------------
+</PRE>
+
+<p style="color:black; font-family: helvetica,arial; font-weight:bold">If you did not find the data you need, please <a href="/cdn-cgi/l/email-protection#3c5d5059445d5258594e12574e5d5155585d7c52554f48125b534a034f495e56595f480171554f4f55525b190e0c585d485d190e0c5552190e0c7d6f781a5d514c075e53584501715b190e0c757575190e0c50594a59504f">inform the ASD Team</a>.</p><table style="width:100%; border:0; margin-top:0">
+<tr><td style="text-align:left"><a href="https://physics.nist.gov/PhysRefData/ASD/index.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/ASD-sm.gif" style="border:0" width="100" height="47"
+alt="[ASD Home]" title="ASD Home"></a><a href="https://physics.nist.gov/PhysRefData/ASD/lines_form.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/Lines.gif" style="border:0" width="70" height="47"
+alt="[Lines Query]" title="Lines Query"></a><a href="https://physics.nist.gov/PhysRefData/ASD/levels_form.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/Levels.gif" style="border:0" width="79" height="47"
+alt="[Levels Query]" title="Levels Query"></a><a href="https://www.nist.gov/pml/atomic-spectra-database-contents"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/List.gif" style="border:0" width="77" height="47"
+alt="[List of Spectra]" title="List of Spectra"></a><a href="https://physics.nist.gov/PhysRefData/ASD/ionEnergy.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/GS-IE.gif" style="border:0" width="124" height="47"
+alt="[Ground States and Ionization Energies]" title="Ground States and Ionization Energies"></a><a
+href="https://physics.nist.gov/PhysRefData/ASBib1/index.html"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/Bib.gif" style="border:0"
+width="98" height="47" alt="[Bibliography]" title="Bibliography"></a><a
+href="https://physics.nist.gov/PhysRefData/ASD/Html/help.html"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/Help.gif" style="border:0"
+width="55" height="47" alt="[Help]" title="Help"/></a></td>
+<td style="text-align:right"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/nist-pl-black.gif" style="border:0" width="136" height="68"
+usemap="#NIST-PL" alt="NIST Physical Measurement Laboratory"/></td>
+</tr></table>
+
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4ab4684c8fac384',t:'MTc5MjAzMDEwMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

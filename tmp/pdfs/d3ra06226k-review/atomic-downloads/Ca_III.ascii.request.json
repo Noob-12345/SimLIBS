@@ -1,0 +1,7 @@
+{
+  "request_url": "https://physics.nist.gov/cgi-bin/ASD/energy1.pl?spectrum=Ca+III&units=1&format=1&output=0&page_size=10000&multiplet_ordered=1&conf_out=on&term_out=on&level_out=on&j_out=on&g_out=on&ids_out=1&unc_out=1&submit=Retrieve+Data",
+  "retrieved_utc": "2026-10-15T02:09:18.049501+00:00",
+  "response_sha256": "5e8b45b98a3af7dcacf4e3eec07f46606d5aa06c88a1ea2766b9a3acd9eaae8c",
+  "http_status": 200,
+  "response_bytes": 61066
+}

@@ -33,6 +33,7 @@ for (const [directory, accept] of [
   ['simlibs_ui', name => name.endsWith('.py')],
   ['web', name => ['server.py', 'backend_api.py', 'real_backend.py', 'sampling.py'].includes(name)],
   ['source/simLIBS', name => name.endsWith('.py') || name === 'py.typed'],
+  ['source/simLIBS/data', name => name.endsWith('.json')],
   ['source', name => name.startsWith('LICENSE')],
   ['Linedatabase', name => /\.(csv|json|md)$/i.test(name)],
   ['', name => name === 'README.md']

@@ -19,7 +19,11 @@
 
 ## 当前功能与数据边界
 
-已复制并连接真实 Python 后端。local 使用本地谱线库及 LTE/Saha 计算；client 使用 NIST dataSticksArray 计算线强加 Python 展宽；server 使用 NIST 官方页面计算与展宽。默认空谱，真实进度，失败/取消保留上一成功结果，无合成谱回退。高级模拟采用真实本地有限能级 LTE slab 自吸收与用户选择的参数化基体模型，提供共同尺度三谱及可携带导出，不宣称无需标定的普适材料预测。完整功能、单位推导与边界见 [功能与原理](PROJECT_FUNCTIONS_AND_PRINCIPLES.md)。本轮实现与自测见 [.ai-workflow/20261014-advanced-batch-scan/](.ai-workflow/20261014-advanced-batch-scan/)，最终独立验收由原 plan 负责。
+已复制并连接真实 Python 后端。local 使用本地谱线库及 LTE/Saha 计算；client 使用 NIST dataSticksArray 计算线强加 Python 展宽；server 使用 NIST 官方页面计算与展宽。默认空谱，真实进度，失败/取消保留上一成功结果，无合成谱回退。当前源码的高级模拟使用与原 simLIBS 相同的论文 Eq.7 / Stark 逐线引擎，适配版本为 `paper-eq7-stark-sa-1`，提供名义薄谱、基体薄谱、自吸收修正谱的共同尺度对照与可携带导出。参数化基体仍需实验标定。完整公式、单位、真实数据来源与适用边界见 [论文自吸收报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 和 [功能与原理](PROJECT_FUNCTIONS_AND_PRINCIPLES.md)。本轮 Vue 实施与自测见 [.ai-workflow/20261015-paper-self-absorption/implementation.md](.ai-workflow/20261015-paper-self-absorption/implementation.md)，最终验收由原 plan 负责。
+
+默认高级数据为论文 Table 1 的 Mg、Ca、Zn 共31条谱线及 NIST I/II/III 能级快照。示例为 Mg 100%、284.5–286 nm；缺少必要 Stark/三态原子数据的元素（如默认数据中的 Fe）会明确拒绝。光程 L 默认0.01 m，总数密度按 `柱密度[cm⁻²] / (100 × L[m])` 换算为 cm⁻³，基体产额倍率再作用于有效数密度；Ne单独指定。逐线 SA 与吸收展宽先计算，仪器 Gaussian 在其后应用，R不进入光学厚度。旧热与附加 Gaussian/Lorentz 草稿字段不用于本模型。高级谱沿用 photon 强度约定，与论文能量式按单线光子能量换算；不声明标定探测器计数。
+
+**2026-10-15 本轮交付为源码、Python 后端和 Markdown 报告。** 后端已在 Python 3.10 环境验证，Vue 类型检查与静态构建已通过；未重打包或更新 `dist-desktop/` 中的旧 EXE/NSIS。此前桌面产物和历史验收记录不能代表本轮论文引擎已进入可执行文件。Tauri 资源白名单与收集脚本均已包含 `backend/source/simLIBS/data/*.json`，实际安装包资源路径仍须在具备 Rust/Cargo 的环境重新构建后验收。
 
 顶栏两个相邻独立按钮分别选择日间/夜间/跟随系统与五种配色，菜单互斥并支持键盘操作。顶栏配色即时保存，仅更新颜色字段；设置页其它未保存配置保留。启动时同一窗口先显示界面准备动画，偏好、字体与首次布局就绪后进入主页；减少动态时改为短静态显示。载入失败或超时提供重新载入，不表示计算引擎加载。
 
@@ -32,7 +36,7 @@ Windows原生标题栏通过现有Tauri窗口接口同步日间/夜间；跟随�
 | 单次模拟 | Te / 实际 Ne / 整数 R 精确输入，波长、模式/高级参数，元素候选与配比校验，真实运行/取消，完成图谱快照 |
 | 批量模拟 | 独立草稿，固定/带种子的随机/CSV 模板，CSV 结构和比例校验，样本预览/统计，真实运行/取消 |
 | 参数扫描 | Te / Ne / R 轴，包含两端的逐帧数据、当前值、时间轴、播放/暂停/前后帧；离开该功能停止播放，真实后台任务继续运行 |
-| 高级模拟 | 本地有限能级 LTE slab、独立自吸收/参数化基体开关、名义薄谱/基体薄谱/修正谱、真实任务取消历史和三谱导出 |
+| 高级模拟 | 论文 Eq.7 / Stark 逐线自吸收、三态 Saha 布居、光程/柱密度和参数化基体、可选仪器卷积、共同尺度三谱、任务取消/历史及三谱导出 |
 | 任务记录 | 真实持久化历史、刷新、详情、重开结果、取消及合法批量续跑 |
 | 设置 | 日间/夜间/跟随系统，五种主题，减少动态，连接/环境检测与受控 Python 重启，本地保存/放弃更改 |
 
@@ -98,4 +102,4 @@ npm run desktop:build
 
 `src/pages/` 为五页界面，`src/components/` 为共享控件/Canvas/SVG，`src/lib/` 为数据、校验、任务、偏好及文件适配。`src-tauri/` 为原生外壳和最小权限，`scripts/collect-desktop.mjs` 收集桌面产物。应用图标由本项目 `public/spectrum.svg` 经 Tauri icon CLI 派生。
 
-保留既有 plan/code 两角色，业务改动每步最多三个文件，code 实现与自测后交原 plan 独立验收。原 UI/Python/CLI/WPF、源库、线库与已有结果保持只读；本轮授权仅复制并修改 Vue 内 backend 副本。
+保留既有 plan/code 两角色，业务改动每步最多三个文件，code 实现与自测后交原 plan 独立验收。本轮核心引擎修改范围以 [论文自吸收报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 为准；Vue code 只处理 Vue 适配、资源与文档，原 UI/CLI/WPF、旧线库及已有结果不在其修改范围。

@@ -4,7 +4,7 @@ import type { RandomRules } from './demo'
 import { request, spectrumResult, fromParameters } from './backend'
 export const page = ref<Page>('single')
 export const single = reactive({ params: defaults(), composition: [elementDraft()], result: null as Spectrum | null })
-export const advanced = reactive({ params: {...defaults(),low:'248',high:'249',step:'.005',charge:'1',broaden:true}, composition:[elementDraft()], result:null as Spectrum|null, selfAbsorption:true,matrix:true,column:'1e16',teFactor:'1',neFactor:'1',gaussian:'.01',lorentz:'.002',temperature:'10000',responses:{} as Record<string,string> })
+export const advanced = reactive({ params: {...defaults(),low:'284.5',high:'286',step:'.005',charge:'2',broaden:true}, composition:[elementDraft('Mg')], result:null as Spectrum|null, selfAbsorption:true,instrumentBroadening:true,matrix:true,column:'1e16',pathLength:'.01',teFactor:'1',neFactor:'1',gaussian:'.01',lorentz:'.002',temperature:'10000',responses:{} as Record<string,string> })
 export const batch = reactive({ params: defaults(), composition: [elementDraft()], generation: 'fixed' as 'fixed' | 'random' | 'template', count: '24', packageSize: '8', seed: '42', rules: { te: true, teMin: '0.8', teMax: '1.5', ne: true, neMin: '5e16', neMax: '2e17' } as RandomRules, templateText: '', templateName: '', result: null as BatchSample[] | null, jobId: '', manifest: null as any })
 export const scan = reactive({ params: defaults(), composition: [elementDraft()], axis: 'te' as ScanResult['axis'], from: '0.6', to: '1.8', count: '12', result: null as ScanResult | null, frame: 0, spectrum: null as Spectrum | null, loading: false, error: '' })
 export const tasks = reactive<DemoTask[]>([])

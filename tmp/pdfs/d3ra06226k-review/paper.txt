@@ -1,0 +1,716 @@
+RSC Advances
+                                                                                                                Published on 09 October 2023
+    PAPER                                                                                                          Licensed under CC-BY 4.0
+
+
+                                          A numerical procedure for understanding the self-
+Cite this: RSC Adv., 2023, 13, 29613
+                                          absorption eﬀects in laser induced breakdown
+                                          spectroscopy
+                                          Lekha Mary John               and K. K. Anoop         *
+
+                                          Optical emission spectroscopic techniques, such as laser-induced breakdown spectroscopy (LIBS), require
+                                          an optimal state of plasma for accurate quantitative elemental analysis. Three fundamental assumptions
+                                          must be satisﬁed in order for analytical results to be accurate: local thermodynamic equilibrium (LTE),
+                                          optically thin plasma, and stoichiometric ablation. But real-life plasma often fails to satisfy these
+                                          conditions, especially the optical thinness of plasma, resulting in the reabsorption of emitted radiation
+                                          called self-absorption. To study the self-absorption eﬀect, we simulated optically thick emission spectrum
+                                          at typical laser-produced plasma conditions. The simulation of the spectrum involves four stages,
+                                          including the estimation of the ratio of the number density of various ionisation states in the plasma using
+                                          the Saha–Boltzmann equation, the peak intensity of a spectral line using the Boltzmann equation, the full-
+                                          width half maxima of each spectral line using the Stark broadening method, and the generation of full
+                                          spectra by providing a Lorentzian proﬁle for each spectral line. Then self-absorption is applied to the
+                                          simulated spectrum. We investigated the dependence of the self-absorption coeﬃcient on the plasma
+                                          temperature, optical path length, and element concentration in the sample. Self-absorption decreases
+Received 13th September 2023
+Accepted 3rd October 2023
+                                          with increased plasma temperature, whereas it increases with increasing optical path length and analyte
+                                          concentration. We also investigated the role of self-absorption in quantitative analysis by calibration-free
+DOI: 10.1039/d3ra06226k
+                                          LIBS with and without resonance lines of the binary alloy (Mg 50% & Ca 50%). We observed a drastic
+rsc.li/rsc-advances                       reduction in error from 27% to 2% in the composition estimation when excluding resonance lines.
+
+
+                                                                                    optically thin when the emitted light passes through it and exits
+1     Introduction                                                                  without evident attenuation or scattering. In optically thick
+Laser-induced breakdown spectroscopy (LIBS) is an analytical                        plasma, when light propagates through the plasma to the
+methodology rooted in the principles of atomic emission                             outside, the emitted radiation is re-absorbed by the same
+spectroscopy, which involves the utilization of laser-induced                       atomic or molecular species in the transmission path.3 Thus,
+plasma to investigate the elemental composition of a given                          the emission intensity measured beyond the source is reduced.
+sample.1 The method exhibits notable characteristics such as in                     Each spectral line exhibits varying degrees of self-absorption,
+situ real-time analysis, minimal or no need for sample prepa-                       and the reabsorption of a single emission line is inuenced
+ration, and the ability to perform standoﬀ LIBS measurements                        by numerous factors. The phenomenon of self-absorption,
+on materials irrespective of their physical states, which make                      which leads to a decrease in spectral line intensity, manifests
+LIBS relevant among the competitive techniques.2 The emission                       as a nonlinear relationship between peak intensity and
+line intensity of each species in the spectrum is related to the                    concentrations.4 As a result, self-absorption must be compen-
+species concentration in the sample, and this idea is utilized for                  sated during the analysis to evaluate concentration accurately.
+quantitative analysis. As a result, any inaccuracy or variation in                     Self-absorption is a property of all types of natural extended
+intensity led to a departure from precise quantitative ndings.                     radiation sources. All emission lines undergo self-absorption;
+The precise measurement of intensity is restricted by experi-                       however, the eﬀects vary from barely detectable to extremely
+mental factors such as the eﬀectiveness of the detection system,                    strong depending on the line.5 Besides reducing the line
+the transmission power of collecting optics, etc. Apart from                        intensity, self-absorption distorts the emission line prole and
+these factors, self-absorption, a consequence of optically thick                    enlarges the full-width half maxima (FWHM).3 Self-absorption
+plasma, remains the greatest concern with regard to emission                        will lead to discrepancies in calculating plasma characteristics
+line intensity. Basically, the plasma can only be regarded as                       like the electron number density and temperature. These
+                                                                                    factors will ultimately result in inaccurate estimations of the
+Department of Physics, Cochin University of Science and Technology, Kochi-682022,
+                                                                                    elemental composition. Self-absorption depends on the lower-
+India. E-mail: anoopkk@cusat.ac.in                                                  level population, analyte density, radiation source size,
+
+
+© 2023 The Author(s). Published by the Royal Society of Chemistry                                             RSC Adv., 2023, 13, 29613–29624 | 29613
+RSC Advances                                                                                                                        Paper
+
+ablation eﬃciency, and plasma volume.5 Depending on their              the dataset of all available transitions of elements with known
+abundance in the plasma, lines originating from either neutral         spectroscopic data.
+species or ionised species of the corresponding element may be             The simulation of the optical emission spectrum includes
+prone to reabsorption.5 Self-absorption is more prominent for          four stages. The rst stage involves calculating the concentra-
+resonance lines (transition end in the ground state) and tran-         tion of each ionisation stage in the plasma. In the second stage,
+sitions with signicant transition probability. Self-absorption        the Boltzmann distribution law is employed to calculate the
+can be quantied using the self-absorption (SA) coeﬃcient,             intensity of individual emission lines. The third stage deter-
+which is the ratio of self-absorbed line intensity to intensity        mines individual line broadening, and the fourth stage plots the
+without self-absorption. And its value is between 0 and 1. The         spectrum based on the broadening. The detailed description of
+line is entirely self-absorbed if it has a value of zero; if it has    diﬀerent stages in the simulation was explained in our previous
+a value of one, the line is not self-absorbed.                         work.18 In previous work we used Gaussian broadening, which
+    Numerous articles discussed the physical mechanism of self-        is attributed to the resolving power of the spectrometer. Here,
+absorption in LIBS and their corrective methods from theoret-          we used stark broadening as the broadening mechanism for the
+ical and experimental perspectives.3–6 Novel approaches and            emission lines, and therefore, the line shape function is Lor-
+methods for self-absorption correction or reduction have               entzian. A detailed description of the each stages of the simu-
+garnered signicant attention in numerous studies in an eﬀort          lation is given in the following sections.
+to reduce this undesirable eﬀect.7–14 Diﬀerent works have been             2.1.1 Estimation of contribution of each species in the
+reported in the literature exclusively discussing self-absorption      plasma. The optical emission spectrum of the plasma contains
+correction. Bulajic et al. adopted the curve of growth method for      emissions originating from distinct ionization states of an
+self-absorption correction, which combines intricate numerical         element. Under local thermodynamic equilibrium (LTE) condi-
+analysis with physical expressions.7 Sun et al. employed               tions, the relative abundances of each ionization state in an atom
+a comparatively simpler approach based on the internal refer-          can be assessed using the Saha-ionization equation. This equa-
+ence for the self-absorption correction (IRSAC) method.11 The          tion establishes a linkage between the population of a given
+degree of self-absorption has been investigated using experi-          ionized state and the immediately subsequent higher state of the
+mental approaches such as duplicating plasma emission by               same elemental species. Consequently, it becomes a valuable tool
+placing a spherical mirror in front of it.15 It is shown that by       for estimating the concentration distribution of individual
+utilising this simple technique, optically thick plasma condi-         species within the plasma medium. In this study, we specically
+tions can be rapidly determined. Zheng et al. used the plasma          examined the neutral, singly ionized, and doubly ionized states of
+image as the primary parameter to evaluate self-absorption and         the elemental species. Employing the Saha-ionization equation
+proposed “relative self-absorption coeﬃcient” method.16                facilitated estimation of the respective contributions of these
+    An accurate compositional analysis using LIBS needs a proper       ionization states to the plasma composition and is given by,22
+understanding of the physical mechanism of self-absorption and                                                                     
+                                                                                  Ne NM0 ðIIÞ            Us ðTÞII T 3=2        Eion
+the main factors inuencing the self-absorption eﬀect.17 In this                              ¼ 6  1021                exp            (1)
+work, we simulated the optical emission spectrum at the typical
+                                                                                   NM0 ðIÞ                 Us ðTÞI              T
+condition of laser-produced plasma (LPP). Then inserted self-          where Ne is the electron number density, NM0(I) and NM0(II) are
+absorption to each spectral line, which varies depending on the        the species number density in the lower state and subsequent
+line parameters. The impacts of various parameters such as             higher state, and Us(T)I and Us(T)II are the partition function of
+plasma temperature, optical path length and concentration of           the lower state and subsequent higher state, respectively, at the
+analyte on self-absorption are then investigated. By this, we try to   temperature T (in eV), and Eion is the ionization energy of the
+convey how the hypothesis of an optically thin plasma alters in        lower state. Using these ratios, we can estimate the fractional
+a real-life situation and emphasize the signicance of using self-     contribution of each state of a particular element.
+absorption correction procedures.                                          2.1.2 Estimation of peak intensity of individual lines. The
+                                                                       Boltzmann equation could be utilized to determine the inten-
+2 Theoretical background                                               sities of the emission lines in the spectrum. The intensity of
+                                                                       each line in the spectrum is due to the characteristic transitions
+2.1 Simulation of emission spectra at typical conditions of
+                                                                       of constituent species. The population of each state is distrib-
+LPP
+                                                                       uted according to the Boltzmann distribution law. Therefore,
+This section discusses the theory and diﬀerent stages in the           the intensity of the emission line at l wavelength can be
+simulation of optical emission spectra.18 We require plasma            expressed in terms of the Boltzmann equation,
+characteristics for simulation, including the fractional composi-
+                                                                                                  hc          expðEk =TÞ
+tion of the elements in the plasma as well as the plasma                                 Iki ¼       Aki gk N                            (2)
+                                                                                                 4pl             Us ðTÞ
+temperature (T) and electron number density (Ne). Spectroscopic
+data such as wavelengths, upper and lower-level energies,              where Iki is the intensity of the emission line at l wavelength, N
+degeneracy, and transition probability can be retrieved from           is the total population of the species, Aki is transition probability
+standard databases like NIST or Kurucz.19,20 The Stark width           and gk is the degeneracy of the upper energy level Ek. This
+parameter of lines, which is also needed for simulation, may be        method pre-computes the intensities of all possible lines at
+found in the Stark-B database.21 The input for the simulation is
+
+
+29614 | RSC Adv., 2023, 13, 29613–29624                                   © 2023 The Author(s). Published by the Royal Society of Chemistry
+Paper                                                                                                                          RSC Advances
+
+a given temperature and electron density, allowing spectra to be          2.2   Introducing self-absorption to the emission lines
+generated over a wide range of wavelengths.
+                                                                          In the real spectrum, emission from plasma suﬀers self-
+   2.1.3 Estimation of full width at half maxima (FWHM) of
+                                                                          absorption phenomenon, and its severity varies from line to
+spectral lines. There are various broadening mechanisms for
+                                                                          line. It is essential to evaluate how much does self-absorption
+spectral lines, such as natural broadening, Doppler broadening,
+                                                                          inuence the analytical line prole. Plasma temperature,
+and Stark broadening.1 Natural broadening in laser-induced
+                                                                          optical path length, and analyte concentration in the sample are
+breakdown spectroscopy (LIBS) is caused by the nite lifetime
+                                                                          the primary factors aﬀecting self-absorption. A quantitative
+of excited states in atoms or ions, leading to an inherent                parameter must be dened to determine the extend to which
+uncertainty in the energy of emitted photons. This uncertainty            self-absorption aﬀects the spectral line. The amount of self-
+broadens the emission lines, but it is negligible when compared
+                                                                          absorption of laser-produced plasma can be determined using
+with other methods.1 Doppler broadening of spectral lines is
+                                                                          the self-absorption coeﬃcient, which is frequently utilized to
+caused by the thermal motion of particles in the plasma. As
+                                                                          modify the intensities or widths of spectral lines.5 The degree of
+atoms and ions move at diﬀerent velocities within the plasma,
+                                                                          self-absorption for a specic emission line can be quantied
+the Doppler eﬀect leads to a spread in the frequencies or
+                                                                          using an assumption of homogenous plasma satisfying LTE.8
+wavelengths of the emitted photons, resulting in broadened
+                                                                          The self-absorption coeﬃcient, denoted as SA coeﬃcient, is
+spectral lines.23 Stark broadening results from the impact of             characterized as the ratio between the actual intensity of the
+electric elds within the plasma on the energy levels of emitting         emission line when it is under optically thick conditions (I(l0))
+species. This eﬀect arises due to the interactions between
+                                                                          to the intensity value it would possess in a state of optical
+charged particles in the plasma, causing a distortion of the
+                                                                          thinness (I0(l0)). Specically, its maximum intensity (i.e., for
+energy levels and broadening the emission lines.23 As is well
+                                                                          l = l0) is lower than that of the optically thin condition, as
+known, Stark broadening is a signicant phenomenon in laser-
+                                                                          governed by the following relationship:3,26,27
+produced plasmas (LPPs), and it results in a Lorentzian line                                                                               
+prole. Here we used Stark broadening method to estimate the                       Iðl0 Þ     ð1  expð kðl0 ÞlÞÞ         1  exp q Dl1=2
+                                                                           SA ¼             ¼                      ¼ Dl1=2
+(FWHM (Dl1/2) in nm) of emission lines,24                                          I0 ðl0 Þ          kðl0 Þl                       q
+                                   1=4                                                                                            (6)
+                  Ne              Ne            3 1=3      Ne
+ Dl1=2 y 2 W            þ 3:5 A             1   N D    W
+                 1016            1016           4          1016           where k(l0) is the absorption coeﬃcient, and l is the optical path
+                                                               (3)        length (absorption) (in meters). The k(l0)l, also called as optical
+                                                                          depth, determines the self-absorption degree of the line. The
+where Ne is the electron number density, W is the electron-impact         Dl1/2 is the FWHM; the formula shows that the SA coeﬃcient
+width parameter, A is the ion broadening parameter, and ND                and q are inversely proportional. The self-absorption eﬀect is
+represents the particle count within the Debye sphere. The value          high when q is large and weak when q is small.8 q can be
+of electron-impact width parameter is taken from Stark-B data-            expressed as q = 2(e2/mc2)nifl02l, where e and m represent the
+base.21 The electron contribution makes up the rst part of the           charge of an electron in units of stat coulombs and the mass of
+right-hand sides of eqn (1), while the ion correction to the Stark        the electron in grams, respectively. And f is the oscillator
+broadening makes up the second. Since electron impact is mainly           strength of a transition, which is a dimensionless quantity, and
+responsible for Stark broadening of lines, the expression can be          ni represents the number density of the species in the ith energy
+simplied to:25                                                           level. When we combine the Boltzmann distribution law and
+                                          
+                                       Ne                                 the oscillator strength (the Ladenburg formula), we can express
+                       Dl1=2 y 2 W                              (4)
+                                      1016                                q as:28
+                                                                                                Ns gk l0 4 Aki l expð Ei =kB TÞ
+                                                                                           q¼                                             (7)
+   2.1.4 Generating nal spectrum. The line prole of laser-                                               4 p2 cUs ðTÞ
+induced high-density plasma can be approximately repre-
+                                                                          where l0 is the emission line wavelength (in meters); l is the
+sented by the standard Lorentz shape due to the signicant
+                                                                          optical path length (absorption) (in meters); gk (dimensionless)
+inuence of Stark broadening mechanism.3 Peak intensity and
+                                                                          is the degeneracy (2J + 1; J represents the total angular
+FWHM are the input parameters for the corresponding wave-
+                                                                          momentum quantum number) of the specic state; Ns is the
+lengths. The Lorentzian spectral prole is given by,1
+                                                                          number density of the species s (m−3); and Εi is the lower-level
+                                       Dl1=2 2                            energy (eV); T (K) indicates the plasma temperature; kB indicates
+                         1               2                                the Boltzmann constant; Us(T) indicates the partition function.
+               IðlÞ ¼ Iki x                         2             (5)
+                         p             2     Dl1=2 2                      The eqn (6) expresses an inverse relationship between the SA
+                              ðl  l0 Þ þ                                 coeﬃcient and q. The self-absorption eﬀect is high when q is
+                                               2
+                                                                          large and weak when q is small.8 Hou et al. investigated how the
+                                                                          q value changes with the temperature (T) of the plasma.27 They
+   By adding intensity of individual line prole give rise to the         focused on the Cu I line at 521.82 nm and observed that as the
+full optical emission spectrum of ideal analytical plasma.                temperature decreases, the q value also decreases. However,
+                                                                          when they analyzed the Al I line at 396.15 nm, they discovered
+
+
+
+© 2023 The Author(s). Published by the Royal Society of Chemistry                                     RSC Adv., 2023, 13, 29613–29624 | 29615
+RSC Advances                                                                                                                        Paper
+
+that the numerical tting curve of q versus T indicated an             spectroscopic characteristics of the line, such as degeneracy, the
+opposite trend: the q value for Al increases as the temperature        lower-level energy, and transition probability, all inuence the
+decreases.27 Depending on the abundance of the element in the          reabsorption of emitted light.5 The distribution of population
+plasma, self-absorption may be introduced to both neutral and          among diﬀerent energy levels, which subsequently inuences
+ionised emission lines of the same element. The SA coeﬃcient           the optical thickness of the lines, is strongly inuenced by the
+has a value between 0 and 1. The line is entirely self-absorbed if     experimental parameters such as spatio-temporal distribution
+SA coeﬃcient value is zero and not self-absorbed if it is one.         of the plasma, the laser energy, and the ambient conditions.
+Self-absorption also has an impact on the line width's value.11,29     The inuence of these experimental parameters on self-
+The precise correlation between the observed width (Dl1/2) and         absorption is very complex, and the impact of the experi-
+the width of the corresponding non-self-absorbed state (l1/20)         mental parameters must thus be considered separately for
+can be mathematically expressed through the utilization of the         diﬀerent situations and for diﬀerent emission lines.5 Changing
+eqn (6), and the relation given by,30                                  the irradiation conditions and the acquisition time may alter
+                          Dl1=2                                        the amount of self-absorption in accordance with changes in
+                                 ¼ ðSAÞa                         (8)   plasma temperature (T), concentration of the species (C), and
+                          Dl1=20
+                                                                       absorption path length (l) produced in the LIBS plasmas.5
+where a = −0.54.30 Using eqn (6), we can estimate the value of            We simulated the plasma spectrum of magnesium under
+SA coeﬃcient of an emission line, at particular T, Ns, and l           both optically thick and thin conditions. These simulations
+values. And by using eqn (6) and (8), we can estimate the change       were carried out at three distinct temperatures: 0.5 eV (5802 K),
+in line intensity and FWHM to simulate the emission lines              1 eV (11 604 K), and 1.5 eV (17 407 K). The electron number
+accordingly.                                                           density was maintained at 1 × 1017 cm−3, and an optical path
+                                                                       length of 1 cm was utilized, reecting the typical conditions
+                                                                       found in laser-produced plasmas (LPPs). In Fig. 1, the impact of
+3 Results and discussion                                               self-absorption on the most prominent magnesium spectral
+                                                                       lines is demonstrated. Specically, the lines of Mg I at
+Self-absorption is not a characteristic of the plasma, as it
+                                                                       285.212 nm and Mg II at 279.077 nm, 279.552 nm, and
+exhibits variability from line to line within the identical species.
+                                                                       280.270 nm are showcased. The spectroscopic parameters for
+The plasma characteristics, such as plasma temperature,
+                                                                       the simulation are taken from NIST spectral database, Kurucz
+species number density, and plasma volume, as well as the
+
+
+
+
+Fig. 1 Simulated emission spectrum from optically thick plasma of Magnesium at 1× 1017 cm−3 electron number density and 0.5 to 1.5 eV plasma
+temperature (plasma temperature indicated on each graph). For each temperature, emission spectra of neutral and singly ionized species are
+shown.
+
+
+
+29616 | RSC Adv., 2023, 13, 29613–29624                                   © 2023 The Author(s). Published by the Royal Society of Chemistry
+Paper                                                                                                                   RSC Advances
+
+Table 1   Emission lines and corresponding spectroscopic parameters used for simulation
+
+                               Stark width       Transition       Accuracy error      Lower       Upper
+              Wavelength       parameter         probability      of transition       energy      energy      Degeneracy       Degeneracy
+Species       (nm)             (nm)              (S−1)            probability (%)     (eV)        (eV)        (lower)          (upper)
+
+Zn I          213.857          0.003             7.14 × 108        3                  0            5.795      1                3
+Zn I          334.501          0.048             1.70 × 108       10                  4.077        7.783      5                7
+Zn II         206.200          0.004             3.86 × 108        7                  0            6.010      2                2
+Zn II         209.992          0.006             5.60 × 108       25                  6.119       12.02       4                6
+Ca I          239.856          0.114             1.67 × 107       18                  0            5.167      1                3
+Ca I          318.052          1.670             2.90 × 106       50                  1.898        5.796      5                3
+Ca I          322.590          3.860             1.60 × 107       50                  1.898        5.741      5                7
+Ca I          397.371          0.190             1.75 × 107       25                  1.898        5.018      5                3
+Ca I          422.673          0.012             2.18 × 108        7                  0            2.932      1                3
+Ca I          443.496          0.126             6.70 × 107       25                  1.885        4.680      3                5
+Ca I          445.478          0.126             8.70 × 107       25                  1.898        4.681      5                7
+Ca I          518.885          0.581             4.00 × 107       50                  2.932        5.321      3                5
+Ca I          585.745          0.790             6.60 × 107       50                  2.932        5.048      3                5
+Ca II         211.276          0.048             9.70 × 107       25                  3.150        9.017      4                6
+Ca II         213.230          0.024             2.00 × 106       50                  1.692        7.505      4                2
+Ca II         317.933          0.045             3.60 × 108       25                  3.150        7.049      4                6
+Ca II         393.366          0.022             1.47 × 108       25                  0            3.150      2                4
+Ca II         396.846          0.023             1.44 × 108       25                  0            3.123      2                2
+Mg I          273.654          2.610             1.25 × 107       25                  2.716        7.245      5                7
+Mg I          285.166          1.270             2.35 × 107       25                  2.716        7.063      5                7
+Mg I          285.212          0.007             4.91 × 108        3                  0            4.345      1                3
+Mg I          294.199          0.237             6.83 × 106       30                  2.716        6.929      5                3
+Mg I          309.689          0.450             4.96 × 107       18                  2.716        6.718      5                7
+Mg I          333.667          0.104             1.70 × 107       10                  2.716        6.431      5                3
+Mg I          383.829          0.151             1.61 × 108        7                  2.716        5.945      5                7
+Mg I          405.750          4.950             1.02 × 107       18                  4.345        7.400      3                5
+Mg II         244.959          1.420             2.02 × 107        7                  8.863       13.92       4                6
+Mg II         266.075          0.881             3.81 × 107        7                  8.863       13.52       6                8
+Mg II         279.077          0.136             4.01 × 108        3                  4.422        8.863      2                4
+Mg II         279.552          0.019             2.60 × 108        2                  0            4.433      2                4
+Mg II         292.863          0.148             1.15 × 108        3                  4.422        8.654      2                2
+
+
+
+
+database and the Stark-B database, and the details of the                remains negligible, accounting for less than 1% of the total
+prominent lines are listed in Table 1.19–21 A detailed description       contribution. This observation holds true even at the highest
+of the study of the dependence of plasma parameters on self-             temperature of 1.5 eV considered in our analysis). Each element
+absorption is given in the next section (3.1). Fig. 2 shows Mg I         in the plasma has a constant overall number density. We esti-
+line 285.212 nm with and without self-absorption simulated at            mated how the electron number density varies with tempera-
+0.5 eV plasma temperature, 5 × 1016 cm−3 electron number                 ture using the Saha-ionization equation.31 We considered
+density, and 0.5 cm optical path length. The purpose of this             conned plasma with optical path length xed at 1 cm. In this
+analysis is to gain insights into the impact of self-absorption on       study, we considered Zn, Ca, and Mg plasmas with the total
+both the intensity and the full-width at half maximum (FWHM)             elemental density is approximately 1 × 1018 cm−3. Next, we
+of the spectral line. It is evident that as a line gets more optically   varied the plasma temperature from 0.2 eV (2321 K) to 1.5 eV
+thick, its intensity reduces, and its FWHM enlarges. In this             (17 407 K). We employed the Saha-ionization equation (eqn (1))
+work, we investigated how change in the T, C, and l aﬀect the            to determine the ratio of the number density of the rst ionized
+self-absorption of emission lines. Also, we studied the eﬀect of         species to that of the neutral species and the ratio of the
+self-absorption in plasma temperature estimation and quanti-             number density of the second ionized species to that of the rst
+tative analysis.                                                         ionized species. As the rst ionized and second ionized species
+                                                                         contribute electrons to the plasma, the sum of number density
+                                                                         of singly ionized species and twice the number density of
+3.1     Dependence of plasma parameters on SA coeﬃcient                  doubly ionized species equals the electron number density.
+In order to study the dependence of the plasma parameters on             Furthermore, utilizing the Saha–Boltzmann relation under the
+the SA coeﬃcient, we made the assumption that there are three            assumption of stoichiometric ablation, we derived the number
+species in the plasma—neutral, rst ionised species and second           density of neutral species.
+ionization species (notably, the inuence of higher-level species           To investigate the relationship between plasma parameters
+on the plasma, specically for elements Mg, Ca, and Zn,                  and the SA coeﬃcient, we considered the plasma of Zn, Ca, and
+
+
+
+© 2023 The Author(s). Published by the Royal Society of Chemistry                                  RSC Adv., 2023, 13, 29613–29624 | 29617
+RSC Advances                                                                                                                       Paper
+
+                                                                        we used two neutral lines and two singly ionized lines, and the
+                                                                        spectral parameters of each line are tabulated in Table 1. We
+                                                                        chose one resonance line among the two neutral and singly
+                                                                        ionized lines. As the plasma temperature increases, the self-
+                                                                        absorption emission lines reduce for the considered elements.
+                                                                        Initially, self-absorption is high, or SA coeﬃcient is low for
+                                                                        neutral species of all three elements since the species number
+                                                                        density of neutral species is high at low temperatures according
+                                                                        to the Saha-ionization relation. As the electron temperature
+                                                                        increases, the self-absorption reduces for neutral species. In the
+                                                                        case of ionized species, even though the number density of
+                                                                        ionized species increases with an increase in temperature, self-
+                                                                        absorption shows a slight reduction as the temperature
+                                                                        increases. This observation is because the temperature-
+                                                                        dependant terms in the eqn (9) reduces q value as tempera-
+Fig. 2Simulated optical emission line of Mg I at 285.212 nm with and    ture increases, which dominates the increase in species number
+without self-absorption.                                                density value. That is why we observe a slight decrease in self-
+                                                                        absorption as temperature increases, but it is not evident as
+                                                                        in neutral lines. In all instances, self-absorption is higher for
+Mg separately, at typical LPP condition. To estimate the electron       resonance lines. Hai et al. demonstrate that when investigating
+number density in each step, we raised the temperature by               the Cu I line at 324.75 nm, they observed reduced levels of self-
+0.1 eV (between 0.2 and 1.5 eV). The Fig. 3 shows the change in         absorption under experimental conditions that create elevated
+the temperature with electron number density. The change in             temperature and electron number density.32
+electron number density with temperature for Zn, Ca, and Mg
+plasma is solely estimated based on theoretical consideration.
+Hai et al. presented a study on the dependence of plasma                3.2   Variation of SA coeﬃcient with species concentration
+parameters on laser uence in tungsten-copper alloy plasma.32           To investigate the eﬀect of element concentration on self-
+As the laser uence is raised from 3 J cm−2 to 18 J cm−2, the           absorption, we simulated optical emission spectrum of the
+plasma temperature exhibits a shi from around 0.7 eV to                alloy plasma composed of the three elements Zn, Ca, and Mg.
+1.2 eV, and the corresponding electron number density varies            To compare the self-absorption in each case, the concentration
+from approximately 5 × 1015 cm−3 to 5 × 1016 cm−3.                      of each element varied from 0.1% to 99.9%. The concentration
+   Next, we investigated how plasma parameters aﬀect the SA             of the other two elements remains constant, and the total
+coeﬃcient. The temperature has been increased for the study             concentration of all three elements adds up to 100%. These
+from 0.2 eV to 1.5 eV (along with the corresponding electron            simulations were carried out at plasma temperatures of 1 eV,
+number density) of Zn, Ca, and Mg plasmas. Fig. 4 depicts the           electron number density 1 × 1017 cm−3, and an optical path
+variation of the self-absorption coeﬃcient with plasma                  length of 1 cm. The Fig. 5 shows the graph of self-absorption
+temperature for the four lines of each element. Among the lines,        coeﬃcient as a function of concentration for three diﬀerent
+                                                                        elements. We used four lines of each of the elements and the
+                                                                        spectroscopic data of lines are listed in the Table 1. We choose
+                                                                        two neutral and two ionised lines for each element, one of
+                                                                        which is the resonance line—a transitional line involving the
+                                                                        ground state.
+                                                                            As the concentration of analyte elements in the alloy rises,
+                                                                        the SA coeﬃcient reduces, which increases the self-absorption
+                                                                        of the emission line. It is evident from the three plots that in
+                                                                        all ionisation states, resonance lines show self-absorption to be
+                                                                        more prominent. Self-absorption is also extremely low or
+                                                                        undetectable for non-resonant lines. In our observation,
+                                                                        although self-absorption is present at an analyte concentration
+                                                                        as low as 1%, its consequence is more notable at an analyte
+                                                                        concentration greater than 15%. For example, in the case of Zn
+                                                                        lines in Fig. 5, SA coeﬃcient is greater than 0.85 even for reso-
+                                                                        nance lines at 15% Zn concentration in the sample. Li et al.
+                                                                        investigate the changes in self-absorption coeﬃcients of spec-
+                                                                        tral lines of Copper (Cu I 324.75 nm) and Chromium (Cr I 427.48
+Fig. 3 Variation of electron number density of Zn, Ca, and Mg plasmas   nm) with the variation of elemental concentration in the
+with temperature.                                                       sample.33 For Copper, the concentration in the sample ranges
+
+
+29618 | RSC Adv., 2023, 13, 29613–29624                                   © 2023 The Author(s). Published by the Royal Society of Chemistry
+Paper                                                                                                                         RSC Advances
+
+
+
+
+Fig. 4 Variation of SA coeﬃcient with electron temperature of (a) zinc, (b) calcium, and (c) magnesium plasmas.
+
+
+
+
+Fig. 5    Variation of self-absorption coeﬃcient with concentration of analyte element of (a) zinc, (b) calcium, and (c) magnesium.
+
+
+
+
+from about 0.02 wt% to 0.35 wt%, leading to a shi in the self-            The simulation were carried out at plasma temperatures of 1 eV,
+absorption value from roughly 0.9 to 0.25. In the case of chro-            electron number density 1 × 1017 cm−3. We changed the optical
+mium, as the concentration in the sample changes from around               path length in steps of 0.2 cm, ranging from 0.2 to 2 cm, and
+0.25 wt% to 2.3 wt%, the self-absorption value changes from                found that the self-absorption is very high at larger optical path
+approximately 1 to 0.3. In a study by Zhang et al., a signicant           length, especially for resonance lines. Self-absorption signi-
+reduction in the relative SA coeﬃcient values of the lines Mn I at         cantly decreases for optically thin plasma, and among non-
+403.3 nm, Sr I at 460.7 nm, and Li I at 670.8 nm was observed as           resonance lines, the variation of the SA coeﬃcient with optical
+the concentration increased.16 Bulajic et al. also observed                path length is minimal. The Fig. 6 illustrates the variation in
+thickness of plasma for the most prominent lines, such as                  optical path length with the SA coeﬃcient. Even at an optical
+resonance lines, of elements with concentrations exceeding                 path length of 0.2 cm, the self-absorption eﬀect of resonance
+roughly 0.1%, but it can also occur in less intense lines when             lines remains substantial, while the impact of optical path
+the elemental concentrations are higher.7 These show that                  length on self-absorption is minimal for non-resonant lines.
+using resonance lines for analytical purposes can result in                Qasim et al. investigated the relationship between the SA coef-
+inaccurate abundance estimation. However, if an element's                  cient value and optical thickness, and they observed that as
+concentration in the sample is low and there are no other lines            the optical thickness decreases, the SA coeﬃcient value
+with a good signal-to-noise ratio, we can still take resonance             approaches unity.34 Alfarraj et al. evaluated the dependence of
+lines into consideration for analytical studies, but we must               the optical depths and SA coeﬃcient value of the strontium and
+consider self-absorption correction methodologies for the                  aluminum emission lines in the strontium nitrate and
+accurate analytical results.                                               aluminum oxide sample spectra.35 Their investigation revealed
+                                                                           a reduction in the SA coeﬃcient alongside elevated optical
+                                                                           depths in situations involving increased analyte concentrations.
+3.3      Variation of SA coeﬃcient with optical path length                The level of self-absorption varies based on the regions of
+The optical path length is the distance through the plasma that            plasma the photons pass through, and the degree of self-
+the emitted photon needs to travel before escaping the plasma.             absorption can diﬀer depending on the angles at which the
+As is well known, reabsorption is very likely if the photon travels        light is captured.5,36 Yi et al. found that selecting diﬀerent
+more distance through plasma. We investigated how the SA                   positions through spatially resolved laser-induced breakdown
+coeﬃcient varies with optical path length. We considered the               spectroscopy can eﬀectively minimize the self-absorption eﬀect
+neutral and rst ionized lines of Zn, Mg, and Ca for the study.            of the major elements.37
+
+
+© 2023 The Author(s). Published by the Royal Society of Chemistry                                      RSC Adv., 2023, 13, 29613–29624 | 29619
+RSC Advances                                                                                                                          Paper
+
+
+
+
+Fig. 6   Variation of self-absorption coeﬃcient with optical path length of (a) zinc, (b) calcium, and (c) magnesium plasmas.
+
+
+
+3.4 Eﬀect of self-absorption on Boltzmann plot and                        singly ionized species. For the element Mg, the spectrum shows
+abundance estimation                                                      strong lines at 279.077 nm, 279.552 nm, 280.270 nm, and
+Plasma temperature and compositional analysis of laser-                   448.132 nm, all belonging to singly ionized states. Among these
+produced plasma can be estimated spectroscopically using                  lines, the ones at 279.552 nm and 280.270 nm are resonance
+                                                                          lines and show the highest degree of self-absorption, as
+physical expressions. These physical expressions are based on
+                                                                          observed in Fig. 7. Similarly, the major lines for Ca in the
+three fundamental assumptions; plasma is in LTE, optically
+                                                                          spectrum are 317.933 nm, 393.366 nm, and 396.846 nm, all
+thin plasma, and stoichiometric ablation. However, it is not
+                                                                          belonging to singly ionized states. Fig. 7 demonstrates that the
+always possible to generate optically thin plasma. With the use
+                                                                          intensity of the lines at 393.366 nm and 396.846 nm, which are
+of calibration-free LIBS, we investigated the impact of deviation
+                                                                          resonance lines, is mostly reduced due to self-absorption.
+of optically thin plasma consideration in plasma temperature
+and compositional evaluation. Plasma temperature is estimated                The Boltzmann plot is constructed using specic lines from
+using the Boltzmann plot method. The following is the Boltz-              diﬀerent elements. For Ca I, the lines used are located at
+                                                                          318.052 nm, 322.590 nm, 397.371 nm, 422.673 nm, 445.478 nm,
+mann equation for the intensity of emission lines:22
+                                                                        518.885 nm, and 585.745 nm. The lines from Ca II are found at
+                                           
+                                               Ek                         211.276 nm, 213.230 nm, 317.933 nm, 373.690 nm, 375.838 nm,
+                                               T
+                                        gk e                              393.366 nm, 396.846 nm, and 472.102 nm. As for Mg I, the lines
+                        Iki l ¼ FCs Aki                             (9)
+                                          Us ðTÞ                          used are 273.654 nm, 285.166 nm, 285.212 nm, 294.199 nm,
+                                                                          309.689 nm, 333.667 nm, 383.829 nm, and 405.750 nm. Finally,
+where Cs representing the concentration of species s, Aki
+                                                                          the lines from Mg II are at 244.959 nm, 266.075 nm,
+denoting the transition probability between level k and i, gk
+                                                                          279.077 nm, 279.552 nm, 280.270 nm, 292.863 nm, and
+representing the degeneracy of upper state, Ek denoting the
+                                                                          293.650 nm. Table 1 presents the spectroscopic data for these
+upper energy, Us(T) representing the partition function at
+                                                                          lines. Then, as shown in the Fig. 8, the Boltzmann plot is plotted
+temperature T, and the F coeﬃcient depending on the eﬃciency
+                                                                          both before and aer the introduction of self-absorption. The
+of the detection system, plasma density and volume. The
+                                                                          gure also includes the R2 value for the linear t of each species
+expression mentioned above (eqn (9)), when converted to
+                                                                          in the plot. Fig. 8(a) shows the Boltzmann plot without self-
+a linearized form, is given by,22
+                                                                          absorption, and the R2 value before introducing self-
+                            Iki l   Ek       FCs                         absorption is almost equal to one for all species, and the
+                      ln          ¼     þ ln                       (10)
+                           gk Aki    T       Us ðTÞ                       temperature evaluated from the slope is also 1 eV for all species.
+                                                                          With self-absorption the temperature calculated using Boltz-
+                                                                          mann plot has signicantly diverged from the simulated
+   The temperature can be determined by examining the slope
+                                                                          temperature (Ca I – 1.00 eV, Ca II – 1.48 eV, Mg I – 1.04 eV, and
+                              Iki l
+of the Boltzmann plot, of ln        as a function of Ek. For opti-        Mg II – 1.48 eV), and the R2 value of the linear regression is also
+                             gk Aki
+                                                                          less than one as shown in Fig. 8(b). For low upper levels ener-
+cally thin plasmas in LTE, the lines corresponding to diﬀerent
+                                                                          gies, the self-absorption eﬀect reduces emission intensity below
+ionization states must exhibit parallel behaviour. Then the
+                                                                          their theoretical value.11 Therefore, the estimated plasma
+points will be linearly aligned, and the R2 value of linear
+                                                                          temperatures are higher than the actual plasma temperature.
+regression will be near to one.
+                                                                             The scattered points in the Boltzmann plot are mainly due to
+   To examine the eﬀects of self-absorption on the Boltzmann
+                                                                          the resonance lines in each species.4 As a result, we do not
+plot, we simulated the optical emission spectra of the Ca–Mg
+                                                                          incorporate resonance lines when plotting the Boltzmann plot;
+alloy (50–50%) at 1 eV plasma temperature and 1 × 1017 cm−3
+                                                                          this is depicted in the Fig. 8(c). Then the lines are more linear,
+electron number density, and the Fig. 7 shows the spectrum. At
+                                                                          and the R2 value is high. Temperature was estimated from the
+a plasma temperature of 1 eV, the plasma is more ionized;
+                                                                          slope of diﬀerent species in the plasma is near to simulated
+therefore, the spectrum displays the most prominent lines from
+                                                                          temperature (Ca I – 1.00 eV, Ca II – 1.07 eV, Mg I – 1.00 eV, and
+
+
+
+29620 | RSC Adv., 2023, 13, 29613–29624                                      © 2023 The Author(s). Published by the Royal Society of Chemistry
+Paper                                                                                                                     RSC Advances
+
+
+
+
+Fig. 7 Optical emission spectrum of Mg–Ca alloy (50% Mg & 50% Ca) simulated at 1 eV plasma temperature and 1 × 1017 cm−3 electron number
+density. Blue spectrum represents the OES without considering self-absorption eﬀects and red spectrum with self-absorption.
+
+
+
+
+Fig. 8 Boltzmann plot of Mg–Ca alloy (50–50%). (a) Boltzmann plot before introducing self-absorption to emission lines, (b) Boltzmann plot of
+self-absorbed emission lines, and (c) Boltzmann plot of self-absorbed emission lines excluding resonance lines.
+
+
+
+Mg II – 1.08 eV). The elemental composition is then determined          Self-absorption is a problem for CF-LIBS and calibration curves,
+using calibration-free LIBS (CF-LIBS).22 We estimated the               so lines without it or lines corrected for self-absorption should
+abundance of neutral and rst ionized species in the plasma             be used for calculations.4 Compared to the calibration curves
+using the y-intercept of the Boltzmann equation (eqn (10)). And         method, the self-absorption eﬀect has a greater impact on the
+the abundance of second ionized species is estimated using              sensitivity of the CF-LIBS procedure.7 Neglecting this nonlinear
+Saha-ionization equation (eqn (1)). A small change in the slope         impact can be severe, particularly for LIBS quantitative proce-
+of the Boltzmann plot can aﬀect the y-intercept and the species         dures that do not use calibration curves.4 Our study shows that
+abundance estimation.38 We determined the concentration of              we should depend on the self-absorption correction methods to
+various elements in the plasma, and the results are summarized          get a precise compositional result.7,10,11,16,28,42–45 In addition to
+in Table 2 (placed in the last section of manuscript). The results      self-absorption correction methodologies, there are various
+clearly show that the quantitative results deviate from the             methods for overcoming the self-absorption eﬀect.7,10,11 One
+standard concentration if we include self-absorbed lines for the        important method is reducing the plasma density by the
+quantitative analysis, especially resonance lines. Even though
+there is a drastic reduction in error in composition estimation
+by (from 27% to 2%) excluding resonance lines, still, the self-         Table 2 CF-LIBS quantitative result of Mg–Ca alloy with self-absor-
+absorption eﬀect can be observed in concentration evaluation,           bed emission lines
+even when conducting quantitative analysis on binary alloys.
+    The self-absorption eﬀect frequently has an impact on the                                          Concentration with SA (%)
+CF-LIBS approach, especially for the major elements. CF-LIBS is
+                                                                                    Concentration      With resonance     Without resonance
+superior to the conventional calibration method by introducing          Elements    without SA (%)     lines              lines
+a more generalized approach by discarding the use of a cali-
+bration curve.22 Numerous new and improved CF-LIBS methods              Mg          50                 36.42              49.33
+are presented with noticeably better quantitative results.27,38–41      Ca          50                 63.58              50.67
+
+
+
+
+© 2023 The Author(s). Published by the Royal Society of Chemistry                                    RSC Adv., 2023, 13, 29613–29624 | 29621
+RSC Advances                                                                                                                           Paper
+
+
+
+
+Fig. 9Accuracy error in self-absorption (SA) coeﬃcient of emission lines of (a) zinc, (b) calcium, and (c) magnesium due to error in transition
+probability.
+
+
+
+ambient pressure control method, and the self-absorption                 lower for higher plasma temperature and low optical path
+coeﬃcient can be brought close to one.3 The self-absorption              length. Therefore, experimental plasma connement to get
+impact on spectral lines was eﬀectively removed by conduct-              a high plasma temperature and low optical path length is
+ing the tests in a vacuum chamber under lowered pressure.                a suitable method to reduce the eﬀect of self-absorption. Self-
+                                                                         absorption is most prominent in the resonance lines and
+3.5 Implications of inaccurate transition probabilities on               excluding resonance lines while analysis increases the accuracy
+self-absorption values                                                   of results, especially in the case of major constituent elements.
+                                                                         We can also consider resonance lines for the minor or trace
+This research is based on the idea that the values used to               constituents of samples since the number of lines with
+calculate SA coeﬃcient are completely accurate, with no errors.          a reasonable signal-to-noise ratio is lower for minor compo-
+However, when it comes to transition probability, there are              nents. And self-absorption is a concentration-dependent
+some uncertainties linked to each line. To explore how these             phenomenon, the minor components suﬀer less self-
+inaccuracies impact SA coeﬃcient values, we utilized two                 absorption than major components. We recommend using
+neutral and two rst ionized lines from elements Zn, Mg, and             lines with high upper energy and low transition probability for
+Ca (the spectroscopic details of the lines are listed in Table 1).       better quantitative analysis. And self-absorption correction is
+The transition probability of lines suﬀers varying degrees of            always needed for elemental analysis for accurate results.
+accuracy error from 2% to 50%. The details of the accuracy error
+of each line are taken from NIST spectral database.19 The q value
+in the SA coeﬃcient expression (eqn (6)) is the transition               4 Conclusion
+probability-dependent term given in the eqn (7). Therefore, any
+error in the transition probability will propagate to the SA             We simulated self-absorbed optical emission spectra of
+coeﬃcient value. We simulated self-absorbed lines at 1 eV                diﬀerent targets under typical laser-produced plasma condi-
+plasma temperature, 1 × 1017 cm−3 electron number density,               tions. We examined how diﬀerent aspects depend on self-
+and 1 cm optical path length to study the potential impact of            absorption by changing plasma parameters, optical path
+inaccurate transition probabilities on SA coeﬃcient values. In           length, and analyte species concentration. Our study yielded
+addition to conducting the simulation, we calculated the error           important ndings and recommendations, which are outlined
+in the SA coeﬃcient values using the error propagation equa-             below.
+tion.46 Fig. 9 shows accuracy error in SA coeﬃcient of emission             High-temperature plasmas with a low electron density
+lines of zinc, calcium, and magnesium due to error in transition         eﬀectively minimize self-absorption in emission lines. This can
+probability. The deviation in the transition probability accuracy        be accomplished by performing experiments at low-pressure
+for the lines at Zn II 209.992 nm is 25%, and Ca II 213.230 nm is        conditions and carefully selecting the temporal window for
+50%. Consequently, this leads to a notable increase in the error         spectral acquisition.
+of the SA coeﬃcient values associated with these lines. However,             The optical path length depends on self-absorption, and
+in most considered lines, the error present in the transition            decreasing the optical path length leads to a less self-absorbed
+probability of the lines is below 20%. As a result, the error            spectrum. We can achieve this by carefully selecting the spatial
+linked to the SA coeﬃcient value of these lines is also minimal.         window for acquiring plasma emission.
+It's worth noting that errors in transition probabilities signi-            The concentration of analyte species is another signicant
+cantly impact compositional analysis. Consequently, we suggest           factor that impacts self-absorption. In particular, it signicantly
+opting for lines with low error rates in transition probability.         aﬀects the resonance lines of major elements. By excluding
+    Our ndings suggest that self-absorption is a global                 resonance lines during quantitative analysis, we can minimize
+phenomenon that should be considered and eliminated during               the error in quantitative results.
+spectral analysis for the trustworthy evaluation of plasma                   CF-LIBS is highly susceptible to self-absorption eﬀects.
+parameters and elemental composition. Self-absorption is                 Skilful experimentation and careful selection of emission lines
+
+
+29622 | RSC Adv., 2023, 13, 29613–29624                                     © 2023 The Author(s). Published by the Royal Society of Chemistry
+Paper                                                                                                                RSC Advances
+
+can enhance the accuracy of quantitative results. However, for      12 A. Sa, S. H. Tavassoli, G. Cristoforetti, E. Tognoni,
+greater precision, we recommend employing self-absorption              B. Campanella, S. Legnaioli, S. Pagnotta, F. Poggialini and
+correction methods.                                                    V. Palleschi, Anal. Chem., 2019, 91, 8595–8601.
+   Our study provides valuable insights into the reduction of       13 J. J. Hou, L. Zhang, Y. Zhao, W. G. Ma, L. Dong, W. B. Yin,
+self-absorption in ideal analytical plasmas. We found that self-       L. T. Xiao and S. T. Jia, Opt. Express, 2019, 27, 3409.
+absorption is a global phenomenon that must be considered           14 G.-C. He, X.-L. Zhu, L.-N. Shi, S.-J. Zhao and Y.-L. Hua, Opt
+and eliminated during spectral analysis to ensure accurate             Laser. Technol., 2021, 143, 107324.
+measurements of plasma parameters and elemental composi-            15 H.-Y. Moon, K. K. Herrera, N. Omenetto, B. W. Smith and
+tion. Further experimental and theoretical research is needed to       J. D. Winefordner, Spectrochim. Acta, Part B, 2009, 64, 702–
+completely eliminate self-absorption eﬀects.                           713.
+                                                                    16 Y. Zhang, Y. Lu, Y. Tian, Y. Li, W. Ye, J. Guo and R. Zheng,
+Author contributions                                                   Anal. Chim. Acta, 2022, 1195, 339423.
+                                                                    17 F. Rezaei, Appl. Opt., 2020, 59, 3002.
+Lekha Mary John: conceptualization, methodology, soware,           18 M. S. S. Sivadas, L. M. John and K. K. Anoop, IOP Conf. Ser.:
+formal analysis, validation, and writing – original dra. K. K.        Mater. Sci. Eng., 2022, 1221, 012027.
+Anoop: conceptualization, supervision, funding acquisition,         19 A. Kramida, Y. Ralchenko, J. Reader and NIST ASD Team,
+validation, writing – review and editing.                              NIST Atomic Spectra Database (ver. 5.10), 2022, National
+                                                                       Institute of Standards and Technology, Gaithersburg, MD,
+Conﬂicts of interest                                                   DOI: 10.18434/T4W30F, available: https://physics.nist.gov/
+                                                                       asd.
+There are no conicts to declare.                                   20 R. L. Kurucz, P. L. Smith, C. Heise and J. R. Esmond, Atomic
+                                                                       spectral line database from CD-ROM 23 of R. L. Kurucz, https://
+Acknowledgements                                                       lweb.cfa.harvard.edu/amp/ampdata/kurucz23/sekur.html,
+                                                                       accessed October 18, 2022.
+LMJ acknowledges the University Grant Commission (UGC),             21 M. S. Dimitrijević and N. Moreau, STARK-B, https://stark-
+Government of India for Junior Research Fellowship [1285/              b.obspm.fr/index.php/data/ion/143, accessed October 18,
+(CSIR-UGC NET DEC. 2017)]. KKA acknowledges the Chancel-               2022.
+lor's Award Grant (267/2021/HEDN, No. CUSAT/PL(B). A3/1793/         22 A. Ciucci, M. Corsi, V. Palleschi, S. Rastelli, A. Salvetti and
+2021) from the Government of Kerala.                                   E. Tognoni, Appl. Spectrosc., 1999, 53, 960–964.
+                                                                    23 I. B. Gornushkin, L. A. King, B. W. Smith, N. Omenetto and
+References                                                             J. D. Winefordner, Spectrochim. Acta, Part B, 1999, 54, 1207–
+                                                                       1217.
+ 1 D. A. Cremers, R. A. Multari and A. K. Knight, in Encyclopedia   24 S. S. Harilal, M. C. Phillips, D. H. Froula, K. K. Anoop,
+   of Analytical Chemistry, John Wiley & Sons, Ltd, 2016, pp. 1–       R. C. Issac and F. N. Beg, Rev. Mod. Phys., 2022, 94, 035002.
+   28.                                                              25 A. Sarkar and M. Singh, Plasma Sci. Technol., 2017, 19,
+ 2 R. E. Russo, Appl. Phys. A, 2023, 129, 168.                         025403.
+ 3 J. Hou, L. Zhang, Y. Zhao, Z. Wang, Y. Zhang, W. Ma,             26 A. M. El Sherbini, Th. M. El Sherbini, H. Hegazy,
+   L. Dong, W. Yin, L. Xiao and S. Jia, Plasma Sci. Technol.,          G. Cristoforetti, S. Legnaioli, V. Palleschi, L. Pardini,
+   2019, 21, 034016.                                                   A. Salvetti and E. Tognoni, Spectrochim. Acta, Part B, 2005,
+ 4 T. Takahashi and B. Thornton, Spectrochim. Acta, Part B,            60, 1573–1579.
+   2017, 138, 31–42.                                                27 J. J. Hou, L. Zhang, Y. Zhao, W. G. Ma, L. Dong, W. B. Yin,
+ 5 F. Rezaei, G. Cristoforetti, E. Tognoni, S. Legnaioli,              L. T. Xiao and S. T. Jia, Opt. Express, 2019, 27, 32184.
+   V. Palleschi and A. Sa, Spectrochim. Acta, Part B, 2020,        28 Y. Tang, J. Li, Z. Hao, S. Tang, Z. Zhu, L. Guo, X. Li, X. Zeng,
+   169, 105878.                                                        J. Duan and Y. Lu, Opt. Express, 2018, 26, 12121–12130.
+ 6 F. Rezaei, Optically Thick Laser-Induced Plasmas in              29 B. Praher, V. Palleschi, R. Viskup, J. Heitz and J. D. Pedarnig,
+   Spectroscopic Analysis, IntechOpen, 2016.                           Spectrochim. Acta, Part B, 2010, 65, 671–679.
+ 7 D. Bulajic, M. Corsi, G. Cristoforetti, S. Legnaioli,            30 A. M. E. Sherbini and A. A. S. A. Aamer, World J. Nano Sci.
+   V. Palleschi, A. Salvetti and E. Tognoni, Spectrochim. Acta,        Eng., 2012, 02, 206–212.
+   Part B, 2002, 57, 339–353.                                       31 E. Tognoni, G. Cristoforetti, S. Legnaioli, V. Palleschi,
+ 8 S. Cai, Y. Tang, F. Wang, Y. Xiong, X. Sun and X. Ming, J.          A. Salvetti, M. Mueller, U. Panne and I. Gornushkin,
+   Anal. At. Spectrom., 2020, 35, 912–926.                             Spectrochim. Acta, Part B, 2007, 62, 1287–1302.
+ 9 I. B. Gornushkin, J. M. Anzano, L. A. King, B. W. Smith,         32 R. Hai, Z. He, X. Yu, L. Sun, D. Wu and H. Ding, Opt. Express,
+   N. Omenetto and J. D. Winefordner, Spectrochim. Acta, Part          2019, 27, 2509–2520.
+   B, 1999, 54, 491–503.                                            33 J. Li, Y. Tang, Z. Hao, N. Zhao, X. Yang, H. Yu, L. Guo, X. Li,
+10 T. Li, Z. Hou, Y. Fu, J. Yu, W. Gu and Z. Wang, Anal. Chim.         X. Zeng and Y. Lu, J. Anal. At. Spectrom., 2017, 32, 2189–2193.
+   Acta, 2019, 1058, 39–47.
+11 L. Sun and H. Yu, Talanta, 2009, 79, 388–395.
+
+
+© 2023 The Author(s). Published by the Royal Society of Chemistry                              RSC Adv., 2023, 13, 29613–29624 | 29623
+RSC Advances                                                                                                                       Paper
+
+34 M. Qasim, M. Anwar-ul-Haq, A. Shah, M. Sher Afgan,                   41 J. Dong, L. Liang, J. Wei, H. Tang, T. Zhang, X. Yang, K. Wang
+   S. U. Haq, R. Abbas Khan and M. Aslam Baig, Microchem.                  and H. Li, J. Anal. At. Spectrom., 2015, 30, 1336–1344.
+   J., 2022, 175, 107106.                                               42 J. A. Aguilera, J. Bengoechea and C. Aragón, Spectrochim.
+35 B. A. Alfarraj, C. R. Bhatt, F. Y. Yueh and J. P. Singh, Appl.          Acta, Part B, 2003, 58, 221–237.
+   Spectrosc., 2017, 71, 640–650.                                       43 I. B. Gornushkin, C. L. Stevenson, B. W. Smith, N. Omenetto
+36 T. Sakka, T. Nakajima and Y. H. Ogata, J. Appl. Phys., 2002,            and J. D. Winefordner, Spectrochim. Acta, Part B, 2001, 56,
+   92, 2296–2303.                                                          1769–1785.
+37 R. Yi, L. Guo, C. Li, X. Yang, J. Li, X. Li, X. Zeng and Y. Lu, J.   44 L. M. John, B. N. BalakrishnaPrabhu and K. K. Anoop, IOP
+   Anal. At. Spectrom., 2016, 31, 961–967.                                 Conf. Ser.: Mater. Sci. Eng., 2022, 1221, 012020.
+38 L. M. John, R. C. Issac, S. Sankararaman and K. K. Anoop, J.         45 J.-M. Li, L.-B. Guo, C.-M. Li, N. Zhao, X.-Y. Yang, Z.-Q. Hao,
+   Anal. At. Spectrom., 2022, 37, 2451–2460.                               X.-Y. Li, X.-Y. Zeng and Y.-F. Lu, Opt. Lett., 2015, 40, 5224–
+39 J. M. Gomba, C. D’Angelo, D. Bertuccelli and G. Bertuccelli,            5226.
+   At. Spectrosc., 2001, 56, 695–705.                                   46 J. R. Taylor and W. Thompson, An introduction to error
+40 J. A. Aguilera, C. Aragón, G. Cristoforetti and E. Tognoni,            analysis: the study of uncertainties in physical measurements,
+   Spectrochim. Acta, Part B, 2009, 64, 685–689.                           Springer, 1982, vol. 2.
+
+
+
+
+29624 | RSC Adv., 2023, 13, 29613–29624                                   © 2023 The Author(s). Published by the Royal Society of Chemistry
+
