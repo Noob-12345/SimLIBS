@@ -1,7 +1,7 @@
-"""普通静态光谱组件：解析 NIST 计算谱线，并在本地进行高斯展宽。
+"""普通静态光谱组件：解析 NIST 计算谱线，可选仪器高斯或无展宽投影。
 
 调用链：simulation.retrieve_data_static -> parse_sticks -> render_sticks。
-本模块负责波段划分、采样网格和普通静态线形；逐线自吸收在
+本模块负责波段划分、采样网格和普通静态线形；逐线 Stark/自吸收在
 nist_self_absorption.py 中计算。谱线面积直接使用 NIST 计算线强，
 各波段合并后统一展宽，不单独归一化。
 
@@ -97,16 +97,48 @@ def wavelength_grid(low, high, step):
     return grid
 
 
-def render_sticks(table, grid, resolution):
+def _project_sticks(centers, strengths, grid):
+    """将未展宽线面积投到相邻网格点，保持梯形积分面积及一阶矩。
+
+    这是离散 delta 的数值表示，不引入物理线宽；端点使用半个网格单元的
+    积分权重，窗口外的线不挪到边界，同波长贡献通过 add.at 累加。
+    """
+    grid = np.asarray(grid, dtype=float)
+    if grid.ndim != 1 or len(grid) < 2 or not np.isfinite(grid).all() or np.any(np.diff(grid) <= 0):
+        raise ValueError("Unbroadened output grid must be finite and strictly increasing with at least two points")
+    weights = np.empty_like(grid)
+    weights[0] = (grid[1]-grid[0])/2
+    weights[-1] = (grid[-1]-grid[-2])/2
+    weights[1:-1] = (grid[2:]-grid[:-2])/2
+    inside = (centers >= grid[0]) & (centers <= grid[-1])
+    centers, strengths = centers[inside], strengths[inside]
+    right = np.clip(np.searchsorted(grid, centers), 1, len(grid)-1)
+    left = right-1
+    fraction = (centers-grid[left])/(grid[right]-grid[left])
+    intensity = np.zeros_like(grid)
+    np.add.at(intensity, left, strengths*(1-fraction)/weights[left])
+    np.add.at(intensity, right, strengths*fraction/weights[right])
+    return intensity
+
+
+def render_sticks(table, grid, resolution, *, instrument_broadening=True):
     """将谱线面积转换为高斯强度密度，并叠加为 wavelength/intensity 表。
 
     grid 须使用递增的 nm 坐标；resolution 是仪器 R。同波长的不同跃迁
     逐条相加；仅计算中心左右各 6 个 1/e 半宽内的高斯贡献。
     仪器展宽+高斯展宽
+    instrument_broadening=False 时改为离散线投影，仅保持线面积与重心。
     """
+    if type(instrument_broadening) is not bool:
+        raise ValueError("instrument_broadening must be a boolean")
     if not np.isfinite(resolution) or resolution <= 0:
         raise ValueError("Spectrometer resolution must be finite and positive")
     centers, strengths = line_strengths(table)
+    if not instrument_broadening:
+        intensity = _project_sticks(centers, strengths, grid)
+        if not np.isfinite(intensity).all():
+            raise ValueError("Rendered spectrum contains nonfinite values")
+        return pd.DataFrame({"wavelength": grid, "intensity": intensity})
     intensity = np.zeros_like(grid)
     for center, strength in zip(centers, strengths):
         if strength == 0:

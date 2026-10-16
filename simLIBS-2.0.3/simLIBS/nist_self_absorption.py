@@ -1,7 +1,7 @@
-"""当前静态逐线自吸收组件：保留 NIST 线强，计算吸收并重建谱线。
+"""当前静态 Stark/逐线自吸收组件：保留 NIST 线强，按开关重建谱线。
 
 调试调用链：parse_atomic_payload -> prepare_nist_absorption
-（拆分未分辨跃迁、计算布居、匹配 Stark）-> render_nist_absorption
+（拆分未分辨跃迁、按需计算布居、匹配 Stark）-> render_nist_absorption
 （计算 tau/SA、更新面积与宽度、叠加 Voigt 线形）。
 
 数据来源：NIST HTML 提供谱线和能级；Stark 系数由用户 stark_data 或
@@ -33,7 +33,7 @@ from .self_absorption import (
 
 @dataclass(frozen=True)
 class NISTSelfAbsorptionConfig:
-    """当前 NIST 自吸收入口的不可变配置；主类还会保存深拷贝快照。
+    """当前 NIST Stark/自吸收入口的不可变配置；主类保存深拷贝快照。
 
     stark_data 接受逐线字典列表或 DataFrame；其 stark_width_nm 为 W，
     使用约定 FWHM = 2*W*Ne/Ne_ref。缺失系数会在 resolve_stark 报错。
@@ -93,16 +93,17 @@ def _scalar(html, name):
     return _number(match.group(1), name, positive=True)
 
 
-def parse_atomic_payload(html):
+def parse_atomic_payload(html, *, include_levels=True):
     """解析同一次 NIST 响应的能级、统计权重、电离能和跃迁元数据。
 
     返回 atoms、transitions、cmeV、koeff。atoms 中阶段从 1 开始，
     transitions 中 charge 从 0 开始；上下能级转换成 eV 后参与后续匹配。
-    若这里报错，先检查原始 HTML 的 levels/gValues/ips/lines 是否完整。
+    include_levels=False 供仅 Stark 模式使用：只解析跃迁身份和能级能量，
+    跳过布居所需的完整能级表与 Saha 常数。默认 True 保留原调用行为。
     """
     # 能级的获取：直接读取同一 NIST 响应中的 levels、gValues、ips，禁止执行网页 JavaScript。
     matrices = {}
-    for name in ('levels', 'gValues', 'ips'):
+    for name in (('levels', 'gValues', 'ips') if include_levels else ()):
         values = {}
         for z, stage, text in re.findall(
                 rf'\b{name}\[(\d+)\]\[(\d+)\]\s*=\s*(\[[^\[\]]*\])\s*;', html):
@@ -122,7 +123,7 @@ def parse_atomic_payload(html):
                 raise ValueError('Conflicting NIST element labels')
             symbols[int(z)] = element
     atoms = {}
-    for z, element in symbols.items():
+    for z, element in (symbols.items() if include_levels else ()):
         # 要求页面提供从中性到类氢阶段的全套数据；裸核阶段由布居函数补入。
         stages = sorted(stage for number, stage in matrices['levels'] if number == z)
         if stages != list(range(1, z+1)):
@@ -160,7 +161,8 @@ def parse_atomic_payload(html):
         transitions.append(dict(element=symbols[z], charge=int(stage)-1,
                                 wavelength_nm=wave, gA_s=ga,
                                 lower_eV=lower/cmev, upper_eV=upper/cmev))
-    return dict(atoms=atoms, transitions=transitions, cmeV=cmev, koeff=_scalar(html, 'koeff'))
+    return dict(atoms=atoms, transitions=transitions, cmeV=cmev,
+                koeff=_scalar(html, 'koeff') if include_levels else None)
 
 
 def attach_nist_strengths(table, payload, te):
@@ -285,17 +287,20 @@ def resolve_stark(records, config):
     return resolved
 
 
-def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config):
+def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config, self_absorption=True):
     """准备与采样网格无关的逐线缓存，供初次合成和 interpolate 复用。
 
     bands 是 (核心谱线表, 原子元数据) 列表。这里依次合并数据、分配线强、
-    计算电离布居和数密度、匹配 Stark；返回 (逐线 records, metadata)。
-    百分比按原子数比例处理，总和须为 100，元素名称须唯一。
+    按需计算电离布居和数密度、匹配 Stark；返回 (逐线 records, metadata)。
+    自吸收开启时比例总和须为 100；关闭时仅准备 Stark，不求 Saha/总密度。
     """
+    if type(self_absorption) is not bool:
+        raise ValueError('self_absorption must be a boolean')
     te = _number(te, 'Te', positive=True)
     ne = _number(ne, 'Ne', positive=True)
     pcts = [_number(p, 'percentage') for p in percentages]
-    if len(set(elements)) != len(elements) or not math.isclose(sum(pcts), 100, abs_tol=1e-6, rel_tol=0):
+    if self_absorption and (len(set(elements)) != len(elements) or
+                            not math.isclose(sum(pcts), 100, abs_tol=1e-6, rel_tol=0)):
         raise ValueError('Self absorption requires unique elements with atomic percentages summing to 100')
     records, atoms = [], {}
     constants = None
@@ -304,13 +309,25 @@ def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config):
         if constants is not None and constants != current:
             raise ValueError('Inconsistent NIST constants across bands')
         constants = current
-        for element, atom in payload['atoms'].items():
+        for element, atom in (payload['atoms'].items() if self_absorption else ()):
             if element in atoms and atoms[element] != atom:
                 raise ValueError('Inconsistent NIST atomic data across bands')
             atoms[element] = atom
         records.extend(attach_nist_strengths(table, payload, te))
     if constants is None:
         raise ValueError('No NIST response available')
+    if not self_absorption:
+        # 仅 Stark 模式保留 NIST 计算线面积；光程和总密度均不进入线宽计算。
+        records = resolve_stark(records, config)
+        for index, row in enumerate(records):
+            row['line_id'] = index
+        return records, dict(
+            model_version='nist-lines-stark-1', line_count=len(records),
+            strength_source='NIST dataSticksArray (int_scale=2, photon weights)',
+            wavelength_convention='vacuum (NIST show_av=3)',
+            self_absorption=False, stark_broadening=True,
+            assumptions=['NIST line areas preserved; no self-absorption population/opacity calculation',
+                         'Stark coefficients scale linearly with electron density; no invented temperature law'])
     active = {el: p/100 for el, p in zip(elements, pcts) if p > 0}
     populations = {}
     for el in active:
@@ -337,6 +354,7 @@ def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config):
     if not math.isfinite(charge_error):
         raise ValueError('Charge balance exceeded numeric range')
     metadata = dict(model_version='nist-lines-self-absorption-1', line_count=len(records),
+                    self_absorption=True, stark_broadening=True,
                     strength_source='NIST dataSticksArray (int_scale=2, photon weights)',
                     wavelength_convention='vacuum (NIST show_av=3)',
                     total_number_density_cm3=density,
@@ -351,13 +369,16 @@ def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config):
     return records, metadata
 
 
-def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, config):
+def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, config, self_absorption=True):
     """用缓存逐线数据合成吸收谱、薄谱、离子分量与诊断，无网络请求。
 
     调试顺序：width（未吸收 Stark FWHM）-> q -> tau -> sa ->
     absorbed_width/absorbed_area -> Voigt。返回共享容器 PaperSpectrumResult；
-    此容器也供离线模型使用，名称不代表此函数改走了离线谱线来源。
+    self_absorption=False 时直接生成 Stark/Voigt 薄谱，tau=0、SA=1，
+    不读取粒子布居或修改光程。函数名和结果容器名保留以兼容已有调用。
     """
+    if type(self_absorption) is not bool:
+        raise ValueError('self_absorption must be a boolean')
     grid = wavelength_grid(low, high, config.wavelength_step_nm)
     r = _number(resolution, 'resolution', positive=True)
     labels = sorted({row['ion'] for row in records})
@@ -371,7 +392,7 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
         # 将参考密度下的 W 换算成当前 Ne 下的未吸收 Stark FWHM，单位 nm。
         width = 2*row['stark_width_nm']*ne/row['stark_reference_ne_cm3']
         _number(width, 'Stark FWHM', positive=True)
-        ns = row['species_density_cm3']
+        ns = row['species_density_cm3'] if self_absorption else 0.0
         # 自吸收光学厚度的计算：用下能级 Boltzmann 因子与 NIST gA，线强仍保留 NIST 原值。
         # SI 换算：Ns 乘 1e6 得 m^-3，波长乘 1e-9 得 m；q 单位为 m。
         # Te 与 lower_eV 均用 eV，因此指数直接为 -lower_eV/Te。
@@ -379,7 +400,7 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
             q = (math.exp(math.log(ns)+math.log(1e6)+math.log(row['gA_s'])+
                           4*math.log(center*1e-9)+math.log(config.path_length_m)-
                           math.log(4*math.pi**2*c)-row['log_partition']-row['lower_eV']/te)
-                 if ns > 0 and config.path_length_m > 0 else 0.0)
+                 if self_absorption and ns > 0 and config.path_length_m > 0 else 0.0)
             tau = _number(q/(width*1e-9), 'line-center optical depth')
             sa = float(slab_attenuation_factor(tau))
             # tau 使用未吸收内禀宽度；零光程/零 Ns 对应 tau=0、sa=1。
@@ -415,7 +436,8 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
     ion, spectrum = frame(absorbed)
     # 薄谱保留相同 Stark 和仪器宽度；它可直接用于隔离自吸收本身的影响。
     thin_ion, thin_spectrum = frame(thin)
-    info = dict(metadata, instrument_broadening=config.instrument_broadening,
+    info = dict(metadata, self_absorption=self_absorption, stark_broadening=True,
+                instrument_broadening=config.instrument_broadening,
                 parameters=dict(Te_eV=te, Ne_cm3=ne, path_length_m=config.path_length_m),
                 output_points=len(grid), output_step_nm=float(grid[1]-grid[0]))
     return PaperSpectrumResult(spectrum, thin_spectrum, ion, thin_ion, pd.DataFrame(diagnostics), info)

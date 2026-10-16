@@ -1,8 +1,9 @@
-"""当前 NIST 逐线自吸收示例：联网取 Mg 谱线，导出吸收谱、薄谱和诊断。
+"""当前 NIST Stark/逐线自吸收示例：联网取 Mg 谱线并导出逐线诊断。
 
 从项目目录运行 python examples/nist_self_absorption_demo.py --help 查看参数。
 默认采用真空波长窄窗口，便于检查一条有内置 Stark 系数的跃迁；扩大窗口后
 可能需要 --stark-csv。调试顺序：config -> SimulatedLIBS -> line_diagnostics.csv。
+--stark-only 关闭自吸收；--no-instrument-broadening 关闭仪器高斯响应。
 系数缺失时只导出 missing_stark.csv 模板，并以状态码 2 返回。
 """
 import argparse
@@ -27,6 +28,8 @@ def main():
     parser.add_argument('--step', type=float, default=.001)
     parser.add_argument('--path-length', type=float, default=.001)
     parser.add_argument('--stark-csv', type=Path)
+    parser.add_argument('--stark-only', action='store_true', help='只计算 Stark 展宽，不计算自吸收')
+    parser.add_argument('--no-instrument-broadening', action='store_true', help='关闭仪器高斯响应')
     parser.add_argument('--output', type=Path, default=ROOT/'output'/'nist_self_absorption')
     args = parser.parse_args()
     output = args.output.resolve()
@@ -38,7 +41,9 @@ def main():
     try:
         libs = SimulatedLIBS(Te=1.0, Ne=1e17, elements=['Mg'], percentages=[100],
                              low_w=args.low, upper_w=args.high, resolution=3000,
-                             webscraping='static', self_absorption=True,
+                             webscraping='static', self_absorption=not args.stark_only,
+                             stark_broadening=True,
+                             instrument_broadening=not args.no_instrument_broadening,
                              self_absorption_config=config)
     except MissingStarkDataError as error:
         # missing_lines 是完整缺失清单；错误消息只预览部分谱线，补数应以 CSV 为准。
@@ -50,7 +55,8 @@ def main():
               'W is the coefficient in FWHM=2*W*Ne/Ne_ref.')
         return 2
     # 三类排查数据：吸收/薄谱看线形，nist_sticks 看原始线强，diagnostics 看逐线物理量。
-    libs.save_to_csv(output/'absorbed.csv')
+    # 仅 Stark 时使用不同文件名，明确输出未应用自吸收。
+    libs.save_to_csv(output/('stark_only.csv' if args.stark_only else 'absorbed.csv'))
     libs.unabsorbed_raw_spectrum.to_csv(output/'thin_voigt.csv', index=False)
     libs.line_table.to_csv(output/'nist_sticks.csv', index=False)
     libs.self_absorption_diagnostics.to_csv(output/'line_diagnostics.csv', index=False)

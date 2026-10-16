@@ -1,266 +1,525 @@
-# Simulated LIBS
+# simLIBS 中文使用说明
 
-[![PyPI version](https://img.shields.io/pypi/v/SimulatedLIBS?style=flat&logo=pypi)](https://pypi.org/project/SimulatedLIBS/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE.md)
-![Tests](https://github.com/MKastek/SimulatedLIBS/actions/workflows/test.yml/badge.svg)
-[![ZENADO DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7260706.svg)](https://doi.org/10.5281/zenodo.7260706)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7260706.svg)](https://doi.org/10.5281/zenodo.7260706)
 
-*SimulatedLIBS* provides Python class to simulate LIBS spectra with NIST LIBS Database interface.  
-*SimulatedLIBS* also allows the creation of simulated data sets that can be used to train ML models.  
-*SimulatedLIBS* was mentioned is [FOSS For Spectroscopy](https://bryanhanson.github.io/FOSS4Spectroscopy/) by Prof. Bryan A. Hanson, DePauw University.
+simLIBS 根据元素组成、电子温度和电子密度生成 LIBS 模拟光谱，可用于单次模拟、绘图、CSV 导出及批量数据集生成。本说明对应当前目录的源码版本。
 
-Project created for **B.Eng. thesis**:  
-Computer methods of the identification of the elements in optical spectra obtained by Laser Induced Breakdown Spectroscopy.
-
-**Thesis supervisor**: Paweł Gąsior PhD  
-e-mail: pawel.gasior@ifpilm.pl  
-Institute of Plasma Physics and Laser Microfusion - IPPLM  
-
-
-## Installation
-```python
-pip install SimulatedLIBS
-```
-## Import
+**日常调用统一使用 `SimulatedLIBS`。** `simulation.py` 负责组织整个流程，`nist_lines.py` 和 `nist_self_absorption.py` 由主类内部调用。
 
 ```python
 from simLIBS import SimulatedLIBS
 ```
-## Example
-Parameters:
-- Te - electron temperature [eV]
-- Ne - electron density [cm^-3]
-- elements - list of elements
-- percentages - list of elements concentrations
-- resoulution
-- wavelength range: low_w, upper_w
-- maximal ion charge: max_ion_charge
-- websraping: 'static' or 'dynamic'
 
+## 1. 环境与安装
 
-### Static websraping
-Static mode retrieves NIST's **calculated, unbroadened `dataSticksArray`**
-and synthesizes the spectrum locally, using the same Gaussian kernel as
-`Cross_attention/Dataset/datagen.py`. It does not use `dataDopplerArray`.
-NIST still calculates line strengths from composition, Te and Ne.
+当前源码使用了 `match/case`，需要 **Python 3.10 或更高版本**。虽然 `setup.cfg` 中仍声明 `>=3.8`，运行本目录源码时应按实际语法要求选择环境。
 
-- Requests use `min_rel_int=0`, 500 nm core bands and 2 nm internal overlap.
-  Line tables are merged before broadening; no per-band normalization is applied.
-- Each line has area equal to its calculated strength, with
-  `I = strength / (width * sqrt(pi)) * exp(-((wavelength-center)/width)**2)`.
-  Here `width = center / resolution` is the Gaussian **1/e half-width**,
-  not FWHM. The profile is evaluated within six widths of the center.
-- The default output grid is approximately 0.005 nm, including both endpoints.
-  The point count is `round((upper_w-low_w)/step)+1` (at least two);
-  `linspace` adjusts the actual step if the range is not evenly divisible.
-- `libs.line_table` retains the merged calculated line table.
-  `raw_spectrum` contains the locally synthesized initial spectrum.
-- With `self_absorption=False`, static mode uses this NIST line-table path.
-  With `self_absorption=True`, static mode applies per-transition self absorption
-  to the same NIST line strengths (see below).
-  Dynamic mode always uses the browser result and ignores the self-absorption
-  switch and its configuration. The instance's `self_absorption` attribute
-  records whether self-absorption is actually enabled.
+先激活对应的 Python 环境，再在项目目录安装本地源码。下面使用当前仓库的 Windows 路径：
 
-```python
-libs = SimulatedLIBS(Te=1.0,
-                     Ne=10**17,
-                     elements=['W','Fe','Mo'],
-                     percentages=[50,25,25],
-                     resolution=1000,
-                     low_w=200,
-                     upper_w=1000,
-                     max_ion_charge=3,
-                     webscraping='static')
+```powershell
+cd D:\LIBS\SimLIBS\simLIBS-2.0.3
+python --version
+python -m pip install -e .
 ```
 
-### Static self-absorption / 静态逐线自吸收
+可编辑安装后，修改此目录中的代码会直接用于后续调用。主要依赖为 `numpy`、`pandas`、`scipy`、`matplotlib`、`requests`、`bs4`、`selenium` 和 `webdriver-manager`。
 
-`static + self_absorption=True` now requests NIST first. It preserves every
-returned nonzero stick contribution, obtains transition energies and `g_upper*Aki`
-from `lines`, and levels/statistical weights/ionization energies from
-`levels`, `gValues`, and `ips`. JavaScript is parsed as data, never executed.
-Coincident transitions share the NIST stick area according to their
-`gA*exp(-E_upper/Te)` weights; their individual absorption is then calculated.
+- `static`：需要联网访问 NIST，使用本地 Python 计算线形。
+- `dynamic`：需要 Chrome，程序通过 Selenium 操作 NIST 页面并导出结果；驱动由 `webdriver-manager` 获取。
+- 独立离线论文模型：使用随项目提供的本地数据，见第 10 节。
 
-布居使用 NIST 页面提供的全部电离阶段和能级集合（含裸核阶段），不再限定
-JSON 中的 I/II/III。总密度未指定时通过电荷守恒反推；组分按原子数百分比处理，
-总和须为 100。线强始终保留 NIST `int_scale=2` 的光子权重，不作分段归一化。
-
-**Stark coefficients are still required for every transition.** The built-in
-JSON is only a coefficient lookup, not a line selection list. Its air-wavelength
-records are matched using both level energies (0.002 eV tolerance) and `gA`
-(3% tolerance); ambiguous matches raise an error. User coefficients take priority.
-No default Stark value is invented and missing lines are never silently skipped.
+确认实际导入的是正在编辑的源码，可以运行：
 
 ```python
+import inspect
+from simLIBS import SimulatedLIBS
+
+print(inspect.getfile(SimulatedLIBS))
+```
+
+## 2. 快速开始：普通静态模拟
+
+下面的例子获取 Mg 的 NIST 计算谱线，在本地做高斯展宽，读取结果、绘图并保存 CSV。
+
+```python
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+from simLIBS import SimulatedLIBS
+
+output = Path("output/basic_static")
+output.mkdir(parents=True, exist_ok=True)
+
+libs = SimulatedLIBS(
+    Te=1.0,                  # 电子温度，eV
+    Ne=1e17,                 # 电子密度，cm^-3
+    elements=["Mg"],
+    percentages=[100.0],
+    low_w=280.0,             # 波长下界，nm
+    upper_w=290.0,           # 波长上界，nm
+    resolution=3000,         # 仪器分辨率 R
+    max_ion_charge=2,        # 允许中性、一价和二价离子发射
+    webscraping="static",
+    self_absorption=False,
+    stark_broadening=False,     # 本例只使用仪器高斯展宽
+    instrument_broadening=True,
+)
+
+spectrum = libs.get_interpolated_spectrum()
+print(spectrum.head())
+libs.save_to_csv(output / "spectrum.csv")
+
+libs.plot(color="blue", title="Mg: static spectrum")
+plt.show()
+```
+
+创建 `SimulatedLIBS(...)` 时就会请求数据并计算光谱，无须额外调用一个“开始模拟”方法。输出是两列 `pandas.DataFrame`：
+
+| 列名 | 含义 |
+| --- | --- |
+| `wavelength` | 真空波长，nm |
+| `intensity` | 该采样点的模拟谱强度；沿用 NIST 计算线权重，未经实验绝对定标 |
+
+## 3. 怎样选择模拟模式
+
+静态模式下，使用三个独立参数选择处理方式：
+
+| `self_absorption` | `stark_broadening` | `instrument_broadening` | 实际输出 |
+| --- | --- | --- | --- |
+| `False` | `False` | `True` | NIST 线强 + 仪器高斯 |
+| `False` | `True` | `False` | NIST 线强 + 纯 Stark（Lorentz） |
+| `False` | `True` | `True` | NIST 线强 + Stark + 仪器高斯（Voigt） |
+| `False` | `False` | `False` | 未展宽离散谱线在输出网格上的表示 |
+| `True` | `True` | `False` / `True` | Stark + 逐线自吸收，可选仪器高斯 |
+| `True` | `False` | 任意 | 报错：当前自吸收公式需要内禀 Stark 宽度 |
+
+不传新增参数时保留旧默认：`stark_broadening=None` 随自吸收开关启用或关闭；`instrument_broadening=None` 在未启用 Stark 时默认开启，在 Stark 路径中使用旧配置的值，默认也为 `True`。显式传入顶层 `instrument_broadening` 时，以顶层值为准。
+
+仅启用 Stark 时，仍通过 `self_absorption_config` 提供系数和采样步长，但不使用其中的光程、总密度进行吸收计算。所有启用 Stark 的组合都需要逐线系数。
+
+两种展宽均关闭时，不赋予谱线物理线宽；程序将线面积分配到相邻采样点，保持梯形积分面积与重心。输出高度随采样步长变化，实际跃迁位置和线面积仍保留在 `line_table`。
+
+`dynamic` 始终使用浏览器导出的结果，忽略这些本地展宽与自吸收配置。
+
+普通静态模式的处理顺序为：
+
+```text
+输入组成、Te、Ne
+  -> NIST 返回 dataSticksArray 中的未展宽计算谱线
+  -> 按核心波段合并谱线表
+  -> 本地高斯展宽并相加
+  -> 输出总谱
+```
+
+静态请求默认使用 `min_rel_int=0` 保留弱线，以 500 nm 为核心波段，内部边界保留 2 nm 请求重叠。谱线按核心区间归属后统一展宽，不逐段归一化，也不按相同波长删除不同跃迁。
+
+`render_sticks()` 中的宽度参数为 `w = wavelength / resolution`，表示高斯 **1/e 半宽**。线形为：
+
+```text
+I(lambda) = area / (w * sqrt(pi)) * exp(-((lambda - center) / w)^2)
+FWHM = 2 * sqrt(ln(2)) * w
+```
+
+其中 `area` 来自 NIST 计算线强。高斯贡献只在中心左右各 6 个 `w` 范围内计算。
+
+## 4. 调用静态逐线自吸收
+
+建议先使用下面的 Mg 窄窗口确认调用流程。该真空波长窗口对应一条可匹配内置 Stark 系数的 Mg I 跃迁。
+
+```python
+from pathlib import Path
+
 from simLIBS import SimulatedLIBS, MissingStarkDataError
 
+output_sa = Path("output/self_absorption")
+output_sa.mkdir(parents=True, exist_ok=True)
+
 try:
-    libs = SimulatedLIBS(
-        Te=1.0, Ne=1e17, elements=['Mg'], percentages=[100],
-        low_w=280, upper_w=290, resolution=3000,
-        webscraping='static', self_absorption=True,
-        self_absorption_config={'path_length_m': 0.001},
+    libs_sa = SimulatedLIBS(
+        Te=1.0,
+        Ne=1e17,
+        elements=["Mg"],
+        percentages=[100.0],
+        low_w=285.27,
+        upper_w=285.33,
+        resolution=3000,
+        max_ion_charge=2,
+        webscraping="static",
+        self_absorption=True,
+        stark_broadening=True,
+        instrument_broadening=True,
+        self_absorption_config={
+            "path_length_m": 0.001,           # 光程，m；这里为 1 mm
+            "wavelength_step_nm": 0.001,     # 采样步长，nm
+        },
     )
 except MissingStarkDataError as error:
-    # 导出全部缺失谱线；依据有出处的逐线数据填入 stark_width_nm 后重新运行。
-    error.missing_lines.to_csv('missing_stark.csv', index=False)
+    error.missing_lines.to_csv(output_sa / "missing_stark.csv", index=False)
+    raise  # 导出完整缺失清单后保留异常，便于定位数据问题
+
+libs_sa.save_to_csv(output_sa / "absorbed.csv")
+libs_sa.unabsorbed_interpolated_spectrum.to_csv(output_sa / "thin_voigt.csv", index=False)
+libs_sa.self_absorption_diagnostics.to_csv(output_sa / "line_diagnostics.csv", index=False)
+
+print(libs_sa.self_absorption_diagnostics[
+    ["element", "wavelength_nm", "tau_center", "SA", "thin_fwhm_nm", "absorbed_fwhm_nm"]
+])
 ```
 
-Use `self_absorption_config={'stark_data': dataframe_or_list, ...}` to supply
-coefficients. Each record needs `element`, zero-based `charge`,
-`wavelength_nm` (**vacuum**, matched within 1e-6 nm), `stark_width_nm`
-and optionally `stark_reference_ne_cm3` (default 1e16) and `source`.
-Instead of wavelength, both `lower_eV` and `upper_eV` can identify a transition
-(matched within 1e-6 eV). When both identifiers are given, both must match.
-For unresolved lines, include the energies to distinguish transitions.
-`stark_width_nm` is W in **FWHM = 2*W*Ne/Ne_ref**, not a measured FWHM itself.
-Convert source FWHM values to this convention before supplying them.
+窄窗口适合验证单线流程；要查看完整线翼，可扩大输出波段，并补齐新进入波段的其他跃迁所需系数。
 
-Defaults: `path_length_m=0.01`, `wavelength_step_nm=0.005`,
-`total_number_density_cm3=None`, `instrument_broadening=True`.
-`NISTSelfAbsorptionConfig` is also accepted instead of a dictionary.
+自吸收路径依次完成以下工作：
 
-The center attenuation is `(1-exp(-tau))/tau`; intrinsic width is multiplied
-by `SA**(-0.54)` and NIST line area by `SA**0.46`. Final profiles are Voigt
-profiles with Gaussian sigma `wavelength/(R*sqrt(2))`, consistent with the
-ordinary static Gaussian convention. Instrument width never enters opacity.
-This is an independent-line empirical model, not coupled radiative transfer.
-Stark coefficients are scaled by electron density; no temperature law is inferred.
+1. 从 NIST 获取计算线强、上下能级、`g_upper * Aki`、能级统计权重和电离能。
+2. 使用 NIST 页面提供的全部电离阶段及裸核阶段计算配分函数和 Saha 布居。
+3. 按原子数百分比计算组分比例。总密度默认通过电荷守恒反推，也可显式指定。
+4. 匹配每条参与计算的跃迁所需的 Stark 系数，求未吸收内禀 FWHM。
+5. 根据粒子布居和光程计算线中心光学厚度 `tau_center` 及自吸收因子 `SA`。
+6. 修正逐线面积和宽度，叠加可选仪器响应，合成 Voigt 光谱。
 
-`unabsorbed_raw_spectrum` is the same NIST/Stark/Voigt model with absorption
-removed. Because it includes intrinsic Stark width, it is not identical to
-the Gaussian-only `self_absorption=False` spectrum. Diagnostics retain each
-transition's original NIST area, coefficient source, tau, SA, width and area.
-`interpolate()` reuses cached transitions and coefficients without network access.
-Large line-count × grid-size jobs raise a resource-limit error; increase the
-sampling step or narrow the window instead of silently dropping lines.
+当前模型使用：
 
-The old offline model remains explicitly available as
-`simLIBS.self_absorption.simulate_paper_spectrum`. Its `PaperSelfAbsorptionConfig`,
-`line_data`, `atomic_data` and `intensity_scale` settings belong to that standalone
-function, not the new `SimulatedLIBS` path. The old paper demo/report describe
-that standalone model. `dynamic` still ignores all self-absorption settings.
+```text
+SA = (1 - exp(-tau_center)) / tau_center，tau_center=0 时 SA=1
+吸收后 Stark FWHM = 未吸收 Stark FWHM * SA^(-0.54)
+吸收后线面积 = NIST 原始线面积 * SA^(0.46)
+```
 
-Run the NIST example from this project directory:
+`SA` 表示仪器响应前的内禀 Lorentz 峰高比；经过仪器展宽后，最终峰高比可能改变。仪器宽度不参与光学厚度计算，仪器高斯标准差为 `sigma = wavelength / (R * sqrt(2))`。
 
-```bash
+这里采用各谱线独立计算的经验模型，尚未处理谱线之间的耦合辐射传输。当前 Stark 系数按电子密度线性缩放，不另行推断系数的温度依赖。
+
+### 4.1 自吸收配置参数
+
+`self_absorption_config` 可以使用字典，也可以使用包入口导出的 `NISTSelfAbsorptionConfig` 对象。为兼容已有代码保留了这个名称；仅做 Stark 展宽时同样从这里读取系数及采样步长。
+
+| 配置项 | 默认值 | 含义 |
+| --- | --- | --- |
+| `path_length_m` | `0.01` | 有效光程，m；允许为 0 |
+| `total_number_density_cm3` | `None` | 总粒子数密度，cm^-3；默认通过 `Ne / 平均电荷` 反推 |
+| `wavelength_step_nm` | `0.005` | 期望输出采样步长，nm |
+| `instrument_broadening` | `True` | 兼容旧调用的仪器开关；顶层同名参数显式传值时优先 |
+| `stark_data` | `None` | 用户逐线系数，可用字典列表或 `DataFrame` |
+| `data_path` | `None` | 自定义本地 JSON 路径；当前 NIST 引擎从其中读取 Stark 系数 |
+
+### 4.2 关闭自吸收，独立调用 Stark 展宽
+
+直接设置 `self_absorption=False`、`stark_broadening=True`。下面关闭仪器高斯，得到纯 Stark 线形：
+
+```python
+from simLIBS import SimulatedLIBS
+
+libs_stark = SimulatedLIBS(
+    Te=1.0,
+    Ne=1e17,
+    elements=["Mg"],
+    percentages=[100.0],
+    low_w=285.27,
+    upper_w=285.33,
+    resolution=3000,
+    max_ion_charge=2,
+    webscraping="static",
+    self_absorption=False,
+    stark_broadening=True,
+    instrument_broadening=False,     # 改为 True 即为 Stark + 仪器高斯
+    self_absorption_config={
+        "wavelength_step_nm": 0.001,
+    },
+)
+
+stark_spectrum = libs_stark.get_interpolated_spectrum()
+```
+
+该路径保留 NIST 计算面积，跳过自吸收所需的完整布居表、Saha、总密度和光学厚度计算。诊断中的 `tau_center=0`、`SA=1`，仍要求逐线 Stark 系数齐全。开启自吸收但将光程设为 0 的旧用法仍然可用。
+
+若已有 `libs_sa`，可读取它的 `unabsorbed_interpolated_spectrum` 作为相同仪器设置下的薄谱参考，避免再次联网。比较两次调用时，要同时核对仪器开关、R 和采样网格。
+
+## 5. Stark 数据覆盖与外部系数
+
+**当前没有接入 STARK-B 自动查询。** 系数匹配顺序为“用户 `stark_data` → 本地 JSON”。内置表仅包含以下部分跃迁：
+
+| 元素 | 内置记录数 |
+| --- | ---: |
+| Mg | 13 |
+| Ca | 14 |
+| Zn | 4 |
+
+这些数量不代表覆盖了三个元素的全部谱线。NIST 会根据请求返回谱线；JSON 在当前入口中只用于查系数。即使元素属于 Mg/Ca/Zn，扩大波段后也可能遇到缺失系数。
+
+其他元素可沿同一计算流程模拟，前提是 NIST 提供所需原子数据，并补齐参与计算的非零跃迁所需的逐线 Stark 系数。任何一条缺失都会抛出 `MissingStarkDataError`，全部缺失项位于 `error.missing_lines`，不会返回部分自吸收结果。
+
+### 5.1 外部系数字段与单位
+
+| 字段 | 要求 | 含义 |
+| --- | --- | --- |
+| `element` | 必填 | 元素符号，例如 `Fe` |
+| `charge` | 必填 | 从 0 开始的电荷态：0 为中性，1 为一价离子 |
+| `stark_width_nm` | 必填 | 系数 `W`，nm，须为正值 |
+| `stark_reference_ne_cm3` | 可选，默认 `1e16` | 系数对应的参考电子密度，cm^-3 |
+| `wavelength_nm` | 作为跃迁标识时填写 | 真空波长，nm，匹配绝对容差为 `1e-6 nm` |
+| `lower_eV`、`upper_eV` | 可代替波长，须成对填写 | 上下能级，eV，匹配绝对容差为 `1e-6 eV` |
+| `source` | 建议填写 | 原始文献、数据库记录或 DOI |
+
+波长和能级两种标识至少提供一种；同时填写时需要全部匹配。同波长未分辨跃迁建议补充上下能级，避免身份混淆。内置表通过能级与 `gA` 匹配，以处理论文空气波长和 NIST 真空波长的差别。
+
+代码采用的系数约定为：
+
+```text
+当前 Stark FWHM_nm = 2 * stark_width_nm * Ne / stark_reference_ne_cm3
+```
+
+文献若给出参考密度下的 FWHM，先统一到 nm，再除以 2 得到此接口需要的 `W`；`stark_reference_ne_cm3` 填文献对应的电子密度。Å 转 nm 的换算为 `1 Å = 0.1 nm`。系数应保留来源，并核对原文的宽度定义及适用条件。
+
+### 5.2 补齐系数后重新运行
+
+先运行第 4 节示例或下面的命令导出缺失模板，在 CSV 中按有出处的逐线数据填写 `stark_width_nm`、参考密度和来源。完成后可通过 Python 读取：
+
+```python
+import pandas as pd
+from simLIBS import NISTSelfAbsorptionConfig
+
+stark_table = pd.read_csv("stark_coefficients.csv")
+config = NISTSelfAbsorptionConfig(
+    path_length_m=0.001,
+    wavelength_step_nm=0.001,
+    stark_data=stark_table,
+)
+# 将 config 作为 SimulatedLIBS(..., self_absorption_config=config) 的参数。
+```
+
+也可以直接运行配套脚本。以下命令均在 `simLIBS-2.0.3` 目录执行：
+
+```powershell
+# 默认窄窗口：导出吸收谱、薄谱、NIST 线强、逐线诊断和元数据
 python examples/nist_self_absorption_demo.py --output output/nist_self_absorption
+
+# 关闭自吸收及仪器高斯，仅做 Stark 展宽，主结果保存为 stark_only.csv
+python examples/nist_self_absorption_demo.py --stark-only --no-instrument-broadening --output output/stark_only
+
+# 扩大窗口：若缺系数，导出 missing_stark.csv，脚本返回状态码 2
+python examples/nist_self_absorption_demo.py --low 280 --high 290 --output output/nist_self_absorption
+
+# 填好 CSV 后重新运行
+python examples/nist_self_absorption_demo.py --low 280 --high 290 --stark-csv stark_coefficients.csv --output output/nist_self_absorption
 ```
 
-The default vacuum window, 285.27–285.33 nm, contains one Mg transition with
-an available built-in Stark coefficient. A broader window can require additional
-coefficients: use `--low 280 --high 290` to export the missing-line CSV template,
-then supply the completed file with `--stark-csv path/to/coefficients.csv`.
+## 6. 主类参数
 
+| 参数 | 默认值 | 含义 |
+| --- | --- | --- |
+| `Te` | `1.0` | 电子温度，eV；使用正值 |
+| `Ne` | `1e17` | 电子密度，cm^-3；使用正值 |
+| `elements` | `None` | 调用时显式提供元素符号列表 |
+| `percentages` | `None` | 显式提供对应比例；自吸收时为总和 100 的原子数百分比 |
+| `resolution` | `1000` | 无量纲仪器分辨率 R |
+| `low_w`、`upper_w` | `200`、`1000` | 波长范围，nm，需为正且下界小于上界 |
+| `max_ion_charge` | `3` | 最大发射电荷态，0 对应 I，1 对应 II |
+| `webscraping` | `"static"` | `"static"` 或 `"dynamic"` |
+| `self_absorption` | `False` | 静态逐线自吸收入口开关 |
+| `stark_broadening` | `None` | 静态 Stark 开关；`None` 时随自吸收开关，显式 `True` 可独立启用 |
+| `instrument_broadening` | `None` | 静态仪器高斯开关；显式值优先于旧配置中的同名字段 |
+| `self_absorption_config` | `None` | Stark/自吸收共用的第 4.1 节配置；无 Stark 时忽略 |
+| `headless` | `True` | 动态模式请求无界面运行 Chrome |
+| `keep_browser_open` | `False` | 动态取数后是否保留浏览器会话，便于调试 |
+| `detach_browser` | `False` | 动态模式的 Chrome 脱离驱动选项 |
+| `optical_depth` | `None` | 保留的旧参数；当前开启自吸收时传手动光学厚度会报错 |
 
-### Plot
-```python
-libs.plot(color='blue', title='W Fe Mo composition')
-```
-![](https://github.com/MKastek/SimulatedLIBS/blob/master/images/plot_static.png?raw=True)
+`max_ion_charge` 控制请求的发射谱线范围。当前 NIST 自吸收模型计算布居时仍使用页面提供的全部电离阶段。
 
-### Save to file
-```python
-libs.save_to_csv('filename.csv')
-```
+## 7. 采样、结果与导出
 
-### Interpolated spectrum
-For static mode this returns the locally synthesized spectrum. To change
-its sampling step, evaluate the retained lines on a new grid without
-another network request or spline interpolation:
-```python
-libs.interpolate(resolution=0.01)  # sampling step [nm], NOT spectrometer R
-```
-The existing method name is retained for compatibility. Dynamic mode still
-returns the browser CSV directly at initialization; an explicit call to
-`interpolate()` on dynamic data retains the legacy cubic-spline behavior.
-```python
-libs.get_interpolated_spectrum()
-```
-
-### Raw spectrum
-Static: the initially synthesized local spectrum. Dynamic: the total
-spectrum retrieved from NIST's browser CSV.
-```python
-libs.get_raw_spectrum()
-```
-### Dynamic webscraping
-Unchanged: Chrome opens the official NIST page, recalculates at the requested
-resolution, and reads the exported total spectrum and ion components.
-```python
-libs = SimulatedLIBS(Te=1.0,
-                     Ne=10**17,
-                     elements=['W','Fe','Mo'],
-                     percentages=[50,25,25],
-                     resolution=1000,
-                     low_w=200,
-                     upper_w=1000,
-                     max_ion_charge=3,
-                     webscraping='dynamic')
-```
-
-### Plot
-```python
-libs.plot(color='blue', title='W Fe Mo composition')
-```
-![](https://github.com/MKastek/SimulatedLIBS/blob/master/images/plot_dynamic.png?raw=True)
-
-### Ion spectra
-After simulation with parameter websraping = dynamic, ion spectra are stored in ion_spectra (pd.DataFrame) and can be plotted.
-```python
-libs.plot_ion_spectra()
-```
-![](https://github.com/MKastek/SimulatedLIBS/blob/master/images/plot_ion_spectra.png?raw=True)
-### Random dataset of samples
-Based on .csv file with chemical composition of samples, one can generate dataset of simulated LIBS measurements
-with different Te and Ne values.
-
-Example of input_composition_df pd.DataFrame:
-
-|W  |H  |He |name|
-|---|---|---|----|
-|50 |25 |25 |A   |
-|30 |60 |10 |B   |
-|40 |40 |20 |C   |
+### 7.1 两处 resolution 的含义
 
 ```python
-SimulatedLIBS.create_dataset(input_composition_df,
-                             size=100,
-                             Te_min=1.0,
-                             Te_max=2.0,
-                             Ne_min=10**17,
-                             Ne_max=10**18)
+# 继续使用第 2 节的 libs 对象。
+# 初始化中的 resolution=3000 是仪器 R。
+libs.interpolate(resolution=0.01)  # 此处是输出采样步长，单位 nm
+resampled = libs.get_interpolated_spectrum()
 ```
 
-Example of output .csv file:
+| 位置 | 控制内容 |
+| --- | --- |
+| `SimulatedLIBS(resolution=3000)` | 线形中的仪器分辨率 |
+| `libs.interpolate(resolution=0.01)` | 新输出网格的采样间隔 |
+| `self_absorption_config["wavelength_step_nm"]` | Stark/自吸收入口初次输出的采样间隔 |
 
-|    |   200.0 |   200.1 |   200.2 |   200.3 |   200.4 | ...   |   H |   W |   Te |       Ne |
-|---:|--------:|--------:|--------:|--------:|--------:|----:|----:|----:|-----:|---------:|
-|  0 |       0 |     0   |     0   |     0   |     0   | ...   |2 |   50 | 1.43 | 1.08e+17 |
-|  1 |       0 |     0   |     0   |     0   |     0   | ...   |0 |   0 | 1.06 | 1.08e+17 |
-|  2 |       0 |     0.1 |     0.1 |     0.1 |     0.1 | ...   |0 |  68 | 1.82 | 1.18e+17 |
-|  3 |       0 |    54.5 |    56.7 |    54.4 |    48.4 | ...   |0 |   3 | 1.25 | 1.06e+17 |
-|  4 |       0 |   121.7 |   143.1 |   140.5 |   115.3 | ...   |0 |  84 | 1.08 | 9.23e+17 |
+静态初始普通谱的期望步长为 `0.005 nm`。网格包含两端点，点数为 `max(2, round((upper_w-low_w)/step)+1)`，由 `linspace` 生成，实际间隔可能略有调整。
 
+静态重采样复用已获取的谱线并重新计算线形或离散投影，无须再次联网。Stark 分支同时更新 `raw_spectrum`、`interpolated_spectrum` 及参考谱；未使用 Stark 的静态分支仅更新 `interpolated_spectrum`。动态数据显式调用 `interpolate()` 时沿用三次样条。
 
-### Animations
-SimulatedLIBS can be helpful in creating LIBS animations mostly for educational purpose.
+### 7.2 可以检查哪些结果
 
-#### Resolution animation
-Changes in resolution in range: 500-10000.
-![](https://github.com/MKastek/SimulatedLIBS/blob/master/SimulatedLIBS/animations/saved-gifs/animated_resolution.gif?raw=True)
-#### Electron temperature animation
-Changes in electron temperature Te in range: 0.5-5 eV.
-![](https://github.com/MKastek/SimulatedLIBS/blob/master/SimulatedLIBS/animations/saved-gifs/animated_temperature.gif?raw=True)
-#### Electron density animation
-Changes in electron density Ne in range: 0.7-1.3 e+17 [cm^-3].
-![](https://github.com/MKastek/SimulatedLIBS/blob/master/SimulatedLIBS/animations/saved-gifs/animated_density.gif?raw=True)
+| 属性或方法 | 内容 | 可用路径 |
+| --- | --- | --- |
+| `get_interpolated_spectrum()` | 当前输出网格上的总谱 | 所有模式 |
+| `get_raw_spectrum()` | 原始/最近一次 Stark 渲染的总谱 | 所有模式 |
+| `line_table` | 合并后的 NIST 计算谱线表 | 静态模式 |
+| `get_ion_spectra()` | 各离子分量，含 `Wavelength (nm)` 和 `Sum(calc)` | 动态或静态 Stark |
+| `unabsorbed_interpolated_spectrum` | 同一 Stark/仪器模型的薄谱参考 | 静态 Stark/自吸收 |
+| `unabsorbed_raw_spectrum`、`unabsorbed_ion_spectra` | 未吸收总谱及离子分量 | 静态 Stark/自吸收 |
+| `self_absorption_diagnostics` | 原始面积、W、出处、tau、SA、前后面积/宽度/内禀峰高；仅 Stark 时 tau=0、SA=1 | 静态 Stark/自吸收 |
+| `self_absorption_metadata` | 实际开关、模型、网格和假设；仅自吸收时包含重新计算的布居与密度 | 静态 Stark/自吸收 |
 
-## References
-- M. Kastek, _et al._, _Analysis of hydrogen isotopes retention in thermonuclear reactors with LIBS supported by machine learning_. Spectrochimica Acta Part B Atomic Spectroscopy 199: 106576. DOI: [10.1016/j.sab.2022.106576](https://doi.org/10.1016/j.sab.2022.106576).
+未使用 Stark 的静态路径只生成总谱，调用 `get_ion_spectra()` 会报错。Stark 薄谱与纯高斯谱存在差别。诊断表中的 `thin_peak`、`absorbed_peak` 是仪器响应前的内禀峰高。
 
+`save_to_csv(path)` 保存当前 `interpolated_spectrum`；父目录需要事先创建。单独导出其他表时，使用相应 `DataFrame.to_csv(..., index=False)`。
 
-## Used in Research
-- Chen Z, Chen Z, Jiang W, Guo L, Zhang Y. _Line intensity calculation of laser-induced breakdown spectroscopy during plasma expansion in nonlocal thermodynamic equilibrium._ Opt Lett. 2023 Jun 15;48(12):3227-3230. DOI: [10.1364/OL.488250](https://opg.optica.org/ol/abstract.cfm?uri=ol-48-12-3227).
+## 8. 动态浏览器模拟
+
+动态模式由 Chrome 打开 NIST 页面，填写分辨率、点击重新计算，再读取导出的 CSV：
+
+```python
+from simLIBS import SimulatedLIBS
+
+libs_dynamic = SimulatedLIBS(
+    Te=1.0,
+    Ne=1e17,
+    elements=["Mg"],
+    percentages=[100.0],
+    low_w=280.0,
+    upper_w=290.0,
+    resolution=3000,
+    max_ion_charge=2,
+    webscraping="dynamic",
+    headless=True,
+    keep_browser_open=False,
+    detach_browser=False,
+)
+
+dynamic_spectrum = libs_dynamic.get_interpolated_spectrum()
+ion_spectrum = libs_dynamic.get_ion_spectra()
+```
+
+排查页面或导出问题时，可设置 `headless=False`、`keep_browser_open=True` 观察页面。动态模式忽略本地展宽及自吸收配置，相关实例开关均记录为 `False`，表示本地引擎未执行。
+
+## 9. 批量生成数据集
+
+输入组成表中，元素为列名，**最后一列必须为 `name`**，每行为一组组成。主类从表中随机抽样，并随机选择指定范围的 `Te` 和 `Ne`：
+
+```python
+from pathlib import Path
+
+import pandas as pd
+from simLIBS import SimulatedLIBS
+
+composition = pd.DataFrame({
+    "Mg": [100.0, 50.0],
+    "Ca": [0.0, 50.0],
+    "name": ["Mg_sample", "Mg_Ca_sample"],
+})
+
+dataset = SimulatedLIBS.create_dataset(
+    input_composition_df=composition,
+    size=1,                       # 初次调试先生成一个样本
+    Te_min=0.9,
+    Te_max=1.1,
+    Ne_min=8e16,
+    Ne_max=1.2e17,
+    webscraping="static",
+    self_absorption=False,
+)
+
+dataset_dir = Path("output/dataset")
+dataset_dir.mkdir(parents=True, exist_ok=True)
+dataset.to_csv(dataset_dir / "samples.csv", index=False)
+```
+
+输出为一行一个样本的宽表，前面是以波长命名的强度列，后面是元素比例、`name`、`Te[eV]`、`Ne[cm^-3]`。
+
+当前批量接口没有暴露波段、仪器分辨率和最大发射电荷态参数，内部使用主类默认值，即 `200–1000 nm`、`R=1000`、`max_ion_charge=3`。它会转发 `stark_broadening`、`instrument_broadening`、自吸收开关与配置；启用 Stark 时，各随机样本在默认波段内同样需要完整的逐线系数。样本并发数随 `size` 增加，建议先用小批量确认调用和数据覆盖。
+
+## 10. 独立离线论文模型
+
+`self_absorption.py` 另保留 `simulate_paper_spectrum()`，用于从本地跃迁和 I/II/III 能级表直接计算光谱。它使用 `PaperSelfAbsorptionConfig`，配置中的 `line_data`、`atomic_data` 和 `intensity_scale` 属于此入口。
+
+```python
+from simLIBS.self_absorption import simulate_paper_spectrum
+
+paper_result = simulate_paper_spectrum(
+    Te=1.0,
+    Ne=1e17,
+    elements=["Mg"],
+    percentages=[100.0],
+    low_w=280.0,
+    upper_w=290.0,
+    resolution=3000,
+    max_ion_charge=2,
+    config={
+        "path_length_m": 0.001,
+        "wavelength_step_nm": 0.005,
+        "instrument_broadening": False,
+    },
+)
+
+offline_spectrum = paper_result.spectrum
+offline_diagnostics = paper_result.line_diagnostics
+```
+
+离线入口默认使用内置 Mg/Ca/Zn 部分跃迁及本地能级快照，其他元素需要相应的用户数据。它的可选仪器高斯宽度约定为 `FWHM=lambda/R`；当前 NIST 入口则采用 `1/e 半宽=lambda/R`。比较两种输出时应同时核对数据来源、线强尺度和宽度定义。
+
+相关材料：
+
+- [NIST 自吸收示例](examples/nist_self_absorption_demo.py)：当前主入口的联网示例。
+- [离线论文模型示例](examples/paper_self_absorption_demo.py)：导出单线、混合谱和光程扫描结果。
+- [自吸收原理与历史实现报告](SELF_ABSORPTION_REPORT.md)：主要描述独立离线论文模型；当前 NIST 入口以本 README 为准。
+
+## 11. 模块职责与调试顺序
+
+| 文件 | 职责 | 适合检查的内容 |
+| --- | --- | --- |
+| [simLIBS/__init__.py](simLIBS/__init__.py) | 对外导入入口 | 导出的主类、配置和异常 |
+| [simLIBS/simulation.py](simLIBS/simulation.py) | 组织取数、模型调用、缓存、重采样与导出 | `site`、`response`、`line_table`、`_absorption_lines`、结果回写 |
+| [simLIBS/nist_lines.py](simLIBS/nist_lines.py) | 计算谱线解析、网格划分、仪器高斯/无展宽离散投影 | `parse_sticks()`、`render_sticks()` |
+| [simLIBS/nist_self_absorption.py](simLIBS/nist_self_absorption.py) | 当前 NIST Stark/逐线自吸收模型 | `resolve_stark()`、`prepare_nist_absorption()`、`render_nist_absorption()` |
+| [simLIBS/self_absorption.py](simLIBS/self_absorption.py) | 共享数值工具、结果容器、独立离线模型 | `slab_attenuation_factor()`、`paper_line_parameters()` |
+| [simLIBS/data/paper_atomic_data.json](simLIBS/data/paper_atomic_data.json) | 内置逐线系数与离线能级快照 | 系数记录、参考密度、原子数据出处 |
+
+静态自吸收适合按以下顺序下断点：
+
+```text
+SimulatedLIBS.__init__
+  -> retrieve_data_static           检查 NIST 请求和 HTML
+     -> parse_sticks               检查计算谱线/线强
+     -> parse_atomic_payload       检查跃迁；仅自吸收时需要完整能级和电离能
+  -> prepare_nist_absorption
+     -> attach_nist_strengths      检查同波长跃迁的面积分配
+     -> nist_populations           仅自吸收时计算配分函数和电离比例
+     -> resolve_stark              检查系数匹配、缺失和歧义
+  -> _render_paper_model
+     -> render_nist_absorption     检查 width、q、tau、SA 和 Voigt 叠加
+  -> get_interpolated_spectrum      读取当前结果
+```
+
+常见情况：
+
+| 现象 | 检查方式 |
+| --- | --- |
+| `MissingStarkDataError` | 导出 `error.missing_lines`，核对每条跃迁及其系数来源 |
+| `self_absorption requires Stark broadening` | 开启自吸收时保留 Stark；如只需展宽，设置 `self_absorption=False`、`stark_broadening=True` |
+| `Ambiguous Stark coefficients` | 检查是否存在重复系数或多个记录匹配同一跃迁，补充能级标识 |
+| 找不到 `dataSticksArray` 或原子数组 | 查看 `response.text`，确认返回的是 NIST 数据页；静态请求最多尝试 3 次 |
+| 把 `resolution=0.01` 传给初始化后线宽异常 | 初始化需要仪器 R；`0.01 nm` 步长应传给 `interpolate()` 或自吸收配置 |
+| 关闭自吸收后两张谱仍有差别 | 同时核对 Stark、仪器高斯、R 和网格；纯高斯与 Stark 薄谱使用不同线形 |
+| 提示网格或计算规模超限 | 缩小波段或增大采样步长；初次自吸收步长应在配置中指定 |
+| 中文注释已修改但调试未进入对应文件 | 用 `inspect.getfile(SimulatedLIBS)` 检查当前解释器导入的源码位置 |
+
+静态网格最多支持 2,000,000 点；自吸收还限制“谱线数 × 网格点数”等计算规模。有限采样与输出窗口会影响数值积分捕获的面积，核对线面积时应使用足够细的网格与足够宽的波段。
+
+现有离线测试可从项目目录运行，无须真实访问 NIST 或启动 Chrome：
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+## 12. 项目来源与许可
+
+原项目由 **Marcin Kastek** 创建，服务于利用 LIBS 光谱识别元素的本科毕业研究。导师为 **Paweł Gąsior**，单位为 Institute of Plasma Physics and Laser Microfusion（IPPLM）。原项目地址：[MKastek/simLIBS](https://github.com/MKastek/simLIBS)。
+
+本目录在原项目上增加了本地静态谱线合成、逐线自吸收、诊断结果和对应测试。许可见 [LICENSE.md](LICENSE.md)。
+
+相关文献：
+
+- M. Kastek 等，*Analysis of hydrogen isotopes retention in thermonuclear reactors with LIBS supported by machine learning*，Spectrochimica Acta Part B 199，106576。[DOI: 10.1016/j.sab.2022.106576](https://doi.org/10.1016/j.sab.2022.106576)。
+- L. M. John、K. K. Anoop，*A numerical procedure for understanding the self-absorption effects in laser induced breakdown spectroscopy*，RSC Advances，2023，13，29613–29624。[DOI: 10.1039/D3RA06226K](https://doi.org/10.1039/D3RA06226K)。当前逐线自吸收使用其中的线中心衰减与经验宽度关系。
+- Chen 等，*Line intensity calculation of laser-induced breakdown spectroscopy during plasma expansion in nonlocal thermodynamic equilibrium*，Optics Letters，2023，48(12)，3227–3230。[DOI: 10.1364/OL.488250](https://doi.org/10.1364/OL.488250)。原项目 README 将其列为相关研究。
