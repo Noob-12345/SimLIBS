@@ -9,11 +9,11 @@ const running = computed(() => tasks.some(task => task.kind === props.kind && ta
 const collapsed = ref(latest.value?.status === 'completed' && latest.value.progress === 100)
 const controls = ref<HTMLElement>(), reveal = ref<HTMLButtonElement>()
 const workbench = ref<HTMLElement>(), wrap = ref<HTMLElement>(), pointerActive = ref(false), edgeHovered = ref(false)
-const edgePosition = ref({ left: 0, top: 0, height: 160, visible: false })
+const edgePosition = ref({ left: 0, top: 0, height: 220, visible: false })
 let observer: ResizeObserver | undefined, frame = 0, activityTimer: ReturnType<typeof setTimeout> | undefined
 function showEdge() {
   pointerActive.value = true; clearTimeout(activityTimer)
-  activityTimer = setTimeout(() => { pointerActive.value = false }, 1500)
+  activityTimer = setTimeout(() => { pointerActive.value = false }, 600)
 }
 function touchActivity(event: PointerEvent) { if (event.pointerType === 'touch') showEdge() }
 function enterEdge(event: PointerEvent) { edgeHovered.value = event.pointerType !== 'touch'; showEdge() }
@@ -22,7 +22,7 @@ function positionEdge() {
   const area = workbench.value?.getBoundingClientRect(), panel = wrap.value?.getBoundingClientRect()
   if (!area || !panel) return
   const top = Math.max(8, area.top), bottom = Math.min(window.innerHeight - 8, area.bottom)
-  const height = Math.min(160, bottom - top)
+  const height = Math.min(220, bottom - top)
   if (height < 32) { edgePosition.value.visible = false; return }
   const center = Math.max(top + height / 2, Math.min(window.innerHeight / 2, bottom - height / 2))
   const gap = parseFloat(getComputedStyle(workbench.value!).columnGap) || 40
