@@ -1,8 +1,17 @@
-"""NIST line strengths with per-transition self absorption (no JS execution).
+"""当前静态逐线自吸收组件：保留 NIST 线强，计算吸收并重建谱线。
 
-NIST LIBS payload conventions follow its published saha_lte.js: lines contain
-[vacuum wavelength, g_upper*Aki, upper energy/cm-1, Z, stage+1, lower energy/cm-1].
-Stark coefficients are separate measured/input data, never inferred from R.
+调试调用链：parse_atomic_payload -> prepare_nist_absorption
+（拆分未分辨跃迁、计算布居、匹配 Stark）-> render_nist_absorption
+（计算 tau/SA、更新面积与宽度、叠加 Voigt 线形）。
+
+数据来源：NIST HTML 提供谱线和能级；Stark 系数由用户 stark_data 或
+本地 JSON 提供。目前此模块没有自动查询 STARK-B 的网络逻辑。
+NIST lines 的六列为 [真空波长 nm, g_upper*Aki, 上能级 cm^-1,
+原子序数 Z, 电离阶段 charge+1, 下能级 cm^-1]，网页 JavaScript 仅作为数据解析。
+
+内部能量使用 eV，Te 使用 eV，Ne/粒子数密度使用 cm^-3，光程使用 m。
+光学厚度计算局部换算到 SI；输出波长和线宽使用 nm。适合依次观察的变量：
+nist_strength -> species_density_cm3 -> stark_width_nm -> tau_center -> SA。
 """
 from collections import defaultdict
 from dataclasses import dataclass
@@ -24,14 +33,26 @@ from .self_absorption import (
 
 @dataclass(frozen=True)
 class NISTSelfAbsorptionConfig:
+    """当前 NIST 自吸收入口的不可变配置；主类还会保存深拷贝快照。
+
+    stark_data 接受逐线字典列表或 DataFrame；其 stark_width_nm 为 W，
+    使用约定 FWHM = 2*W*Ne/Ne_ref。缺失系数会在 resolve_stark 报错。
+    """
+    # 有效吸收光程，m；设为 0 时 tau=0、SA=1，得到同线形模型的薄谱。
     path_length_m: float = 0.01
+    # 总粒子数密度，cm^-3；None 时通过 Ne 与平均电荷反推。
     total_number_density_cm3: object = None
+    # 光谱采样间隔，nm；与仪器分辨率 resolution 分别控制网格和线宽。
     wavelength_step_nm: float = 0.005
+    # 是否在内禀 Stark/自吸收处理后叠加仪器高斯响应。
     instrument_broadening: bool = True
+    # 用户逐线系数优先于内置记录；可带 source 字段保留出处。
     stark_data: object = None
+    # 替换内置 JSON 的本地路径；这里只读取其中的逐线 Stark 系数。
     data_path: object = None
 
     def __post_init__(self):
+        """创建配置时校验光程、采样间隔、可选密度和仪器开关。"""
         for key in ('path_length_m', 'wavelength_step_nm'):
             object.__setattr__(self, key, _number(getattr(self, key), key,
                                                positive=key == 'wavelength_step_nm'))
@@ -43,8 +64,9 @@ class NISTSelfAbsorptionConfig:
 
 
 class MissingStarkDataError(ValueError):
-    """All missing transitions are available in missing_lines for CSV export."""
+    """逐线系数不全；missing_lines 保存可直接导出 CSV 的完整缺失清单。"""
     def __init__(self, rows):
+        """异常消息只预览前 8 条，调试完整覆盖情况应查看 missing_lines。"""
         self.missing_lines = pd.DataFrame(rows)
         examples = ', '.join(f"{r['element']} charge={r['charge']} {r['wavelength_nm']:.8g} nm" for r in rows[:8])
         super().__init__(f'Missing Stark coefficients for {len(rows)} NIST transitions: {examples}. '
@@ -53,6 +75,7 @@ class MissingStarkDataError(ValueError):
 
 
 def _array(text):
+    """将网页中的 JSON 数值数组转成有限浮点数组，拒绝非数据表达式。"""
     try:
         value = np.asarray(json.loads(text), dtype=float)
     except (ValueError, TypeError):
@@ -63,6 +86,7 @@ def _array(text):
 
 
 def _scalar(html, name):
+    """读取 NIST 页面具名正标量，如 cm^-1/eV 换算常数 cmeV。"""
     match = re.search(r'\bvar\s+' + name + r'\s*=\s*([\d.eE+-]+)\s*;', html)
     if match is None:
         raise ValueError('NIST response missing ' + name)
@@ -70,6 +94,12 @@ def _scalar(html, name):
 
 
 def parse_atomic_payload(html):
+    """解析同一次 NIST 响应的能级、统计权重、电离能和跃迁元数据。
+
+    返回 atoms、transitions、cmeV、koeff。atoms 中阶段从 1 开始，
+    transitions 中 charge 从 0 开始；上下能级转换成 eV 后参与后续匹配。
+    若这里报错，先检查原始 HTML 的 levels/gValues/ips/lines 是否完整。
+    """
     # 能级的获取：直接读取同一 NIST 响应中的 levels、gValues、ips，禁止执行网页 JavaScript。
     matrices = {}
     for name in ('levels', 'gValues', 'ips'):
@@ -93,6 +123,7 @@ def parse_atomic_payload(html):
             symbols[int(z)] = element
     atoms = {}
     for z, element in symbols.items():
+        # 要求页面提供从中性到类氢阶段的全套数据；裸核阶段由布居函数补入。
         stages = sorted(stage for number, stage in matrices['levels'] if number == z)
         if stages != list(range(1, z+1)):
             raise ValueError(f'Incomplete NIST ionization stages for {element}')
@@ -133,7 +164,11 @@ def parse_atomic_payload(html):
 
 
 def attach_nist_strengths(table, payload, te):
-    """Resolve coincident transitions while preserving every NIST stick area."""
+    """把计算线强关联到具体跃迁，保持每个 NIST stick 的总面积。
+
+    相同元素/电荷/波长的未分辨跃迁按 gA*exp(-E_upper/Te) 分配面积。
+    返回逐线字典列表；nist_strength 是分配后的 NIST 面积，ion 是离子列名。
+    """
     grouped = defaultdict(list)
     for row in payload['transitions']:
         grouped[(row['element'], row['charge'], row['wavelength_nm'])].append(row)
@@ -143,7 +178,7 @@ def attach_nist_strengths(table, payload, te):
         if not match:
             continue
         element, roman = match.groups()
-        # Roman stages in the response can extend past III.
+        # 将罗马数字阶段转为整数；NIST 返回的电离阶段可能高于 III。
         values = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
         stage = sum(-values[ch] if i+1 < len(roman) and values[ch] < values[roman[i+1]]
                     else values[ch] for i, ch in enumerate(roman))
@@ -154,6 +189,7 @@ def attach_nist_strengths(table, payload, te):
             if not candidates:
                 raise ValueError(f'NIST stick lacks transition metadata: {element} {roman} {wave} nm')
             # 谱线强度的获取：总面积来自 dataSticksArray；同波长未分辨跃迁按 gA*Boltzmann 权重拆分。
+            # 对数域归一化避免极弱跃迁直接 exp 下溢后失去相对权重。
             logs = np.array([math.log(row['gA_s'])-row['upper_eV']/te for row in candidates])
             fractions = np.exp(logs-logsumexp(logs))
             for row, fraction in zip(candidates, fractions):
@@ -162,12 +198,18 @@ def attach_nist_strengths(table, payload, te):
 
 
 def nist_populations(atom, te, ne, cmev, koeff):
+    """用页面能级计算全部电离阶段的 LTE 配分函数和 Saha 粒子比例。
+
+    fractions[charge] 对应该电荷态比例；log_partition 同样按 charge 索引。
+    te 为 eV、ne 为 cm^-3；末尾裸核态配分函数为 1，即 log(U)=0。
+    """
     # 粒子布居的计算：采用 NIST 页面全部电离阶段及其配分函数，并加入裸核阶段。
     # 与 NIST saha_lte.js 一致，使用页面提供的能级集合，不限定为旧 JSON 的 I/II/III。
     log_u = [float(logsumexp(np.log(atom['weights'][s])-
                             np.asarray(atom['levels'][s])/(cmev*te)))
              for s in range(1, atom['z']+1)] + [0.0]
     logs = [0.0]
+    # koeff 与 NIST 页面保持一致；在对数域累加各相邻电离阶段的 Saha 比值。
     log_rw = math.log(koeff)+1.5*math.log(te)-math.log(ne)
     for stage in range(1, atom['z']+1):
         logs.append(logs[-1]+log_rw+log_u[stage]-log_u[stage-1]-
@@ -177,6 +219,11 @@ def nist_populations(atom, te, ne, cmev, koeff):
 
 
 def resolve_stark(records, config):
+    """为每条非零贡献跃迁匹配 W、参考电子密度和系数出处。
+
+    优先级：用户 stark_data -> 本地 JSON。匹配歧义直接报错；缺失项全部
+    收集后抛 MissingStarkDataError。可在 candidates/missing 处下断点。
+    """
     # stark展宽系数的获取：JSON 仅提供已有的逐线系数；用户 stark_data 可补充任意 NIST 跃迁。
     # 不把仪器分辨率当作 Stark 系数，不给未知谱线赋默认值，不静默跳过。
     builtins = load_paper_data(config.data_path)['lines']
@@ -202,6 +249,7 @@ def resolve_stark(records, config):
                 _number(row[key], key, positive=key == 'wavelength_nm')
 
     def matches(candidate, line, builtin):
+        """内置记录用能级和 gA 识别；用户记录按其提供的所有标识共同匹配。"""
         if candidate['element'] != line['element'] or candidate['charge'] != line['charge']:
             return False
         # 内置论文波长可能采用空气波长：通过上下能级和 gA 联合匹配，避免空气/真空混用。
@@ -209,6 +257,7 @@ def resolve_stark(records, config):
             return (abs(candidate['lower_eV']-line['lower_eV']) <= .002 and
                     abs(candidate['upper_eV']-line['upper_eV']) <= .002 and
                     math.isclose(candidate['Aki_s']*candidate['g_upper'], line['gA_s'], rel_tol=.03))
+        # 用户波长按真空 nm、绝对容差 1e-6 匹配；能量绝对容差为 1e-6 eV。
         return (('wavelength_nm' not in candidate or
                  math.isclose(candidate['wavelength_nm'], line['wavelength_nm'], rel_tol=0, abs_tol=1e-6)) and
                 all(key not in candidate or abs(candidate[key]-line[key]) <= 1e-6
@@ -231,11 +280,18 @@ def resolve_stark(records, config):
                              stark_reference_ne_cm3=float(row.get('stark_reference_ne_cm3', 1e16)),
                              stark_source=str(row.get('source', source))))
     if missing:
+        # 此时不返回部分结果，防止把缺少若干吸收谱线的结果当作完整模拟。
         raise MissingStarkDataError(missing)
     return resolved
 
 
 def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config):
+    """准备与采样网格无关的逐线缓存，供初次合成和 interpolate 复用。
+
+    bands 是 (核心谱线表, 原子元数据) 列表。这里依次合并数据、分配线强、
+    计算电离布居和数密度、匹配 Stark；返回 (逐线 records, metadata)。
+    百分比按原子数比例处理，总和须为 100，元素名称须唯一。
+    """
     te = _number(te, 'Te', positive=True)
     ne = _number(ne, 'Ne', positive=True)
     pcts = [_number(p, 'percentage') for p in percentages]
@@ -261,6 +317,7 @@ def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config):
         if el not in atoms:
             raise ValueError(f'NIST response missing level data for {el}')
         populations[el] = nist_populations(atoms[el], te, ne, *constants)
+    # 平均电荷 <Z> 由组成与电离比例加权；默认使用 Ne=N_total*<Z> 闭合密度。
     mean_charge = sum(active[el]*float(np.dot(np.arange(len(pop['fractions'])), pop['fractions']))
                       for el, pop in populations.items())
     if config.total_number_density_cm3 is None:
@@ -273,6 +330,7 @@ def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config):
     for index, row in enumerate(records):
         pop = populations[row['element']]
         row['line_id'] = index
+        # Ns 是该元素该电离阶段的数密度，尚需乘下能级 Boltzmann 因子才进入吸收公式。
         row['species_density_cm3'] = density*active[row['element']]*pop['fractions'][row['charge']]
         row['log_partition'] = pop['log_partition'][row['charge']]
     charge_error = _number(density*mean_charge, 'charge density')/ne-1
@@ -294,6 +352,12 @@ def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config):
 
 
 def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, config):
+    """用缓存逐线数据合成吸收谱、薄谱、离子分量与诊断，无网络请求。
+
+    调试顺序：width（未吸收 Stark FWHM）-> q -> tau -> sa ->
+    absorbed_width/absorbed_area -> Voigt。返回共享容器 PaperSpectrumResult；
+    此容器也供离线模型使用，名称不代表此函数改走了离线谱线来源。
+    """
     grid = wavelength_grid(low, high, config.wavelength_step_nm)
     r = _number(resolution, 'resolution', positive=True)
     labels = sorted({row['ion'] for row in records})
@@ -304,10 +368,13 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
     diagnostics = []
     for row in records:
         center = row['wavelength_nm']
+        # 将参考密度下的 W 换算成当前 Ne 下的未吸收 Stark FWHM，单位 nm。
         width = 2*row['stark_width_nm']*ne/row['stark_reference_ne_cm3']
         _number(width, 'Stark FWHM', positive=True)
         ns = row['species_density_cm3']
         # 自吸收光学厚度的计算：用下能级 Boltzmann 因子与 NIST gA，线强仍保留 NIST 原值。
+        # SI 换算：Ns 乘 1e6 得 m^-3，波长乘 1e-9 得 m；q 单位为 m。
+        # Te 与 lower_eV 均用 eV，因此指数直接为 -lower_eV/Te。
         try:
             q = (math.exp(math.log(ns)+math.log(1e6)+math.log(row['gA_s'])+
                           4*math.log(center*1e-9)+math.log(config.path_length_m)-
@@ -315,8 +382,10 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
                  if ns > 0 and config.path_length_m > 0 else 0.0)
             tau = _number(q/(width*1e-9), 'line-center optical depth')
             sa = float(slab_attenuation_factor(tau))
+            # tau 使用未吸收内禀宽度；零光程/零 Ns 对应 tau=0、sa=1。
             absorbed_width = width*sa**WIDTH_EXPONENT
             area = row['nist_strength']
+            # 面积乘 SA^0.46、宽度乘 SA^-0.54，使仪器响应前的 Lorentz 峰高比为 SA。
             absorbed_area = area*sa**(1+WIDTH_EXPONENT)
         except (OverflowError, ZeroDivisionError):
             raise ValueError('Self absorption line parameters exceeded numeric range') from None
@@ -326,6 +395,7 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
         # Stark 洛伦兹宽度和自吸收先计算，最后与高斯仪器响应组成 Voigt 线型。
         sigma = center/r/math.sqrt(2) if config.instrument_broadening else 0.0
         delta = grid-center
+        # voigt_profile 的第三个参数 gamma 为 Lorentz 半高半宽，故 FWHM 需要除以 2。
         thin[row['ion']] += area*voigt_profile(delta, sigma, width/2)
         absorbed[row['ion']] += absorbed_area*voigt_profile(delta, sigma, absorbed_width/2)
         diagnostics.append(dict(row, q_m=q, tau_center=tau, SA=sa, thin_area=area,
@@ -336,12 +406,14 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
                                 instrument_sigma_nm=sigma))
 
     def frame(channels):
+        """将离子数组汇总成离子宽表和 wavelength/intensity 总谱两张表。"""
         ion = pd.DataFrame({'Wavelength (nm)': grid, **channels})
         ion['Sum(calc)'] = sum(channels.values(), np.zeros(len(grid)))
         if not np.isfinite(ion.to_numpy(dtype=float)).all():
             raise ValueError('Self absorption spectrum contains nonfinite values')
         return ion, pd.DataFrame({'wavelength': grid, 'intensity': ion['Sum(calc)'].to_numpy()})
     ion, spectrum = frame(absorbed)
+    # 薄谱保留相同 Stark 和仪器宽度；它可直接用于隔离自吸收本身的影响。
     thin_ion, thin_spectrum = frame(thin)
     info = dict(metadata, instrument_broadening=config.instrument_broadening,
                 parameters=dict(Te_eV=te, Ne_cm3=ne, path_length_m=config.path_length_m),

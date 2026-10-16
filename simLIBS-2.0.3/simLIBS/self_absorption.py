@@ -1,20 +1,21 @@
-"""Paper-based line self-absorption and legacy explicit-opacity utilities.
+"""自吸收共享工具与独立离线论文模型。
 
-The primary model implements John & Anoop (2023), DOI 10.1039/D3RA06226K:
-finite-bound-level I/II/III Saha/Boltzmann, Eq. (7) opacity, Stark widths,
-Eq. (6) center SA and Eq. (8) empirical width change. See simulate_paper_spectrum.
-The older attenuate_spectrum helper remains an explicit mathematical utility;
-it is not the paper model used by SimulatedLIBS.
+模块内的组件分工：
+1. validate_optical_depth/slab_attenuation_factor/attenuate_spectrum：
+   校验显式光学厚度并计算均匀发射层的衰减因子；可独立用于整谱后处理。
+2. _number/load_paper_data/PaperSpectrumResult 及资源上限常量：
+   同时供当前 nist_self_absorption.py 和本模块离线模型使用。
+3. simulate_paper_spectrum：从本地或用户提供的跃迁、能级数据出发，
+   使用 I/II/III Saha/Boltzmann、逐线光学厚度和经验宽度关系合成离线光谱。
 
-For a uniform emitting slab with no incident background, I = S(1-exp(-tau))
-and its optically thin reference is I_thin = S*tau. Their ratio is
-beta(tau) = (1-exp(-tau))/tau, with beta(0) = 1.
-Reference: https://www.astro.uvic.ca/~tatum/stellatm/atm5.pdf (section 5.7).
+当前 SimulatedLIBS 的 static+self_absorption 主流程位于
+nist_self_absorption.py；本模块的离线入口仍可直接调用以复现实例和调试公式。
+论文依据：John & Anoop (2023), DOI 10.1039/D3RA06226K。
+显式衰减工具依据：https://www.astro.uvic.ca/~tatum/stellatm/atm5.pdf 第 5.7 节。
 
-Here tau is supplied by the caller; it is NOT inferred from normalized intensity,
-Te, Ne or instrumental resolution. Applying this factor to a spectrum that has
-already been broadened is a post-processing approximation, not intrinsic
-radiative transfer followed by instrumental convolution.
+公共单位：Te/能量为 eV，Ne/数密度为 cm^-3，波长与线宽为 nm，光程为 m。
+q 的计算会换算到 SI，tau 无量纲。调试时先区分“显式给定 tau”与
+“逐线根据布居推导 tau”两个入口，再观察 SA、thin_fwhm_nm 和 absorbed_area。
 """
 
 import numpy as np
@@ -30,14 +31,19 @@ from scipy.special import logsumexp, voigt_profile
 
 PAPER_DOI = "10.1039/D3RA06226K"
 MODEL_VERSION = "john-anoop-2023-lines-1"
+# 论文式(8)的经验指数 alpha；吸收后 FWHM=原 FWHM*SA^alpha。
 WIDTH_EXPONENT = -0.54
+# 离线网格点数上限，以及两个逐线引擎共用的内存/计算规模保护。
 MAX_OUTPUT_POINTS = 200000
 MAX_SPECTRUM_CELLS = 5000000
 MAX_LINE_POINT_WORK = 50000000
 
 #数值检验（optical_depth）
 def validate_optical_depth(optical_depth):
-    """Return a copied scalar/1D array of finite, nonnegative, dimensionless tau."""
+    """返回有限非负的无量纲 tau 副本，允许标量或非空一维数组。
+
+    布尔、复数、NaN、无穷值及负值均拒绝，避免强制类型转换掩盖输入问题。
+    """
     try:
         original = np.asarray(optical_depth, dtype=object)
         if original.ndim > 1 or original.size == 0:
@@ -55,6 +61,10 @@ def validate_optical_depth(optical_depth):
 
 #自吸收系数
 def slab_attenuation_factor(optical_depth):
+    """计算 SA=(1-exp(-tau))/tau；tau=0 时连续取极限 SA=1。
+
+    expm1 保证极薄情形的数值精度；该因子也作为逐线内禀峰高衰减系数。
+    """
     tau = validate_optical_depth(optical_depth)
     factor = np.ones_like(tau)
     np.divide(-np.expm1(-tau), tau, out=factor, where=tau != 0)
@@ -62,6 +72,11 @@ def slab_attenuation_factor(optical_depth):
 
 
 def attenuate_spectrum(spectrum, optical_depth, wavelength_column="wavelength")-> pd.DataFrame:
+    """对已存在的谱表逐点乘显式衰减因子，返回副本并保留输入。
+
+    标量 tau 应用于所有波长，一维 tau 必须与波长行数一致；各强度列共用因子。
+    本工具只缩放强度，不计算布居、Stark 宽度或逐线重建。
+    """
 
     if not isinstance(spectrum, pd.DataFrame):
         raise ValueError("spectrum must be a pandas DataFrame")
@@ -94,6 +109,7 @@ def attenuate_spectrum(spectrum, optical_depth, wavelength_column="wavelength")-
 
 #数值检验
 def _number(value, name, minimum=0.0, positive=False):
+    """共享数值校验：拒绝布尔/复数，按需要求非负或严格为正的有限实数。"""
     if isinstance(value, (bool, np.bool_, complex, np.complexfloating)):
         raise ValueError("{} must be a real number".format(name))
     try:
@@ -107,18 +123,28 @@ def _number(value, name, minimum=0.0, positive=False):
 
 @dataclass(frozen=True)
 class PaperSelfAbsorptionConfig:
+    """独立离线入口的配置，供 simulate_paper_spectrum 使用。
+
+    line_data/atomic_data 可替换内置跃迁和 I/II/III 能级快照；当前 NIST
+    主入口使用另一个 NISTSelfAbsorptionConfig，两者的数据来源分别维护。
+    """
 
     #自吸收配置参数
+    # 光程 m；0 对应薄谱极限。密度 cm^-3；None 时用电荷守恒反推。
     path_length_m: float = 0.01
     total_number_density_cm3: object = None
+    # 输出步长 nm；仪器开关默认 False，方便直接观察内禀 Lorentz 峰高与宽度。
     wavelength_step_nm: float = 0.005
     instrument_broadening: bool = False
+    # energy 将光子线权重乘以 hc/lambda；photon 保留光子计数权重。
     intensity_scale: str = "energy"
+    # 本地/用户逐线表与原子能级表；缺少任一表时，从 data_path 的 JSON 补读。
     line_data: object = None
     atomic_data: object = None
     data_path: object = None
 
     def __post_init__(self):
+        """在配置创建时检查范围、强度尺度和开关类型。"""
         object.__setattr__(self, "path_length_m", _number(self.path_length_m, "path_length_m"))
         object.__setattr__(self, "wavelength_step_nm", _number(self.wavelength_step_nm, "wavelength_step_nm", positive=True))
         if self.total_number_density_cm3 is not None:
@@ -130,6 +156,7 @@ class PaperSelfAbsorptionConfig:
 
 #配置参数验证
 def _config(config):
+    """将 None、字典或现成配置对象统一为 PaperSelfAbsorptionConfig。"""
     if config is None:
         return PaperSelfAbsorptionConfig()
     if isinstance(config, PaperSelfAbsorptionConfig):
@@ -143,7 +170,11 @@ def _config(config):
 
 #读取论文数据
 def load_paper_data(path=None):
-    """Load the auditable Table 1/NIST snapshot, without runtime network access."""
+    """读取本地论文谱线/能级快照，并附加文件路径与 SHA256 追溯信息。
+
+    离线引擎使用 lines 和 elements；当前 NIST 引擎只从 lines 查 Stark 系数。
+    此函数不发网络请求，也不自动增加元素或谱线覆盖。
+    """
     path = Path(path) if path is not None else Path(__file__).with_name("data") / "paper_atomic_data.json"
     try:
         raw = path.read_bytes()
@@ -156,9 +187,13 @@ def load_paper_data(path=None):
     data["_source_path"] = str(path.resolve())
     return data
 
-#粒子布局数->比例，配分函数，能级数量
+# 粒子布居：输出 I/II/III 的数目比例、配分函数和实际纳入的束缚能级数量。
 def saha_populations(atomic_data, *, Te, Ne):
-    """Three-stage finite-bound-level LTE populations; Te[eV], Ne[cm^-3]."""
+    """使用提供的真实束缚能级计算三阶段 LTE 布居；Te[eV]，Ne[cm^-3]。
+
+    输入 levels 的键为字符串 '0'/'1'/'2'；输出三个数组均按 charge=0/1/2
+    排列。缺少任何阶段的真实束缚能级时明确报错。
+    """
     te = _number(Te, "Te", positive=True)
     ne = _number(Ne, "Ne", positive=True)
     if not isinstance(atomic_data, dict):
@@ -169,6 +204,7 @@ def saha_populations(atomic_data, *, Te, Ne):
         raise ValueError("I/II/III Saha requires the first two ionization energies")
     ionization = [_number(v, "ionization energy", positive=True) for v in energies[:2]]
     log_u, counts = [], []
+    # logsumexp 累加 g*exp(-E/Te)，减小大配分和极小布居的数值误差。
     for stage in ("0", "1", "2"):
         weights = []
         if not isinstance(levels.get(stage), list):
@@ -187,6 +223,7 @@ def saha_populations(atomic_data, *, Te, Ne):
         if not weights:
             raise ValueError("missing bound levels for ionization stage {}".format(stage))
         log_u.append(float(logsumexp(weights))); counts.append(len(weights))
+    # 常数使用 SI：Te 的 eV 乘 e 转成 J，Ne 的 cm^-3 乘 1e6 转成 m^-3。
     prefactor = math.log(2) + 1.5*(math.log(2*math.pi*m_e*e/h**2) + math.log(te)) - math.log(ne) - math.log(1e6)
     logs = [0.0]
     for stage in (0, 1):
@@ -199,6 +236,10 @@ def saha_populations(atomic_data, *, Te, Ne):
 
 
 def _line(line):
+    """校验并复制离线跃迁记录：元素、charge=0/1/2、能级、Aki、g 和 Stark W。
+
+    能量为 eV，波长及 W 为 nm；W 的约定为 FWHM=2*W*Ne/Ne_ref。
+    """
     if not isinstance(line, dict):
         raise ValueError("each transition must be a dictionary")
     out = dict(line)
@@ -221,6 +262,11 @@ def _line(line):
 
 
 def paper_line_parameters(line, *, Te, Ne, species_density_cm3, partition_function, config=None):
+    """计算一条离线跃迁的薄谱面积、Stark FWHM、光学厚度和吸收后参数。
+
+    species_density_cm3 是该元素该电荷态的 Ns；partition_function 是该阶段 U。
+    返回包含 q_m、tau_center、SA、前后峰高/面积/FWHM 的字典，适合单线断点调试。
+    """
     cfg = _config(config); row = _line(line)
     te = _number(Te, "Te", positive=True); ne = _number(Ne, "Ne", positive=True)
     ns = _number(species_density_cm3, "species_density_cm3")
@@ -229,6 +275,7 @@ def paper_line_parameters(line, *, Te, Ne, species_density_cm3, partition_functi
     width = 2*row["stark_width_nm"]*(ne/row["stark_reference_ne_cm3"])
     _number(width, "derived Stark FWHM", positive=True)
     try:
+        # 论文式(7)：下能级 Boltzmann 布居决定吸收，q_m 与内禀宽度换算成 m 后求 tau。
         q_m = (math.exp(math.log(ns) + math.log(1e6) + math.log(row["g_upper"]) + 4*math.log(wavelength_m)
                         + math.log(row["Aki_s"]) + math.log(cfg.path_length_m)
                         - math.log(4*math.pi**2*c) - math.log(partition) - row["lower_eV"]/te)
@@ -236,11 +283,13 @@ def paper_line_parameters(line, *, Te, Ne, species_density_cm3, partition_functi
         tau = q_m/(width*1e-9)
         sa = float(slab_attenuation_factor(tau))
         absorbed_width = width*sa**WIDTH_EXPONENT
+        # 离线入口从上能级布居与 Aki 计算相对线面积；当前 NIST 入口直接保留 NIST 面积。
         area = (math.exp(math.log(ns) + math.log(1e6) + math.log(row["g_upper"])
                          + math.log(row["Aki_s"]) - math.log(4*math.pi) - math.log(partition)
                          - row["upper_eV"]/te) if ns > 0 else 0.0)
         if cfg.intensity_scale == "energy":
             area *= h*c/wavelength_m
+        # Lorentz 峰高正比于面积/FWHM；面积指数 1+alpha=0.46 保证峰高比为 SA。
         absorbed_area = area*sa**(1+WIDTH_EXPONENT)
         peak = area/(math.pi*width/2)
         absorbed_peak = absorbed_area/(math.pi*absorbed_width/2)
@@ -256,6 +305,12 @@ def paper_line_parameters(line, *, Te, Ne, species_density_cm3, partition_functi
 
 @dataclass
 class PaperSpectrumResult:
+    """两个逐线引擎共用的结果容器。
+
+    spectrum/thin_spectrum 为 wavelength/intensity 总谱；ion_spectrum 和
+    thin_ion_spectrum 为离子宽表；line_diagnostics 保存逐线中间量，metadata
+    保存模型、参数和数据来源。thin 表示同一线形模型下移除自吸收的参考谱。
+    """
     spectrum: pd.DataFrame
     thin_spectrum: pd.DataFrame
     ion_spectrum: pd.DataFrame
@@ -266,17 +321,23 @@ class PaperSpectrumResult:
 
 def simulate_paper_spectrum(*, Te, Ne, elements, percentages, low_w, upper_w,
                             resolution=1000, max_ion_charge=2, config=None, cancelled=None, progress=None):
-    """Generate a paper-model spectrum directly from transitions, offline.
+    """从本地/用户跃迁和 I/II/III 能级表生成独立离线论文模型光谱。
 
-    Lorentz lines are rebuilt before summation. Optional Gaussian instrument
-    convolution is evaluated analytically as a Voigt profile AFTER the intrinsic
-    SA peak/width update. It never enters the optical-depth calculation.
+    执行顺序：校验组成 -> 读取逐线数据 -> Saha 布居与密度 -> 单线参数 ->
+    可选仪器响应 -> 各离子/总谱 -> 诊断和来源。每条线保留 Lorentz 翼部，
+    records 不按输出窗口预先裁剪；超出窗口的线也可能贡献翼部。
+
+    仪器高斯与内禀 Lorentz 通过 Voigt 解析合成；本离线入口约定
+    lambda/R 为仪器高斯 FWHM。当前 NIST 入口的 1/e 半宽约定见对应模块。
+    cancelled 为无参回调，progress 接收 (当前进度, 100, 消息)。
     """
     cfg = _config(config)
     def check():
+        """在准备和逐线循环中响应取消请求，终止时抛出 InterruptedError。"""
         if cancelled is not None and cancelled():
             raise InterruptedError("paper self-absorption calculation cancelled")
     def emit(current, message):
+        """先检查取消，再向调用方报告 0-100 范围内的进度。"""
         check()
         if progress is not None:
             progress(current, 100, message)
@@ -322,6 +383,7 @@ def simulate_paper_spectrum(*, Te, Ne, elements, percentages, low_w, upper_w,
         if el not in atoms:
             raise ValueError("missing atomic I/II/III data for " + str(el))
         populations[el] = saha_populations(atoms[el], Te=te, Ne=ne)
+    # 组成按原子数比例；每个阶段的电荷权重为 0、1、2。
     mean_charge = math.fsum(active[el]*float(np.dot([0, 1, 2], populations[el]["fractions"])) for el in active)
     if cfg.total_number_density_cm3 is None:
         if mean_charge <= 0:
@@ -348,6 +410,7 @@ def simulate_paper_spectrum(*, Te, Ne, elements, percentages, low_w, upper_w,
         ns = total_density*active[el]*float(populations[el]["fractions"][stage])
         row = paper_line_parameters(line, Te=te, Ne=ne, species_density_cm3=ns,
                                    partition_function=float(populations[el]["partition_functions"][stage]), config=cfg)
+        # 高斯 sigma=FWHM/(2*sqrt(2*ln2))；Voigt 的 Lorentz 参数则为 FWHM/2。
         sigma = (line["wavelength_nm"]/r/(2*math.sqrt(2*math.log(2))) if cfg.instrument_broadening else 0.0)
         key = el + " " + ("I", "II", "III")[stage]
         delta = axis-line["wavelength_nm"]
@@ -357,6 +420,7 @@ def simulate_paper_spectrum(*, Te, Ne, elements, percentages, low_w, upper_w,
         diagnostics.append(row)
         emit(5+90*(index+1)/len(records), "Paper transition {}/{}".format(index+1, len(records)))
     def frame(channels):
+        """把离子数组组织为宽表，并生成与主类兼容的总光谱表。"""
         ion = pd.DataFrame({"Wavelength (nm)": axis, **channels})
         ion["Sum(calc)"] = ion[labels].sum(axis=1)
         if not np.isfinite(ion.to_numpy(dtype=float)).all():
@@ -364,6 +428,7 @@ def simulate_paper_spectrum(*, Te, Ne, elements, percentages, low_w, upper_w,
         return ion, pd.DataFrame({"wavelength": axis, "intensity": ion["Sum(calc)"].to_numpy()})
     ion, spectrum = frame(absorbed); thin_ion, thin_spectrum = frame(thin)
     def json_number(value):
+        """将 NumPy 标量转换为 JSON 数字，用于稳定计算输入数据的来源指纹。"""
         if isinstance(value, np.generic):
             return value.item()
         raise TypeError("atomic data must be JSON serializable")

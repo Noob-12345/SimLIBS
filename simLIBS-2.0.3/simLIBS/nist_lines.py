@@ -1,7 +1,13 @@
-"""Parse NIST calculated sticks and synthesize area-normalized Gaussians.
+"""普通静态光谱组件：解析 NIST 计算谱线，并在本地进行高斯展宽。
 
-Matches Dataset/nist_reconstruction.py's kernel: lambda/R is the Gaussian
-1/e half-width, NOT FWHM. No per-band normalization or Doppler grid is used.
+调用链：simulation.retrieve_data_static -> parse_sticks -> render_sticks。
+本模块负责波段划分、采样网格和普通静态线形；逐线自吸收在
+nist_self_absorption.py 中计算。谱线面积直接使用 NIST 计算线强，
+各波段合并后统一展宽，不单独归一化。
+
+单位约定：波长和采样步长为 nm，resolution 为无量纲仪器分辨率 R。
+lambda/R 表示高斯 1/e 半宽，FWHM = 2*sqrt(log(2))*lambda/R。
+调试入口：解析失败看 parse_sticks，谱线面积或线宽异常看 render_sticks。
 """
 import math
 import re
@@ -11,6 +17,11 @@ import pandas as pd
 
 
 def parse_sticks(html):
+    """从 HTML 的 dataSticksArray 提取波长和各离子线强，返回 DataFrame。
+
+    仅解析网页中的数据文本；null 离子贡献记为 0。返回前检查列结构、
+    波长和线强，便于将 NIST 页面格式变化与后续展宽问题分开定位。
+    """
     match = re.search(r"\bdataSticksArray\s*=\s*(\[\[.*?\]\])\s*;", html, re.S)
     if match is None:
         raise ValueError("NIST response has no dataSticksArray")
@@ -33,6 +44,10 @@ def parse_sticks(html):
 
 
 def line_strengths(table):
+    """校验谱线表，返回中心波长和每行各离子贡献之和两个数组。
+
+    只汇总 Fe I、Fe II 等离子列；线强非负且有限，作为高斯积分面积。
+    """
     ions = [col for col in table if re.match(r"^[A-Z][a-z]? [IVXLCDM]+(?:\s|$)", col)]
     if "wavelength" not in table or not ions:
         raise ValueError("Expected wavelengths and calculated ion intensity columns")
@@ -49,6 +64,11 @@ def line_strengths(table):
 
 
 def bands_for(low, high, width=500.0, overlap=2.0):
+    """依次生成 (核心下界, 核心上界, 请求下界, 请求上界)，单位 nm。
+
+    相邻请求默认重叠 2 nm；调用方按核心区间归属保留谱线，避免重复计入。
+    此处只划分请求区间，谱线合并及展宽由 simulation.py 完成。
+    """
     if not np.isfinite([low, high]).all() or not 0 < low < high:
         raise ValueError("Wavelength range must be finite, positive and increasing")
     for index in range(math.ceil((high-low)/width)):
@@ -58,6 +78,11 @@ def bands_for(low, high, width=500.0, overlap=2.0):
 
 
 def wavelength_grid(low, high, step):
+    """生成包含两端点的递增网格，并在分配数组前限制最大点数。
+
+    step 是期望采样间隔；linspace 按范围与点数调整实际间隔。
+    极窄波段无法表示递增浮点坐标时也会明确报错。
+    """
     if not np.isfinite([low, high, step]).all() or not 0 < low < high or step <= 0:
         raise ValueError("Wavelength bounds and sampling step must be finite and positive")
     quotient = (high-low)/step
@@ -73,6 +98,12 @@ def wavelength_grid(low, high, step):
 
 
 def render_sticks(table, grid, resolution):
+    """将谱线面积转换为高斯强度密度，并叠加为 wavelength/intensity 表。
+
+    grid 须使用递增的 nm 坐标；resolution 是仪器 R。同波长的不同跃迁
+    逐条相加；仅计算中心左右各 6 个 1/e 半宽内的高斯贡献。
+    仪器展宽+高斯展宽
+    """
     if not np.isfinite(resolution) or resolution <= 0:
         raise ValueError("Spectrometer resolution must be finite and positive")
     centers, strengths = line_strengths(table)
@@ -80,6 +111,7 @@ def render_sticks(table, grid, resolution):
     for center, strength in zip(centers, strengths):
         if strength == 0:
             continue
+        # 面积归一化高斯：积分为 strength；峰高随 width 增大而降低。
         width = center / resolution
         low = np.searchsorted(grid, center-6*width, side="left")
         high = np.searchsorted(grid, center+6*width, side="right")

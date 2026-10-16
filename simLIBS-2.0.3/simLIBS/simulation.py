@@ -1,3 +1,16 @@
+"""SimulatedLIBS 主入口：组织数据获取、逐线计算、重采样和结果导出。
+
+静态普通谱：get_site -> retrieve_data_static -> nist_lines.render_sticks。
+静态自吸收：retrieve_data_static -> prepare_nist_absorption
+            -> _render_paper_model -> render_nist_absorption。
+动态浏览器：retrieve_data_dynamic -> 读取 NIST 导出的总谱和离子分量。
+
+调试时依次检查 line_table（NIST 计算线强）、_absorption_lines（已匹配
+Stark/布居的跃迁缓存）、self_absorption_diagnostics（tau/SA/线宽）和
+interpolated_spectrum（当前输出）。构造对象时即获取数据并计算光谱。
+当前自吸收只在 static 模式生效；逐线算法见 nist_self_absorption.py。
+"""
+
 import sys
 import time
 from typing import List
@@ -33,6 +46,7 @@ urllib3.disable_warnings()
 
 
 class CompositionError(Exception):
+    """输入元素百分比之和超过 100% 时使用的组成校验异常。"""
     pass
 
 
@@ -46,7 +60,8 @@ def validate_simulated_libs(
     max_ion_charge: int,
 ):
     """
-    Validates the input parameters for simLIBS.
+    公共基础校验：比例总和、参数负值、波长顺序和数组长度。
+    各子模型还会检查有限值、正值网格和原子数比例等更严格条件。
 
     Raises:
         CompositionError: If the sum of percentages exceeds 100.
@@ -65,6 +80,11 @@ def validate_simulated_libs(
 
 
 class SimulatedLIBS(object):
+    """单次 LIBS 模拟对象，提供批量生成、绘图、取谱和 CSV 导出接口。
+
+    总谱表使用 wavelength/intensity 两列；自吸收开启时额外保留
+    unabsorbed_* 参考谱、逐线诊断和元数据，NIST 计算线强保存在 line_table。
+    """
 
     def __init__(
         self,
@@ -84,7 +104,16 @@ class SimulatedLIBS(object):
         optical_depth=None,
         self_absorption_config=None,
     ):
-        """
+        """保存参数并立即生成一次光谱。
+
+        Te/Ne：电子温度 eV、电子密度 cm^-3；波长界限使用 nm。
+        resolution：仪器分辨率 R；max_ion_charge：最大电荷态，0 表示中性。
+        自吸收时 percentages 按原子数百分比处理，总和须为 100。
+        self_absorption_config 的光程/密度/步长/Stark 单位见 NISTSelfAbsorptionConfig。
+
+        建议断点：retrieve_data_static 检查网页解析，prepare_nist_absorption
+        检查跃迁/布居/Stark，_render_paper_model 检查结果回写。缺失系数时查看
+        MissingStarkDataError.missing_lines；动态模式只使用浏览器计算结果。
 
         Parameters
         ----------
@@ -125,6 +154,7 @@ class SimulatedLIBS(object):
 
         """
 
+        # 先确定实际生效的开关；动态模式不进入配置解析和本地自吸收计算。
         if type(self_absorption) is not bool:
             raise ValueError("self_absorption must be a boolean")
         self.self_absorption = webscraping == "static" and self_absorption
@@ -133,10 +163,12 @@ class SimulatedLIBS(object):
         self.optical_depth = None
         self.self_absorption_config = None
         self.self_absorption_metadata = None
+        # 请求快照、分波段原始数据、逐线物理量缓存：重采样时复用，避免再次联网。
         self._paper_request = None
         self._nist_bands = []
         self._absorption_lines = None
         self._absorption_metadata = None
+        # 未吸收参考谱与逐线诊断仅在自吸收渲染成功后赋值。
         self.unabsorbed_raw_spectrum = None
         self.unabsorbed_interpolated_spectrum = None
         self.unabsorbed_ion_spectra = None
@@ -147,6 +179,7 @@ class SimulatedLIBS(object):
         )
 
         self.Te = Te
+        # 静态请求使用原始 Ne 数值；self.Ne 保留动态请求所用的历史格式字符串。
         self._static_ne = Ne
         self.Ne = round(Ne, 3 - int(math.floor(math.log10(abs(Ne)))) - 1)
         self.Ne = re.sub(r"\+", "", str(self.Ne))
@@ -174,6 +207,7 @@ class SimulatedLIBS(object):
             else:
                 raise ValueError("self_absorption_config must be a dictionary or NISTSelfAbsorptionConfig; "
                                  "the offline PaperSelfAbsorptionConfig belongs to simulate_paper_spectrum")
+            # 深拷贝本次配置和可变系数表；之后外部修改原字典不影响缓存重绘。
             self.self_absorption_config = deepcopy(config)
             self._paper_request = dict(Te=Te, Ne=Ne, elements=tuple(elements), percentages=tuple(percentages),
                                        low_w=low_w, upper_w=upper_w, resolution=resolution, max_ion_charge=max_ion_charge)
@@ -183,9 +217,11 @@ class SimulatedLIBS(object):
                 # 全部谱线的获取：自吸收开关不再改变谱线来源，始终先请求 NIST。
                 self.retrieve_data_static()
                 if self.self_absorption:
+                    # 准备阶段与采样网格无关，完成布居、密度和所有 Stark 系数匹配。
                     self._absorption_lines, self._absorption_metadata = prepare_nist_absorption(
                         self._nist_bands, te=Te, ne=Ne, elements=elements, percentages=percentages,
                         config=self.self_absorption_config)
+                    # 使用逐线缓存生成 Voigt 谱，再回写吸收/参考/诊断属性。
                     self._render_paper_model()
                 else:
                     self.interpolated_spectrum = self.raw_spectrum.copy(deep=True)
@@ -206,7 +242,12 @@ class SimulatedLIBS(object):
                         self.driver.quit()
 
     def _render_paper_model(self, step=None):
-        """Retained internal name: render cached NIST transitions with self absorption."""
+        """从缓存的 NIST 跃迁重新合成自吸收光谱，并回写所有结果属性。
+
+        保留历史函数名，当前实际调用 render_nist_absorption。step 为采样间隔
+        nm，省略则用原配置。此处不联网、不重新匹配 Stark；每次同时更新
+        raw/interpolated 及其未吸收参考谱。
+        """
         config = self.self_absorption_config
         if step is not None:
             config = replace(config, wavelength_step_nm=step)
@@ -215,6 +256,7 @@ class SimulatedLIBS(object):
             self._absorption_lines, self._absorption_metadata,
             te=request['Te'], ne=request['Ne'], low=request['low_w'], high=request['upper_w'],
             resolution=request['resolution'], config=config)
+        # 各公开谱表独立复制，便于调试时修改一张表而不连带改动另一张表。
         self.raw_spectrum = result.spectrum.copy(deep=True)
         self.interpolated_spectrum = result.spectrum.copy(deep=True)
         self.ion_spectra = result.ion_spectrum.copy(deep=True)
@@ -225,17 +267,19 @@ class SimulatedLIBS(object):
         self.self_absorption_metadata = deepcopy(result.metadata)
 
     def __repr__(self):
+        """生成交互环境中用于查看模拟参数的对象文本。"""
         return f"simLIBS(Te={self.Te:.2f} eV, Ne={self.Ne:.3e} cm^-3, elements={', '.join(self.elements)}, percentages={', '.join([str(p) for p in self.percentages])}, resolution={self.resolution}, low_w={self.low_w}, upper_w={self.upper_w}, max_ion_charge={self.max_ion_charge})"
 
     def __str__(self):
+        """生成电子温度、密度和元素组成的简要文本。"""
         return f"Te: {self.Te:.2f} eV, Ne: {self.Ne:.3e} cm^-3, elements: {', '.join(self.elements)}, percentages: {', '.join([str(p) for p in self.percentages])}"
 
     def get_site(self, low_w=None, upper_w=None, min_rel_int=None):
-        """
+        """拼接 NIST LIBS 请求 URL，允许覆盖分段的波长界限。
 
-        Returns
-        -------
-
+        show_av=3 请求真空波长，unit=1 使用 nm，int_scale=2 保留光子线权重。
+        min_rel_int 是返回谱线的相对强度阈值：静态默认 0，动态沿用 0.001。
+        它控制谱线筛选；自吸收由后续的本地逐线计算处理。
         """
         if min_rel_int is None:
             min_rel_int = 0 if self.webscraping == "static" else 0.001
@@ -284,11 +328,10 @@ class SimulatedLIBS(object):
         return site
 
     def retrieve_data_dynamic(self):
-        """
+        """通过已创建的 Chrome 会话重新计算 NIST 页面并读取导出 CSV。
 
-        Returns
-        -------
-
+        ion_spectra 保留各离子列；raw/interpolated 从 Sum(calc) 取总谱。
+        页面布局变化或导出失败时，可在 resolution_input/button_csv 处下断点。
         """
         site = self.get_site()
         self.driver.get(site)
@@ -325,7 +368,12 @@ class SimulatedLIBS(object):
         self.interpolated_spectrum["intensity"] = self.ion_spectra["Sum(calc)"]
 
     def retrieve_data_static(self):
-        """Fetch calculated sticks in 500 nm bands, then broaden locally once."""
+        """分波段请求 NIST 计算谱线，合并后生成默认 0.005 nm 网格的普通谱。
+
+        自吸收开启时额外将 (核心谱线表, 原子元数据) 存入 _nist_bands。
+        初步高斯谱先写入 raw_spectrum，随后自吸收渲染会用逐线模型覆盖它。
+        调试网络看 response/site，解析看 table/payload，边界归属看 core_table。
+        """
         grid = wavelength_grid(self.low_w, self.upper_w, 0.005)
         if not np.isfinite(self.resolution) or self.resolution <= 0:
             raise ValueError("Spectrometer resolution must be finite and positive")
@@ -334,6 +382,7 @@ class SimulatedLIBS(object):
         self._nist_bands = []
         for index, (low, high, request_low, request_high) in enumerate(bands):
             site = self.get_site(request_low, request_high, min_rel_int=0)
+            # 每段最多尝试 3 次；HTTP 或解析异常均重试，最后一次将原异常抛出。
             for attempt in range(3):
                 try:
                     response = requests.get(site, timeout=90)
@@ -346,6 +395,7 @@ class SimulatedLIBS(object):
                         raise
                     time.sleep(1)
             wave = table["wavelength"]
+            # 核心段左闭右开，末段右端也保留；同波长的不同跃迁行仍完整保留。
             upper = wave <= high if index == len(bands)-1 else wave < high
             core_table = table.loc[(wave >= low) & upper].copy()
             tables.append(core_table)
@@ -353,23 +403,23 @@ class SimulatedLIBS(object):
                 self._nist_bands.append((core_table, payload))
             if index < len(bands)-1:
                 time.sleep(3)
-        # Assign overlap lines to one core band without rounding/deduplicating
-        # distinct transitions at the same wavelength. Broaden after merging.
+        # 重叠请求按核心区间归属，合并后统一展宽；不按波长值去重不同跃迁。
         self.line_table = pd.concat(tables, ignore_index=True).fillna(0.0)
         self.line_table = self.line_table.sort_values("wavelength").reset_index(drop=True)
         self.raw_spectrum = render_sticks(self.line_table, grid, self.resolution)
 
     def retrieve_spectrum_from_html(self, html_data: str):
-        """Load calculated sticks from a supplied NIST HTML response."""
+        """从给定 HTML 解析计算谱线并生成普通高斯谱，适合离线排查网页格式。"""
         self.line_table = parse_sticks(html_data)
         grid = wavelength_grid(self.low_w, self.upper_w, 0.005)
         self.raw_spectrum = render_sticks(self.line_table, grid, self.resolution)
 
     def interpolate(self, resolution: float = 0.005):
-        """
-        resolution here is the sampling step in nm, not spectrometer R.
-        Static paths evaluate line profiles directly on the new grid;
-        spectra without a line table retain the legacy CubicSpline behavior.
+        """按新的采样步长 nm 更新光谱；参数名沿用历史接口。
+
+        此处 resolution 是采样步长，初始化时的同名参数则是仪器 R。
+        自吸收分支重算缓存线形并更新全部谱表；普通静态分支仅更新
+        interpolated_spectrum；没有静态谱线表时沿用自然边界三次样条。
         """
         if self.self_absorption:
             self._render_paper_model(step=resolution)
@@ -395,6 +445,7 @@ class SimulatedLIBS(object):
         color=(random.random(), random.random(), random.random()),
         title="Simulated LIBS",
     ):
+        """绘制当前 interpolated_spectrum 总谱，便于检查最新重采样结果。"""
         plt.plot(
             self.interpolated_spectrum["wavelength"],
             self.interpolated_spectrum["intensity"],
@@ -407,6 +458,7 @@ class SimulatedLIBS(object):
         plt.ylabel("Line Intensity [a.u.]")
 
     def plot_ion_spectra(self):
+        """绘制动态或静态自吸收结果中的各离子分量，去掉 Sum(calc) 总和列。"""
         self.ion_spectra.drop(["Sum(calc)"], axis=1).plot(
             x="Wavelength (nm)",
             xlabel=r"$\lambda$ [nm]",
@@ -416,12 +468,15 @@ class SimulatedLIBS(object):
         )
 
     def get_interpolated_spectrum(self):
+        """返回当前采样网格上的总光谱表；返回的是对象持有的表本身。"""
         return self.interpolated_spectrum
 
     def get_raw_spectrum(self):
+        """返回 raw_spectrum；自吸收重新渲染时该表也会一起更新。"""
         return self.raw_spectrum
 
     def get_ion_spectra(self):
+        """读取动态/静态自吸收离子分量；普通静态路径没有此分量表。"""
 
         if (self.self_absorption or self.webscraping == "dynamic") and self.ion_spectra is not None:
             return self.ion_spectra
@@ -431,6 +486,7 @@ class SimulatedLIBS(object):
             )
 
     def save_to_csv(self, filepath: str):
+        """将当前 interpolated_spectrum 保存为无索引 CSV，便于与诊断表联查。"""
         self.interpolated_spectrum.to_csv(path_or_buf=filepath, index=False)
 
     @staticmethod
@@ -445,6 +501,11 @@ class SimulatedLIBS(object):
         optical_depth=None,
         self_absorption_config=None,
     ):
+        """抽取组成及 Te/Ne，运行一次模拟并返回谱和样本标签。
+
+        输入表最后一列约定为 name，其余为元素百分比；自吸收配置传入主类后
+        独立保存快照。未指定的波段/分辨率使用主类默认值。
+        """
         seed = random.randrange(len(input_df))
         percentages = input_df.iloc[seed].values[:-1]
         elements = input_df.iloc[seed].keys().values[:-1]
@@ -485,7 +546,10 @@ class SimulatedLIBS(object):
         optical_depth=None,
         self_absorption_config=None,
     ) -> pd.DataFrame:
-        """
+        """在线程池中生成 size 个样本，返回“波长强度列+组成+Te/Ne”宽表。
+
+        组成从输入表抽样，Te 使用 eV，Ne 使用 cm^-3；worker 转发自吸收配置。
+        建议先用 size=1 调试；future.result() 会将工作线程异常抛回调用处。
 
         Parameters
         ----------

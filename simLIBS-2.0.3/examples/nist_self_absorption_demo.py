@@ -1,4 +1,10 @@
-"""NIST Mg example; expand the window and supply a coefficient CSV as needed."""
+"""当前 NIST 逐线自吸收示例：联网取 Mg 谱线，导出吸收谱、薄谱和诊断。
+
+从项目目录运行 python examples/nist_self_absorption_demo.py --help 查看参数。
+默认采用真空波长窄窗口，便于检查一条有内置 Stark 系数的跃迁；扩大窗口后
+可能需要 --stark-csv。调试顺序：config -> SimulatedLIBS -> line_diagnostics.csv。
+系数缺失时只导出 missing_stark.csv 模板，并以状态码 2 返回。
+"""
 import argparse
 import json
 from pathlib import Path
@@ -7,11 +13,13 @@ import sys
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+# 从源码运行示例时优先导入本项目的 simLIBS，便于对正在编辑的函数下断点。
 sys.path.insert(0, str(ROOT))
 from simLIBS import SimulatedLIBS, MissingStarkDataError
 
 
 def main():
+    """读取命令行配置，运行当前主入口，并按结果类别分别导出文件。"""
     parser = argparse.ArgumentParser(description=__doc__)
     # 默认窄窗口包含一条有内置 Stark 数据的 Mg I 线；全波段可用 --low 280 --high 290。
     parser.add_argument('--low', type=float, default=285.27)
@@ -23,6 +31,7 @@ def main():
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
+    # 光程使用 m，采样步长使用 nm；CSV 中 W 的约定为 FWHM=2*W*Ne/Ne_ref。
     config = dict(path_length_m=args.path_length, wavelength_step_nm=args.step)
     if args.stark_csv:
         config['stark_data'] = pd.read_csv(args.stark_csv)
@@ -32,6 +41,7 @@ def main():
                              webscraping='static', self_absorption=True,
                              self_absorption_config=config)
     except MissingStarkDataError as error:
+        # missing_lines 是完整缺失清单；错误消息只预览部分谱线，补数应以 CSV 为准。
         path = output/'missing_stark.csv'
         error.missing_lines.to_csv(path, index=False)
         print(str(error))
@@ -39,10 +49,12 @@ def main():
         print('Fill stark_width_nm from a cited source, then rerun with --stark-csv. '
               'W is the coefficient in FWHM=2*W*Ne/Ne_ref.')
         return 2
+    # 三类排查数据：吸收/薄谱看线形，nist_sticks 看原始线强，diagnostics 看逐线物理量。
     libs.save_to_csv(output/'absorbed.csv')
     libs.unabsorbed_raw_spectrum.to_csv(output/'thin_voigt.csv', index=False)
     libs.line_table.to_csv(output/'nist_sticks.csv', index=False)
     libs.self_absorption_diagnostics.to_csv(output/'line_diagnostics.csv', index=False)
+    # 元数据记录模型假设、布居、总密度、光程和实际输出步长，方便复查同次模拟。
     (output/'metadata.json').write_text(
         json.dumps(libs.self_absorption_metadata, ensure_ascii=False, indent=2, allow_nan=False),
         encoding='utf-8')
