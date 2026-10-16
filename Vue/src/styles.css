@@ -168,10 +168,10 @@ svg{display:block}
 .single-controls-wrap{position:relative;min-width:0;align-self:stretch;overflow:clip}
 .single-parameter-panel{position:relative;width:var(--single-expanded-width);transition:opacity .2s,transform .36s cubic-bezier(.22,1,.36,1)}
 .controls-collapsed .single-parameter-panel{position:absolute;top:0;left:0;opacity:0;transform:translateX(-12px);pointer-events:none}
-.workbench-edge{--edge-yellow-ink:#996400;--edge-yellow-frame:#dba52f;--edge-green-ink:#1e7750;--edge-green-frame:#299663;--edge-ink:var(--edge-yellow-ink);--edge-frame:var(--edge-yellow-frame);position:fixed;z-index:40;width:22px;min-height:32px;border:1px solid var(--edge-frame);border-radius:7px;color:var(--edge-ink);background:color-mix(in srgb,var(--edge-frame) 10%,var(--panel));box-shadow:0 0 0 3px color-mix(in srgb,var(--edge-frame) 28%,transparent),inset 0 1px 4px #0000000c;display:grid;place-items:center;padding:0;opacity:0;outline:none;transition:opacity .18s,color .15s,border-color .15s,background .15s,box-shadow .15s}
-:root[data-theme=dark] .workbench-edge{--edge-yellow-ink:#f3cb64;--edge-yellow-frame:#e5b63f;--edge-green-ink:#88deb0;--edge-green-frame:#55bd86}
+.workbench-edge{--edge-ink:var(--accent-text);--edge-frame:var(--accent);position:fixed;z-index:40;width:22px;min-height:32px;border:1px solid var(--edge-frame);border-radius:7px;color:var(--edge-ink);background:color-mix(in srgb,var(--edge-frame) 10%,var(--panel));box-shadow:0 0 0 3px color-mix(in srgb,var(--edge-frame) 28%,transparent),inset 0 1px 4px color-mix(in srgb,var(--edge-frame) 8%,transparent);display:grid;place-items:center;padding:0;opacity:0;outline:none;transition:opacity .18s,color .15s,border-color .15s,background .15s,box-shadow .15s}
+
 .workbench-edge.edge-active,.workbench-edge.edge-hover,.workbench-edge:focus-visible{opacity:1}
-.workbench-edge.edge-hover{--edge-ink:var(--edge-green-ink);--edge-frame:var(--edge-green-frame)}
+.workbench-edge.edge-hover,.workbench-edge:focus-visible{border-color:var(--accent-text);background:color-mix(in srgb,var(--accent) 22%,var(--panel));box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 48%,transparent),0 0 14px color-mix(in srgb,var(--accent) 30%,transparent),inset 0 1px 4px color-mix(in srgb,var(--accent) 12%,transparent)}
 .workbench-edge>svg{stroke-width:3.2;transition:transform .2s}
 .workbench-edge[aria-expanded=true]>svg{transform:rotate(180deg)}
 .workbench-edge:focus-visible{outline:none}
