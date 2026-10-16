@@ -18,7 +18,7 @@ let disposed=false
 export async function runReal(kind: TaskKind, summary: string, payload: unknown) {
   if (starting.has(kind) || tasks.some(t => t.kind === kind && t.status === 'running')) return
   const snapshot = JSON.parse(JSON.stringify(payload)); starting.add(kind);resultRevision[kind]++
-  try { const data = await request(`/simulate/${kind}`, snapshot); const task: DemoTask = reactive({ id: data.job_id, kind, status: 'running', progress: 0, startedAt: Date.now(), summary, detail: '已提交真实后端' }); tasks.unshift(task); void poll(task) }
+  try { const data = await request(`/simulate/${kind}`, snapshot); const task: DemoTask = reactive({ id: data.job_id, kind, status: 'running', progress: 0, startedAt: Date.now(), summary, detail: '已提交计算引擎' }); tasks.unshift(task); void poll(task) }
   finally { starting.delete(kind) }
 }
 function update(task: DemoTask, data: any) {
@@ -64,7 +64,7 @@ async function loadResult(task: DemoTask) {
 }
 export async function cancelTask(task?: DemoTask) {
   if (!task || task.status !== 'running') return
-  try { await request(`/jobs/${task.id}/cancel`, {}); task.detail = '正在取消真实任务；保留上一成功图谱'; if (!timers.has(task.id)) void poll(task) }
+  try { await request(`/jobs/${task.id}/cancel`, {}); task.detail = '正在取消任务；保留上一成功图谱'; if (!timers.has(task.id)) void poll(task) }
   catch (e) { task.detail = String(e) }
 }
 export async function resumeTask(task: DemoTask) { const data = await request(`/jobs/${task.id}/resume`, {}); await refreshTasks(); if(tasks.some(t=>t.id===data.job_id))page.value='batch' }

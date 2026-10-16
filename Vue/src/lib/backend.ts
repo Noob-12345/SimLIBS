@@ -133,9 +133,9 @@ export function spectrumResult(data: any, job: string): Spectrum {
   const raw = p.webscraping === 'local' && !p.local_broadening_enabled && !p.resample
   const main = raw ? data.series.raw : data.series.interpolated ?? data.series.raw
   const curves = raw ? data.series.elements.raw : data.series.elements.interpolated ?? data.series.elements.raw
-  if (!Array.isArray(main.xs) || main.xs.length !== main.ys.length) throw new Error('真实节点结构无效')
+  if (!Array.isArray(main.xs) || main.xs.length !== main.ys.length) throw new Error('光谱节点结构无效')
   const elements = (curves?.curves ?? []).map((e: any) => ({ symbol: e.label, ys: e.ys }))
-  if (elements.some((e: any) => e.ys.length !== main.xs.length)) throw new Error('真实元素贡献与总谱网格不一致')
+  if (elements.some((e: any) => e.ys.length !== main.xs.length)) throw new Error('元素贡献与总谱网格不一致')
   if (data.comparison && (data.comparison.xs.length !== main.xs.length || data.comparison.xs.some((x: number, i: number) => x !== main.xs[i]))) throw new Error('高级对照网格不一致')
   return { id: job, jobId: job, title: p.elements.join(' / '), xs: main.xs, total: main.ys, elements, params, comparison: data.comparison ? {thin: data.comparison.thin, nominal: data.comparison.nominal} : undefined,
     composition: p.elements.map((symbol: string, i: number) => ({ symbol, pct: p.percentages[i] })),

@@ -43,7 +43,7 @@ onUnmounted(() => { disposeTimers(); disposePreferences() })
     <aside class="sidebar">
       <div class="brand"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M3 26h6l3-12 4 17 5-26 4 21h8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" /></svg><div><strong>SimLIBS</strong><small>光谱工作台</small></div></div>
       <div class="sidebar-caption">SCNU</div>
-      <nav aria-label="主导航"><template v-for="item in pages" :key="item.id"><div v-if="item.id === 'jobs'" class="sidebar-caption nav-group-caption">软件日志</div><button :class="['nav-item', { active: page === item.id }]" :aria-label="item.label" :aria-current="page === item.id ? 'page' : undefined" :title="item.label" @click="page = item.id"><AppIcon :name="item.id" class="nav-symbol" :size="19" /><span class="nav-text">{{ item.label }}</span><AppIcon v-if="page === item.id" name="chevron" class="nav-arrow" :size="14" /></button></template></nav>
+      <nav aria-label="主导航"><template v-for="item in pages" :key="item.id"><div v-if="item.id === 'jobs'" class="sidebar-caption nav-group-caption">管理与设置</div><button :class="['nav-item', { active: page === item.id }]" :aria-label="item.label" :aria-current="page === item.id ? 'page' : undefined" :title="item.label" @click="page = item.id"><AppIcon :name="item.id" class="nav-symbol" :size="19" /><span class="nav-text">{{ item.label }}</span><AppIcon v-if="page === item.id" name="chevron" class="nav-arrow" :size="14" /></button></template></nav>
       <RuntimeStatus />
     </aside>
     <main class="main-shell">

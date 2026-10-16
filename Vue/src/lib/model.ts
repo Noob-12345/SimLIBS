@@ -61,12 +61,12 @@ export function validateParams(p: ParameterDraft, overrides: Partial<Record<'te'
 }
 export function canonical(value: string): string { return symbols.find(s => s.toLowerCase() === value.trim().toLowerCase()) || '' }
 export function validateComposition(rows: ElementDraft[]): Composition[] {
-  if (!rows.length || rows.length > 32) throw new Error('组成须包含 1 至 32 个元素')
-  if (rows.slice(0, -1).reduce((sum, e) => sum + Number(e.pct), 0) > 100 + 1e-6) throw new Error('已输入占比超过 100%，请减少前置元素占比；余额暂不可用')
+  if (!rows.length || rows.length > 32) throw new Error('请添加 1 至 32 个元素。')
+  if (rows.slice(0, -1).reduce((sum, e) => sum + Number(e.pct), 0) > 100 + 1e-6) throw new Error('前序元素比例合计已超过 100%，请调小前序元素比例，为最后一个元素释放余额。')
   const comp = rows.map(e => { const symbol = canonical(e.symbol); if (!symbol) throw new Error(`无效元素：${e.symbol || '空值'}`); return { symbol, pct: numeric(e.pct, `${symbol} 比例`, 0, 100) } })
-  if (new Set(comp.map(e => e.symbol)).size !== comp.length) throw new Error('元素重复，请使用不同元素')
-  if (Math.abs(comp.reduce((sum, e) => sum + e.pct, 0) - 100) > 1e-6) throw new Error('元素占比总和须为 100%，请检查余额')
-  if (!comp.some(e => e.pct > 0)) throw new Error('至少一个元素的比例须大于 0')
+  if (new Set(comp.map(e => e.symbol)).size !== comp.length) throw new Error('每种元素只能添加一次，请移除重复元素。')
+  if (Math.abs(comp.reduce((sum, e) => sum + e.pct, 0) - 100) > 1e-6) throw new Error(`元素比例合计应为 100%，当前总计 ${Number(comp.reduce((sum, e) => sum + e.pct, 0).toFixed(8))}%，请调整各元素比例。`)
+  if (!comp.some(e => e.pct > 0)) throw new Error('请至少为一个元素设置大于 0 的比例。')
   return comp
 }
 export function balance(rows: ElementDraft[]) {
