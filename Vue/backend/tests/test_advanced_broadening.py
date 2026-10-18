@@ -77,7 +77,7 @@ class AdvancedBroadeningTests(unittest.TestCase):
 
     def run_model(self, sa=False, stark=False, instrument=False, *, html=None, p=None, extra=None):
         raw = dict(model='nist', self_absorption=sa, stark_broadening=stark, instrument_broadening=instrument,
-                   matrix=False, stark_csv=stark_csv(), density_mode='specified', number_density_cm3=1e16)
+                   matrix=False, stark_source='local', stark_csv=stark_csv(), density_mode='specified', number_density_cm3=1e16)
         raw.update(extra or {})
         def get(url, **kwargs): self.calls.append(url); return Response(html if html is not None else mixed_html())
         with patch.dict(os.environ, {'SIMLIBS_TASK_DIR': str(self.root)}):

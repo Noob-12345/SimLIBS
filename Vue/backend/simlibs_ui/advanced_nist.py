@@ -17,6 +17,7 @@ import requests
 from .adapter import source_module
 from .models import ELEMENTS, MAX_POINTS
 from .storage import now, write_csv, write_json
+from .advanced_stark import StarkTransport, cache_directory, json_value, merge_missing
 
 VERSION = 'nist-lines-self-absorption-1'
 MAX_CSV_BYTES = 2_000_000
@@ -106,6 +107,21 @@ def options(raw):
     if not isinstance(name, str):
         raise ValueError('Stark文件名须为文本')
     out['stark_name'] = name.replace('\\', '/').split('/')[-1][:240]
+    out.update(stark_source='local', stark_allow_network=False, stark_methods=('SCP', 'MSE'))
+    if out['stark_broadening']:
+        if raw.get('stark_cache_dir') is not None:
+            raise ValueError('Stark缓存目录由程序管理，不接受请求路径')
+        out['stark_source'] = raw.get('stark_source', 'auto')
+        out['stark_allow_network'] = raw.get('stark_allow_network', True)
+        methods = raw.get('stark_methods', ('SCP', 'MSE'))
+        if out['stark_source'] not in ('auto', 'local'):
+            raise ValueError('stark_source须为auto或local')
+        if type(out['stark_allow_network']) is not bool:
+            raise ValueError('stark_allow_network须为布尔值')
+        if (not isinstance(methods, (tuple, list)) or not methods or
+                any(method not in ('SCP', 'MSE') for method in methods) or len(set(methods)) != len(methods)):
+            raise ValueError('stark_methods须为不重复的有序SCP/MSE列表')
+        out['stark_methods'] = tuple(methods)
     return out
 
 
@@ -127,7 +143,23 @@ def effective(p, raw):
     return q, o, scale
 
 
-def simulate(p, s, raw, cancelled=lambda: False, emit=None, request_get=None):
+def simulate(p, s, raw, cancelled=lambda: False, emit=None, request_get=None, request_stark=None):
+    try:
+        return _simulate(p, s, raw, cancelled, emit, request_get, request_stark)
+    except InterruptedError:
+        raise
+    except Exception as error:
+        # Keep physical missing coverage separate from transport/cache/ambiguity.
+        code = getattr(error, 'code', None)
+        if code:
+            if code.startswith('stark_'):
+                error.args = (f'Stark数据处理失败[{code}]：{error}',)
+            if os.environ.get('SIMLIBS_TASK_DIR'):
+                write_json(Path(os.environ['SIMLIBS_TASK_DIR'])/'stark-error.json', {'code': code, 'message': str(error)})
+        raise
+
+
+def _simulate(p, s, raw, cancelled, emit, request_get, request_stark):
     q, o, scale = effective(p, raw)
     source_module(s.source)
     engine = importlib.import_module('simLIBS.nist_self_absorption')
@@ -137,7 +169,9 @@ def simulate(p, s, raw, cancelled=lambda: False, emit=None, request_get=None):
         raise ValueError('高级输出超过200000节点，请加大步长或缩小范围')
     density = o['number_density_cm3'] if o['density_mode'] == 'specified' else None
     config = engine.NISTSelfAbsorptionConfig(path_length_m=o['path_length_m'], total_number_density_cm3=density,
-            wavelength_step_nm=step, instrument_broadening=o['instrument_broadening'], stark_data=parse_stark_csv(o['stark_csv']))
+            wavelength_step_nm=step, instrument_broadening=o['instrument_broadening'], stark_data=parse_stark_csv(o['stark_csv']),
+            stark_source=o['stark_source'], stark_allow_network=o['stark_allow_network'], stark_methods=o['stark_methods'],
+            stark_cache_dir=cache_directory())
     request_get = request_get or requests.get
     directory = Path(os.environ['SIMLIBS_TASK_DIR']) if os.environ.get('SIMLIBS_TASK_DIR') else None
     cache, evidence = {}, []
@@ -157,6 +191,16 @@ def simulate(p, s, raw, cancelled=lambda: False, emit=None, request_get=None):
         while time.monotonic() < until:
             check()
             time.sleep(min(.05, max(0, until-time.monotonic())))
+
+    transport = StarkTransport(s, cancelled, report, request_stark)
+
+    def prepare(bands, actual, cfg, condition, progress):
+        with transport.stage(condition, progress):
+            return engine.prepare_nist_absorption(bands, te=actual.Te, ne=actual.Ne,
+                    elements=actual.elements, percentages=actual.percentages, config=cfg, self_absorption=o['self_absorption'])
+
+    def condition_rows(rows, actual, condition):
+        return [json_value(dict(row, condition=condition, Te_eV=actual.Te, Ne_cm3=actual.Ne)) for row in rows]
 
     def fetch(actual, condition, start):
         nonlocal response_bytes
@@ -211,7 +255,7 @@ def simulate(p, s, raw, cancelled=lambda: False, emit=None, request_get=None):
         return output
 
     report(2, '校验Stark系数与高级参数')
-    prepared, missing = [], []
+    prepared, missing, matched = [], [], []
     for actual, condition, start, factor in [(p, '名义条件', 5, 1), (q, '有效条件', 35, scale)]:
         bands = fetch(actual, condition, start)
         check()
@@ -220,27 +264,32 @@ def simulate(p, s, raw, cancelled=lambda: False, emit=None, request_get=None):
             prepared.append((actual, bands, None, cfg))
             continue
         try:
-            records, metadata = engine.prepare_nist_absorption(bands, te=actual.Te, ne=actual.Ne,
-                    elements=actual.elements, percentages=actual.percentages, config=cfg, self_absorption=o['self_absorption'])
+            records, metadata = prepare(bands, actual, cfg, condition, start+25)
             if not records:
                 raise ValueError('当前波段未找到非零 NIST 跃迁，请调整波长范围')
             if o['self_absorption'] and density is None and factor != 1:
                 cfg = replace(cfg, total_number_density_cm3=metadata['total_number_density_cm3']*factor)
-                records, metadata = engine.prepare_nist_absorption(bands, te=actual.Te, ne=actual.Ne,
-                        elements=actual.elements, percentages=actual.percentages, config=cfg, self_absorption=True)
+                records, metadata = prepare(bands, actual, cfg, condition, start+25)
             # Explicit, uncalibrated matrix yield: retain fetched NIST weights for audit.
             records = [dict(row, nist_strength_original=row['nist_strength'], nist_strength=row['nist_strength']*factor) for row in records]
             prepared.append((actual, records, metadata, cfg))
+            matched.extend(condition_rows(records, actual, condition))
         except engine.MissingStarkDataError as error:
-            missing.extend(dict(row, condition=condition) for row in error.missing_lines.to_dict('records'))
+            missing.extend(condition_rows(error.missing_lines.to_dict('records'), actual, condition))
+            matched.extend(condition_rows(error.matched_lines.to_dict('records'), actual, condition))
     if missing:
-        table = pd.DataFrame(missing).drop_duplicates(subset=['element', 'charge', 'wavelength_nm', 'lower_eV', 'upper_eV', 'gA_s'])
-        error = engine.MissingStarkDataError(table.to_dict('records'))
+        merged = merge_missing(missing)
+        table = pd.DataFrame(merged)
+        error = engine.MissingStarkDataError(merged, matched)
+        error.code = 'missing_stark'
         if directory:
             # Default pandas CSV uses round-trip double precision; never UI formatting.
             write_csv(directory/'missing-stark.csv', table)
             write_json(directory/'missing-stark.json', {'code': 'missing_stark', 'count': len(table),
-                       'csv_sha256': hashlib.sha256((directory/'missing-stark.csv').read_bytes()).hexdigest()})
+                        'csv_sha256': hashlib.sha256((directory/'missing-stark.csv').read_bytes()).hexdigest(),
+                        'matched_count': len(matched), 'missing_conditions': json_value(missing)})
+            write_csv(directory/'matched-stark.csv', pd.DataFrame(matched))
+            write_json(directory/'matched-stark.json', json_value(matched))
         raise error
     results, plain_tables = [], []
     for index, (actual, records, metadata, cfg) in enumerate(prepared):
@@ -278,6 +327,10 @@ def simulate(p, s, raw, cancelled=lambda: False, emit=None, request_get=None):
         'stark_input': {'name': o['stark_name'], 'rows': len(user_rows), 'text_utf8_sha256': hashlib.sha256(o['stark_csv'].encode()).hexdigest(),
                         'sources': sorted({row['source'] for row in user_rows})},
         'engine_sha256': hashlib.sha256(Path(engine.__file__).read_bytes()).hexdigest(),
+        'engine_modules': {name: hashlib.sha256((Path(engine.__file__).parent/name).read_bytes()).hexdigest()
+                           for name in ('nist_self_absorption.py', 'nist_stark.py', 'stark_b.py')},
+        'stark_data_access': {'cache_directory': str(config.stark_cache_dir), 'requests': transport.evidence,
+                             'snapshots': transport.snapshots},
         'matrix': {'yield_scale': scale, 'effective_composition': dict(zip(q.elements, q.percentages)), 'effective_Te_eV': q.Te,
                    'effective_Ne_cm3': q.Ne, 'effective_number_density_cm3': result.metadata.get('total_number_density_cm3')},
         'diagnostics': {'tau_max': float(diagnostics.tau_center.max()) if len(diagnostics) else None,
@@ -291,6 +344,7 @@ def simulate(p, s, raw, cancelled=lambda: False, emit=None, request_get=None):
         origin['thin_reference'] = str(directory/'advanced-reference.csv')
         if o['stark_broadening']:
             write_csv(directory/'advanced-lines.csv', diagnostics)
+            write_json(directory/'advanced-lines.json', json_value(diagnostics.to_dict('records')))
             write_csv(directory/'advanced-opacity.csv', diagnostics[['wavelength_nm', 'tau_center', 'SA']].rename(columns={'wavelength_nm': 'wavelength', 'tau_center': 'tau', 'SA': 'beta'}))
             origin.update(line_table=str(directory/'advanced-lines.csv'), opacity_table=str(directory/'advanced-opacity.csv'))
         else:

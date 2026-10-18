@@ -17,3 +17,7 @@ local 使用本地 LTE/Saha 科学计算；client 由 NIST dataSticksArray 计�
 Stark CSV仅接收受控上传文本，无任意路径读取；2MB上限，finite/正宽度/正参考Ne/完整标识严格校验。缺失时任务固定missing-stark.csv/json原子落盘并失败，现有export端点以stark-missing下载失败任务清单，以diagnostics下载成功高级任务完整逐线CSV。轮询只有小型摘要，重启按原job的expected_result_path恢复固定文件；禁止客户端指定文件路径。三谱/诊断绑定成功job，失败/取消不覆盖旧结果。
 
 本轮交源码与前端dist，未打包桌面。46项后端+8项SSR/组件检查；捕获夹具不等于在线实算，另有一次真实窄带1条61点证据。GUI未测，独立review待完成，见Vue/.ai-workflow/20261016-advanced-nist/。
+
+2026-10-18：stark_b.py、nist_stark.py、nist_self_absorption.py 按上游d7a340d工作树原字节同步；普通simulation.py、旧离线self_absorption.py保留兼容版本。高级配置支持stark_source=auto/local、stark_allow_network及有序SCP/MSE。缓存优先SIMLIBS_STATE_DIR/cache/stark-v1，否则上游用户目录；仅可信进程可用SIMLIBS_STARK_CACHE_DIR隔离测试，HTTP请求不可指定路径。每个取数阶段180–600秒，单请求沿用connect/read超时、TLS设置、最多3次尝试与响应大小限制，协作取消之外仍由独立worker进程树兜底。
+
+MissingStarkDataError保留每条件原因和matched来源；缺失CSV按跃迁唯一化，可填W重导入。固定job导出新增stark-matched及stark-report，仍保留stark-missing/diagnostics。网络/缓存/格式错误按stark_*分类，不伪造缺系数清单；成功advanced-lines.json保留温区列表、引用、NIST身份和快照SHA，CSV与旧结果读取继续兼容。最终桌面构建待与网站模块合并；当前运行中的root EXE与backend资源不修改。

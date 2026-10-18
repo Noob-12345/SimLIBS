@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Main desktop window: dialog-selected files and the fixed SimLIBS GitHub URL",
+  "description": "Main desktop window: dialog-selected files and four fixed project/research URLs",
   "windows": ["main"],
   "permissions": [
     "core:default",
@@ -12,6 +12,11 @@
     "fs:allow-write-text-file",
     "fs:allow-write-file",
     "fs:allow-stat",
-    { "identifier": "opener:allow-open-url", "allow": [{ "url": "https://github.com/Noob-12345/SimLIBS" }] }
+    { "identifier": "opener:allow-open-url", "allow": [
+      { "url": "https://github.com/Noob-12345/SimLIBS" },
+      { "url": "https://physics.nist.gov/PhysRefData/ASD/lines_form.html" },
+      { "url": "https://stark-b.obspm.fr/" },
+      { "url": "https://scholar.google.com/" }
+    ] }
   ]
 }

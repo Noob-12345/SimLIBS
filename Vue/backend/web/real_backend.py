@@ -485,13 +485,23 @@ class RealBackend:
     def _job_view(self, job: Dict[str, Any]) -> Dict[str, Any]:
         view={k:job.get(k) for k in ('job_id','kind','status','summary','progress','duration','error','created','created_at','resume_from')}
         if job.get('kind') == '高级模拟' and job.get('status') == 'failed':
+            error_file = self._advanced_file(job, 'stark-error.json') or self._advanced_file(job, 'error.json')
+            if error_file and error_file.stat().st_size <= 65536:
+                try:
+                    failure = json.loads(error_file.read_text(encoding='utf-8'))
+                    if isinstance(failure.get('code'), str):
+                        view['error_code'] = failure['code']
+                except (OSError, ValueError, AttributeError):
+                    pass
             summary = self._advanced_file(job, 'missing-stark.json')
             artifact = self._advanced_file(job, 'missing-stark.csv')
-            if summary and artifact and summary.stat().st_size <= 65536:
+            if summary and artifact and summary.stat().st_size <= 4_000_000 and view.get('error_code', 'missing_stark') == 'missing_stark':
                 try:
                     data = json.loads(summary.read_text(encoding='utf-8'))
                     if data.get('code') == 'missing_stark' and isinstance(data.get('count'), int):
                         view['stark_missing'] = {'count': data['count'], 'available': True}
+                        if isinstance(data.get('matched_count'), int):
+                            view['stark_matched'] = {'count': data['matched_count'], 'available': bool(data['matched_count']) and self._advanced_file(job, 'matched-stark.csv') is not None}
                 except (OSError, ValueError, AttributeError):
                     pass
         path=Path(job.get('expected_result_path') or job.get('result_path') or str(Path(self._settings.output)/'.jobs'/job['job_id']/'result'/'manifest.json')).parent/'checkpoint.json'
@@ -506,7 +516,8 @@ class RealBackend:
     @staticmethod
     def _advanced_file(job, name):
         # Only fixed files belonging to this already-authorized job; never a client path.
-        if name not in ('missing-stark.json', 'missing-stark.csv', 'advanced-lines.csv'):
+        if name not in ('missing-stark.json', 'missing-stark.csv', 'matched-stark.csv', 'matched-stark.json',
+                        'advanced-lines.csv', 'advanced-lines.json', 'stark-error.json', 'error.json'):
             return None
         manifest = job.get('expected_result_path') or job.get('result_path')
         if not manifest:
@@ -611,7 +622,10 @@ class RealBackend:
                     result['comparison']={'xs':reference['wavelength'].tolist(),'thin':reference['intensity'].tolist(),'nominal':reference['nominal_intensity'].tolist()}
             # Optional paper metadata (e.g. unreported Stark temperature) is
             # exported as an empty CSV cell and must round-trip to JSON null.
-            if origin.get('line_table') and Path(origin['line_table']).is_file():
+            typed_lines = self._advanced_file(job, 'advanced-lines.json')
+            if typed_lines:
+                result['origin'] = dict(result['origin'], line_diagnostics=json.loads(typed_lines.read_text(encoding='utf-8')))
+            elif origin.get('line_table') and Path(origin['line_table']).is_file():
                 diagnostics=pd.read_csv(origin['line_table'],float_precision='round_trip').astype(object)
                 diagnostics=diagnostics.where(pd.notna(diagnostics),None)
                 result['origin']=dict(result['origin'],line_diagnostics=diagnostics.to_dict(orient='records'))
@@ -687,11 +701,22 @@ class RealBackend:
             job = self._jobs.get(job_id)
         if not job:
             raise ApiError(404, f'任务不存在：{job_id}', 'not_found')
-        if kind == 'stark-missing':
-            path = self._advanced_file(job, 'missing-stark.csv') if job.get('kind') == '高级模拟' and job.get('status') == 'failed' else None
+        if kind in ('stark-missing', 'stark-matched'):
+            name = 'missing-stark.csv' if kind == 'stark-missing' else 'matched-stark.csv'
+            path = self._advanced_file(job, name) if job.get('kind') == '高级模拟' and job.get('status') == 'failed' else None
             if not path:
-                raise ApiError(409, '此失败任务没有Stark缺失清单', 'no_result')
-            return ExportPayload(path.read_bytes(), 'text/csv; charset=utf-8', f'{job_id}_missing_stark.csv')
+                raise ApiError(409, '此失败任务没有对应Stark诊断清单', 'no_result')
+            return ExportPayload(path.read_bytes(), 'text/csv; charset=utf-8', f'{job_id}_{name.replace("-", "_")}')
+        if kind == 'stark-report':
+            report = self._advanced_file(job, 'stark-error.json') if job.get('kind') == '高级模拟' and job.get('status') == 'failed' else None
+            if not report:
+                raise ApiError(409, '此失败任务没有Stark报告', 'no_result')
+            payload = {'error': json.loads(report.read_text(encoding='utf-8'))}
+            for key, name in (('missing', 'missing-stark.json'), ('matched', 'matched-stark.json')):
+                file = self._advanced_file(job, name)
+                if file and payload['error'].get('code') == 'missing_stark':
+                    payload[key] = json.loads(file.read_text(encoding='utf-8'))
+            return ExportPayload(json.dumps(payload, ensure_ascii=False, allow_nan=False), 'application/json', f'{job_id}_stark_report.json')
         if job['status'] != 'completed' or not job.get('result_path'):
             raise ApiError(409, '只有成功完成的任务才能导出', 'no_result')
         manifest, result_path = job['manifest'], job['result_path']

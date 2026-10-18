@@ -47,7 +47,7 @@ class AdvancedNISTTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.s = replace(Settings(), output=str(self.root), line_database=str(self.root/'missing-library'))
-        self.raw = {'model': 'nist', 'matrix': False}
+        self.raw = {'model': 'nist', 'matrix': False, 'stark_source': 'local'}
         source_module(self.s.source)
         self.engine = importlib.import_module('simLIBS.nist_self_absorption')
         self.calls = []
