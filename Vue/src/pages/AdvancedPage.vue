@@ -1,30 +1,108 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import CompositionEditor from '../components/CompositionEditor.vue'
 import WorkbenchLayout from '../components/WorkbenchLayout.vue'
-import SpectrumChart from '../components/SpectrumChart.vue'
-import EmptyStateArt from '../components/EmptyStateArt.vue'
 import TaskActivity from '../components/TaskActivity.vue'
-import { advanced, activeTask, runReal } from '../lib/workbench'
-import { numeric, validateComposition, validateParams, errorOf, format } from '../lib/model'
-import { apiParams, apiComposition } from '../lib/backend'
-const running=activeTask('advanced'), submitError=ref(''),compositionError=ref('')
-const fields=[{key:'te',label:'名义 Te / eV'},{key:'ne',label:'名义 Ne / cm⁻³'},{key:'resolution',label:'仪器 R (λ/Δλ)'},{key:'low',label:'λ 下界 / nm'},{key:'high',label:'λ 上界 / nm'},{key:'step',label:'输出步长 / nm'},{key:'charge',label:'最大发射电荷（0–2）'}] as const
-function prepare() {
-  const p=validateParams({...advanced.params,mode:'local',flux:'photon',broaden:true,temperatureMode:'manual',temperature:'0',gaussian:'0',lorentz:'0',resample:false})
-  if((p.high-p.low)/((p.high+p.low)/2)>.05)throw Error('窄带仪器近似要求波段跨度≤中心波长的5%，请缩小范围')
-  if(compositionError.value)throw Error(compositionError.value)
-  const comp=validateComposition(advanced.composition)
-  const unsupported=comp.filter(e=>e.pct>0 && !['Mg','Ca','Zn'].includes(e.symbol)).map(e=>e.symbol)
-  if(unsupported.length)throw Error(`${unsupported.join('、')} 暂缺少 Stark 展宽或能级跃迁常数；目前仅支持 Mg、Ca、Zn`)
-  const responses=Object.fromEntries(comp.map(e=>[e.symbol,advanced.matrix ? numeric(advanced.responses[e.symbol]??'1',`${e.symbol} 响应`,0,1e6) : 1]))
-  if(advanced.matrix && !comp.some(e=>e.pct>0 && responses[e.symbol]!>0))throw Error('有效元素响应不能全为零')
-  return {params:apiParams(p),composition:apiComposition(comp),advanced:{self_absorption:advanced.selfAbsorption,instrument_broadening:advanced.instrumentBroadening,matrix:advanced.matrix,column_cm2:numeric(advanced.column,'总原子/离子柱密度',0,1e24),path_length_m:numeric(advanced.pathLength,'光程',1e-12,1e6),responses,te_factor:advanced.matrix ? numeric(advanced.teFactor,'Te倍率',1e-4,1e4) : 1,ne_factor:advanced.matrix ? numeric(advanced.neFactor,'Ne倍率',1e-4,1e4) : 1}}
+import ChoiceSelect from '../components/ChoiceSelect.vue'
+import SwitchHint from '../components/SwitchHint.vue'
+import AdvancedResults from '../components/AdvancedResults.vue'
+import { advanced, activeTask, runReal, tasks } from '../lib/workbench'
+import { errorOf, symbols } from '../lib/model'
+import { issueAttrs, parameterIssues } from '../lib/issues'
+import { advancedModels, applyAdvancedStark, changeAdvancedModel, clearAdvancedStark, densityChoices, prepareAdvanced, setAdvancedAbsorption, setAdvancedStark } from '../lib/advanced'
+import { download } from '../lib/backend'
+import { desktopHost, openCsvTemplate, readBrowserCsv, useFileSave } from '../lib/fileAccess'
+const running = activeTask('advanced'), submitError = ref(''), compositionError = ref(''), fileError = ref(''), reading = ref(false)
+const fileInput = ref<HTMLInputElement>(), importRevision = ref(0)
+const { pending: saving, feedback, failed: saveFailed, run: saveOutput } = useFileSave()
+const nist = computed(() => advanced.model === 'nist')
+const cards = [{ key: 'te', label: 'Te', unit: '/ eV' }, { key: 'ne', label: 'Ne', unit: '/ cm⁻³' }, { key: 'resolution', label: 'R', unit: '(λ/Δλ)' }] as const
+const chargeChoices = [0, 1, 2].map(value => ({ value: String(value), label: `${value}+` }))
+const issues = computed(() => parameterIssues({ ...advanced.params, mode: 'local', broaden: false, resample: false }))
+const attrs = (key: string) => issueAttrs(issues.value[key], 'advanced-draft-error')
+const starkSwitch = computed({ get: () => nist.value ? advanced.starkBroadening : true, set: setAdvancedStark })
+const absorptionSwitch = computed({ get: () => advanced.selfAbsorption, set: setAdvancedAbsorption })
+function densityBlur() { const value = Number(advanced.params.ne); if (Number.isFinite(value) && value > 0) advanced.params.ne = value.toExponential() }
+const inputError = computed(() => errorOf(() => prepareAdvanced(compositionError.value)))
+const latest = computed(() => tasks.find(task => task.kind === 'advanced'))
+const missingTask = computed(() => latest.value?.status === 'failed' && latest.value.starkMissing?.available ? latest.value : null)
+watch(inputError, value => { if (!value) submitError.value = '' })
+async function run() {
+  try { submitError.value = ''; await runReal('advanced', nist.value ? '高级 NIST 模拟' : '高级离线论文模型', prepareAdvanced(compositionError.value)) }
+  catch (error) { submitError.value = error instanceof Error ? error.message : String(error) }
 }
-const inputError=computed(()=>errorOf(prepare))
-const diagnostics=computed(()=>advanced.result?.source.origin?.diagnostics as Record<string,number>|undefined)
-const matrixResult=computed(()=>advanced.result?.source.origin?.matrix as Record<string,number>|undefined)
-const paperResult=computed(()=>advanced.result?.source.origin?.model_version==='paper-eq7-stark-sa-1')
-async function run(){try{submitError.value='';await runReal('advanced','高级物理模拟 (LTE Slab)',prepare())}catch(e){submitError.value=String(e)}}
+async function chooseStark(event?: Event) {
+  const file = event ? (event.target as HTMLInputElement).files?.[0] : undefined
+  if (reading.value || !desktopHost && !file) return
+  const revision = ++importRevision.value; reading.value = true; fileError.value = ''
+  try {
+    const result = desktopHost ? await openCsvTemplate() : await readBrowserCsv(file!)
+    if (revision !== importRevision.value) return
+    fileError.value = applyAdvancedStark(result)
+    if (result.status === 'opened') submitError.value = ''
+  } finally { if (revision === importRevision.value) reading.value = false; if (fileInput.value) fileInput.value.value = '' }
+}
+function clearStark() { importRevision.value++; clearAdvancedStark(); fileError.value = ''; reading.value = false; if (fileInput.value) fileInput.value.value = '' }
+function saveMissing() { const job = missingTask.value?.id; if (job) void saveOutput(`SimLIBS-${job}-missing-stark.csv`, () => download(job, 'stark-missing')) }
 </script>
-<template><WorkbenchLayout kind="advanced"><template #controls="{disabled}"><fieldset class="control-fieldset" :disabled="disabled"><div class="panel-heading"><h2>高级单次参数</h2><span class="badge neutral">论文逐线 Stark</span></div><div class="row2"><label v-for="field in fields" :key="field.key" class="field">{{ field.label }}<input :id="`advanced-${field.key}`" v-model="advanced.params[field.key]" type="text" inputmode="decimal" /></label></div><div class="row2"><label class="field">总原子/离子柱密度 / cm⁻²<input id="advanced-column" v-model="advanced.column" type="text" /></label><label class="field">光程 L / m<input id="advanced-path-length" v-model="advanced.pathLength" type="text" /></label></div><p class="hint">总数密度 N = 柱密度 / (100 × L)，单位 cm⁻³；基体产额倍率再作用于 N。N 与电子密度 Ne 分别指定。</p><div class="divider" /><label class="switch"><input v-model="advanced.selfAbsorption" type="checkbox" aria-label="高级自吸收" /><span class="switch-track" />逐线自吸收</label><label class="switch"><input v-model="advanced.instrumentBroadening" type="checkbox" aria-label="高级仪器Gaussian卷积" /><span class="switch-track" />仪器 Gaussian 卷积</label><p class="hint">吸收使用论文 Stark 参数并随 Ne 缩放，逐线更新峰高与线宽后叠加。R 仅控制吸收后的仪器响应。旧热、附加 Gaussian/Lorentz 草稿字段不参与本模型。</p><div class="divider" /><label class="switch"><input v-model="advanced.matrix" type="checkbox" aria-label="参数化基体效应" /><span class="switch-track" />参数化基体效应</label><div class="row2"><label class="field">Te 修正倍率<input v-model="advanced.teFactor" :disabled="!advanced.matrix" type="text" /></label><label class="field">Ne 修正倍率<input v-model="advanced.neFactor" :disabled="!advanced.matrix" type="text" /></label></div></fieldset><div class="divider" /><CompositionEditor v-model="advanced.composition" scope="advanced" :disabled="disabled" @issue="compositionError=$event" /><fieldset class="control-fieldset" :disabled="disabled || !advanced.matrix"><label v-for="row in advanced.composition" :key="row.id" class="field">{{ row.symbol }} 元素响应（默认1）<input :value="advanced.responses[row.symbol]??'1'" type="text" @input="advanced.responses[row.symbol]=($event.target as HTMLInputElement).value" /></label></fieldset><p class="hint">未标定参数模型，可后续用实验校准；不是普适材料预测。</p><button class="btn primary full" :disabled="!!running || !!inputError" @click="run">运行高级模拟</button></template><section class="panel activity-panel"><h2>高级物理模拟 (LTE Slab)</h2><p class="hint">依据论文 Eq.7 计算逐线自吸收，默认使用论文 Table 1 的 Mg、Ca、Zn 共31条谱线与 NIST I/II/III 能级计算三态 Saha 布居；谱线数据覆盖 I/II，缺必要 Stark/原子数据的元素会明确拒绝。逐线计算 τ、SA 和吸收展宽，不预测自反转、时空梯度或连续吸收。相对波段限5%，超出数值资源上限会明确拒绝。</p></section><SpectrumChart v-if="advanced.result" :spectrum="advanced.result" label="高级三谱对照" /><section v-else class="panel empty-state"><EmptyStateArt /><h3>尚未生成高级光谱</h3><p>配置左侧参数与元素后点击“运行高级模拟”，查看名义薄谱、基体薄谱及自吸收修正谱。</p></section><section v-if="diagnostics" class="panel activity-panel"><h2>已完成结果诊断</h2><p>{{ paperResult ? '逐线中心最大 τ' : '已保存模型最大 τ' }} {{ format(diagnostics.tau_max!) }} · {{ paperResult ? '最小 SA' : '最小 β' }} {{ format(diagnostics.beta_min!) }} · 谱线 {{ diagnostics.line_count }}</p><p v-if="matrixResult">有效 Te / eV {{ format(matrixResult.effective_Te_eV!) }} · Ne / cm⁻³ {{ format(matrixResult.effective_Ne_cm3!) }}<span v-if="matrixResult.effective_number_density_cm3!==undefined"> · N {{ format(matrixResult.effective_number_density_cm3) }} cm⁻³</span> · 产额倍率 {{ format(matrixResult.yield_scale!) }}</p><p v-if="paperResult" class="hint">三个谱共用显示尺度与相同仪器响应，采用 photon 强度。CSV/JSON携带三谱对照；JSON 的 opacity 是逐线中心 τ/SA 诊断，未表示连续总光学厚度。PNG保留颜色图例。</p><p v-else class="hint">这是已保存的旧高级模型结果；来源、参数和诊断按原记录保留。新计算使用上方论文模型。</p></section><TaskActivity kind="advanced" :error="inputError || submitError" /></WorkbenchLayout></template>
+<template>
+  <WorkbenchLayout kind="advanced">
+    <template #controls="{ disabled }">
+      <fieldset class="control-fieldset advanced-parameters" :disabled="disabled">
+        <section class="parameter-section">
+          <div class="panel-heading"><h2>实验参数</h2><span class="section-number">01</span></div>
+          <div class="parameter-cards"><div v-for="field in cards" :key="field.key" class="field precise-field parameter-card" :data-parameter="field.key"><label :for="`advanced-${field.key}`">{{ field.label }}<span class="card-title-unit">{{ field.unit }}</span></label><div class="card-value"><input :id="`advanced-${field.key}`" v-model="advanced.params[field.key]" type="text" :inputmode="field.key === 'resolution' ? 'numeric' : 'decimal'" :aria-label="`${field.label} ${field.unit}`" v-bind="attrs(field.key)" @blur="field.key === 'ne' && densityBlur()" /></div></div></div>
+          <p class="hint">Te、Ne 为名义参数；R 仅在启用仪器展宽时控制线宽。</p>
+          <div class="field"><label>λ <span>/ nm</span></label><div class="row2"><input id="advanced-low" v-model="advanced.params.low" type="text" inputmode="decimal" aria-label="λ 下界 / nm" v-bind="attrs('low')" /><input id="advanced-high" v-model="advanced.params.high" type="text" inputmode="decimal" aria-label="λ 上界 / nm" v-bind="attrs('high')" /></div></div>
+          <div class="row2"><label class="field compact">输出步长 / nm<input id="advanced-step" v-model="advanced.params.step" type="text" inputmode="decimal" v-bind="attrs('step')" /></label><ChoiceSelect v-model="advanced.params.charge" label="最大发射电荷" :options="chargeChoices" :disabled="disabled" :issue="issues.charge" issue-id="advanced-draft-error" /></div>
+        </section>
+        <section class="parameter-section">
+          <div class="panel-heading"><h2>模型与展宽</h2><span class="section-number">02</span></div>
+          <ChoiceSelect :model-value="advanced.model" label="高级模型" :options="advancedModels" :disabled="disabled" @update:model-value="changeAdvancedModel" />
+          <div class="advanced-switches" role="group" aria-label="展宽机制">
+            <SwitchHint v-model="starkSwitch" label="Stark 展宽" :description="nist ? '逐线内禀 Lorentz 展宽，需要完整 Stark 系数。关闭时同时关闭自吸收；开启时不改变自吸收或仪器展宽。' : '离线论文模型使用固有 Stark 宽度，固定开启。'" :disabled="disabled || !nist" />
+            <SwitchHint v-model="absorptionSwitch" label="逐线自吸收" description="按布居与光程计算逐线吸收及展宽。NIST 模型开启自吸收会自动开启 Stark；关闭自吸收保留 Stark 与仪器展宽。" :disabled="disabled" />
+            <SwitchHint v-model="advanced.instrumentBroadening" label="仪器展宽（Gaussian）" description="仪器响应独立开关，不改变 Stark 或自吸收。启用后由 R 控制高斯线宽；先计算内禀谱，再应用仪器响应。" :disabled="disabled" />
+          </div>
+          <p class="hint">{{ nist ? '关 Stark 同时关自吸收；开自吸收自动开 Stark。仪器展宽独立。' : '离线论文模型固有 Stark，固定开启；仪器展宽独立。' }}</p>
+          <details class="advanced-help"><summary>模型与线宽约定</summary>
+            <template v-if="nist"><p class="hint">在线取得 NIST 线强；Stark 需要跃迁和完整逐线系数，自吸收还需要全阶段能级与布居。默认 Mg 100%、真空 285.27–285.33 nm；发射电荷范围为 0–2。</p><p class="hint">仪器 w=λ/R 为高斯 1/e 半宽，FWHM=2√ln2·λ/R，R 不进入 τ。仅 Stark 为 Lorentz，叠加仪器为 Voigt；两者都关闭时为守恒面积/重心的网格投影，高度依赖步长，不代表物理线宽。</p></template>
+            <template v-else><p class="hint">离线论文 Table 1 的 Mg、Ca、Zn 共31条谱线与 NIST I/II/III 能级快照；仅此模型保留 5% 窄带限制。</p><p class="hint">离线约定：仪器 FWHM=λ/R；Stark/自吸收逐线计算在仪器响应之前，R 不进入 τ。</p></template>
+          </details>
+          <Transition name="expand"><div v-if="nist && advanced.starkBroadening" class="advanced-subpanel" data-advanced-section="stark-data">
+            <h3>Stark 系数</h3>
+            <button v-if="desktopHost" type="button" class="btn" :disabled="disabled || reading" @click="chooseStark()">导入 Stark CSV</button>
+            <label v-else class="btn file-select">导入 Stark CSV<input ref="fileInput" type="file" accept=".csv,text/csv" aria-label="导入 Stark CSV" :disabled="disabled || reading" @change="chooseStark" /></label>
+            <div class="backend-action"><span :class="advanced.starkName ? 'success-text' : 'hint'" role="status">{{ reading ? '正在读取…' : advanced.starkName || '未导入，使用内置系数' }}</span><button type="button" class="btn sm danger" :disabled="disabled || !advanced.starkName || reading" @click="clearStark">清除系数</button></div>
+            <p v-if="fileError" class="error-text" role="alert">{{ fileError }}</p>
+            <details class="advanced-help"><summary>CSV 格式、单位与来源</summary><p class="hint">用户 CSV 优先于内置记录，最大 2 MB。W = stark_width_nm，FWHM = 2W·Ne/Ne_ref；不是直接输入 FWHM。系数应有可追溯出处。</p><p class="hint">列：element、charge、stark_width_nm；真空 wavelength_nm 或成对 lower_eV/upper_eV；可选 stark_reference_ne_cm3、source。缺失清单填写 W 后可直接导入，勿按界面精度截断标识。</p></details>
+          </div></Transition>
+          <Transition name="expand"><div v-if="!nist || advanced.selfAbsorption" class="advanced-subpanel" data-advanced-section="medium">
+            <h3>{{ nist ? '自吸收介质' : '介质与离线密度' }}</h3>
+            <label class="field">光程 L / m<input id="advanced-path-length" v-model="advanced.pathLength" type="text" inputmode="decimal" /></label>
+            <template v-if="nist"><ChoiceSelect v-model="advanced.densityMode" label="总数密度方式" :options="densityChoices" :disabled="disabled" /><label v-if="advanced.densityMode === 'specified'" class="field">总原子/离子数密度 / cm⁻³<input id="advanced-number-density" v-model="advanced.numberDensity" type="text" inputmode="decimal" /></label><p class="hint">默认由 Ne 与全阶段平均电荷反推密度；L=0 为同线形薄谱极限。基体产额作用于有效密度。</p></template>
+            <template v-else><label class="field">总原子/离子柱密度 / cm⁻²<input id="advanced-column" v-model="advanced.column" type="text" inputmode="decimal" /></label><p class="hint">N = 柱密度 / (100 × L)，单位 cm⁻³；L 必须大于0。基体产额倍率再作用于 N。</p></template>
+          </div></Transition>
+        </section>
+        <section class="parameter-section">
+          <CompositionEditor v-model="advanced.composition" scope="advanced" section-number="03" mode-override="client" :candidate-symbols="nist ? symbols : ['Mg','Ca','Zn']" :disabled="disabled" @issue="compositionError = $event" />
+          <div class="advanced-subpanel">
+            <h3>可选基体</h3>
+            <SwitchHint v-model="advanced.matrix" label="参数化基体效应" description="未标定响应模型：修正有效 Te、Ne 与各元素产额。不能代表普适材料预测；关闭时保留草稿。" :disabled="disabled" />
+            <Transition name="expand"><div v-if="advanced.matrix" data-advanced-section="matrix">
+              <div class="row2"><label class="field">Te 修正倍率<input v-model="advanced.teFactor" type="text" inputmode="decimal" /></label><label class="field">Ne 修正倍率<input v-model="advanced.neFactor" type="text" inputmode="decimal" /></label></div>
+              <label v-for="row in advanced.composition" :key="row.id" class="field">{{ row.symbol }} 元素响应（默认1）<input :value="advanced.responses[row.symbol] ?? '1'" type="text" inputmode="decimal" @input="advanced.responses[row.symbol] = ($event.target as HTMLInputElement).value" /></label>
+              <p class="hint">未标定：NIST 名义与有效条件分别取数，产额倍率作用于有效线强与吸收粒子密度。</p>
+            </div></Transition>
+          </div>
+        </section>
+      </fieldset>
+      <button class="btn primary full" :disabled="!!running || !!inputError || reading" @click="run">运行高级模拟</button>
+    </template>
+    <section class="panel activity-panel"><h2>高级物理模拟 (LTE Slab)</h2><p class="hint">名义薄谱、基体薄谱和修正谱使用共同尺度。逐线独立模型，不预测连续谱、自反转、时空梯度或重叠谱线耦合传输。新草稿不会改写已完成结果。</p></section>
+    <section v-if="missingTask" class="panel activity-panel"><h2>Stark 系数待补充</h2><p>任务 {{ missingTask.id }} 缺少 {{ missingTask.starkMissing?.count }} 条逐线系数；未生成不完整谱。</p><button class="btn" :disabled="saving" @click="saveMissing">下载完整缺失清单</button><p class="hint">填写 W 和系数出处后导入上方 Stark CSV，再运行高级模拟。上一成功结果及其导出仍保留。</p></section>
+    <p v-if="feedback" :class="saveFailed ? 'error-text' : 'hint'" role="status">{{ feedback }}</p>
+    <AdvancedResults :spectrum="advanced.result" />
+    <TaskActivity kind="advanced" :error="inputError || submitError" />
+  </WorkbenchLayout>
+</template>

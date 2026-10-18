@@ -5,13 +5,13 @@ import ElementCandidate from './ElementCandidate.vue'
 import { service } from '../lib/backend'
 import { single, batch, scan } from '../lib/workbench'
 import { compositionIssues, issueAttrs } from '../lib/issues'
-import { balance, canonical, elementColor, elementDraft, errorOf, symbols, validateComposition, type ElementDraft } from '../lib/model'
+import { balance, canonical, elementColor, elementDraft, errorOf, symbols, validateComposition, type ElementDraft, type Mode } from '../lib/model'
 const model = defineModel<ElementDraft[]>({ required: true })
-const props = defineProps<{ scope: string; random?: boolean; disabled?: boolean }>()
+const props = defineProps<{ scope: string; sectionNumber?: string; random?: boolean; disabled?: boolean; modeOverride?: Mode; candidateSymbols?: readonly string[] }>()
 const emit = defineEmits<{ issue: [message: string] }>()
 const adding = ref(''), addError = ref('')
-const mode = computed(() => (props.scope === 'single' ? single : props.scope === 'batch' ? batch : scan).params.mode)
-const supportedSymbols = computed(() => mode.value === 'local' ? service.capabilities?.elements ?? [] : symbols)
+const mode = computed(() => props.modeOverride ?? (props.scope === 'single' ? single : props.scope === 'batch' ? batch : scan).params.mode)
+const supportedSymbols = computed(() => props.candidateSymbols ?? (mode.value === 'local' ? service.capabilities?.elements ?? [] : symbols))
 const localError = computed(() => {
   if (mode.value !== 'local') return ''
   if (!service.capabilities?.ready) return service.capabilities?.error || '本地谱线能力尚未就绪'
@@ -40,7 +40,7 @@ function remove(id: number) { if (model.value.length <= 1) return; model.value.s
 </script>
 <template>
   <fieldset class="control-fieldset composition-editor" :disabled="disabled">
-    <div class="panel-heading"><h2>元素组成</h2><span class="section-number">02</span></div>
+    <div class="panel-heading"><h2>元素组成</h2><span class="section-number">{{ sectionNumber ?? '02' }}</span></div>
     <div v-if="!random" class="composition-bar"><span v-for="e in model" :key="e.id" :style="{ width: `${Math.max(0, Math.min(100, Number(e.pct) || 0))}%`, background: elementColor(e.symbol) }" /></div>
     <TransitionGroup name="element" tag="div" class="composition-rows">
       <div v-for="(e, i) in model" :key="e.id" class="composition-entry">

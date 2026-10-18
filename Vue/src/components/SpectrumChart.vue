@@ -6,11 +6,16 @@ import { elementColor, format, type Spectrum } from '../lib/model'
 import { realSpectrumCsv } from '../lib/backend'
 import { useFileSave } from '../lib/fileAccess'
 import { localPeakIndices, nearestNode, selectHoverNode } from '../lib/spectrumInteraction'
-const props = defineProps<{ spectrum: Spectrum; label?: string }>()
+import { advancedFlags, isNistAdvanced } from '../lib/advanced'
+const props = defineProps<{ spectrum: Spectrum; label?: string; viewMode?: 'elements' | 'comparison' }>()
 const spec = computed(() => props.spectrum)
+const showComparison = computed(() => props.viewMode !== 'elements' && !!spec.value.comparison)
+const showElements = computed(() => props.viewMode !== 'comparison')
 const resolutionLabel = computed(() => {
   const origin = spec.value.source.origin as { actual_resolution?: number | null; parameters?: { webscraping?: string; local_broadening_enabled?: boolean } } | undefined
   if (origin?.parameters?.webscraping === 'local' && !origin.parameters.local_broadening_enabled) return '未展宽（R 不应用）'
+  const flags = advancedFlags(spec.value.source.origin)
+  if (flags.known && !flags.instrument) return '仪器响应未启用（R 不应用）'
   return typeof origin?.actual_resolution === 'number' && Number.isFinite(origin.actual_resolution) ? `实际 R (λ/Δλ) ${origin.actual_resolution}` : '实际 R (λ/Δλ) 未知'
 })
 const canvas = ref<HTMLCanvasElement>()
@@ -22,18 +27,19 @@ let pointer: { x: number; y: number } | null = null
 const view = ref<[number, number]>([spec.value.params.low, spec.value.params.high])
 const drag = ref<{ start: number; now: number; pan: boolean; initial: [number, number]; pointerId: number } | null>(null)
 let resize: ResizeObserver | undefined, themeObserver: MutationObserver | undefined
-const max = computed(() => [spec.value.total, ...(spec.value.comparison ? [spec.value.comparison.thin,spec.value.comparison.nominal] : [])].reduce((peak, values) => values.reduce((m, v) => Math.max(m,v),peak), 1e-30))
-const unit = computed(() => normalized.value ? '共同归一化强度' : spec.value.comparison ? '模型光子辐亮度（未标定）/ photons·s⁻¹·m⁻²·sr⁻¹·nm⁻¹' : '实际强度 / a.u.')
-const valueUnit = computed(()=>spec.value.comparison ? '(s·m²·sr·nm)⁻¹ · 未标定' : 'a.u.')
+const max = computed(() => [spec.value.total, ...(showElements.value ? spec.value.elements.map(e => e.ys) : []), ...(showComparison.value ? [spec.value.comparison!.thin,spec.value.comparison!.nominal] : [])].reduce((peak, values) => values.reduce((m, v) => Math.max(m,v),peak), 1e-30))
+const nistAdvanced = computed(() => isNistAdvanced(spec.value.source.origin?.model_version))
+const unit = computed(() => normalized.value ? '共同归一化强度' : nistAdvanced.value ? 'NIST 相对光子强度 / a.u.' : spec.value.comparison ? '模型光子辐亮度（未标定）/ photons·s⁻¹·m⁻²·sr⁻¹·nm⁻¹' : '实际强度 / a.u.')
+const valueUnit = computed(()=>nistAdvanced.value ? 'a.u. · NIST 相对光子强度' : spec.value.comparison ? '(s·m²·sr·nm)⁻¹ · 未标定' : 'a.u.')
 const zoomed = computed(() => Math.abs(view.value[0] - spec.value.params.low) > .00001 || Math.abs(view.value[1] - spec.value.params.high) > .00001)
 const visibleCurves = computed(() => [
   ...(!hidden.value.includes('total') ? [{ id: 'total', label: '总谱', ys: spec.value.total, color: '' }] : []),
-  ...(spec.value.comparison ? [{ id: '$nominal', label: '名义薄谱', ys: spec.value.comparison.nominal, color: '#8d8d8d' }, { id: '$thin', label: '基体薄谱', ys: spec.value.comparison.thin, color: '#d078ad' }] : []),
-  ...spec.value.elements.filter(e => !hidden.value.includes(e.symbol)).map(e => ({ id: e.symbol, label: e.symbol, ys: e.ys, color: elementColor(e.symbol) }))
+  ...(showComparison.value ? [{ id: '$nominal', label: '名义薄谱', ys: spec.value.comparison!.nominal, color: '#8d8d8d' }, { id: '$thin', label: '基体薄谱', ys: spec.value.comparison!.thin, color: '#d078ad' }] : []),
+  ...(showElements.value ? spec.value.elements.filter(e => !hidden.value.includes(e.symbol)).map(e => ({ id: e.symbol, label: e.symbol, ys: e.ys, color: elementColor(e.symbol) })) : [])
 ])
 const peakCurves = computed(() => visibleCurves.value.map(curve => ({ ...curve, peaks: localPeakIndices(curve.ys) })))
 const hoverValues = computed(() => hover.value === null ? null : { x: spec.value.xs[hover.value]!, rows: visibleCurves.value.map(curve => ({ ...curve, value: curve.ys[hover.value!]! })) })
-function geometry() { const cv = canvas.value; if (!cv) return null; const rect = cv.getBoundingClientRect(); return { rect, left: 76, right: 28, top: spec.value.comparison ? 62 : 38, bottom: 58, w: rect.width, h: rect.height } }
+function geometry() { const cv = canvas.value; if (!cv) return null; const rect = cv.getBoundingClientRect(); return { rect, left: 76, right: 28, top: showComparison.value || props.viewMode === 'elements' ? 62 : 38, bottom: 58, w: rect.width, h: rect.height } }
 function positionTooltip() {
   const g = geometry(), box = tooltip.value
   if (!g || !box || hover.value === null) return
@@ -65,9 +71,14 @@ function draw() {
   for (let i = 0; i <= ticks; i++) { const x = g.left + i / ticks * pw; ctx.globalAlpha = .2; ctx.beginPath(); ctx.moveTo(x, g.top); ctx.lineTo(x, base); ctx.stroke(); ctx.globalAlpha = 1; ctx.textAlign = i === 0 ? 'left' : i === ticks ? 'right' : 'center'; ctx.fillText(format(view.value[0] + (view.value[1] - view.value[0]) * i / ticks), x, base + 20) }
   ctx.setLineDash([]); ctx.font = `${auxiliarySize} ${fontFamily}`
   ctx.textAlign = 'left'; ctx.fillText(normalized.value ? '共同归一化强度' : '原始强度', g.left, 17)
-  if(spec.value.comparison) {
+  if(showComparison.value) {
     ctx.font=`${metadataSize} ${fontFamily}`
     for(const [i,label,stroke] of [[0,'名义薄谱','#8d8d8d'],[1,'基体薄谱','#d078ad'],[2,'修正谱',color('--chart')]] as const){ctx.fillStyle=stroke;ctx.fillText(label,g.left+i*(g.w-g.left-g.right)/3,40)}
+    ctx.fillStyle=color('--muted')
+  } else if (props.viewMode === 'elements') {
+    const entries = visibleCurves.value
+    ctx.font=`${metadataSize} ${fontFamily}`
+    entries.forEach((entry, i) => { const slot=(g.w-g.left-g.right)/Math.max(1,entries.length); ctx.fillStyle=entry.color || color('--chart'); ctx.fillText(entry.label,g.left+i*slot,40,Math.max(1,slot-4)) })
     ctx.fillStyle=color('--muted')
   }
   ctx.textAlign = 'right'; ctx.fillText('λ / nm', g.w - g.right, base + 37)
@@ -79,8 +90,8 @@ function draw() {
     ctx.strokeStyle = stroke; ctx.lineWidth = total ? 2 : comparison ? 1.2 : 1; ctx.setLineDash([]); ctx.stroke()
     if (total && complete && spec.value.xs.length > 1 && spec.value.source.style !== 'sticks') { ctx.lineTo(xPos(spec.value.xs[spec.value.xs.length - 1]!), base); ctx.lineTo(xPos(spec.value.xs[0]!), base); ctx.closePath(); const gradient = ctx.createLinearGradient(0, g.top, 0, base); gradient.addColorStop(0, stroke); gradient.addColorStop(1, 'transparent'); ctx.globalAlpha = .07; ctx.fillStyle = gradient; ctx.fill(); ctx.globalAlpha = 1 }
   }
-  spec.value.elements.filter(e => !hidden.value.includes(e.symbol)).forEach(e => curve(e.ys, elementColor(e.symbol)))
-  if (spec.value.comparison) { curve(spec.value.comparison.nominal, '#8d8d8d', false, true); curve(spec.value.comparison.thin, '#d078ad', false, true) }
+  if (showElements.value) spec.value.elements.filter(e => !hidden.value.includes(e.symbol)).forEach(e => curve(e.ys, elementColor(e.symbol)))
+  if (showComparison.value) { curve(spec.value.comparison!.nominal, '#8d8d8d', false, true); curve(spec.value.comparison!.thin, '#d078ad', false, true) }
   if (!hidden.value.includes('total')) curve(spec.value.total, color('--chart'), true)
   if (hover.value !== null) { const active = visibleCurves.value.find(item => item.id === hoverSeries.value), value = active?.ys[hover.value]; if (active && value !== undefined && Number.isFinite(value)) { const x = xPos(spec.value.xs[hover.value]!), y = yPos(value); ctx.strokeStyle = color('--chart'); ctx.globalAlpha = .55; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(x, g.top); ctx.lineTo(x, base); ctx.moveTo(g.left, y); ctx.lineTo(g.w - g.right, y); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; ctx.fillStyle = active.color || color('--chart'); ctx.strokeStyle = color('--panel'); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, snapped.value ? 4 : 3, 0, Math.PI * 2); ctx.fill(); ctx.stroke() } }
   if (drag.value && !drag.value.pan) { ctx.globalAlpha = .14; ctx.fillStyle = color('--accent'); const a = xPos(drag.value.start), b = xPos(drag.value.now); ctx.fillRect(Math.min(a,b), g.top, Math.abs(b - a), ph); ctx.globalAlpha = 1 }
@@ -135,6 +146,7 @@ function exportFile(kind: 'csv' | 'json' | 'png') {
   if (kind === 'png') void saveOutput('SimLIBS-spectrum.png', pngBlob, 'image/png')
 }
 watch([view, hidden, normalized, hover, hoverSeries, snapped], () => { draw(); void nextTick(positionTooltip) })
+watch(() => props.viewMode, () => { hover.value = null; snapped.value = false; void nextTick(draw) })
 watch(visibleCurves, curves => { if (!curves.some(curve => curve.id === hoverSeries.value)) hover.value = null })
 watch(() => spec.value, (next, old) => { hover.value = null; if (next.params.low !== old.params.low || next.params.high !== old.params.high) reset(); if (next.elements.map(e => e.symbol).join() !== old.elements.map(e => e.symbol).join()) hidden.value = []; draw() })
 onMounted(() => { resize = new ResizeObserver(() => { draw(); positionTooltip() }); if (canvas.value) resize.observe(canvas.value); themeObserver = new MutationObserver(draw); themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme','style'] }); window.addEventListener('resize', draw); draw() })
@@ -143,11 +155,11 @@ onUnmounted(() => { resize?.disconnect(); themeObserver?.disconnect(); window.re
 <template>
   <section class="panel spectrum-panel">
     <div class="chart-title-row"><div><h2>光谱 <span class="badge neutral">{{ label || '计算结果' }}</span></h2><p>{{ spec.title }} · Te / eV {{ format(spec.params.te) }} · {{ resolutionLabel }}</p></div><div class="chart-tools"><button class="icon-btn" aria-label="放大光谱" title="放大" @click="zoom(.65)"><AppIcon name="plus" :size="15" /></button><button class="icon-btn" aria-label="缩小光谱" title="缩小" @click="zoom(1.5)"><AppIcon name="minus" :size="15" /></button><button class="icon-btn" aria-label="恢复全谱" title="恢复全谱" :disabled="!zoomed" @click="reset"><AppIcon name="reset" :size="15" /></button></div></div>
-    <p v-if="spec.comparison" class="hint">灰：名义薄谱 · 粉：基体薄谱 · 主题色：修正谱；三谱及元素贡献使用同一归一化尺度。</p><div class="chart-overline"><span>{{ unit }}</span><span class="mono">λ / nm {{ format(view[0]) }} — {{ format(view[1]) }}</span></div>
+    <p v-if="showComparison" class="hint">灰：名义薄谱 · 粉：基体薄谱 · 主题色：当前总谱；三谱使用同一归一化尺度。</p><p v-else-if="viewMode === 'elements'" class="hint">当前混合计算的总谱与各元素贡献共用尺度；单元素贡献可与总谱重合，可用图例隐藏总谱查看。</p><div class="chart-overline"><span>{{ unit }}</span><span class="mono">λ / nm {{ format(view[0]) }} — {{ format(view[1]) }}</span></div>
     <div class="chart-wrap"><canvas ref="canvas" class="chart-surface" tabindex="0" role="img" :aria-label="`${spec.title}，界面光谱。左键拖选缩放，中键或 Alt 加左键拖动平移，右键恢复全谱，滚轮缩放，Home/Escape 复原，左右方向键读取节点。`" @pointermove="move" @pointerdown="down" @pointerup="up" @pointercancel="cancelDrag" @lostpointercapture="cancelDrag" @mousedown="preventMiddleDefault" @auxclick="preventMiddleDefault" @contextmenu.prevent="reset" @pointerleave="leaveChart" @wheel.prevent="zoom($event.deltaY > 0 ? 1.15 : .85, xAt($event))" @keydown="key" />
       <div v-if="hoverValues && !drag" ref="tooltip" class="chart-tooltip" :style="{ left: tooltipPosition.left + 'px', top: tooltipPosition.top + 'px' }" tabindex="0" role="region" aria-label="光谱节点读数" @pointerleave="leaveChart"><b class="mono">λ / nm {{ format(hoverValues.x) }}</b><span>{{ snapped ? '局部峰吸附 · 10px 内' : '原始节点' }} · {{ hover }}</span><p class="tooltip-unit">原值单位：{{ valueUnit }}</p><div class="tooltip-values"><span>曲线</span><span>原值</span><span>共同归一化</span><template v-for="row in hoverValues.rows" :key="row.id"><span class="curve-name"><i :style="{ background: row.color || 'var(--chart)' }" />{{ row.label }}</span><strong class="mono" :title="String(row.value)">{{ format(row.value) }}</strong><strong class="mono">{{ format(row.value / max) }}</strong></template></div><p v-if="spec.elements.length" class="tooltip-note">元素贡献；当前数据不含谱线离子鉴定。</p><p v-if="hidden.includes('total')" class="tooltip-note">总谱已隐藏，读数仅列可见曲线。</p></div>
     </div>
-    <div class="chart-bottom"><div class="legend"><button :aria-pressed="!hidden.includes('total')" :class="{ 'legend-off': hidden.includes('total') }" @click="toggle('total')"><i style="background:var(--chart)" />总谱</button><button v-for="e in spec.elements" :key="e.symbol" :aria-pressed="!hidden.includes(e.symbol)" :class="{ 'legend-off': hidden.includes(e.symbol) }" @click="toggle(e.symbol)"><i :style="{ background: elementColor(e.symbol) }" />{{ e.symbol }}</button></div><label class="inline-check"><input v-model="normalized" type="checkbox" />共同归一化</label></div>
+    <div class="chart-bottom"><div class="legend"><button :aria-pressed="!hidden.includes('total')" :class="{ 'legend-off': hidden.includes('total') }" @click="toggle('total')"><i style="background:var(--chart)" />总谱</button><template v-if="showElements"><button v-for="e in spec.elements" :key="e.symbol" :aria-pressed="!hidden.includes(e.symbol)" :class="{ 'legend-off': hidden.includes(e.symbol) }" @click="toggle(e.symbol)"><i :style="{ background: elementColor(e.symbol) }" />{{ e.symbol }}</button></template></div><label class="inline-check"><input v-model="normalized" type="checkbox" />共同归一化</label></div>
     <div class="export-row"><div><button type="button" class="file-export-btn format-csv" :disabled="saving" title="保存 CSV" aria-label="保存 CSV" @click="exportFile('csv')"><FileFormatIcon format="csv" /></button><button type="button" class="file-export-btn format-json" :disabled="saving" title="保存来源 JSON" aria-label="保存来源 JSON" @click="exportFile('json')"><FileFormatIcon format="json" /></button><button type="button" class="file-export-btn format-png" :disabled="saving" title="保存 PNG" aria-label="保存 PNG" @click="exportFile('png')"><FileFormatIcon format="png" /></button></div></div><p v-if="saveFeedback" :class="saveFailed ? 'error-text' : 'hint'" style="overflow-wrap:anywhere" role="status">{{ saveFeedback }}</p>
   </section>
 </template>

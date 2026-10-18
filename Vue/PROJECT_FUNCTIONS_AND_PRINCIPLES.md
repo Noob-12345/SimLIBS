@@ -1,6 +1,35 @@
 # SimLIBS 功能与计算原理
 
-日期：2026-10-15。本文对应 Vue 当前源码与共享论文 Eq.7 / Stark 逐线高级模型，Vue 适配版本为 `paper-eq7-stark-sa-1`；当前公式、数据来源与科学边界以 [论文自吸收报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 为准。`finite-lte-slab-1` 是旧高级历史模型，本轮不再使用。实现、自测与独立验收是不同证据；本轮未更新旧 EXE/NSIS，最终验收以 plan 的 review 为准。
+日期：2026-10-16。高级默认模型为 `nist-lines-self-absorption-1`，可选旧离线 `paper-eq7-stark-sa-1`；当前公式、数据来源与科学边界以 [论文自吸收报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 为准。`finite-lte-slab-1` 是旧高级历史模型，本轮不再使用。实现、自测与独立验收是不同证据；本轮未更新旧 EXE/NSIS，最终审查由独立 review 完成。
+
+## NIST高级入口（2026-10-16）
+
+默认Mg100%、真空285.27–285.33nm、Te=1eV、Ne=1e17cm⁻³、R=1000、步长0.001nm。高级专用适配层取得同次响应的计算光子线强、跃迁gA和全部阶段能级，复用原始 prepare_nist_absorption / render_nist_absorption，不执行网页JS。仅按原字节增加nist_lines.py/nist_self_absorption.py，旧simulation.py/self_absorption.py不变，普通local/client/server语义不变。
+
+NIST线强作为积分面积；布居使用全阶段及裸核态，发射电荷仍限定0–2。Stark W来自用户CSV或内置逐线系数，FWHM_Stark=2W·Ne/Ne_ref。仪器w=λ/R是高斯1/e半宽，FWHM_G=2√ln2·λ/R；R不进入τ。默认Ne/平均电荷反推总密度，可指定数密度；L=0及关闭自吸收均得到同Stark/Voigt薄谱。新入口不保留5%限制，但执行200000节点和源引擎工作量/内存上限。输出是NIST相对光子强度，不标成绝对光子辐亮度。
+
+名义与有效Te/Ne/组成分别请求NIST，完全相同的规范化请求在单任务内复用。可选未标定基体先改变有效组成/条件，再把产额倍率作用于有效NIST线强及吸收粒子密度；逐线诊断保留未缩放线强。不提供普适材料预测。三谱同网格同尺度，origin记录URL/响应hash/引擎版本/约定/配置/用户系数出处。
+
+Stark CSV最大2MB、最多20000行，支持BOM。必需element、非负整数charge、正W，以及真空波长或成对能级；参考Ne须为正。所有给定标识共同匹配，沿用原引擎1e-6 nm/eV阈值。完整缺失CSV按双精度保存，填W后可重导入；系数未知或歧义时报失败，不跳线出部分谱。固定job export的stark-missing仅导出失败高级任务清单；diagnostics导出成功结果的完整诊断CSV。轮询只有数量/可用标志，不塞逐线数组，刷新/重启可恢复固定任务证据。前端分别绑定失败清单和旧成功结果job，三谱CSV/JSON/PNG与诊断不串绑；更早缺字段记录防御读取。
+
+HTTP继承TLS、连接/读取及分段期限，增加响应大小边界，进度按取数/准备/渲染/保存真实阶段报告。原始渲染函数无逐行取消回调；网络读取和阶段边界协作检查，耗时计算由现有worker进程树取消兜底。不改物理公式，不终止用户其它进程。
+
+46项后端与8项SSR/组件/脚本检查通过；其中数学和HTTP闭环用捕获NIST夹具，不冒充在线实算。另一次真实NIST窄带成功：1条跃迁、61个节点，URL/hash见 [.ai-workflow/20261016-advanced-nist/](.ai-workflow/20261016-advanced-nist/)。GUI未测，不重试受拒浏览器启动；本轮只交源码及前端dist。下方高级推导保留为离线论文模型及历史证据。
+
+## 独立展宽机制与元素视图（2026-10-17）
+
+高级模拟支持三个独立布尔开关：self_absorption、stark_broadening、instrument_broadening，对应 6 种有效物理分支：
+1. 纯棒状投影（SA=False, Stark=False, Instrument=False）：调用 nist_lines.render_sticks(instrument_broadening=False)，在共享网格上做精确线位与面积离散投影，不伪造物理线宽，高度依赖步长；跳过原子能级与 Stark 数据。
+2. 纯仪器高斯（SA=False, Stark=False, Instrument=True）：调用 nist_lines.render_sticks(instrument_broadening=True)，以 w=λ/R (1/e 半宽) 进行仪器高斯卷积；跳过原子能级与 Stark 数据。
+3. 纯 Stark Lorentz（SA=False, Stark=True, Instrument=False）：调用 prepare_nist_absorption(self_absorption=False) 与 render_nist_absorption(self_absorption=False)，直接解析跃迁与 Stark 宽度，生成解析 Lorentz 轮廓，跳过全能级布居与 Saha 计算；光程与吸收密度不影响结果。
+4. Stark + 仪器 Voigt 薄谱（SA=False, Stark=True, Instrument=True）：同上并在内禀 Stark 基础上叠加仪器高斯响应，生成解析 Voigt 轮廓，无自吸收衰减。
+5. 逐线自吸收 + 内禀 Stark（SA=True, Stark=True, Instrument=False）：计算全阶段布居、吸收密度、tau 与 SA，输出经自吸收修正但未经仪器卷积的光谱。
+6. 逐线自吸收 + Stark + 仪器响应（SA=True, Stark=True, Instrument=True）：完整物理自吸收与仪器响应 Voigt 光谱。
+
+约束：开启自吸收必须启用 Stark 展宽（前端约束联动，后端严格校验拒绝）。
+界面布局与展示：
+- AdvancedPage 实验参数顶部采用 Te / eV、Ne / cm⁻³、R (λ/Δλ) 三张横排方卡，与单次模拟一致。
+- AdvancedResults 增加“元素组分”与“三谱对照”分段切换，默认元素组分；元素组分视图共享总谱尺度，可独立切换各元素可见性，导出 PNG/CSV 与当前视图严格一致。
 
 ## 目录
 
@@ -56,7 +85,7 @@ NIST 官方页面的线形定义与 Python 常用 FWHM 定义并非自动相同�
 n_(z+1)/n_z = (2/ne) (2π me kT/h²)^(3/2) (U_(z+1)/U_z) exp(-χ_z/kT)
 ```
 
-公式采用 SI 的 ne，需要把 cm⁻³ 乘 10⁶；Te[eV] 与 kT 的转换必须一致。源实现使用有限数据集，并非所有真实高激发态/电离级的完整配分函数。高级模型只采用有数据的 I/II，不虚构 III 能级。设置的最大发射电荷控制输出发射，不代表消除了其他人口。
+公式采用 SI 的 ne，需要把 cm⁻³ 乘 10⁶；Te[eV] 与 kT 的转换必须一致。源实现使用有限数据集，并非所有真实高激发态/电离级的完整配分函数。NIST高级入口使用响应中的全部阶段，离线论文选择使用其I/II/III快照。设置的最大发射电荷控制输出发射，不代表消除了其他人口。
 
 光学薄光子线强正比于上能级人口乘 Aki；能量谱还乘光子能量。普通本地绝对尺度有其模型约定，与高级指定柱密度辐亮度不能直接混用。
 
@@ -86,7 +115,7 @@ Gaussian 标准差 σ=FWHM/(2√(2ln2))；Lorentz 半宽 γ=FWHM/2；Voigt 是�
 
 ## 高级模拟推导
 
-当前高级后端直接调用与原 simLIBS 相同的 `simLIBS.self_absorption.simulate_paper_spectrum`，依照 RSC Advances 2023 论文 *A numerical procedure for understanding the self-absorption effects in laser induced breakdown spectroscopy* 的 Eq.7 计算逐线吸收参数，并用论文 SA/展宽关系重建谱线。完整推导、数据核对和适用限制见 [核心中文报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md)。这里不是对已经展宽的总谱任意削峰，也没有混用旧有限 slab 的连续总 tau 算法。
+离线选择的高级后端直接调用与原 simLIBS 相同的 `simLIBS.self_absorption.simulate_paper_spectrum`，依照 RSC Advances 2023 论文 *A numerical procedure for understanding the self-absorption effects in laser induced breakdown spectroscopy* 的 Eq.7 计算逐线吸收参数，并用论文 SA/展宽关系重建谱线。完整推导、数据核对和适用限制见 [核心中文报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md)。这里不是对已经展宽的总谱任意削峰，也没有混用旧有限 slab 的连续总 tau 算法。
 
 ### 真实数据与三态布居
 

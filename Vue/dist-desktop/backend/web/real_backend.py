@@ -257,7 +257,8 @@ class RealBackend:
             # ordinary local-library preflight cannot validate these inputs.
             _,config,_=effective(p,body.get('advanced',{}))
         except (ValueError,TypeError) as error:raise ApiError(400,str(error),'validation') from error
-        return self._launch('高级模拟','advanced',{'parameters':p.to_dict(),'advanced':config},'高级论文 Eq.7 · Stark逐线自吸收 / 参数化基体（未标定）')
+        label = '高级NIST逐线自吸收' if config.get('model') == 'nist' else '高级论文 Eq.7 · Stark逐线自吸收'
+        return self._launch('高级模拟','advanced',{'parameters':p.to_dict(),'advanced':config},label+' / 参数化基体（未标定）')
 
     def start_batch(self, req: BatchRequest) -> str:
         p = self._to_parameters(req.params, req.compositions[0].items)
@@ -483,6 +484,16 @@ class RealBackend:
 
     def _job_view(self, job: Dict[str, Any]) -> Dict[str, Any]:
         view={k:job.get(k) for k in ('job_id','kind','status','summary','progress','duration','error','created','created_at','resume_from')}
+        if job.get('kind') == '高级模拟' and job.get('status') == 'failed':
+            summary = self._advanced_file(job, 'missing-stark.json')
+            artifact = self._advanced_file(job, 'missing-stark.csv')
+            if summary and artifact and summary.stat().st_size <= 65536:
+                try:
+                    data = json.loads(summary.read_text(encoding='utf-8'))
+                    if data.get('code') == 'missing_stark' and isinstance(data.get('count'), int):
+                        view['stark_missing'] = {'count': data['count'], 'available': True}
+                except (OSError, ValueError, AttributeError):
+                    pass
         path=Path(job.get('expected_result_path') or job.get('result_path') or str(Path(self._settings.output)/'.jobs'/job['job_id']/'result'/'manifest.json')).parent/'checkpoint.json'
         if path.is_file():
             try:
@@ -491,6 +502,18 @@ class RealBackend:
             except (OSError,ValueError,KeyError):view.update(resumable=False,resume_reason='checkpoint/计划损坏，原结果保留')
         else:view.update(resumable=False,resume_reason='无确定计划的旧任务仅保留已有结果')
         return view
+
+    @staticmethod
+    def _advanced_file(job, name):
+        # Only fixed files belonging to this already-authorized job; never a client path.
+        if name not in ('missing-stark.json', 'missing-stark.csv', 'advanced-lines.csv'):
+            return None
+        manifest = job.get('expected_result_path') or job.get('result_path')
+        if not manifest:
+            return None
+        root = Path(manifest).resolve().parent.parent
+        file = root/name
+        return file if file.is_file() and file.resolve().parent == root else None
 
     def get_job(self, job_id: str) -> Dict[str, Any]:
         with self._lock:
@@ -579,13 +602,19 @@ class RealBackend:
         result = {'kind': 'single', 'xs': xs, 'ys': ys, 'yi': [], 'series': series, 'meta': meta, 'origin': origin, 'manifest': manifest}
         if origin.get('mode')=='advanced':
             import pandas as pd
-            reference=pd.read_csv(origin['thin_reference'],float_precision='round_trip')
-            result['comparison']={'xs':reference['wavelength'].tolist(),'thin':reference['intensity'].tolist(),'nominal':reference['nominal_intensity'].tolist()}
+            if origin.get('nist_line_table') and Path(origin['nist_line_table']).is_file():
+                sticks = pd.read_csv(origin['nist_line_table'], float_precision='round_trip')
+                result['origin'] = dict(result['origin'], nist_line_sticks=sticks.to_dict(orient='records'))
+            if origin.get('thin_reference') and Path(origin['thin_reference']).is_file():
+                reference=pd.read_csv(origin['thin_reference'],float_precision='round_trip')
+                if {'wavelength', 'intensity', 'nominal_intensity'} <= set(reference):
+                    result['comparison']={'xs':reference['wavelength'].tolist(),'thin':reference['intensity'].tolist(),'nominal':reference['nominal_intensity'].tolist()}
             # Optional paper metadata (e.g. unreported Stark temperature) is
             # exported as an empty CSV cell and must round-trip to JSON null.
-            diagnostics=pd.read_csv(origin['line_table'],float_precision='round_trip').astype(object)
-            diagnostics=diagnostics.where(pd.notna(diagnostics),None)
-            result['origin']=dict(origin,line_diagnostics=diagnostics.to_dict(orient='records'))
+            if origin.get('line_table') and Path(origin['line_table']).is_file():
+                diagnostics=pd.read_csv(origin['line_table'],float_precision='round_trip').astype(object)
+                diagnostics=diagnostics.where(pd.notna(diagnostics),None)
+                result['origin']=dict(result['origin'],line_diagnostics=diagnostics.to_dict(orient='records'))
         return result
 
     def _scan_result(self, job: Dict[str, Any], manifest: Dict[str, Any]) -> Dict[str, Any]:
@@ -658,25 +687,51 @@ class RealBackend:
             job = self._jobs.get(job_id)
         if not job:
             raise ApiError(404, f'任务不存在：{job_id}', 'not_found')
+        if kind == 'stark-missing':
+            path = self._advanced_file(job, 'missing-stark.csv') if job.get('kind') == '高级模拟' and job.get('status') == 'failed' else None
+            if not path:
+                raise ApiError(409, '此失败任务没有Stark缺失清单', 'no_result')
+            return ExportPayload(path.read_bytes(), 'text/csv; charset=utf-8', f'{job_id}_missing_stark.csv')
         if job['status'] != 'completed' or not job.get('result_path'):
             raise ApiError(409, '只有成功完成的任务才能导出', 'no_result')
         manifest, result_path = job['manifest'], job['result_path']
+        if kind == 'diagnostics':
+            path = self._advanced_file(job, 'advanced-lines.csv') if manifest.get('origin', {}).get('mode') == 'advanced' else None
+            if not path:
+                raise ApiError(409, '此历史结果没有逐线诊断表', 'no_result')
+            return ExportPayload(path.read_bytes(), 'text/csv; charset=utf-8', f'{job_id}_line_diagnostics.csv')
         if manifest.get('origin',{}).get('mode')=='advanced' and kind in ('csv','json','png'):
             import pandas as pd
             import io
             result=self._single_result(job,manifest)
             if kind=='json':
-                result['opacity']=pd.read_csv(manifest['origin']['opacity_table'],float_precision='round_trip').to_dict(orient='list')
+                if manifest['origin'].get('opacity_table') and Path(manifest['origin']['opacity_table']).is_file():
+                    result['opacity']=pd.read_csv(manifest['origin']['opacity_table'],float_precision='round_trip').to_dict(orient='list')
                 return ExportPayload(json.dumps(result,ensure_ascii=False,allow_nan=False),'application/json',f'{job_id}_advanced.json')
+            if 'comparison' not in result:
+                # Earliest saved advanced results may have no three-spectrum files.
+                if kind == 'csv':
+                    return ExportPayload(pd.DataFrame({'wavelength': result['xs'], 'intensity': result['ys']}).to_csv(index=False), 'text/csv; charset=utf-8', f'{job_id}_advanced.csv')
+                from simlibs_ui.operations import export_result
+                from tempfile import TemporaryDirectory
+                with TemporaryDirectory() as temporary:
+                    target = Path(temporary)/'saved.png'
+                    export_result(result_path, target, 'png')
+                    return ExportPayload(target.read_bytes(), 'image/png', f'{job_id}_advanced.png')
             if kind=='csv':
                 data={'wavelength':result['xs'],'corrected':result['ys'],'matrix_thin':result['comparison']['thin'],'nominal_thin':result['comparison']['nominal']}
                 for curve in result['series']['elements']['interpolated']['curves']:data[curve['label']+'_corrected']=curve['ys']
                 return ExportPayload(pd.DataFrame(data).to_csv(index=False),'text/csv; charset=utf-8',f'{job_id}_advanced.csv')
             from matplotlib.figure import Figure
             fig=Figure(figsize=(10,5),dpi=140);ax=fig.subplots()
-            for ys,label,color in [(result['comparison']['nominal'],'Nominal thin','#777777'),(result['comparison']['thin'],'Matrix thin','#d078ad'),(result['ys'],'Corrected','#317aa3')]:ax.plot(result['xs'],ys,label=label,color=color)
+            sticks = manifest['origin'].get('spectrum_style') == 'sticks'
+            draw = lambda ys, label, color=None: ax.vlines(result['xs'], 0, ys, label=label, color=color) if sticks else ax.plot(result['xs'], ys, label=label, color=color)
+            draw(result['ys'], 'Total', '#317aa3')
+            for index, curve in enumerate(result['series']['elements']['interpolated']['curves']):
+                draw(curve['ys'], curve['label'], f'C{(index+1)%10}')
             advanced_version=manifest['origin'].get('model_version')
-            title=('Paper Eq.7 / Stark per-line self-absorption: shared scale'
+            title=('NIST: fixed element view / shared relative photon scale' if str(advanced_version).startswith('nist-lines-')
+                   else 'Paper Eq.7 / Stark per-line self-absorption: shared scale'
                    if advanced_version=='paper-eq7-stark-sa-1' else 'Saved advanced model: shared scale')
             ax.set(xlabel='Wavelength / nm',ylabel=manifest['origin'].get('intensity_units','Model photon intensity per nm; uncalibrated'),title=title);ax.legend();fig.tight_layout()
             stream=io.BytesIO();fig.savefig(stream,format='png');return ExportPayload(stream.getvalue(),'image/png',f'{job_id}_advanced.png')

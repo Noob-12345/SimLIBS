@@ -20,6 +20,13 @@ PAPER_ELEMENTS = frozenset(('Mg', 'Ca', 'Zn'))
 def options(raw):
     if not isinstance(raw, dict):
         raise ValueError('高级参数须为对象')
+    if raw.get('model', 'paper') not in ('paper', 'nist'):
+        raise ValueError('高级模型须为paper或nist')
+    if raw.get('model') == 'nist':
+        from .advanced_nist import options as nist_options
+        return nist_options(raw)
+    if 'stark_broadening' in raw and raw['stark_broadening'] is not True:
+        raise ValueError('离线论文模型固有Stark宽度，不支持关闭Stark')
     out = {}
     for name, default in (('self_absorption', True), ('matrix', True), ('instrument_broadening', True)):
         value = raw.get(name, default)
@@ -62,6 +69,9 @@ def options(raw):
 
 def effective(p, raw):
     o = options(raw)
+    if o.get('model') == 'nist':
+        from .advanced_nist import effective as nist_effective
+        return nist_effective(p, o)
     if p.webscraping != 'local':
         raise ValueError('高级论文模型仅使用本地论文Stark/原子数据快照')
     missing = sorted(element for element, pct in zip(p.elements, p.percentages)
@@ -88,6 +98,9 @@ def effective(p, raw):
 
 
 def simulate(p, s, raw, cancelled=lambda: False, emit=None):
+    if isinstance(raw, dict) and raw.get('model') == 'nist':
+        from .advanced_nist import simulate as nist_simulate
+        return nist_simulate(p, s, raw, cancelled, emit)
     def check():
         if cancelled():
             raise InterruptedError('高级模拟已取消')

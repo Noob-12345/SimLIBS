@@ -19,11 +19,19 @@
 
 ## 当前功能与数据边界
 
-已复制并连接真实 Python 后端。local 使用本地谱线库及 LTE/Saha 计算；client 在线获取 NIST 谱线跃迁与强度，由本地引擎进行线型展宽；server 由 NIST LIBS 在线服务生成光谱并进行展宽，未承诺连续谱能力。默认空谱，真实进度，失败/取消保留上一成功结果，无合成谱回退。当前源码的高级模拟使用与原 simLIBS 相同的论文 Eq.7 / Stark 逐线引擎，适配版本为 `paper-eq7-stark-sa-1`，提供名义薄谱、基体薄谱、自吸收修正谱的共同尺度对照与可携带导出。参数化基体仍需实验标定。完整公式、单位、真实数据来源与适用边界见 [论文自吸收报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 和 [功能与原理](PROJECT_FUNCTIONS_AND_PRINCIPLES.md)。本轮 Vue 实施与自测见 [.ai-workflow/20261015-paper-self-absorption/implementation.md](.ai-workflow/20261015-paper-self-absorption/implementation.md)，最终验收由原 plan 负责。
+已复制并连接真实 Python 后端。local 使用本地谱线库及 LTE/Saha 计算；client 在线获取 NIST 谱线跃迁与强度，由本地引擎进行线型展宽；server 由 NIST LIBS 在线服务生成光谱并进行展宽，未承诺连续谱能力。默认空谱，真实进度，失败/取消保留上一成功结果，无合成谱回退。当前源码的高级模拟默认使用 NIST 逐线自吸收（`nist-lines-self-absorption-1`），可选保留离线论文模型（`paper-eq7-stark-sa-1`），提供名义薄谱、基体薄谱、自吸收修正谱的共同尺度对照与可携带导出。参数化基体仍需实验标定。完整公式、单位、真实数据来源与适用边界见 [论文自吸收报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 和 [功能与原理](PROJECT_FUNCTIONS_AND_PRINCIPLES.md)。本轮 Vue 实施与自测见 [.ai-workflow/20261015-paper-self-absorption/implementation.md](.ai-workflow/20261015-paper-self-absorption/implementation.md)，最终验收由原 plan 负责。
 
-默认高级数据为论文 Table 1 的 Mg、Ca、Zn 共31条谱线及 NIST I/II/III 能级快照。示例为 Mg 100%、284.5–286 nm；缺少必要 Stark/三态原子数据的元素（如默认数据中的 Fe）会明确拒绝。光程 L 默认0.01 m，总数密度按 `柱密度[cm⁻²] / (100 × L[m])` 换算为 cm⁻³，基体产额倍率再作用于有效数密度；Ne单独指定。逐线 SA 与吸收展宽先计算，仪器 Gaussian 在其后应用，R不进入光学厚度。旧热与附加 Gaussian/Lorentz 草稿字段不用于本模型。高级谱沿用 photon 强度约定，与论文能量式按单线光子能量换算；不声明标定探测器计数。
+高级NIST入口在线获取线强、跃迁及全部电离阶段能级，默认Mg100%、真空285.27–285.33nm、输出步长0.001nm；任意元素或宽波段需要完整逐线Stark系数，不保证全部元素可算。仪器w=λ/R为高斯1/e半宽，FWHM=2√ln2·λ/R；输出为NIST相对光子强度，不是绝对辐亮度。默认总密度由Ne与平均电荷按电荷守恒反推，也可指定数密度，L=0可作薄谱极限。Stark CSV最大2MB、支持BOM；W为stark_width_nm，内禀FWHM=2W·Ne/Ne_ref。缺失清单保留双精度，填W后可重导入，错误/歧义不得跳线发布部分谱。失败清单和成功三谱/诊断分别绑定原job，刷新/重启后仍可导出；所有新增自吸收入口仅在高级页。新入口不使用旧5%限制；未带model的旧请求继续旧离线语义。
 
-**2026-10-15 本轮交付为源码、Python 后端和 Markdown 报告。** 后端已在 Python 3.10 环境验证，Vue 类型检查与静态构建已通过；未重打包或更新 `dist-desktop/` 中的旧 EXE/NSIS。此前桌面产物和历史验收记录不能代表本轮论文引擎已进入可执行文件。Tauri 资源白名单与收集脚本均已包含 `backend/source/simLIBS/data/*.json`，实际安装包资源路径仍须在具备 Rust/Cargo 的环境重新构建后验收。
+离线选择保留论文 Table 1 的 Mg、Ca、Zn 共31条谱线及 NIST I/II/III 能级快照。示例为 Mg 100%、284.5–286 nm；缺少必要 Stark/三态原子数据的元素（如默认数据中的 Fe）会明确拒绝。光程 L 默认0.01 m，总数密度按 `柱密度[cm⁻²] / (100 × L[m])` 换算为 cm⁻³，基体产额倍率再作用于有效数密度；Ne单独指定。逐线 SA 与吸收展宽先计算，仪器 Gaussian 在其后应用，R不进入光学厚度。旧热与附加 Gaussian/Lorentz 草稿字段不用于本模型。高级谱沿用 photon 强度约定，与论文能量式按单线光子能量换算；不声明标定探测器计数。
+
+2026-10-16新增NIST高级入口交付源码及前端dist，未打包Windows。46项后端与8项SSR/组件/脚本检查通过，其中数学和HTTP补数闭环使用捕获夹具；另一次真实NIST窄带模拟成功得到1条跃迁、61个节点。GUI未测，未重试受拒浏览器启动。实现与冻结见 [.ai-workflow/20261016-advanced-nist/](.ai-workflow/20261016-advanced-nist/)，独立review尚待完成。
+
+2026-10-17 高级模拟新增三卡一行布局（Te / Ne / R 方卡）、独立展宽机制（自吸收、Stark、仪器响应 3 个独立布尔开关，覆盖 6 种有效物理分支）及分元素光谱视图（元素组分与三谱对照双视图切换，默认元素组分，支持元素图例独立显示/隐藏与共同尺度展示）。后端更新源库至 ee7b66a 字节，无 Stark 时渲染纯棒状投影或仪器高斯、无需原子能级与 Stark 数据；纯 Stark 跳过全能级布居与 Saha；开启自吸收严格依赖 Stark。交付源码与前端 dist，GUI 未测。见 [.ai-workflow/20261017-advanced-broadening/](.ai-workflow/20261017-advanced-broadening/)。
+
+2026-10-18 高级参数栏按实验参数、模型与展宽、元素组成与可选基体三组组织，Te / Ne / R 沿用单次模拟的同排方卡。模型下直接显示 Stark、自吸收和仪器展宽：NIST 关闭 Stark 时同步关闭自吸收，开启自吸收时自动开启 Stark，仪器展宽独立；离线论文模型仍为固定 Stark。隐藏细项保留草稿，参数区保持整页自然滚动。本轮已重新构建 Windows EXE、中文 NSIS 并同步 backend 到 `dist-desktop/` 根目录，替换早于 10/17 前端的旧产物。code 自测与冻结记录见 [.ai-workflow/20261018-advanced-panel/implementation.md](.ai-workflow/20261018-advanced-panel/implementation.md)；新版 GUI 由主会话另行取证，安装包未执行，最终审查由独立 review 完成。
+
+**2026-10-15 历史交付为源码、Python 后端和 Markdown 报告。** 后端已在 Python 3.10 环境验证，Vue 类型检查与静态构建已通过；未重打包或更新 `dist-desktop/` 中的旧 EXE/NSIS。此前桌面产物和历史验收记录不能代表本轮论文引擎已进入可执行文件。Tauri 资源白名单与收集脚本均已包含 `backend/source/simLIBS/data/*.json`，实际安装包资源路径仍须在具备 Rust/Cargo 的环境重新构建后验收。
 
 顶栏两个相邻独立按钮分别选择日间/夜间/跟随系统与五种配色，菜单互斥并支持键盘操作。顶栏配色即时保存，仅更新颜色字段；设置页其它未保存配置保留。启动时同一窗口先显示界面准备动画，偏好、字体与首次布局就绪后进入主页；减少动态时改为短静态显示。载入失败或超时提供重新载入，不表示计算引擎加载。
 
@@ -36,7 +44,7 @@ Windows原生标题栏通过现有Tauri窗口接口同步日间/夜间；跟随�
 | 单次模拟 | Te / 实际 Ne / 整数 R 精确输入，波长、模式/高级参数，元素候选与配比校验，真实运行/取消，完成图谱快照 |
 | 批量模拟 | 独立草稿，固定/带种子的随机/CSV 模板，CSV 结构和比例校验，样本预览/统计，真实运行/取消 |
 | 参数扫描 | Te / Ne / R 轴，包含两端的逐帧数据、当前值、时间轴、播放/暂停/前后帧；离开该功能停止播放，真实后台任务继续运行 |
-| 高级模拟 | 论文 Eq.7 / Stark 逐线自吸收、三态 Saha 布居、光程/柱密度和参数化基体、可选仪器卷积、共同尺度三谱、任务取消/历史及三谱导出 |
+| 高级模拟 | NIST全阶段逐线自吸收/旧离线选择、三卡一行(Te/Ne/R)、独立展宽机制(自吸收/Stark/仪器)、元素组分与三谱对照双视图、Stark CSV补数闭环、光程/密度及未标定基体、分页诊断与完整导出、任务取消/历史 |
 | 任务记录 | 真实持久化历史、刷新、详情、重开结果、取消及合法批量续跑 |
 | 设置 | 日间/夜间/跟随系统，五种主题，减少动态，连接/环境检测与受控 Python 重启，本地保存/放弃更改 |
 

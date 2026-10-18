@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "deliveryDirectory": "dist-desktop",
-  "collectedAt": "2026-10-15T17:23:55.122Z",
+  "collectedAt": "2026-10-17T23:49:43.804Z",
   "runtime": "Windows x64 / system WebView2 / external Python 3.11",
   "frontend": "embedded static dist",
   "scientificSource": "real Python / local LTE-Saha / NIST",
@@ -11,15 +11,15 @@
       "kind": "windows-x64-application",
       "file": "SimLIBS.exe",
       "source": "src-tauri\\target\\release\\simlibs-vue.exe",
-      "bytes": 5117440,
-      "sha256": "4b3daf46f1b988de6409c656acc4867c608cf75397c9d8dc3af54f82ac3b362a"
+      "bytes": 5120000,
+      "sha256": "05601a804704569741166e2fd4e9f728f9ed32390d6719535dff62134f3d84b9"
     },
     {
       "kind": "nsis-installer",
       "file": "SimLIBS-Setup.exe",
       "source": "src-tauri\\target\\release\\bundle\\nsis\\SimLIBS_0.1.0_x64-setup.exe",
-      "bytes": 1752216,
-      "sha256": "4b21edae550e28ed6900a2c3151d2f9deec51502b831b51766068bb6a49cbd79"
+      "bytes": 1769367,
+      "sha256": "f2d2b6804767f4d92412cc67f9f6a3c47dbfbad555e9b653089f7c8038d82997"
     },
     {
       "kind": "python-backend-resource",
@@ -30,8 +30,20 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/simlibs_ui/advanced.py",
-      "bytes": 11312,
-      "sha256": "b693f0af24f29971745d5ecc54d12e639378fb5576269d9617767ae9cc0bd4e9"
+      "bytes": 12042,
+      "sha256": "fec9846ff627bbc88e71aca75468d95c08ffe84faaf7c3481d3276ffca2e20e0"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/advanced_nist.py",
+      "bytes": 18674,
+      "sha256": "009cfb337ab5ade4a73979a804ca3d260b6d0c88bd4fd66d4b6367584d8345f5"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/advanced_nist_render.py",
+      "bytes": 2324,
+      "sha256": "00cdbf48bc8eaa0e8628b1a4c4f606521e1c4ffb86c647d614d4255fa8f589f0"
     },
     {
       "kind": "python-backend-resource",
@@ -156,8 +168,8 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/web/real_backend.py",
-      "bytes": 42759,
-      "sha256": "d3a85b89455d6dbc49804025b91823aec271685eb9b106517a140aacf32fe76a"
+      "bytes": 46730,
+      "sha256": "123dacf1dd53be9bea0b5590cfd98e6fc138d5c737efcdae5c338e184a1f857a"
     },
     {
       "kind": "python-backend-resource",
@@ -176,6 +188,18 @@
       "file": "backend/source/simLIBS/animation.py",
       "bytes": 4041,
       "sha256": "f4f19f24e6728098785fc69ef9a68187ebb2dcac0468d118c05fa6039d24cd52"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/source/simLIBS/nist_lines.py",
+      "bytes": 7734,
+      "sha256": "8da09d3016524ad992f3969347b2fee8ac387993a0350e6e8908525533b70b3a"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/source/simLIBS/nist_self_absorption.py",
+      "bytes": 26092,
+      "sha256": "05f506c5d1a3357ba2f63120b5623bfb7cfbd97ba16444b8e5e713caee3e4efb"
     },
     {
       "kind": "python-backend-resource",
@@ -600,8 +624,8 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/README.md",
-      "bytes": 1579,
-      "sha256": "cc5316f81b78e28f20abf8e3d0cb19e1bcd031034cfbadc0f09662604bbdc732"
+      "bytes": 3164,
+      "sha256": "53da9cabbf5427826116bc05e28a0b120ff51cf939fa474cd3fc2fb4b60c33d1"
     }
   ]
 }

@@ -628,3 +628,14 @@ body .runtime-dialog[open]{box-shadow:var(--shadow-overlay)}
 .empty-state h3{margin-bottom:8px;letter-spacing:.015em}
 .empty-state p{max-width:480px}
 .empty-state>.hint{margin-top:8px}
+
+/* Advanced controls reuse the single-run cards and natural page flow. */
+.advanced-parameters .advanced-switches{margin-top:12px;padding:3px 10px;border:1px solid color-mix(in srgb,var(--accent) 18%,var(--border));border-radius:8px;background:color-mix(in srgb,var(--accent) 3%,var(--panel-soft))}
+.advanced-parameters .advanced-switches>.switch-with-hint+.switch-with-hint{border-top:1px solid var(--border)}
+.advanced-parameters .advanced-switches .switch{min-height:43px;margin:0;padding:8px 0;line-height:1.5}
+.advanced-parameters .advanced-subpanel{min-width:0;margin-top:14px;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--panel-soft)}
+.advanced-parameters .advanced-subpanel>h3{margin:0 0 10px}
+.advanced-parameters .advanced-help{margin-top:10px;overflow-wrap:anywhere;color:var(--muted);font-size:var(--text-aux)}
+.advanced-parameters .advanced-help>summary{width:fit-content;max-width:100%;padding:3px 0;cursor:pointer;color:var(--accent-text)}
+.advanced-parameters .advanced-help>summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+.advanced-parameters .backend-action{flex-wrap:wrap;overflow-wrap:anywhere}
