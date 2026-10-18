@@ -135,7 +135,7 @@ class CorePaperIntegrationTests(unittest.TestCase):
         with patch.object(simulation.requests, 'get', return_value=nist_response()) as fetch:
             with self.assertRaises(MissingStarkDataError) as raised:
                 SimulatedLIBS(elements=['Mg'], percentages=[100], low_w=280, upper_w=290,
-                              self_absorption=True)
+                              self_absorption=True, self_absorption_config={'stark_source': 'local'})
         fetch.assert_called_once()
         self.assertEqual(len(raised.exception.missing_lines), 18)
         self.assertTrue((raised.exception.missing_lines.element == 'Mg').all())

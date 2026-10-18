@@ -1,0 +1,363 @@
+[
+  {
+    "element": "Si",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": null
+      },
+      {
+        "charge": 1,
+        "tables": 36,
+        "status": null
+      }
+    ],
+    "matched": [
+      {
+        "charge": 1,
+        "wave_nm": 385.7111,
+        "W_nm": 0.026282983683693653,
+        "method": "SCP"
+      }
+    ]
+  },
+  {
+    "element": "Al",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 7,
+        "status": null
+      }
+    ],
+    "matched": [
+      {
+        "charge": 0,
+        "wave_nm": 308.30462,
+        "W_nm": 0.02129462610123777,
+        "method": "SCP"
+      },
+      {
+        "charge": 0,
+        "wave_nm": 309.36062,
+        "W_nm": 0.021440751945421894,
+        "method": "SCP"
+      },
+      {
+        "charge": 0,
+        "wave_nm": 309.37347,
+        "W_nm": 0.0214425331636296,
+        "method": "SCP"
+      }
+    ]
+  },
+  {
+    "element": "Na",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 9,
+        "status": null
+      }
+    ],
+    "matched": [
+      {
+        "charge": 0,
+        "wave_nm": 818.55053,
+        "W_nm": 0.19488501770932423,
+        "method": "SCP"
+      },
+      {
+        "charge": 0,
+        "wave_nm": 819.70433,
+        "W_nm": 0.19543481103638244,
+        "method": "SCP"
+      },
+      {
+        "charge": 0,
+        "wave_nm": 819.70769,
+        "W_nm": 0.19543641322948285,
+        "method": "SCP"
+      }
+    ]
+  },
+  {
+    "element": "K",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 8,
+        "status": null
+      }
+    ],
+    "matched": [
+      {
+        "charge": 0,
+        "wave_nm": 693.81995,
+        "W_nm": 0.46911488285142044,
+        "method": "SCP"
+      },
+      {
+        "charge": 0,
+        "wave_nm": 696.60921,
+        "W_nm": 0.47289428852464155,
+        "method": "SCP"
+      },
+      {
+        "charge": 0,
+        "wave_nm": 696.66113,
+        "W_nm": 0.47296478310350515,
+        "method": "SCP"
+      }
+    ]
+  },
+  {
+    "element": "Cu",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": null
+      },
+      {
+        "charge": 1,
+        "tables": 0,
+        "status": "species not available"
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "Fe",
+    "stages": [
+      {
+        "charge": 0,
+        "error": "StarkDataAccessError: Stark data request failed: https://stark-b.obspm.fr/index.php: HTTPSConnectionPool(host='stark-b.obspm.fr', port=443): Max retries exceeded with url: /index.php (Caused by SSLError(SSLEOFError(8, '[SS"
+      },
+      {
+        "charge": 1,
+        "tables": 9,
+        "status": null
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "Li",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 9,
+        "status": null
+      }
+    ],
+    "matched": [
+      {
+        "charge": 0,
+        "wave_nm": 610.522,
+        "W_nm": 0.18587473445670874,
+        "method": "SCP"
+      },
+      {
+        "charge": 0,
+        "wave_nm": 610.533,
+        "W_nm": 0.18588143246431005,
+        "method": "SCP"
+      },
+      {
+        "charge": 0,
+        "wave_nm": 610.535,
+        "W_nm": 0.1858826502968394,
+        "method": "SCP"
+      }
+    ]
+  },
+  {
+    "element": "C",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": "species not available"
+      },
+      {
+        "charge": 1,
+        "tables": 149,
+        "status": null
+      },
+      {
+        "charge": 1,
+        "error": "ValueError: Unrecognised NIST identity export; expected vacuum wavelengths and cm-1 energies"
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "Ti",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": "species not available"
+      },
+      {
+        "charge": 1,
+        "tables": 138,
+        "status": null
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "Ni",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": "species not available"
+      },
+      {
+        "charge": 1,
+        "tables": 2,
+        "status": null
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "Cr",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": null
+      },
+      {
+        "charge": 1,
+        "tables": 9,
+        "status": null
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "Mn",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": "species not available"
+      },
+      {
+        "charge": 1,
+        "tables": 15,
+        "status": null
+      },
+      {
+        "charge": 1,
+        "error": "StarkDataAccessError: NIST Stark identity request failed: HTTPSConnectionPool(host='physics.nist.gov', port=443): Max retries exceeded with url: /cgi-bin/ASD/lines1.pl?spectra=Mn+II&output_type=0&low_w=300.69&upp_w=306.69&"
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "Mo",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": "species not available"
+      },
+      {
+        "charge": 1,
+        "error": "StarkDataAccessError: Stark data request failed: https://stark-b.obspm.fr/index.php: HTTPSConnectionPool(host='stark-b.obspm.fr', port=443): Max retries exceeded with url: /index.php (Caused by SSLError(SSLEOFError(8, '[SS"
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "Pb",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": "species not available"
+      },
+      {
+        "charge": 1,
+        "tables": 0,
+        "status": "species not available"
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "Y",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": "species not available"
+      },
+      {
+        "charge": 1,
+        "tables": 6,
+        "status": null
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "La",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": "species not available"
+      },
+      {
+        "charge": 1,
+        "tables": 3,
+        "status": null
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "Eu",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": "species not available"
+      },
+      {
+        "charge": 1,
+        "tables": 7,
+        "status": null
+      },
+      {
+        "charge": 1,
+        "error": "ValueError: Unrecognised NIST identity export; expected vacuum wavelengths and cm-1 energies"
+      }
+    ],
+    "matched": []
+  },
+  {
+    "element": "Lu",
+    "stages": [
+      {
+        "charge": 0,
+        "tables": 0,
+        "status": "species not available"
+      },
+      {
+        "charge": 1,
+        "tables": 0,
+        "status": "species not available"
+      }
+    ],
+    "matched": []
+  }
+]

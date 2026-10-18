@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>NIST: Atomic Spectra Database Lines Form</title>
+<style>
+   P.top {border-width:1px; border: solid; border-color:brown; text-align:justify; padding:3px}
+</style>
+<script>
+<!--
+var showGraphical = null;
+var showAdvanced = null;
+var graph_shown = null;
+var advanced_shown = null;
+var outputType = null;
+var outputUnit = null;
+//var lowWib = null;
+//var uppWib = null;
+var prev_int_checked = null;
+var prev_or_checked = null;
+var prev_wn_checked = null;
+var prev_J_checked = null;
+var prev_g_checked = null;
+var prev_noJS_checked = null;
+var linesAll = null;
+var linesTP = null;
+var plotOut = null;
+var plot_selected = 0;
+var showAvRb = null;
+var lteTemp = null;
+var lteDoppler = null;
+var lteEden = null;
+var lteIonTemp = null;
+var linesClass = null;
+var linesObs = null;
+var linesDiagOnly = null;
+var outputOrdWL = null;
+var outputOrdMult = null;
+var gBox = null;
+var prev_lines_all_checked = true;
+var prev_lines_tp_checked = false;
+var prev_lines_class_checked = false;
+var prev_lines_obs_checked = false;
+var prev_lines_diag_only_checked = false;
+var prev_output_type = 0;
+var prev_unit = 1;
+var multDisabledText = "<font size='-1' color=brown>(Disabled for multiplet ordering)</font>";
+var orderOut = null;
+var unitChoices = ["&Aring;","nm","&micro;m","cm<sup>-1</sup>","eV","Ry","Hartree","GHz"];
+var unitMenuOptions = ["&Aring;","nm","&micro;m","cm-1","eV","Ry","Hartree","GHz"];
+function setFocus(val) {
+  document.lines.spectra.focus();
+
+  var de = document.getElementById("de");
+  var idsSp = document.getElementById("ids_sp");
+  var dom = document.domain;
+  var href = document.location.href;
+  if ( href.match(/^http:\/\/ekron\.nist\.gov\/ASD\/DataEntry\/.*/i) ) {
+    de.value = 1;
+  }
+  if ( dom.match(/^ekron\.nist\.gov/i) ) {
+    idsSp.style.display="inline";
+  //  var tabOpt = document.getElementById("tab");
+  //  tabOpt.style.display="inline";
+  //  tabOpt.disabled = false;
+  //  var csvOpt = document.getElementById("csv");
+  //  csvOpt.style.display="inline";
+  //  csvOpt.disabled = false;
+  }
+
+  showGraphical = document.getElementById("show_graphical");
+  showAdvanced = document.getElementById("show_advanced");
+  graph_shown = document.getElementById("graph_shown");
+  advanced_shown = document.getElementById("advanced_shown");
+  if ( (showAdvanced.style.display != "table") && advanced_shown.checked ) {
+    toggleAdvanced();
+  }
+  if ( (showGraphical.style.display != "table") && graph_shown.checked ) {
+    toggleGraphical();
+  }
+
+  outputType = document.getElementsByName("output_type").item(0); // value = Wavelength (0) or Wavenumber (1) or Photon Energy or Frequency
+  outputUnit = document.getElementsByName("unit").item(0);
+  prev_output_type = outputType.value;
+  prev_unit = outputUnit.value;
+  lowLimitUnits = document.getElementById("low_lim_units");
+  uppLimitUnits = document.getElementById("upp_lim_units");
+  //lowWib = document.getElementById("low_w");
+  //uppWib = document.getElementById("upp_w");
+  prev_or_checked = document.getElementById("show_diff_obs_calc").checked;
+  prev_wn_checked = document.getElementById("show_wn").checked;
+  prev_noJS_checked = document.getElementById("remove_js").checked;
+  orderOut = document.getElementsByName("order_out"); // Wavelength (0) or Multiplet (1)
+  linesAll = document.getElementById("lines_all");
+  linesTP = document.getElementById("lines_tp");
+  plotOut = document.getElementsByName("plot_out");
+  showAvRb = document.getElementsByName("show_av");
+  lteTemp = document.getElementsByName("temp").item(0);
+  lteDoppler = document.getElementsByName("doppler").item(0);
+  lteEden = document.getElementsByName("eden").item(0);
+  lteIonTemp = document.getElementsByName("iontemp").item(0);
+  linesClass = document.getElementById("lines_class");
+  linesObs = document.getElementById("lines_obs");
+  linesDiagOnly = document.getElementById("diag_out_only");
+  outputOrdWL = document.getElementById("output_ord_wl");
+  outputOrdMult = document.getElementById("output_ord_mult");
+  gBox = document.getElementById("g_out");
+  prev_lines_all_checked = linesAll.checked;
+  prev_lines_tp_checked = linesTP.checked;
+  prev_lines_class_checked = linesClass.checked;
+  prev_lines_obs_checked = linesObs.checked;
+  prev_lines_diag_only_checked = linesDiagOnly.checked;
+  prev_g_checked = gBox.checked;
+  var plot_checked = 0;
+  for ( var i = 0; i<=1; i++ ) {
+    if (orderOut.item(i).checked) {
+      setMult(i);
+    }
+  }
+  for ( var i = 1; i<=3; i++ ) {
+    if (plotOut.item(i).checked && (val != 0) ) {
+      if ( plotOut.item(i).value > 0 ) {
+        //alert("plotOut shecked item value=" + plotOut.item(i).value);
+        plot_checked = plotOut.item(i).value;
+      } 
+    }
+  }
+  setPlot(plot_checked);
+  plot_selected = plot_checked;
+  if ( val == 0 ) {
+    setMult(0);
+    setOutputType(0);
+  } else {
+    setOutputType(prev_output_type);
+  }
+  setUnit(prev_unit);
+  //setUnit(outputUnit.value);
+}
+
+function setOutputType(val) {
+  //if (val != prev_output_type) {
+    outputUnit.innerHTML = "";
+    for ( var i = 0; i <= 7; i++ ) {
+      var selected = "";
+      if ((val == 0) && (i == 1) || (val == 1) && (i == 3) || 
+        (val == 2) && (i == 4) || (val == 3) && (i == 7)
+      ) {
+        selected = " selected=\"selected\"";
+      }
+      if ((val == 0) && (i < 3) || (val == 1) && (i == 3) || (val == 2) && (i >= 4) && (i <= 6) ||
+        (val == 3) && (i == 7)
+      ) {
+        outputUnit.innerHTML += "<option" + selected + " value=\"" + i + "\">" + 
+          unitMenuOptions[i] + "</option>\n";
+      }
+	  setUnit(outputUnit.value);
+    }
+    //outputOrdMult.disabled = (val > 0) || (plot_selected > 0);
+    set_wn_cb(val);
+    for ( var i = 1; i <= 3; i++ ) {
+      var sp = document.getElementById("output_type_span" + i);
+      if (val == 0) {
+        sp.innerHTML = "Wavelength";
+      } else if (val == 1) {
+        sp.innerHTML = "Wavenumber";
+      } else if (val == 2) {
+        sp.innerHTML = "Photon Energy";
+      } else if (val == 3) {
+        sp.innerHTML = "Frequency";
+      }
+    }
+    for ( var i = 1; i <= 2; i++ ) {
+      var avDiv = document.getElementById("show_av_div" + i);
+      if (val == 0) {
+        avDiv.style.display = "block";
+      } else {
+        avDiv.style.display = "none";
+      }
+    }
+    var showWnDiv = document.getElementById("show_wn_div");
+    if (val == 0) {
+      showWnDiv.style.display = "block";
+    } else {
+      showWnDiv.style.display = "none";
+    }
+    //setUnit(outputUnit.value);
+    //outputType.value = val;
+    prev_output_type = outputType.value;
+  //}
+}  // setOutputType(val)
+function setIonTemp() {
+  lteIonTemp.disabled = !lteDoppler.checked;
+}  // setTemp()
+function setSpImgText() {
+  var spImgText = document.getElementById("dfm_text6");
+  var lower_values = ["3800", "380", "0.38", "12817", "1.5891", "0.1168", "0.0584", "384244"];
+  var upper_values = ["7800", "780", "0.78", "26308", "3.2618", "0.2397", "0.1199", "788704"];
+  var low = lower_values[outputUnit.value];
+  var upp = upper_values[outputUnit.value];
+  var quantity = "&lambda;";
+  if (outputUnit.value == 3) {
+    quantity = "&sigma;";
+  } else if (outputUnit.value > 3 && outputUnit.value < 7) {
+    quantity = "E";
+  } else if (outputUnit.value == 7) {
+    quantity = "&nu;";
+  }
+//  spImgText.innerHTML = "available for single atoms/ions and " + low + "&nbsp;" + unitChoices[outputUnit.value] +
+//    " &lt; <i>" + quantity + "</i> &lt; " + upp + "&nbsp;" + unitChoices[outputUnit.value];
+}
+function setSpans( txt ) {
+  for ( var i = 1; i <= 5; i++ ) {
+    var sp = document.getElementById("dfm_text" + i);
+    sp.innerHTML = txt;
+  }
+  var spImgText = document.getElementById("dfm_text6");
+  if (spImgText != null) {
+    if (txt == "") {
+      spImgText.style.visibility = "visible";
+    } else {
+      spImgText.style.visibility = "hidden";
+    }
+  }
+}  // setSpans
+function setMult(val) {
+  var intBox = document.getElementsByName("intens_out").item(0);
+  var orDiffBox = document.getElementsByName("show_diff_obs_calc").item(0);
+  var wnBox = document.getElementsByName("show_wn").item(0);
+  var JBox = document.getElementsByName("J_out").item(0);
+  //alert("Mult val=" + val);
+  if ( val == 0 ) {
+    intBox.disabled = false;
+    setSpans("");
+    for ( var i = 0; i <= 3; i++ ) {
+      plotOut.item(i).disabled = false;
+    }
+    orDiffBox.disabled = false;
+    wnBox.disabled = false;
+    JBox.disabled = false;
+    if ( prev_int_checked == null) {
+      prev_int_checked = true;
+    }
+    if ( prev_or_checked == null) {
+      prev_or_checked = false;
+    }
+    if ( prev_wn_checked == null) {
+      prev_wn_checked = false;
+    }
+    if ( prev_J_checked == null) {
+      prev_J_checked = true;
+    }
+    if ( prev_g_checked == null) {
+      prev_g_checked = false;
+    }
+    intBox.checked = prev_int_checked;
+    orDiffBox.checked = prev_or_checked;
+    wnBox.checked = prev_wn_checked;
+    JBox.checked = prev_J_checked;
+    gBox.checked = prev_g_checked;
+    //outputOrdWL.checked = true;
+    //outputOrdMult.checked = false;
+    linesTP.disabled = false;
+    linesAll.disabled = false;
+    linesClass.disabled = false;
+    linesObs.disabled = false;
+    linesDiagOnly.disabled = false;
+    linesAll.checked = prev_lines_all_checked;
+    linesTP.checked = prev_lines_tp_checked;
+    linesClass.checked = prev_lines_class_checked;
+    linesObs.checked = prev_lines_obs_checked;
+    linesDiagOnly.checked = prev_lines_diag_only_checked;
+    //outputType.disabled = false;
+  } else {
+    for ( var i = 0; i <= 3; i++ ) {
+      plotOut.item(i).disabled = true;
+    }
+    prev_output_type = outputType.value;
+    //var prev_unit_saved = outputUnit.value;
+    prev_int_checked = intBox.checked;
+    intBox.checked = false;
+    intBox.disabled = true;
+    setSpans(multDisabledText);
+    prev_or_checked = orDiffBox.checked;
+    orDiffBox.checked = false;
+    orDiffBox.disabled = true;
+    prev_wn_checked = wnBox.checked;
+    wnBox.checked = false;
+    wnBox.disabled = true;
+    prev_J_checked = JBox.checked;
+    JBox.checked = false;
+    JBox.disabled = true;
+    prev_g_checked = gBox.checked;
+    gBox.checked = true;
+    prev_lines_all_checked = linesAll.checked;
+    prev_lines_tp_checked = linesTP.checked;
+    prev_lines_class_checked = linesClass.checked;
+    prev_lines_obs_checked = linesObs.checked;
+    prev_lines_diag_only_checked = linesDiagOnly.checked;
+    linesTP.disabled = true;
+    linesAll.disabled = true;
+    linesClass.checked = true;
+    linesObs.disabled = true;
+    linesDiagOnly.disabled = true;
+    //setOutputType(0);
+    //prev_unit = prev_unit_saved;
+    //setUnit(prev_unit);
+    //outputType.disabled = true;
+  }
+}
+function setG() {
+  prev_g_checked = !gBox.checked;
+}
+function setPlot(val) {
+  //alert("setPlot val=" + val);
+  prev_lines_all_checked = linesAll.checked;
+  prev_lines_tp_checked = linesTP.checked;
+  prev_lines_class_checked = linesClass.checked;
+  prev_lines_obs_checked = linesObs.checked;
+  prev_lines_diag_only_checked = linesDiagOnly.checked;
+  plot_selected = val;
+  if (val == 1) {
+    setMult(0);
+    setSpans("");
+    linesTP.disabled = false;
+    linesTP.checked = true;
+    linesAll.disabled = true;
+    linesClass.disabled = true;
+    linesObs.disabled = true;
+    linesDiagOnly.disabled = true;
+    outputOrdMult.disabled = true;
+    lteTemp.disabled = false;
+    lteDoppler.disabled = false;
+    lteEden.disabled = false;
+  } 
+  if (val == 0) {
+    lteTemp.disabled = true;
+    lteDoppler.disabled = true;
+    lteEden.disabled = true;
+    linesAll.disabled = false;
+    linesAll.checked = true;
+    linesTP.disabled = false;
+    linesClass.disabled = false;
+    linesObs.disabled = false;
+    linesDiagOnly.disabled = false;
+    outputOrdMult.disabled = false;
+  }
+  if (val == 2) {
+    setMult(0);
+    setSpans("");
+    outputOrdMult.disabled = true;
+    lteTemp.disabled = true;
+    lteDoppler.disabled = true;
+    lteEden.disabled = true;
+    linesAll.disabled = (val == 3);
+    linesTP.disabled = (val == 3);
+    linesClass.disabled = (val == 3);
+    linesObs.disabled = false;
+    linesDiagOnly.disabled = (val == 3);
+    linesAll.checked = true;
+  }
+  if (val == 3) {
+    setMult(0);
+    setSpans("");
+    outputOrdMult.disabled = true;
+    lteTemp.disabled = true;
+    lteDoppler.disabled = true;
+    lteEden.disabled = true;
+    //linesAll.disabled = (val == 3);
+    linesTP.disabled = (val == 3);
+    linesClass.disabled = (val == 3);
+    //linesObs.disabled = false;
+    linesDiagOnly.disabled = (val == 3);
+    linesAll.checked = true;
+  }
+  lteIonTemp.disabled = !lteDoppler.checked;
+}  // setPlot()
+function setUnit(val) {
+  var unit_index = outputUnit.value;
+  lowLimitUnits.innerHTML = unitChoices[unit_index];
+  uppLimitUnits.innerHTML = unitChoices[unit_index];
+  var showAv0 = document.getElementById("show_av0");
+  var showAv1 = document.getElementById("show_av1");
+  var showAv2 = document.getElementById("show_av2");
+  var showAv4 = document.getElementById("show_av4");
+  var tt = " <span style=\"font-family:monospace\">&nbsp;";
+  if (val <= 2) { //Wavelength units
+    for ( var i = 0; i <= 4; i++ ) {
+      showAvRb.item(i).disabled = false;
+      if (i == 2) {
+        showAvRb.item(i).checked = true;
+      }
+    }
+  } else {  //Energy units
+    for ( var i = 0; i <= 4; i++ ) {
+      showAvRb.item(i).disabled = (i != 5);
+      showAvRb.item(i).checked = (i == 5);
+    }
+  }
+  if ( val == 0 ) {
+    showAv0.innerHTML = "Vacuum (&lt; 2,000&nbsp;&Aring;)"+tt+"&nbsp;</span>Air (2,000&nbsp;-&nbsp;10,000&nbsp;&Aring;) &nbsp;Wavenumber (&gt;&nbsp;10,000&nbsp;&Aring;)";
+    showAv1.innerHTML = "Vacuum (&lt;&nbsp;10,000&nbsp;&Aring;)"+tt+"</span>Wavenumber (&gt;&nbsp;10,000&nbsp;&Aring;)";
+    showAv2.innerHTML = "Vacuum (&lt;&nbsp;2,000&nbsp;&Aring;)"+tt+"&nbsp;</span>Air (2,000&nbsp;-&nbsp;20,000&nbsp;&Aring;) &nbsp; Vacuum (&gt;&nbsp;20,000&nbsp;&Aring;)";
+    showAv4.innerHTML = "Vacuum (&lt;&nbsp;1,850&nbsp;&Aring;)"+tt+"&nbsp;</span>Air (&gt;&nbsp;1,850&nbsp;&Aring;";
+  } else if ( val == 1 ) {
+    showAv0.innerHTML = "Vacuum (&lt; 200&nbsp;nm)"+tt+"&nbsp;</span>Air (200&nbsp;-&nbsp;1,000&nbsp;nm) &nbsp;Wavenumber (&gt;&nbsp;1,000&nbsp;nm)";
+    showAv1.innerHTML = "Vacuum (&lt;&nbsp;1,000&nbsp;nm)"+tt+"</span>Wavenumber (&gt;&nbsp;1,000&nbsp;nm)";
+    showAv2.innerHTML = "Vacuum (&lt;&nbsp;200&nbsp;nm)"+tt+"&nbsp;</span>Air (200&nbsp;-&nbsp;2,000&nbsp;nm) &nbsp; Vacuum (&gt;&nbsp;2,000&nbsp;nm)";
+    showAv4.innerHTML = "Vacuum (&lt;&nbsp;185&nbsp;nm)"+tt+"&nbsp;</span>Air (&gt;&nbsp;185&nbsp;nm";
+  } else if ( val == 2 ) {
+    showAv0.innerHTML = "Vacuum (&lt; 0.2&nbsp;&mu;)"+tt+"&nbsp;</span>Air (0.2&nbsp;-&nbsp;1.0&nbsp;&mu;) &nbsp;Wavenumber (&gt;&nbsp;1.0&nbsp;&mu;)";
+    showAv1.innerHTML = "Vacuum (&lt;&nbsp;1.0&nbsp;&mu;)"+tt+"</span>Wavenumber (&gt;&nbsp;1.0&nbsp;&mu;)";
+    showAv2.innerHTML = "Vacuum (&lt;&nbsp;0.2&nbsp;&mu;)"+tt+"&nbsp;</span>Air (0.2&nbsp;-&nbsp;2.0&nbsp;&mu;) &nbsp; Vacuum (&gt;&nbsp;2.0&nbsp;&mu;)";
+    showAv4.innerHTML = "Vacuum (&lt;&nbsp;0.185&nbsp;&mu;)"+tt+"&nbsp;</span>Air (&gt;&nbsp;0.185&nbsp;&mu;";
+  }
+  prev_unit = outputUnit.value;
+  setSpImgText();
+}  // setUnit()
+function set_wn_cb(val) {
+  var showWn = document.getElementById("show_wn");
+  if ( val == 1 ) {
+    prev_wn_checked = showWn.checked;
+    showWn.checked = false;
+    showWn.disabled = true;
+  } else {
+    showWn.checked = prev_wn_checked;
+    showWn.disabled = false;
+  }
+}  // set_wn_cb()
+function toggleGraphical() {
+  var graphicalOptions = document.getElementById("graphical_options");
+  if (graphicalOptions.style.display == "table") {
+    showGraphical.innerHTML = "Show Graphical Options";
+    graphicalOptions.style.display = "none";
+    graph_shown.checked = false;
+  } else {
+    showGraphical.innerHTML = "Hide Graphical Options";
+    graphicalOptions.style.display = "table";
+    graph_shown.checked = true;
+  }
+}
+function toggleAdvanced() {
+  var advancedSettings = document.getElementById("advanced_settings");
+  var footer = document.getElementById("footer");
+  if (advancedSettings.style.display == "table") {
+    showAdvanced.innerHTML = "Show Advanced Settings";
+    advancedSettings.style.display = "none";
+    footer.style.display = "none";
+    advanced_shown.checked = false;
+  } else {
+    showAdvanced.innerHTML = "Hide Advanced Settings";
+    advancedSettings.style.display = "table";
+    footer.style.display = "table";
+    advanced_shown.checked = true;
+  }
+}
+function setJS(val) {
+  var noJSbox = document.getElementById("remove_js");
+  if ( val > 0 ) {
+    noJSbox.checked = true;
+  } else {
+    noJSbox.checked = prev_noJS_checked;
+  }
+}
+function changeJS(val) {
+  prev_noJS_checked = val;
+}
+// -->
+</script>
+ <link rel="stylesheet" type="text/css" href="/PhysRefData/ASD/Scripts/1.css">
+ <link rel="stylesheet" href="/css/generic-nist-exit-script.css" type="text/css">
+ <script src="/js/jquery.min.js"></script>
+ <script src="/js/generic-nist-exit-script.js"></script>
+<!-- Google Analtyics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9SLN1VEEJ2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9SLN1VEEJ2');
+</script>
+<!-- End of Google Analytics 4 -->
+<SCRIPT async id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&subagency=NIST&pua=UA-37115410-46&yt=false&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c"></script>
+<script src="/js/clickjack.js"></script>
+</head>
+
+
+<body style="background-color:white; margin-top:0" onLoad="setFocus(1)">
+<script src="/PhysRefData/ASD/Scripts/balloon.js"></script>
+<script>
+<!-- //
+function setupBalloons() {
+makeBalloon("intensity",200," Relative intensities are source dependent and typically are useful only as guidelines for low density sources.");
+makeBalloon("Aki",250,"The transition probability, or Einstein coefficient, has units of s<sup>-1</sup>. Typical<sub> </sub> values for strong lines are of the order of 10<sup>8</sup> for neutral atoms and<sub> </sub> rapidly increase for ions.");
+makeBalloon("fik",220,"The oscillator strength is a dimensionless quantity which for strong lines (both in atoms and in ions) is of the order of unity.");
+makeBalloon("sik",220,"The line strength is proportional to A<sub>ki</sub> or f<sub>ik</sub>. This parameter does not depend on the transition energy.");
+makeBalloon("mult_ord",210,"The multiplet-averaged lines are shown only if all components of the multiplet are available. Both observed and Ritz values are always presented if any.");
+makeBalloon("spectrum",200,"<b>Examples of allowed spectra:</b><br>Ar I<BR>Mg I-IV<br>All spectra<br>Fe I; Si IX,XI; Ni Co-like<br>H-Ar I-II<br>Mg Li-like; Al Li-like-Be-like<br>Sc-Fe K-like-Ca-like<br>198Hg I");
+makeBalloon("no_plots",200,"No plots in the output.");
+makeBalloon("lte",200,"If LTE spectrum generation is chosen, the output wavelengths are given.");
+makeBalloon("term_mult",200,"Values like '1' or '1P' are allowed to select only specific groups of terms.");
+makeBalloon("lineident",250,"Selecting this option would generate spectral lines distribution for one or several ions. All lines within a specific ion stage are given the same intensity in order to indicate their positions. The links to the plots will be provided below the final line output.");
+makeBalloon("LIP",250,"Selecting this option generates a PNG plot of either relative intensities for observed lines or gA-values for Ritz lines vs. the wavelengths in the visible spectrum. Accordingly, the lower and upper wavelength limits must be not smaller than 380 nm and not larger than 780 nm, respectively.");
+makeBalloon("plots",250,"The links to the plots will be provided below the final line output.");
+makeBalloon("accur",250,"The estimated accuracies for transition probabilities are:<br><b>AA</b>: &le; 1%<br><b>A+</b>: &le; 2% | <b>A</b>: &le; 3%<br><b>B+</b>: &le; 7% | <b>B</b>: &le; 10%<br><b>C+</b>: &le; 18% | <b>C</b>: &le; 25%<br><b>D+</b>: &le; 40% | <b>D</b>: &le; 50%<br><b>E</b>: &gt; 50%<br>");
+makeBalloon("saha",250,"The level populations are calculated according to the Boltzmann distribution within each ion and Saha distribution between the ion stages. Thus, to calculate the spectrum from a single ion, e.g., C&nbsp;I, only <b><i>T</i><sub>e</sub></b> is required, while for the spectrum from several ions of the same element (e.g., C&nbsp;I-V), <b><i>N</i><sub>e</sub></b> must be defined as well. The links to the generated plots and the table of line intensities will be provided below the final line output.");
+makeBalloon("Iscale",250,"Relative intensity is calculated in the synthetic spectra on an arbitrary scale. This scale can be proportional to energy flux or photon counts per a wavelength interval.");
+makeBalloon("density",250,"Example: 3.5e22");
+makeBalloon("temper",250,"Example: 150");
+makeBalloon("dop",250,"The Saha-LTE spectrum is calculated with finite Doppler line widths determined by ion temperature.");
+makeBalloon("iontemper",250,"Ion temperature determines Doppler line widths for the Saha-LTE spectrum. If blank, it is assumed same as electron temperature.");
+}
+//var n
+//function popdef(n){window.open(n,"data","toolbar=yes,location=no,alwaysRaised=yes,directories=no,status=yes,menubar=no,scrollbars=yes,resizable=yes,copyhistory=yes,width=900,height=640");return true;
+//}
+// -->
+</script>
+<a href="#start"><img src="/Images/dot_t.gif" alt="[skip navigation]" style="{border:0; margin-top:0;margin-bottom:0;height:1px}"></a>
+<!--
+<a href="#start"><img src="/Images/dot_t.gif" border="0" width="1" height="1" alt="[skip navigation]"></a>
+-->
+<table style="width:1050px; border:0; border-spacing:0px; margin-top:0px">
+<tr><td style="text-align:left; padding:0"><a href="index.html"><img
+src="/PhysRefData/ASD/Images/ASD-sm.gif" width="100" height="47" title="ASD Home" alt="[ASD Home]"
+  style="{border:0}"></a><a href="lines_form.html"><img
+src="/PhysRefData/ASD/Images/Lines.gif" width="70" height="47" title="Lines Query" alt="[Lines Query]"
+  style="{border:0}"></a><a href="levels_form.html"><img
+src="/PhysRefData/ASD/Images/Levels.gif" width="79" height="47" title="Levels Query" alt="[Levels Query]"
+  style="{border:0}"></a><a href="Html/contents.html"><img
+src="/PhysRefData/ASD/Images/List.gif" width="77" height="47" title="List of Spectra" alt="[List of Spectra]"
+  style="{border:0}"></a><a href="ionEnergy.html"><img
+src="/PhysRefData/ASD/Images/GS-IE.gif" width="124" height="47" title="Ground States and Ionization Energies"
+  alt="[Ground States and Ionization Energies]"
+  style="{border:0}"></a><a href="/asbib"><img
+src="/PhysRefData/ASD/Images/Bib.gif" width="98" height="47" title="Bibliography" alt="[Bibliography]"
+  style="{border:0}"></a><a href="Html/help.html"><img
+src="/PhysRefData/ASD/Images/Help.gif" width="55" height="47" title="Help" alt="[Help]" style="{border:0}"></a></td>
+
+<td style="text-align:right">
+  <img src="/PhysRefData/ASD/Images/nist-pl-black.gif" width="136" height="68"
+  usemap="#NIST-PL" title="NIST Physical Measurement Laboratory" alt="NIST Physical Measurement Laboratory" style="{border:0; border-width:thin}">
+</td>
+</tr></table>
+
+<map name="NIST-PL">
+  <area shape="rect" coords="1,1,135,48" href="http://www.nist.gov" alt="National Institute of Standards and Technology" title="National Institute of Standards and Technology">
+  <area shape="rect" coords="1,50,135,67" href="/" alt="NIST Physical Measurement Laboratory" title="NIST Physical Measurement Laboratory">
+</map>
+
+<a id="start"><!-- filler --></a>
+<table style="width:1050px">
+  <tr>
+    <td>
+      <h2>NIST&nbsp;Atomic&nbsp;Spectra&nbsp;Database&nbsp;Lines&nbsp;Form</h2>
+    </td>
+    <td style="text-align:right; font-size:smaller; font-family:Arial,Helvetica,sans-serif">
+      Best viewed with the latest versions of Web browsers and JavaScript enabled
+    </td>
+  </tr>
+</table>
+
+<form method="get" action="/cgi-bin/ASD/lines1.pl" name="lines">
+  <table style="border-spacing:0; border:0; width:1050px">
+    <tbody>
+<tr style="vertical-align:baseline; font-size:large; background-color:#66cccc">
+<td style="text-align:left; font-weight:bold; padding:4px">
+Main Parameters
+</td><td style="text-align:right; padding:4px; font-weight:bold;">
+<script>
+<!--
+linkBalloon("spectrum","Spectrum")
+//-->
+</script>
+</td>
+<td style="background-color:#66cccc; padding:4px" colspan="3">
+  <input tabindex="01" type="text" size="25" name="spectra"> <span class="ex1">e.g., </span><span class="ex2">Fe&nbsp;I</span>
+  <span class="ex1"> or </span><span class="ex2">Na;Mg;&nbsp;Al</span>
+  <span class="ex1"> or </span><span class="ex2">mg&nbsp;i-iii</span>
+  <span class="ex1"> or </span><span class="ex2">198Hg I</span><br>
+</td>
+</tr>
+
+<tr style="vertical-align:baseline; font-size:large; background-color:#66cccc">
+  <td style="text-align:right; padding:4px; font-weight:bold" colspan="2">
+    Search for
+      <select tabindex="02" name="output_type" id="output_type" onchange="setOutputType(this.value);">
+        <option selected="selected" value="0">Wavelength</option>
+        <option value="1">Wavenumber</option>
+        <option value="2">Photon Energy</option>
+        <option value="3">Frequency</option>
+      </select>&nbsp;
+    Lower:<br>Upper:
+  </td>
+  <td colspan="3" style="text-align:left; padding:4px">
+    <span id="limits">
+      <input tabindex="03" name="low_w" id="low_w" type="text" size="8">&nbsp;<span 
+        id="low_lim_units" style="font-size:smaller">nm</span><br>
+      <input tabindex="04" name="upp_w" id="upp_w" type="text" size="8">&nbsp;<span 
+        id="upp_lim_units" style="font-size:smaller">nm</span>
+    </span>
+  </td>
+</tr>
+<tr style="vertical-align:baseline; font-size:large; background-color:#66cccc">
+  <td style="text-align:right; padding:4px; font-weight:bold" colspan="2">
+    Output&nbsp;<span id="output_type_span1">Wavelength</span>&nbsp;Units:
+  </td>
+  <td style="text-align:left; padding:4px; font-weight:bold" colspan="3">
+    <select tabindex="07" name="unit" id="unit" onchange="setUnit(this.value);">
+      <option value="0">&Aring;</option>
+      <option selected="selected" value="1">nm</option>
+      <option value="2">&micro;m</option>
+      <!--<option value="3">cm-1</option>
+      <option value="4">eV</option>
+      <option value="5">Ry</option>
+      <option value="6">Hartree</option>
+      <option value="7">GHz</option>-->
+    </select>
+</tr>
+
+<tr style="background-color:SteelBlue"><td style="padding:2px" colspan="5"> </td>
+</tr>
+
+<tr style="background-color:SteelBlue; vertical-align:top">
+  <td colspan="2">
+    <input tabindex="08" style="background-color:#dddddd;color:black;font-weight:bold"  type="reset" value="Reset input" name="reset" onclick="setFocus(0);">
+  </td>
+  <td style="text-align:left; white-space:nowrap"><input tabindex="09" style="background-color:#dddddd;color:black;font-weight:bold" type="submit" value="Retrieve Data" name="submit">
+    <!-- Ekron only for ASD_DE: change value to 1 --> <input type="hidden" name="de" id="de" value="0">
+  </td>
+  <td style="text-align:right">
+    <button tabindex="10" style="background-color:#ddddbb;color:#550000" type="button" name="show_graphical" id="show_graphical" onclick="toggleGraphical()">Show Graphical Options</button>
+  </td>
+  <td style="text-align:right">
+    <button tabindex="11" style="background-color:#eeeeaa;color:#550000" type="button" name="show_advanced" id="show_advanced" onclick="toggleAdvanced()">Hide Advanced Settings</button>
+  </td>
+</tr>
+
+<tr style="background-color:SteelBlue">
+  <td style="padding:2px" colspan="5">
+    <input id="graph_shown" type="checkbox" style="display:none">
+    <input id="advanced_shown" type="checkbox" style="display:none" checked>
+  </td>
+</tr>
+
+</tbody>
+</table>
+
+<P>
+<table style="border-spacing:3px; border:1px solid black; width:1050px;">
+<tr>
+  <td style="color:navy; font-family:helvetica; font-size:medium; text-align:center; padding:0px; background-color:#faeac1">Can you please provide some <a href="/cdn-cgi/l/email-protection#8ce8edf8edcce2e5fff8a2ebe3fa" target="_blank">feedback</a> to improve our database?</td>
+</tr>
+</table>
+<P>
+
+  <table style="border-spacing:0; border:0; width:1050px; display:none" id="graphical_options">
+<tbody>
+
+<tr style="background-color:#cdcdff">
+  <td style="text-align:left; font-weight:bold; padding:4px" colspan="3">
+    Graphical Output Options
+  </td>
+</tr>
+
+<tr>
+  <td colspan="1" style="background-color:#ddddff">
+<table style="width:100%">
+  <tr>
+    <td style="vertical-align:top" colspan="5">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<!--
+linkBalloon("plots",'<img style="border:0; vertical-align:top" src="/PhysRefData/ASD/Images/dyn_plots.jpeg" alt="Dynamic Plots">')
+//-->
+</script>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="text-align:right">
+<script>
+<!--
+linkBalloon("no_plots","No plots:")
+//-->
+</script>
+    </td>
+    <td colspan="4">
+      <input type="radio" name="plot_out" value="0" checked="checked" onclick="setPlot(0);">
+    </td>
+  </tr>
+
+  <tr>
+    <td style="text-align:right">
+<script>
+<!--
+linkBalloon("lineident","Line Identification Plot:")
+//-->
+</script>
+    </td>
+    <td colspan="1">
+      <input type="radio" name="plot_out" value="2" onclick="setPlot(2);">
+    </td>
+    <td colspan="3" style="text-align:left">&nbsp;<span id="dfm_text1"></span></td>
+  </tr>
+
+  <tr>
+    <td colspan="5"><hr style="height:3px; color:#339999;background-color:#339999; border-width:0"></td>
+  </tr>
+
+  <tr>
+    <td colspan="3">
+<script>
+<!--
+linkBalloon("LIP","Visible spectrum image for a single atom/ion<br>(380 nm &lt; &lambda; &lt; 780 nm):")
+//-->
+</script>
+	</td>
+    <td style="text-align:left; white-space:nowrap; font-size:small">
+      <input type="radio" name="plot_out" value="3" onclick="setPlot(3); onclick=A_outA.checked=true;">&nbsp;<span
+        id="dfm_text6">log(relative intensities) for observed lines</span>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align:right;"  colspan="3">
+    </td>
+    <td style="white-space:nowrap; font-size:small">
+      <input type="radio" name="plot_out" value="4" onclick="setPlot(4); onclick=A_outgA.checked=true;">&nbsp;<span
+        id="dfm_text6">log(gA)-values for Ritz lines</span>
+    </td>
+  </tr>
+
+  <tr>
+    <td colspan="5"><hr style="height:3px; color:#339999;background-color:#339999; border-width:0"></td>
+  </tr>
+  <tr>
+    <td style="text-align:right">
+<script>
+<!--
+linkBalloon("saha","Saha-LTE Spectrum:")
+//-->
+</script>
+    </td>
+    <td><input type="radio" name="plot_out" value="1" onclick="setPlot(1);"></td>
+    <!-- <td> </td> -->
+    <td colspan="1">&nbsp;<span id="dfm_text2"></span></td>
+    <td colspan="1" style="text-align:right; font-size:small; border-left:solid 1px gray">
+<script>
+<!--
+linkBalloon("Iscale","Intensity scale:")
+//-->
+</script>
+    <td colspan="1" style="text-align:left; font-size:small">
+      <input type="radio" name="I_scale_type" value="1" checked="checked" >Energy flux<br>
+      <input type="radio" name="I_scale_type" value="2">Photon flux<br>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="5" style="vertical-align:middle"><hr style="height:1px; color:gray; background-color:gray; border-width:0"></td>
+  </tr>
+  <tr style="white-space:nowrap; font-size:small; padding-bottom:0">
+    <td style="text-align:right">
+<script>
+<!--
+linkBalloon("temper","Electron Temperature")
+//-->
+</script>
+    <b><i>T</i><sub>e</sub></b>(eV):
+    </td>
+    <td colspan="2" style="text-align:left">
+      <input type="text" name="temp" size="5">
+    </td>
+    <!-- <td rowspan="2" style="width:1px; border-left:solid 1px gray"> </td> -->
+    <td colspan="2" style="text-align:center; border-left:solid 1px gray">
+      <input type="checkbox" name="doppler" onclick="setIonTemp()">&nbsp;
+<script>
+<!--
+linkBalloon("dop","Doppler-broadened spectrum")
+//-->
+</script>
+    </td>
+  </tr>
+
+  <tr style="white-space:nowrap; font-size:small; padding-top:0">
+    <td style="text-align:left">
+<script>
+<!--
+linkBalloon("density","Electron Density")
+//-->
+</script>
+      <b><i>N</i><sub>e</sub></b>(cm<sup>-3</sup>):
+    </td>
+    <td colspan="2" style="text-align:left">
+      <input type="text" name="eden" size="5">
+    </td>
+    <td style="text-align:right; border-left:solid 1px gray">
+<script>
+<!--
+linkBalloon("iontemper","Ion Temperature")
+//-->
+</script>
+      <b><i>T</i><sub>i</sub></b>(eV):
+    </td>
+    <td><input type="text" name="iontemp" size="5"> (if <b><i>T</i><sub>i</sub></b> &ne; <b><i>T</i><sub>e</sub></b>)</td>
+  </tr>
+
+</table>
+</td>
+
+<!--
+<td style="vertical-align:top">
+-->
+  <!--Log scale for wavelength: <input type="checkbox" name="lte_logx" value="1"> -->
+<!--
+</td>
+-->
+<td style="vertical-align:top; background-color:#339999; width:2px"> <br>
+</td>
+<td style="vertical-align:top; font-size:small; background-color:#bbddff" colspan="1">
+  <img style="vertical-align:top" src="/PhysRefData/ASD/Images/grotr_d.jpeg" alt="Grotrian Diagram" title="">
+  <hr style="height:1px; color:gray; background-color:gray; border-width:0"><br><br><br>
+  <p style="margin:0px;text-align:center">
+    <input type="submit" value="Make Grotrian Diagram" name="java_out" id="java_out">
+  </p>
+</td>
+</tr>
+
+<tr>
+  <td colspan="3" style="vertical-align:top">
+    <hr style="height:1px; color:gray; background-color:gray; border-width:0">
+  </td>
+</tr>
+
+</tbody>
+</table>
+
+  <table style="border-spacing:0; border:0; width:1050px; display:none" id="advanced_settings">
+<tbody>
+
+<tr>
+  <td style="background-color:#ffcc66" colspan="2"><img
+    src="/PhysRefData/ASD/Images/out_options.jpeg" alt="Advanced Output Options"><br>
+  </td>
+  <td  rowspan="19" style="vertical-align:top; background-color:#339999; width:2px"> <br>
+  </td>
+  <td style="vertical-align:top; background-color:#dddddd; white-space:nowrap" colspan="2"><img
+    src="/PhysRefData/ASD/Images/add_criteria.gif" alt="Additional Criteria"><br>
+  </td>
+</tr>
+
+<tr style="vertical-align:top; font-size:smaller">
+  <td style="background-color:#ffff88; text-align:right; font-weight:bold">
+    Format output:
+  </td>
+  <td style="background-color:#ffff88; text-align:left; font-weight:bold">
+    <select name="format" id="format" onchange="setJS(this.value)">
+      <option value="0">HTML (formatted)</option>
+      <option value="1">ASCII (text)</option>
+            <!--
+      <option value="2" id="csv" style="display:none" disabled>CSV (text)</option>
+      <option value="3" id="tab" style="display:none" disabled>Tab-delimited</option>
+            -->
+      <option value="2">CSV (text)</option>
+      <option value="3">Tab-delimited</option>
+    </select>
+  </td>
+  <td style="text-align:right; background-color:#edddde" rowspan="2"><u>Lines</u>:<br>
+  </td>
+  <td style="background-color:#edddde" rowspan="2">
+    <input type="radio" name="line_out" id="lines_all" value="0" checked="checked"> All<br>
+    <input type="radio" name="line_out" id="lines_tp" value="1"> Only with transition probabilities<br>
+    <input type="radio" name="line_out" id="lines_class" value="2"> Only with energy level classifications<br>
+    <input type="radio" name="line_out" id="lines_obs" value="3"> Only with observed wavelengths or intensities<br>
+    <input type="radio" name="line_out" id="diag_out_only" value="4"> Only with diagnostics<br>
+	<input type="checkbox" name="include_Ritz_E1" id="include_Ritz_E1" value="1"> Include Ritz wavelengths for all possible E1 transitions<br>
+	<!--
+	<input type="checkbox" name="include_Ritz_M1" id="include_Ritz_M1" value="1"> Include Ritz wavelengths for all possible M1 transitions<br>
+	<input type="checkbox" name="include_Ritz_E2" id="include_Ritz_E2" value="1"> Include Ritz wavelengths for all possible E2 transitions<br>
+	<input type="checkbox" name="include_Ritz_M2" id="include_Ritz_M2" value="1"> Include Ritz wavelengths for all possible M2 transitions<br>
+	-->
+    <br>
+    <input type="checkbox" name="diag_out" id="diag_out" value="1"> Include diagnostics data
+  </td>
+</tr>
+
+<tr style="vertical-align:top; font-size:smaller">
+  <td style="background-color:#ffff88; text-align:right; font-weight:bold">
+    No&nbsp;JavaScript<br>
+    No&nbsp;spaces in values
+  </td>
+  <td style="background-color:#ffff88; text-align:left">
+    <input type=checkbox name="remove_js" id="remove_js" onchange="changeJS(this.checked)"><br>
+    <input type=checkbox name="no_spaces" id="no_spaces">
+  </td>
+</tr>
+
+<tr style="font-size:smaller">
+  <td style="background-color:#fff890; text-align:right; font-weight:bold">
+    Energy Level Units:
+  </td>
+  <td style="background-color:#ffff88; text-align:left">
+    <select name="en_unit">
+      <option selected="selected" value="0">cm-1 </option>
+      <option value="1">eV </option>
+      <option value="2">Rydberg </option>
+          <option value="3">Hartree </option>
+          <option value="4">GHz </option>
+    </select>
+  </td>
+
+  <td style="background-color:#ededed" colspan="2">
+  </td>
+</tr>
+
+<tr style="font-size:smaller">
+  <td style="vertical-align:bottom; text-align:right; background-color:#ffffaa; font-weight:bold">
+    Display output:
+  </td>
+  <td style="vertical-align:bottom; text-align:left; background-color:#ffffaa">
+    <select name="output">
+      <option value="0">in its entirety</option>
+      <option value="1">in pages</option>
+    </select>
+  </td>
+  <td style="background-color:#ededed; vertical-align:top; text-align:right">
+    <u>Bibliographic<br>Information</u>:
+  </td>
+  <td style="background-color:#ededed; vertical-align:top; text-align:left">
+    <input name="bibrefs" type="checkbox" checked="checked" value="1"> TP references, Line references
+  </td>
+</tr>
+
+<tr style="font-size:smaller">
+  <td style="vertical-align:bottom; text-align:right; background-color:#ffffaa; font-weight:bold">
+    Page size:
+  </td>
+  <td style="vertical-align:bottom; text-align:left; background-color:#ffffaa">
+    <input size="3" name="page_size" value="15">
+  </td>
+  <td style="background-color:#ededed" colspan="2"><br></td>
+</tr>
+
+<tr style="font-size:smaller">
+  <td style="background-color:#cfffcc" colspan="2"><br></td>
+  <td style="vertical-align:top; text-align:right; background-color:#edddde" rowspan="3">
+    <u><span id="output_type_span2">Wavelength</span> Data</u>:
+  </td>
+  <td style="vertical-align:top; text-align:left; background-color:#edddde" rowspan="3">
+    <input type="checkbox" name="show_obs_wl" checked="checked" value="1"> Observed<br>
+    <input type="checkbox" name="show_calc_wl" checked="checked" value="1"> Ritz<br>
+    <input type="checkbox" name="show_diff_obs_calc" id="show_diff_obs_calc" value="1"> Observed - Ritz (difference) <span id="dfm_text3"></span><br>
+    <div id="show_wn_div">
+      <input type="checkbox" name="show_wn" id="show_wn" value="1" onchange="prev_wn_checked=this.checked"> Wavenumber (in cm<sup>-1</sup>) <span id="dfm_text4"></span><br>
+    </div>
+    <input type="checkbox" name="unc_out" id="unc_out" checked="checked" value="1"> Uncertainties
+  </td>
+</tr>
+<tr style="font-size:smaller">
+  <td style="vertical-align:top; text-align:right; background-color:#cfffcc; font-weight:bold">
+    Output ordering:<br>
+  </td>
+  <td style="vertical-align:top; text-align:left; background-color:#cfffcc">
+    <input type="radio" name="order_out" id="output_ord_wl" value="0" checked="checked" onclick="setMult(0);"> <span id="output_type_span3">Wavelength</span><br>
+    <input type="radio" name="order_out" id="output_ord_mult" value="1" onclick="setMult(1);">
+<script>
+<!--
+linkBalloon("mult_ord","Multiplet")
+//-->
+</script>
+  </td>
+</tr>
+<tr>
+  <td style="background-color:#cfffcc" colspan="2"><br></td>
+</tr>
+<tr style="font-size:smaller">
+  <td style="vertical-align:top; text-align:left; background-color:#ffcccc; white-space:nowrap" colspan="2">
+    <img src="/PhysRefData/ASD/Images/opt_search_cri.jpeg" alt="Optional Search Criteria">
+  </td>
+  <td style="vertical-align:top; text-align:left; background-color:#ededed"><br></td>
+  <td style="vertical-align:top; text-align:left; background-color:#ededed" id="ids_td">
+    <span id="ids_sp" style="display:none">
+      <input type="checkbox" name="ids_out" id="ids_out" value="1"> Level IDs
+    </span>
+  </td>
+</tr>
+
+<tr style="font-size:smaller">
+  <td style="vertical-align:bottom; text-align:right; background-color:#ffdddd; font-weight:bold; white-space:nowrap">
+    Maximum lower level energy:
+  </td>
+  <td style="vertical-align:bottom; text-align:left; background-color:#ffdddd; white-space:nowrap">
+    <input name="max_low_enrg" size="10"> (e.g., 100000)
+  </td>
+  <td style="vertical-align:top; text-align:right; background-color:#edddde" rowspan="3"><div id="show_av_div1">
+    <u><span id="output_type_span3">Wavelength</span> in</u>: <br>
+    <!--<font size="-2" color=brown>Only the last<br>three options<br>are available<br>for <b>multiplets</b></font>-->
+    </div>
+  </td>
+  <td style="vertical-align:top; text-align:left; background-color:#edddde; white-space:nowrap" rowspan="3"><div id="show_av_div2">
+    <input type="radio" name="show_av" value="0" onchange="set_wn_cb(!this.checked)">&nbsp;<span id="show_av0">Vacuum (&lt; 2,000 &Aring;) <span style="font-family:monospace">&nbsp;&nbsp;</span>Air (2,000&nbsp;-&nbsp;10,000&nbsp;&Aring;) &nbsp;Wavenumber (&gt;&nbsp;10,000&nbsp;&Aring;)</span><br>
+    <input type="radio" name="show_av" value="1" onchange="set_wn_cb(!this.checked)">&nbsp;<span id="show_av1">Vacuum (&lt;&nbsp;10,000&nbsp;&Aring;) <span style="font-family:monospace">&nbsp;</span>Wavenumber (&gt;&nbsp;10,000&nbsp;&Aring;)</span><br>
+    <input type="radio" name="show_av" value="2" checked="checked" onchange="set_wn_cb(!this.checked)">&nbsp;<span id="show_av2">Vacuum (&lt;&nbsp;2,000&nbsp;&Aring;) <span style="font-family:monospace">&nbsp;&nbsp;</span>Air (2,000&nbsp;-&nbsp;20,000&nbsp;&Aring;) &nbsp; Vacuum (&gt;&nbsp;20,000&nbsp;&Aring;)</span>
+    <hr style="height:1px; color:gray; background-color:gray; border-width:0; width:400px">
+    <input type="radio" name="show_av" value="3" onchange="set_wn_cb(!this.checked)">&nbsp;<span id="show_av3">Vacuum (all&nbsp;wavelengths)</span><br>
+    <input type="radio" name="show_av" value="4" onchange="set_wn_cb(!this.checked)">&nbsp;<span id="show_av4">Vacuum (&lt;&nbsp;1,850&nbsp;&Aring;) <span style="font-family:monospace">&nbsp;&nbsp;</span>Air (&gt;&nbsp;1,850&nbsp;&Aring;</span>)<br>
+    <!--<input type="radio" name="show_av" value="5" onchange="set_wn_cb(this.checked)">&nbsp;<span id="show_av5">Wavenumber (in cm<sup>&minus;1</sup>; all&nbsp;wavelengths)</span>-->
+    <br></div>
+  </td>
+</tr>
+
+<tr style="font-size:smaller">
+  <td style="vertical-align:bottom; text-align:right; background-color:#ffdddd; white-space:nowrap; font-weight:bold">
+    Maximum upper level energy:
+  </td>
+  <td style="vertical-align:bottom; text-align:left; background-color:#ffdddd; white-space:nowrap">
+    <input name="max_upp_enrg" size="10"> (e.g., 400000)
+  </td>
+</tr>
+
+<tr style="font-size:smaller">
+  <td style="background-color:#ededed" colspan="2"><br></td>
+</tr>
+
+<tr style="font-size:smaller">
+  <td style="vertical-align:bottom; text-align:right; background-color:#ffdddd; white-space:nowrap; font-weight:bold">
+    Transition strength bounds will apply to:
+  </td>
+  <td style="vertical-align:bottom; text-align:left; background-color:#ffdddd; white-space:nowrap">
+    <select name="tsb_value">
+      <option selected="selected" value="0">Aki </option>
+      <option value="1">fik </option>
+      <option value="2">S </option>
+      <option value="3">log(gf) </option>
+    </select>
+  </td>
+  <td style="background-color:#ededed" colspan="2"><br></td>
+</tr>
+
+<tr style="font-size:smaller">
+  <td style="vertical-align:bottom; text-align:right; background-color:#ffdddd; white-space:nowrap; font-weight:bold">
+    Minimum transition strength:
+  </td>
+  <td style="vertical-align:bottom; text-align:left; background-color:#ffdddd; white-space:nowrap">
+    <input name="min_str" size="10"> (e.g., 1.2e+05)
+  </td>
+  <td style="vertical-align:top; text-align:right; background-color:#edddde; white-space:nowrap" rowspan="2">
+    <u>Transition strength</u>:
+  </td>
+  <td style="vertical-align:top; text-align:left; background-color:#edddde; white-space:nowrap" rowspan="2">
+    <input type="radio" name="A_out" id="A_outA" checked="checked" value="0">
+<script>
+<!--
+linkBalloon("Aki","<i>A<sub>ki</sub></i>")
+//-->
+</script>
+    &nbsp;<input type="radio" name="A_out" id="A_outgA" value="1">
+<script>
+<!--
+linkBalloon("Aki","<i>g<sub>k</sub>A<sub>ki</sub></i>")
+//-->
+</script>
+
+    &nbsp;<input type="checkbox" name="A8" value="1"> in units of 10<sup>8</sup> s<sup>-1</sup>
+    <hr style="height:1px; color:gray; background-color:gray; border-width:0">
+    <input type="checkbox" name="f_out">
+<script>
+<!--
+linkBalloon("fik", "<i>f</i><sub>ik</sub>")
+//-->
+</script>
+    &nbsp;&nbsp;&nbsp; <input type="checkbox" name="S_out">
+<script>
+<!--
+linkBalloon("sik","<i>S<sub>ik</sub></i>")
+//-->
+</script>
+    &nbsp;&nbsp;&nbsp; <input type="checkbox" name="loggf_out"> log(<i>gf</i>)
+    <hr style="height:1px; color:gray; background-color:gray; border-width:0">
+    <input type="checkbox" name="intens_out" checked="checked">
+<script>
+<!--
+linkBalloon("intensity","Relative Intensity")
+//-->
+</script>
+    <span id="dfm_text5"></span>
+  </td>
+</tr>
+<tr style="font-size:smaller">
+  <td style="vertical-align:bottom; text-align:right; background-color:#ffdddd; white-space:nowrap; font-weight:bold">
+    Maximum transition strength:
+  </td>
+  <td style="vertical-align:bottom; text-align:left; background-color:#ffdddd; white-space:nowrap">
+    <input name="max_str" size="10"> (e.g., 2.5e+12) <br>
+  </td>
+</tr>
+<tr style="font-size:smaller">
+  <td style="vertical-align:top; text-align:right; background-color:#ededed">
+    <br>
+  </td>
+  <td style="vertical-align:top; text-align:right; background-color:#ededed; font-size:small">
+    &nbsp; <br>
+  </td>
+  <td style="vertical-align:top; text-align:right; background-color:#edddde">
+    <u>Transition Type</u>:
+  </td>
+  <td style="vertical-align:top; text-align:left; background-color:#edddde">
+    <input checked="checked" type="checkbox" name="allowed_out" value="1"> Allowed (E1) &nbsp;&nbsp; <input type="checkbox" checked="checked" name="forbid_out" value="1"> Forbidden (M1,E2,...)
+  </td>
+</tr>
+<tr style="font-size:smaller">
+  <td style="vertical-align:bottom; text-align:right; background-color:#ffdddd; white-space:nowrap; font-weight:bold">
+<script>
+<!--
+linkBalloon("accur","Accuracy minimum:")
+//-->
+</script>
+  </td>
+  <td style="vertical-align:bottom; text-align:left; background-color:#ffdddd; white-space:nowrap">
+    <input name="min_accur" size="10">&nbsp; (e.g., C+)
+  </td>
+  <td style="vertical-align:top; background-color:#ededed" colspan="2"><br></td>
+</tr>
+<tr style="font-size:smaller">
+  <td style="vertical-align:bottom; text-align:right; background-color:#ffdddd; white-space:nowrap; font-weight:bold">
+    Relative intensity minimum:
+  </td>
+  <td style="vertical-align:bottom; text-align:left; background-color:#ffdddd; white-space:nowrap">
+    <input name="min_intens" size="10"> (e.g., 1.2e-03)
+  </td>
+  <td style="vertical-align:top; text-align:right; background-color:#edddde">
+    <u>Level information</u>:<br>
+  </td>
+  <td style="vertical-align:top; text-align:left; background-color:#edddde">
+    <input type="checkbox" name="conf_out" checked="checked"> Configurations&nbsp;
+    <input type="checkbox" name="term_out" checked="checked"> Terms&nbsp;
+    <input type="checkbox" name="enrg_out" checked="checked"> Energies&nbsp;
+    <input type="checkbox" name="J_out" checked="checked"> <i>J</i>&nbsp;
+    <input type="checkbox" name="g_out" id="g_out" onclick="setG();"> <i>g</i><br>
+  </td>
+</tr>
+
+<tr style="background-color:SteelBlue">
+  <td colspan="5"></td>
+</tr>
+
+<tr style="background-color:SteelBlue">
+  <td style="vertical-align:top">
+    <input type="reset" value="Reset input" name="reset" onclick="setFocus(0);">
+  </td>
+  <td style="vertical-align:top; white-space:nowrap" colspan="3"></td>
+  <td style="vertical-align:top; text-align:left; white-space:nowrap">
+    <input type="submit" value="Retrieve Data" name="submit" style="font-weight:bold">
+  </td>
+</tr>
+
+<tr style="background-color:SteelBlue">
+  <td colspan="5"></td>
+</tr>
+
+  </table>
+</form>
+<script>
+<!--
+    setupBalloons();
+//-->
+ </script>
+
+<table style="width:1050px; border:0; border-spacing:0px; display:none" id="footer">
+<tr><td style="text-align:left; padding:0"><a href="index.html"><img
+src="/PhysRefData/ASD/Images/ASD-sm.gif" width="100" height="47" title="ASD Home" alt="[ASD Home]" style="{border:0}"></a><a href="lines_form.html"><img
+src="/PhysRefData/ASD/Images/Lines.gif" width="70" height="47" title="Lines Query" alt="[Lines Query]" style="{border:0}"></a><a href="levels_form.html"><img
+src="/PhysRefData/ASD/Images/Levels.gif" width="79" height="47" title="Levels Query" alt="[Levels Query]" style="{border:0}"></a><a href="Html/contents.html"><img
+src="/PhysRefData/ASD/Images/List.gif" width="77" height="47" title="List of Spectra" alt="[List of Spectra]" style="{border:0}"></a><a href="ionEnergy.html"><img
+src="/PhysRefData/ASD/Images/GS-IE.gif" width="124" height="47" title="Ground States and Ionization Energies"
+  alt="[Ground States and Ionization Energies]" style="{border:0}"></a><a href="/asbib"><img
+src="/PhysRefData/ASD/Images/Bib.gif" width="98" height="47" title="Bibliography" alt="[Bibliography]" style="{border:0}"></a><a href="Html/help.html"><img
+src="/PhysRefData/ASD/Images/Help.gif" width="55" height="47" title="Help" alt="[Help]" style="{border:0}"></a></td>
+
+<td style="text-align:right">
+  <img src="/PhysRefData/ASD/Images/nist-pl-black.gif" width="136" height="68"
+  usemap="#NIST-PL" title="NIST Physical Measurement Laboratory" alt="NIST Physical Measurement Laboratory" style="{border:0; border-width:thin}">
+</td>
+</tr></table>
+
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4c5e0814a9ecefe',t:'MTc5MjMwOTAzOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

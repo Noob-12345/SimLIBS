@@ -12,3 +12,5 @@ from simLIBS.simulation import validate_simulated_libs
 from simLIBS.simulation import SimulatedLIBS
 # 当前 NIST 自吸收的配置对象和可导出完整缺失跃迁清单的异常类型。
 from simLIBS.nist_self_absorption import NISTSelfAbsorptionConfig, MissingStarkDataError
+# 自动数据源的网络/缓存异常，与确实缺少逐线系数的异常分别处理。
+from simLIBS.stark_b import StarkDataAccessError

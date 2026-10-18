@@ -8,8 +8,14 @@ Let input elements use Stark broadening and self absorption without manually pre
 ## Phases
 1. [complete] Inspect current resolver and confirm the default coefficient set: Mg 13, Ca 14, Zn 4 transitions.
 2. [complete] Verify authoritative data services, access protocol, matching rules, temperature/density validity and coverage limits. Live HTTPS TAP queries returned Mg and Si II XSAMS data; seven rare-earth sample elements are unavailable in STARK-B.
-3. [awaiting_user] Present a concrete modification proposal and obtain approval before coding, as required by the user's AGENTS.md.
-4. [pending] If approved, implement in batches of at most three files with meaningful tests and update the report.
+3. [complete] User explicitly renewed the request to expand coverage to most elements on 2026-10-18; proceed with sourced data, no synthetic fallback.
+4. [complete] Batch 1 provider/cache: real Si II fixture, seven offline tests passing, live query retrieved 36 Si II transitions from SCP/MSE datasets.
+5. [complete] Strict NIST identity enrichment and matching tests; connected resolver/config and preserved local priority and legacy direct calls.
+6. [complete] Chinese README/coverage report/CLI complete; 86 tests pass, seven additional elements verified live and final CLI snapshot repeat/export verified. Independent review rechecked cache fix, 16 focused tests and live Al tables; no further reproducible important defects.
+
+## Delivered scope and data boundary
+- Source-backed automatic retrieval/cache and strict identity bridge are implemented. No element whitelist remains in the NIST Stark engine.
+- Seven additional elements have actual main-entry validation; blanket majority coverage of the user's full 28-element mix or every 200-900nm transition is NOT established. Missing external data/validity/identities remain explicit errors and exported coverage rows, never invented fallback coefficients.
 
 ## Constraints
 - Use only traceable per-transition coefficients; no global guessed width or approximate fallback for absent records.

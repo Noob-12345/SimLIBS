@@ -1,0 +1,807 @@
+{
+  "scope": "Conservative demonstration only, not production code or universal spectroscopic parser. Exact same-source labels are required; unsupported forms rejected.",
+  "species": {
+    "Si II": {
+      "row_count": 2,
+      "single_J_normalizable": 2,
+      "failures": [],
+      "sample": [
+        {
+          "lower": [
+            [
+              [
+                "subshell",
+                3,
+                "s",
+                2
+              ],
+              [
+                "subshell",
+                4,
+                "s",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "S",
+              "",
+              false
+            ],
+            "1/2"
+          ],
+          "upper": [
+            [
+              [
+                "subshell",
+                3,
+                "s",
+                2
+              ],
+              [
+                "subshell",
+                4,
+                "p",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "P",
+              "",
+              true
+            ],
+            "3/2"
+          ],
+          "nist_IDs": [
+            "014002.000009",
+            "014002.000014"
+          ],
+          "Type": ""
+        },
+        {
+          "lower": [
+            [
+              [
+                "subshell",
+                3,
+                "s",
+                2
+              ],
+              [
+                "subshell",
+                4,
+                "s",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "S",
+              "",
+              false
+            ],
+            "1/2"
+          ],
+          "upper": [
+            [
+              [
+                "subshell",
+                3,
+                "s",
+                2
+              ],
+              [
+                "subshell",
+                4,
+                "p",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "P",
+              "",
+              true
+            ],
+            "1/2"
+          ],
+          "nist_IDs": [
+            "014002.000009",
+            "014002.000013"
+          ],
+          "Type": ""
+        }
+      ]
+    },
+    "Mg II": {
+      "row_count": 12,
+      "single_J_normalizable": 12,
+      "failures": [],
+      "sample": [
+        {
+          "lower": [
+            [
+              [
+                "subshell",
+                2,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                4,
+                "s",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "S",
+              "",
+              false
+            ],
+            "1/2"
+          ],
+          "upper": [
+            [
+              [
+                "subshell",
+                2,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                6,
+                "p",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "P",
+              "",
+              true
+            ],
+            "3/2"
+          ],
+          "nist_IDs": [
+            "012002.000004",
+            "012002.000024"
+          ],
+          "Type": ""
+        },
+        {
+          "lower": [
+            [
+              [
+                "subshell",
+                2,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                3,
+                "p",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "P",
+              "",
+              true
+            ],
+            "1/2"
+          ],
+          "upper": [
+            [
+              [
+                "subshell",
+                2,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                3,
+                "d",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "D",
+              "",
+              false
+            ],
+            "3/2"
+          ],
+          "nist_IDs": [
+            "012002.000002",
+            "012002.000006"
+          ],
+          "Type": ""
+        }
+      ]
+    },
+    "Ca II": {
+      "row_count": 2,
+      "single_J_normalizable": 2,
+      "failures": [],
+      "sample": [
+        {
+          "lower": [
+            [
+              [
+                "subshell",
+                3,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                4,
+                "s",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "S",
+              "",
+              false
+            ],
+            "1/2"
+          ],
+          "upper": [
+            [
+              [
+                "subshell",
+                3,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                4,
+                "p",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "P",
+              "",
+              true
+            ],
+            "3/2"
+          ],
+          "nist_IDs": [
+            "020002.000001",
+            "020002.000005"
+          ],
+          "Type": ""
+        },
+        {
+          "lower": [
+            [
+              [
+                "subshell",
+                3,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                4,
+                "s",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "S",
+              "",
+              false
+            ],
+            "1/2"
+          ],
+          "upper": [
+            [
+              [
+                "subshell",
+                3,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                4,
+                "p",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "P",
+              "",
+              true
+            ],
+            "1/2"
+          ],
+          "nist_IDs": [
+            "020002.000001",
+            "020002.000004"
+          ],
+          "Type": ""
+        }
+      ]
+    },
+    "Na I": {
+      "row_count": 2,
+      "single_J_normalizable": 2,
+      "failures": [],
+      "sample": [
+        {
+          "lower": [
+            [
+              [
+                "subshell",
+                2,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                3,
+                "s",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "S",
+              "",
+              false
+            ],
+            "1/2"
+          ],
+          "upper": [
+            [
+              [
+                "subshell",
+                2,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                3,
+                "p",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "P",
+              "",
+              true
+            ],
+            "3/2"
+          ],
+          "nist_IDs": [
+            "011001.000001",
+            "011001.000003"
+          ],
+          "Type": ""
+        },
+        {
+          "lower": [
+            [
+              [
+                "subshell",
+                2,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                3,
+                "s",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "S",
+              "",
+              false
+            ],
+            "1/2"
+          ],
+          "upper": [
+            [
+              [
+                "subshell",
+                2,
+                "p",
+                6
+              ],
+              [
+                "subshell",
+                3,
+                "p",
+                1
+              ]
+            ],
+            [
+              "",
+              2,
+              "P",
+              "",
+              true
+            ],
+            "1/2"
+          ],
+          "nist_IDs": [
+            "011001.000001",
+            "011001.000002"
+          ],
+          "Type": ""
+        }
+      ]
+    },
+    "Fe II": {
+      "row_count": 21,
+      "single_J_normalizable": 20,
+      "failures": [
+        "unsupported or uncertain term: 3P2<1>"
+      ],
+      "sample": [
+        {
+          "lower": [
+            [
+              [
+                "subshell",
+                3,
+                "d",
+                6
+              ],
+              [
+                "parent",
+                [
+                  "",
+                  5,
+                  "D",
+                  "",
+                  false
+                ]
+              ],
+              [
+                "subshell",
+                4,
+                "s",
+                1
+              ]
+            ],
+            [
+              "a",
+              6,
+              "D",
+              "",
+              false
+            ],
+            "7/2"
+          ],
+          "upper": [
+            [
+              [
+                "subshell",
+                3,
+                "d",
+                6
+              ],
+              [
+                "parent",
+                [
+                  "",
+                  5,
+                  "D",
+                  "",
+                  false
+                ]
+              ],
+              [
+                "subshell",
+                4,
+                "p",
+                1
+              ]
+            ],
+            [
+              "z",
+              6,
+              "D",
+              "",
+              true
+            ],
+            "5/2"
+          ],
+          "nist_IDs": [
+            "026002.000002",
+            "026002.000452"
+          ],
+          "Type": ""
+        },
+        {
+          "lower": [
+            [
+              [
+                "subshell",
+                3,
+                "d",
+                6
+              ],
+              [
+                "parent",
+                [
+                  "",
+                  3,
+                  "H",
+                  "",
+                  false
+                ]
+              ],
+              [
+                "subshell",
+                4,
+                "p",
+                1
+              ]
+            ],
+            [
+              "z",
+              2,
+              "H",
+              "",
+              true
+            ],
+            "11/2"
+          ],
+          "upper": [
+            [
+              [
+                "subshell",
+                3,
+                "d",
+                6
+              ],
+              [
+                "parent",
+                [
+                  "",
+                  3,
+                  "H",
+                  "",
+                  false
+                ]
+              ],
+              [
+                "subshell",
+                4,
+                "d",
+                1
+              ]
+            ],
+            [
+              "",
+              4,
+              "K",
+              "",
+              false
+            ],
+            "13/2"
+          ],
+          "nist_IDs": [
+            "026002.000525",
+            "026002.000189"
+          ],
+          "Type": ""
+        }
+      ]
+    }
+  },
+  "normalization_probes": {
+    "parity_alias_simple": true,
+    "decimal_J_equals_fraction": true,
+    "different_parent_terms_distinct": true,
+    "different_parent_indices_distinct": true,
+    "term_prefix_distinct": true,
+    "parity_distinct": true,
+    "J_components_distinct": true,
+    "reject_J_''": true,
+    "reject_J_'1/2,3/2'": true,
+    "reject_J_'1/2 or 3/2'": true,
+    "reject_J_'?'": true
+  },
+  "csv_unwrapped_equals_tsv": true,
+  "provider_cached_file": "siII_all_interp_query.html",
+  "provider_unique_identity_rows": 23,
+  "provider_identities": [
+    {
+      "lower": "3s2.4p 2Po 3/2",
+      "upper": "3s2.5d 2D 3/2",
+      "multiplet": "54",
+      "wavelength_A_raw": "3210.042"
+    },
+    {
+      "lower": "3s2.4p 2Po 3/2",
+      "upper": "3s2.5d 2D 5/2",
+      "multiplet": "54",
+      "wavelength_A_raw": "3210.026"
+    },
+    {
+      "lower": "3s2.4p 2Po 3/2",
+      "upper": "3s2.6s 2S 1/2",
+      "multiplet": "53",
+      "wavelength_A_raw": "3339.82"
+    },
+    {
+      "lower": "3s.3p2 2D 5/2",
+      "upper": "3s2.4p 2Po 3/2",
+      "multiplet": "26",
+      "wavelength_A_raw": "3856.02"
+    },
+    {
+      "lower": "3s2.4d 2D",
+      "upper": "3s2.9f 2Fo",
+      "multiplet": "",
+      "wavelength_A_raw": "3955"
+    },
+    {
+      "lower": "3s2.3d 2D 5/2",
+      "upper": "3s2.5p 2Po 3/2",
+      "multiplet": "44",
+      "wavelength_A_raw": "4075.45"
+    },
+    {
+      "lower": "3s2.3d 2D 5/2",
+      "upper": "3s2.4f 2Fo 7/2",
+      "multiplet": "43",
+      "wavelength_A_raw": "4130.894"
+    },
+    {
+      "lower": "3s2.3p.(3Po).3d 2Do",
+      "upper": "3s2.3p.(3Po).4p 2P",
+      "multiplet": "",
+      "wavelength_A_raw": "4190"
+    },
+    {
+      "lower": "3s2.4d 2D 5/2",
+      "upper": "3s2.8f 2Fo 5/2",
+      "multiplet": "70",
+      "wavelength_A_raw": "4200.887"
+    },
+    {
+      "lower": "3s2.4d 2D 5/2",
+      "upper": "3s2.8f 2Fo 7/2",
+      "multiplet": "70",
+      "wavelength_A_raw": "4200.898"
+    },
+    {
+      "lower": "3s2.4f 2Fo",
+      "upper": "3s2.9g 2G",
+      "multiplet": "",
+      "wavelength_A_raw": "4377"
+    },
+    {
+      "lower": "3s2.4d 2D",
+      "upper": "3s2.7f 2Fo",
+      "multiplet": "69",
+      "wavelength_A_raw": "4621.6"
+    },
+    {
+      "lower": "3s2.4f 2Fo",
+      "upper": "3s2.8g 2G",
+      "multiplet": "76",
+      "wavelength_A_raw": "4673.27"
+    },
+    {
+      "lower": "3s2.4p 2Po 3/2",
+      "upper": "3s2.4d 2D 3/2",
+      "multiplet": "52",
+      "wavelength_A_raw": "5056.317"
+    },
+    {
+      "lower": "3s2.4p 2Po 3/2",
+      "upper": "3s2.4d 2D 5/2",
+      "multiplet": "52",
+      "wavelength_A_raw": "5055.98"
+    },
+    {
+      "lower": "3s2.4f 2Fo",
+      "upper": "3s2.7g 2G",
+      "multiplet": "",
+      "wavelength_A_raw": "5186"
+    },
+    {
+      "lower": "3s2.3p.(3Po).4p 4D",
+      "upper": "3s2.3p.(3Po).4d 4Fo",
+      "multiplet": "",
+      "wavelength_A_raw": "5202"
+    },
+    {
+      "lower": "3s2.4d 2D",
+      "upper": "3s2.6f 2Fo",
+      "multiplet": "68",
+      "wavelength_A_raw": "5467"
+    },
+    {
+      "lower": "3s2.4p 2Po 3/2",
+      "upper": "3s2.5s 2S 1/2",
+      "multiplet": "51",
+      "wavelength_A_raw": "5979"
+    },
+    {
+      "lower": "3s2.4f 2Fo 5/2",
+      "upper": "3s2.6g 2G 7/2",
+      "multiplet": "74",
+      "wavelength_A_raw": "6239.66"
+    },
+    {
+      "lower": "3s2.4f 2Fo 7/2",
+      "upper": "3s2.6g 2G 7/2",
+      "multiplet": "74",
+      "wavelength_A_raw": "6239.61"
+    },
+    {
+      "lower": "3s2.4s 2S 1/2",
+      "upper": "3s2.4p 2Po 3/2",
+      "multiplet": "32",
+      "wavelength_A_raw": "6347"
+    },
+    {
+      "lower": "3s2.4d 2D 5/2",
+      "upper": "3s2.5f 2Fo 7/2",
+      "multiplet": "65",
+      "wavelength_A_raw": "7850"
+    }
+  ],
+  "SiII_provider_matches": [
+    {
+      "nist_ritz_vacuum_nm": "634.886",
+      "NIST_upper_J": "3/2",
+      "matched_identity_rows": [
+        {
+          "lower": "3s2.4s 2S 1/2",
+          "upper": "3s2.4p 2Po 3/2",
+          "multiplet": "32",
+          "wavelength_A_raw": "6347"
+        }
+      ]
+    },
+    {
+      "nist_ritz_vacuum_nm": "637.313",
+      "NIST_upper_J": "1/2",
+      "matched_identity_rows": []
+    }
+  ]
+}

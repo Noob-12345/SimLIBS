@@ -156,7 +156,7 @@ class IndependentBroadeningTests(unittest.TestCase):
 
     def test_stark_only_still_reports_missing_coefficients(self):
         with self.assertRaises(model.MissingStarkDataError) as raised:
-            self.make(low_w=280., upper_w=290.)
+            self.make(low_w=280., upper_w=290., self_absorption_config={'stark_source': 'local'})
         self.assertEqual(len(raised.exception.missing_lines), 18)
 
     def test_dataset_forwards_both_options_and_uses_stark_sampling_grid(self):

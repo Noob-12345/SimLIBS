@@ -16,10 +16,21 @@
 - VAMDC protocol: https://vamdc-standards.readthedocs.io/en/latest/dataAccessProtocol/vamdctap.html . Standard HTTP TAP queries using LANG=VSS2, FORMAT=XSAMS.
 - VAMDC tutorial: https://tutorial.vamdc.eu/self-study/end-user-self-study/python-scripting.html . Read-only automation is supported; query conservatively and cache results.
 
+## 2026-10-18 resumed research
+- User has explicitly requested implementation of wider coverage; former approval step is satisfied.
+- Python 3.10 requests successfully validates HTTPS for STARK-B and GitHub. No TLS bypass needed.
+- Official VAMDC/NodeSoftware `nodes/starkb/node/queryfunc.py:getBroadening` copies environment.w unchanged into XSAMS gammaL; dictionaries.py labels it Angstrom. Together with STARK-B data description this identifies provider gammaL as table FWHM, despite the parameter name. Need independently cross-check a table row.
+- NIST enrichment research delegated read-only, separately from provider width research.
+- Cross-checked live Si II website table against saved XSAMS: electron FWHM at 10000 K, 1e17 cm^-3 is 1.930 Angstrom, exactly the gammaL XML value. Correct local W=FWHM_nm/2.
+- Better provider route found: session GET /index.php/data/ion/35, POST action=querypage:densities datasetId=223, then POST action=querypage:query queryType=interpolatedDensity density=1e16 format=html yields ALL 23 dataset transitions with four temperatures, C (empty for this dataset), validity flags, sources and published a0/a1/a2 fits. Raw siII_all_interp_query.html saved. This avoids TAP 1000-row truncation and its omitted fits/C. Density selection UI explicitly permits lower-density extrapolation/interpolation and forbids densities above maximum.
+- Console UnicodeEncodeError under default Windows GBK resolved by Python -X utf8; saved downloads unaffected.
+
 ## Open items
-- Obtain approval of the concrete implementation approach before source edits.
-- For implementation, verify width-convention mapping, source-state identifiers, temperature interpolation and validity checks against original tables.
-- Quantify line-level coverage for the actual input; element-level availability alone is insufficient.
+- Automatic provider and strict NIST bridge implemented; original/local override priority preserved.
+- Live SimulatedLIBS Si II 634.886 nm, Te=1eV, Ne=1e17 returned sourced SCP width FWHM=0.179445 nm. Additional sampled state matches Al, Na, K, Li; normalization of term-prefix spacing and parenthesis separators additionally resolves Fe II and Ni II.
+- Initial wider audit is deliberately incomplete (first three usable transitions per species). Some stages lack data or valid density; closed-core and term naming differences remain unassigned rather than stripping identity details. Cannot claim most of the user's full 28-element mix or all 200-900 nm lines are covered.
+- Fixed provider boundary issues with regression tests: exact density uses a different website form path, C/W uses the same reference density as C, K/eV machine roundoff at table limits is tolerated only within four ULP.
+- Independent review initiated; first reviewer tool failed externally, replaced with a new reviewer.
 
 ## Live species coverage check
 - Downloaded the STARK-B periodic table with PowerShell Invoke-WebRequest and normal certificate validation on 2026-10-16.

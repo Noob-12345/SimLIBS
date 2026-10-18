@@ -1,0 +1,16 @@
+	<div>
+		<select name="density"  id="density" onchange="transitionUpdater()">
+			<option value="-1">Select your Perturber density ( cm-3 )</option>
+							<option value="1e17" >1.00e+17</option>
+			
+		</select>
+	</div>
+	<div>
+		<div>
+			<label></label>
+			<label for="interpolatedDensity">or enter a value:</label>
+			<input type="text" title="extrapolation towards lower densities or interpolation between available densities" name="interpolatedDensity" id="interpolatedDensity" />
+			<input type="button" value="OK" id="interpolatedDensityQueryButton" onclick="interpolatedDensityResultUpdater()" class="pure-button"/>
+		</div>
+	</div>
+

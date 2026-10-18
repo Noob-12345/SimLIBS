@@ -1,0 +1,39 @@
+	<div>
+		<select name="transition"  id="transition" onchange="temperatureUpdaterFromDensity()">
+			<option value="-1">Select your transition</option>
+			<option value="all" >All</option>
+							<option value="5234" >3s.3p2 2D 5/2 -> 3s2.4p 2Po 3/2</option>
+							<option value="5237" >3s2.3d 2D 5/2 -> 3s2.4f 2Fo 7/2</option>
+							<option value="5236" >3s2.3d 2D 5/2 -> 3s2.5p 2Po 3/2</option>
+							<option value="5238" >3s2.3p.(3Po).3d 2Do  -> 3s2.3p.(3Po).4p 2P </option>
+							<option value="5247" >3s2.3p.(3Po).4p 4D  -> 3s2.3p.(3Po).4d 4Fo </option>
+							<option value="5248" >3s2.4d 2D  -> 3s2.6f 2Fo </option>
+							<option value="5242" >3s2.4d 2D  -> 3s2.7f 2Fo </option>
+							<option value="5235" >3s2.4d 2D  -> 3s2.9f 2Fo </option>
+							<option value="5253" >3s2.4d 2D 5/2 -> 3s2.5f 2Fo 7/2</option>
+							<option value="5239" >3s2.4d 2D 5/2 -> 3s2.8f 2Fo 5/2</option>
+							<option value="5240" >3s2.4d 2D 5/2 -> 3s2.8f 2Fo 7/2</option>
+							<option value="5246" >3s2.4f 2Fo  -> 3s2.7g 2G </option>
+							<option value="5243" >3s2.4f 2Fo  -> 3s2.8g 2G </option>
+							<option value="5241" >3s2.4f 2Fo  -> 3s2.9g 2G </option>
+							<option value="5250" >3s2.4f 2Fo 5/2 -> 3s2.6g 2G 7/2</option>
+							<option value="5251" >3s2.4f 2Fo 7/2 -> 3s2.6g 2G 7/2</option>
+							<option value="5244" >3s2.4p 2Po 3/2 -> 3s2.4d 2D 3/2</option>
+							<option value="5245" >3s2.4p 2Po 3/2 -> 3s2.4d 2D 5/2</option>
+							<option value="5231" >3s2.4p 2Po 3/2 -> 3s2.5d 2D 3/2</option>
+							<option value="5232" >3s2.4p 2Po 3/2 -> 3s2.5d 2D 5/2</option>
+							<option value="5249" >3s2.4p 2Po 3/2 -> 3s2.5s 2S 1/2</option>
+							<option value="5233" >3s2.4p 2Po 3/2 -> 3s2.6s 2S 1/2</option>
+							<option value="5252" >3s2.4s 2S 1/2 -> 3s2.4p 2Po 3/2</option>
+			
+		</select>
+	</div>	
+	<div>
+		<p>or a wavelength interval</p>
+		<label for="wavelengthMin">min (Å):</label>
+		<input type="text" name="wavelengthMin" id="wavelengthMin" />
+		<label for="wavelengthMax">max (Å):</label>
+		<input type="text" name="wavelengthMax" id="wavelengthMax"/>
+		<input type="button" value="OK" id="wavelengthQueryButton" onclick="temperatureUpdaterFromWavelength()" class="pure-button"/>
+	</div>
+

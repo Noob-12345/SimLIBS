@@ -1,0 +1,84 @@
+[
+  {
+    "element": "Fe",
+    "charge": 1,
+    "wavelength_nm": 258.664928,
+    "lines": 1,
+    "fwhm_nm": [
+      0.008829057472900732
+    ],
+    "methods": [
+      "SCP"
+    ]
+  },
+  {
+    "element": "Ni",
+    "charge": 1,
+    "wavelength_nm": 226.5161,
+    "lines": 1,
+    "fwhm_nm": [
+      0.006482577091857921
+    ],
+    "methods": [
+      "SCP"
+    ]
+  },
+  {
+    "element": "Na",
+    "charge": 0,
+    "wavelength_nm": 818.55053,
+    "lines": 1,
+    "fwhm_nm": [
+      0.38977003541864846
+    ],
+    "methods": [
+      "SCP"
+    ]
+  },
+  {
+    "element": "K",
+    "charge": 0,
+    "wavelength_nm": 693.81995,
+    "lines": 1,
+    "fwhm_nm": [
+      0.938229765702841
+    ],
+    "methods": [
+      "SCP"
+    ]
+  },
+  {
+    "element": "Al",
+    "charge": 0,
+    "wavelength_nm": [
+      308.30462
+    ],
+    "lines": 1,
+    "fwhm_nm": [
+      0.04258925220247554
+    ],
+    "methods": [
+      "SCP"
+    ]
+  },
+  {
+    "element": "Li",
+    "charge": 0,
+    "wavelength_nm": [
+      610.522,
+      610.533,
+      610.535
+    ],
+    "lines": 3,
+    "fwhm_nm": [
+      0.3717494689134175,
+      0.3717628649286201,
+      0.3717653005936788
+    ],
+    "methods": [
+      "SCP",
+      "SCP",
+      "SCP"
+    ]
+  }
+]
