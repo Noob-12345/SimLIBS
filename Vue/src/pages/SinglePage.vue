@@ -22,7 +22,8 @@ async function run() {
 </script>
 <template><WorkbenchLayout kind="single">
   <template #controls="{ disabled }"><ParameterEditor v-model="single.params" scope="single" cards :disabled="disabled" /><div class="divider" /><CompositionEditor v-model="single.composition" scope="single" :disabled="disabled" @issue="compositionError = $event" /><button class="btn primary full" :disabled="!!running || !!inputError" @click="run"><AppIcon name="play" :size="16" />{{ single.result ? '重新生成' : '生成光谱' }}</button></template>
-  <div v-if="dirty" class="draft-notice"><span>草稿已更改</span>运行后更新图谱。</div><SpectrumChart v-if="spectrum" :spectrum="spectrum" label="计算结果" /><section v-else class="panel empty-state"><EmptyStateArt /><h3>尚未生成光谱</h3><p>配置左侧实验参数与元素后点击“生成光谱”。</p></section>
+  <template #spectrum><SpectrumChart v-if="spectrum" :spectrum="spectrum" label="计算结果" /><section v-else class="panel empty-state"><EmptyStateArt /><h3>尚未生成光谱</h3><p>配置左侧实验参数与元素后点击“生成光谱”。</p></section></template>
+  <div v-if="dirty" class="draft-notice"><span>草稿已更改</span>运行后更新图谱。</div>
   <div v-if="spectrum" class="metrics-row spectrum-metrics">
     <div class="panel metric"><span>实验参数</span><dl class="summary-parameters"><div><dt>Te / eV</dt><dd>{{ format(spectrum.params.te) }}</dd></div><div><dt>Ne / cm⁻³</dt><dd>{{ format(spectrum.params.ne) }}</dd></div><div><dt>R (λ/Δλ)</dt><dd>{{ spectrum.params.resolution }}</dd></div></dl></div>
     <div class="panel metric"><span>λ / nm</span><strong class="summary-wavelength"><span>{{ format(spectrum.params.low) }}</span><span>–{{ format(spectrum.params.high) }}</span></strong></div>

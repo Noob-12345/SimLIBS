@@ -10,7 +10,7 @@ export const scan = reactive({ params: defaults(), composition: [elementDraft()]
 export const tasks = reactive<DemoTask[]>([])
 export const activeTask = (kind: TaskKind) => computed(() => tasks.find(t => t.kind === kind && t.status === 'running'))
 const timers = new Map<string, ReturnType<typeof setTimeout>>()
-const starting = new Set<TaskKind>()
+export const starting = reactive(new Set<TaskKind>())
 const polling = new Map<string,Promise<void>>()
 const failures = new Map<string,number>()
 const resultRevision: Record<TaskKind,number> = {single:0,batch:0,scan:0,advanced:0}

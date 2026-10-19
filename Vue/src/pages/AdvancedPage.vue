@@ -16,7 +16,7 @@ const running = activeTask('advanced'), submitError = ref(''), compositionError 
 const fileInput = ref<HTMLInputElement>(), importRevision = ref(0)
 const { pending: saving, feedback, failed: saveFailed, run: saveOutput } = useFileSave()
 const nist = computed(() => advanced.model === 'nist')
-const cards = [{ key: 'te', label: 'Te', unit: '/ eV' }, { key: 'ne', label: 'Ne', unit: '/ cm⁻³' }, { key: 'resolution', label: 'R', unit: '(λ/Δλ)' }] as const
+const cards = [{ key: 'te', label: 'Te', unit: 'eV' }, { key: 'ne', label: 'Ne', unit: 'cm⁻³' }, { key: 'resolution', label: 'R', unit: '(λ/Δλ)' }] as const
 const chargeChoices = [0, 1, 2].map(value => ({ value: String(value), label: `${value}+` }))
 const issues = computed(() => parameterIssues({ ...advanced.params, mode: 'local', broaden: false, resample: false }))
 const attrs = (key: string) => issueAttrs(issues.value[key], 'advanced-draft-error')
@@ -51,7 +51,7 @@ function saveMissing() { const job = missingTask.value?.id; if (job) void saveOu
       <fieldset class="control-fieldset advanced-parameters" :disabled="disabled">
         <section class="parameter-section">
           <div class="panel-heading"><h2>实验参数</h2><span class="section-number">01</span></div>
-          <div class="parameter-cards"><div v-for="field in cards" :key="field.key" class="field precise-field parameter-card" :data-parameter="field.key"><label :for="`advanced-${field.key}`">{{ field.label }}<span class="card-title-unit">{{ field.unit }}</span></label><div class="card-value"><input :id="`advanced-${field.key}`" v-model="advanced.params[field.key]" type="text" :inputmode="field.key === 'resolution' ? 'numeric' : 'decimal'" :aria-label="`${field.label} ${field.unit}`" v-bind="attrs(field.key)" @blur="field.key === 'ne' && densityBlur()" /></div></div></div>
+          <div class="parameter-cards"><div v-for="field in cards" :key="field.key" class="field precise-field parameter-card" :data-parameter="field.key"><label :for="`advanced-${field.key}`">{{ field.label }}<span class="card-title-unit">{{ field.key === 'resolution' ? '' : ' ' }}{{ field.unit }}</span></label><div class="card-value"><input :id="`advanced-${field.key}`" v-model="advanced.params[field.key]" type="text" :inputmode="field.key === 'resolution' ? 'numeric' : 'decimal'" :aria-label="`${field.label} ${field.unit}`" v-bind="attrs(field.key)" @blur="field.key === 'ne' && densityBlur()" /></div></div></div>
           <p class="hint">Te、Ne 为名义参数；R 仅在启用仪器展宽时控制线宽。</p>
           <div class="row2">
             <label for="advanced-low" class="field compact">波长下限 / nm<input id="advanced-low" v-model="advanced.params.low" type="text" inputmode="decimal" aria-label="波长下限 / nm" v-bind="attrs('low')" /></label>
@@ -102,10 +102,10 @@ function saveMissing() { const job = missingTask.value?.id; if (job) void saveOu
       </fieldset>
       <button class="btn primary full" :disabled="!!running || !!inputError || reading" @click="run">运行高级模拟</button>
     </template>
+    <AdvancedResults :spectrum="advanced.result" />
     <section class="panel activity-panel"><h2>高级物理模拟 (LTE Slab)</h2><p class="hint">名义薄谱、基体薄谱和修正谱使用共同尺度。逐线独立模型，不预测连续谱、自反转、时空梯度或重叠谱线耦合传输。新草稿不会改写已完成结果。</p></section>
     <section v-if="missingTask" class="panel activity-panel"><h2>Stark 系数待补充</h2><p>任务 {{ missingTask.id }} 缺少 {{ missingTask.starkMissing?.count }} 条逐线系数；未生成不完整谱。</p><button class="btn" :disabled="saving" @click="saveMissing">下载完整缺失清单</button><p class="hint">填写 W 和系数出处后导入上方 Stark CSV，再运行高级模拟。上一成功结果及其导出仍保留。</p></section>
     <p v-if="feedback" :class="saveFailed ? 'error-text' : 'hint'" role="status">{{ feedback }}</p>
-    <AdvancedResults :spectrum="advanced.result" />
     <TaskActivity kind="advanced" :error="inputError || submitError" />
   </WorkbenchLayout>
 </template>
