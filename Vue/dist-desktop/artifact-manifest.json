@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "deliveryDirectory": "dist-desktop",
-  "collectedAt": "2026-10-19T07:12:26.950Z",
+  "collectedAt": "2026-10-19T08:47:13.157Z",
   "runtime": "Windows x64 / system WebView2 / external Python 3.11",
   "frontend": "embedded static dist",
   "scientificSource": "real Python / local LTE-Saha / NIST",
@@ -12,14 +12,14 @@
       "file": "SimLIBS.exe",
       "source": "src-tauri\\target\\release\\simlibs-vue.exe",
       "bytes": 5125120,
-      "sha256": "61ee77f1cd1c21ba3c8f7c084e06a6fcf52aa869af2e5bb643f6bad9e904c2a3"
+      "sha256": "7b0bad100553fa9e728bef40e79a5bdf816a5b5e8c7ce376d2eb8800e2585795"
     },
     {
       "kind": "nsis-installer",
       "file": "SimLIBS-Setup.exe",
       "source": "src-tauri\\target\\release\\bundle\\nsis\\SimLIBS_0.1.0_x64-setup.exe",
-      "bytes": 1785109,
-      "sha256": "1e8482b60cdb94a5eb8b2a49589126d4f06cc5ff34fbe01e9d40353bd354f8af"
+      "bytes": 1786072,
+      "sha256": "57678154b487e0b02125e4277baad5ef9e5d553edd0d290c214a405021e7508b"
     },
     {
       "kind": "python-backend-resource",
@@ -36,8 +36,8 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/simlibs_ui/advanced_nist.py",
-      "bytes": 21814,
-      "sha256": "2419e52d9998f3e7c26678b295dd579e6bbbd6eb6021b238b9ba7d28f6f5d747"
+      "bytes": 23416,
+      "sha256": "85ee4c7f21f5427cb8e9c1180be384bcec835e848e54d22dd6962fc8661f92c8"
     },
     {
       "kind": "python-backend-resource",
@@ -210,8 +210,8 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/source/simLIBS/nist_self_absorption.py",
-      "bytes": 29173,
-      "sha256": "73e7042af8360122d809fe1f3439a990192feb82b4aee860ee7b3116380481a5"
+      "bytes": 30062,
+      "sha256": "4bb5e76105e77fb2355e2cdcb411b4d32bfe4d4b7515253e857ae86e7f09683b"
     },
     {
       "kind": "python-backend-resource",

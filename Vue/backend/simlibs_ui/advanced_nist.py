@@ -6,6 +6,7 @@ import importlib
 import io
 import math
 import os
+import re
 from pathlib import Path
 import time
 from urllib.parse import urlencode
@@ -23,6 +24,14 @@ VERSION = 'nist-lines-self-absorption-1'
 MAX_CSV_BYTES = 2_000_000
 MAX_RESPONSE_BYTES = 4_000_000
 MAX_TOTAL_RESPONSE_BYTES = 32_000_000
+
+
+class NISTResponseDataError(ValueError):
+    """A valid service no-data response is not transport/format/atomic-data failure."""
+    def __init__(self, message, code, response_evidence):
+        super().__init__(message)
+        self.code = code
+        self.response_evidence = response_evidence
 
 
 def number(value, name, low=0, high=1e30):
@@ -155,7 +164,11 @@ def simulate(p, s, raw, cancelled=lambda: False, emit=None, request_get=None, re
             if code.startswith('stark_'):
                 error.args = (f'Stark数据处理失败[{code}]：{error}',)
             if os.environ.get('SIMLIBS_TASK_DIR'):
-                write_json(Path(os.environ['SIMLIBS_TASK_DIR'])/'stark-error.json', {'code': code, 'message': str(error)})
+                name = 'nist-response-error.json' if code.startswith('nist_') else 'stark-error.json'
+                data = {'code': code, 'message': str(error)}
+                if isinstance(error, NISTResponseDataError):
+                    data['response_evidence'] = error.response_evidence
+                write_json(Path(os.environ['SIMLIBS_TASK_DIR'])/name, data)
         raise
 
 
@@ -174,7 +187,7 @@ def _simulate(p, s, raw, cancelled, emit, request_get, request_stark):
             stark_cache_dir=cache_directory())
     request_get = request_get or requests.get
     directory = Path(os.environ['SIMLIBS_TASK_DIR']) if os.environ.get('SIMLIBS_TASK_DIR') else None
-    cache, evidence = {}, []
+    cache, payloads, evidence = {}, {}, []
     response_bytes = 0
 
     def check():
@@ -238,21 +251,35 @@ def _simulate(p, s, raw, cancelled, emit, request_get, request_stark):
                                 chunks.append(chunk)
                             content = b''.join(chunks)
                         html = content.decode('utf-8')
+                        response_evidence = {'url': url, 'response_sha256': hashlib.sha256(content).hexdigest(), 'bytes': size}
+                        if re.search(r'\bNo\s+lines\s+are\s+available\s+in\s+ASD\s+with\s+the\s+parameters\s+selected\b', html, re.I):
+                            raise NISTResponseDataError(
+                                f'NIST 在当前查询条件下未提供可用谱线：{", ".join(elements)}，{req_low:g}–{req_high:g} nm；请核对组成、波段及电离范围。',
+                                'nist_no_lines', response_evidence)
                         table = lines_engine.parse_sticks(html)
-                        payload = engine.parse_atomic_payload(html, include_levels=o['self_absorption']) if o['stark_broadening'] else None
-                        cache[url] = (table, payload)
+                        cache[url] = (table, html)
                         response_bytes += size
-                        evidence.append({'url': url, 'response_sha256': hashlib.sha256(content).hexdigest(), 'bytes': size})
+                        evidence.append(response_evidence)
                         break
                     except (requests.RequestException, TimeoutError) as error:
                         if attempt == 2:
                             raise RuntimeError('NIST请求失败：'+str(error)) from error
                         pause(min(1, max(0, end-time.monotonic())))
-            table, payload = cache[url]
+            table, html = cache[url]
             wave = table['wavelength']
             upper = wave <= high if index == len(bands)-1 else wave < high
-            output.append((table.loc[(wave >= low) & upper].copy(), payload))
-        return output
+            output.append((table.loc[(wave >= low) & upper].copy(), html, url))
+        if not any(np.any(lines_engine.line_strengths(table)[1] > 0) for table, _, _ in output):
+            raise NISTResponseDataError(
+                f'NIST 返回的谱线表在当前范围内未找到非零有效跃迁：{", ".join(elements)}，{actual.low_w:g}–{actual.upper_w:g} nm。',
+                'nist_zero_transitions', {'bands': list(evidence)})
+        result = []
+        for table, html, url in output:
+            check()
+            if o['stark_broadening'] and url not in payloads:
+                payloads[url] = engine.parse_atomic_payload(html, include_levels=o['self_absorption'])
+            result.append((table, payloads.get(url)))
+        return result
 
     report(2, '校验Stark系数与高级参数')
     prepared, missing, matched = [], [], []
