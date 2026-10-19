@@ -119,8 +119,8 @@ class RealBackend:
         except Exception:
             pass
         try:
-            data.update(source=Settings().source, line_database=Settings().line_database, python=sys.executable)
-            return Settings(**data).validated()
+            from simlibs_ui.library_settings import load_service_settings
+            return load_service_settings(data)
         except Exception:
             return Settings().validated()
 
@@ -135,22 +135,45 @@ class RealBackend:
             'dynamic_deadline': s.dynamic_deadline, 'tls_verify': s.tls_verify,
             'python': s.python, 'chrome': s.chrome, 'driver': s.driver,
             'output_dir': s.output, 'source': s.source,
+            'line_database_override': s.line_database_override,
+            'line_database': s.line_database,
+            'default_line_database': Settings().line_database,
         }
 
     def save_settings(self, settings: Dict[str, Any]) -> Dict[str, Any]:
-        current = self._settings.to_dict()
-        for key, value in (settings or {}).items():
-            their = self._SET_MAP.get(key, key)
-            if their in current and their not in ('source', 'line_database', 'python'):
-                current[their] = value
-        try:
-            candidate = Settings(**current).validated()
-        except (ValueError, TypeError) as exc:
-            raise ApiError(400, str(exc), 'validation')
-        from simlibs_ui.storage import write_json
-        write_json(self._settings_path, candidate.to_dict())
-        self._settings = candidate
-        return self.get_settings()
+        if not isinstance(settings, dict):
+            raise ApiError(400, '设置须为对象', 'validation')
+        with self._lock:
+            if 'settings_rollback' in settings:
+                undo = getattr(self, '_settings_undo', None)
+                if set(settings) != {'settings_rollback'} or not undo or settings['settings_rollback'] != undo[0] or self._settings is not undo[2]:
+                    raise ApiError(409, '设置已变化，不能恢复过期保存', 'conflict')
+                from simlibs_ui.storage import write_json
+                write_json(self._settings_path, undo[1].to_dict())
+                self._settings = undo[1]
+                self._settings_undo = None
+                return self.get_settings()
+            previous = self._settings
+            current = self._settings.to_dict()
+            for key, value in settings.items():
+                their = self._SET_MAP.get(key, key)
+                if their in current and their not in ('source', 'line_database', 'line_database_override', 'python'):
+                    current[their] = value
+            try:
+                candidate = Settings(**current).validated()
+                if 'line_database_override' in settings:
+                    from simlibs_ui.library_settings import with_library_override
+                    candidate = with_library_override(candidate, settings['line_database_override'])
+            except (ValueError, TypeError, OSError) as exc:
+                raise ApiError(400, str(exc), 'validation') from exc
+            from simlibs_ui.storage import write_json
+            write_json(self._settings_path, candidate.to_dict())
+            self._settings = candidate
+            # Restore exactly the server-owned prior snapshot, including unavailable
+            # custom media. A token cannot validate/bypass an arbitrary user path.
+            token = uuid.uuid4().hex
+            self._settings_undo = (token, previous, candidate)
+            return dict(self.get_settings(), settings_rollback=token)
 
     # ------------------------------------------------------------------
     # 引擎状态 / 默认参数 / 预览
@@ -241,12 +264,13 @@ class RealBackend:
         )
 
     def start_single(self, req: SingleRequest) -> str:
+        settings = self._settings
         p = self._to_parameters(req.params, req.composition)
-        self._validate_local(p)
+        self._validate_local(p, settings=settings)
         payload = {'parameters': p.to_dict()}
         summary = (f"{req.params.summary()} · "
                    + " / ".join(f"{it.el} {it.pct:g}%" for it in req.composition))
-        return self._launch('单次模拟', 'single', payload, summary)
+        return self._launch('单次模拟', 'single', payload, summary, settings=settings)
 
     def start_advanced(self, body):
         from simlibs_ui.advanced import effective
@@ -261,6 +285,7 @@ class RealBackend:
         return self._launch('高级模拟','advanced',{'parameters':p.to_dict(),'advanced':config},label+' / 参数化基体（未标定）')
 
     def start_batch(self, req: BatchRequest) -> str:
+        settings = self._settings
         p = self._to_parameters(req.params, req.compositions[0].items)
         rows = []
         for comp in req.compositions:
@@ -277,9 +302,9 @@ class RealBackend:
         }
         payload = {'parameters': p.to_dict(), 'spec': spec, 'compositions': rows}
         if req.template_plan is not None:payload['template_plan']=req.template_plan
-        self.validate_batch(req)
+        self.validate_batch(req, settings=settings)
         summary = f'{req.n_samples} 样本 · seed={req.seed} · {req.params.summary()}'
-        return self._launch('批量模拟', 'batch', payload, summary)
+        return self._launch('批量模拟', 'batch', payload, summary, settings=settings)
 
     def resume(self,job_id):
         from simlibs_ui.batch_pipeline import load_checkpoint
@@ -290,12 +315,13 @@ class RealBackend:
             active=self.__dict__.setdefault('_resume_active',{})
             if job_id in active:raise ApiError(409,'该任务正在续跑','conflict')
             active[job_id]=None
-        path=Path(job.get('expected_result_path') or job.get('result_path') or str(Path(self._settings.output)/'.jobs'/job_id/'result'/'manifest.json')).parent/'checkpoint.json'
+        settings = self._settings
+        path=Path(job.get('expected_result_path') or job.get('result_path') or str(Path(settings.output)/'.jobs'/job_id/'result'/'manifest.json')).parent/'checkpoint.json'
         try:
             if not path.is_file():raise ApiError(409,'旧任务没有确定计划/checkpoint，不能伪造恢复','no_checkpoint')
-            plan,records=load_checkpoint(path,self._settings)
+            plan,records=load_checkpoint(path,settings)
             if json.loads(path.read_text(encoding='utf-8')).get('status')=='completed':raise ApiError(409,'完整任务已成功，无需续跑','conflict')
-            jid=self._launch('批量模拟','resume',{'checkpoint_path':str(path)},f'续跑 {job_id} · 已完成{len(records)}/{len(plan["entries"])}')
+            jid=self._launch('批量模拟','resume',{'checkpoint_path':str(path)},f'续跑 {job_id} · 已完成{len(records)}/{len(plan["entries"])}',settings=settings)
             with self._lock:
                 self._jobs[jid]['resume_from']=job_id
                 if self._jobs[jid]['status'] in TERMINAL_STATUSES:active.pop(job_id,None)
@@ -307,24 +333,26 @@ class RealBackend:
             if isinstance(error,(ValueError,OSError,KeyError)):raise ApiError(409,f'checkpoint校验失败：{error}','checkpoint') from error
             raise
 
-    def validate_batch(self,req):
+    def validate_batch(self,req,settings=None):
         if req.params.mode!='local':return
+        settings = settings or self._settings
         from simlibs_ui.offline_database import capabilities
-        report=capabilities(self._settings.line_database)
+        report=capabilities(settings.line_database)
         if req.template_plan:
-            for entry in req.template_plan['entries']:self._validate_local(Parameters.from_dict(entry['parameters']),report)
+            for entry in req.template_plan['entries']:self._validate_local(Parameters.from_dict(entry['parameters']),report,settings)
         else:
-            for comp in req.compositions:self._validate_local(self._to_parameters(req.params,comp.items),report)
+            for comp in req.compositions:self._validate_local(self._to_parameters(req.params,comp.items),report,settings)
 
-    def _validate_local(self,p,report=None):
+    def _validate_local(self,p,report=None,settings=None):
         if p.webscraping!='local':return
         from simlibs_ui.offline_database import preflight
-        try:preflight(p,self._settings.line_database,report)
+        try:preflight(p,(settings or self._settings).line_database,report)
         except (OSError,ValueError,KeyError,TypeError) as error:raise ApiError(400,str(error),'validation') from error
 
     def start_scan(self, req: ScanRequest) -> str:
+        settings = self._settings
         p = self._to_parameters(req.params, req.composition)
-        self._validate_local(p)
+        self._validate_local(p, settings=settings)
         axis = AXIS_MAP[req.axis]
         # Web 契约的 Ne 轴以 10^ 指数表达；真实扫描使用绝对 Ne。
         start = 10 ** req.start if req.axis == 'ne' else req.start
@@ -333,11 +361,11 @@ class RealBackend:
         comp_txt = " / ".join(f"{it.el} {it.pct:g}%" for it in req.composition)
         payload = {'parameters': p.to_dict(), 'spec': spec}
         summary = f'{axis} {req.start:g}→{req.end:g} · {req.frames} 帧 · {req.params.summary()} · {comp_txt}'
-        return self._launch('扫描动画', 'scan', payload, summary)
+        return self._launch('扫描动画', 'scan', payload, summary, settings=settings)
 
-    def _launch(self, kind_label: str, worker_kind: str, payload: Dict[str, Any], summary: str) -> str:
+    def _launch(self, kind_label: str, worker_kind: str, payload: Dict[str, Any], summary: str, *, settings=None) -> str:
         from simlibs_ui.jobs import JobController
-        controller = JobController(self._settings)
+        controller = JobController(settings or self._settings)
         try:
             job_id = controller.start(worker_kind, **payload)
         except ValueError as exc:

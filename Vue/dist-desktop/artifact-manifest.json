@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "deliveryDirectory": "dist-desktop",
-  "collectedAt": "2026-10-19T01:59:19.217Z",
+  "collectedAt": "2026-10-19T07:12:26.950Z",
   "runtime": "Windows x64 / system WebView2 / external Python 3.11",
   "frontend": "embedded static dist",
   "scientificSource": "real Python / local LTE-Saha / NIST",
@@ -11,15 +11,15 @@
       "kind": "windows-x64-application",
       "file": "SimLIBS.exe",
       "source": "src-tauri\\target\\release\\simlibs-vue.exe",
-      "bytes": 5123584,
-      "sha256": "1bc4d39928a4c46bafd45a8a20ede32a8841e38ea0d36f76d7afc329b9153da7"
+      "bytes": 5125120,
+      "sha256": "61ee77f1cd1c21ba3c8f7c084e06a6fcf52aa869af2e5bb643f6bad9e904c2a3"
     },
     {
       "kind": "nsis-installer",
       "file": "SimLIBS-Setup.exe",
       "source": "src-tauri\\target\\release\\bundle\\nsis\\SimLIBS_0.1.0_x64-setup.exe",
-      "bytes": 1782745,
-      "sha256": "bad96bdbe990419da6aa1b7f8e24b174c391965a2b635435c554d231864bdea0"
+      "bytes": 1785109,
+      "sha256": "1e8482b60cdb94a5eb8b2a49589126d4f06cc5ff34fbe01e9d40353bd354f8af"
     },
     {
       "kind": "python-backend-resource",
@@ -83,6 +83,12 @@
     },
     {
       "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/library_settings.py",
+      "bytes": 1958,
+      "sha256": "a0dc60609dbcc8301d0d0703a84669fabaee3e69a84dd14f51db509d95bdcd3d"
+    },
+    {
+      "kind": "python-backend-resource",
       "file": "backend/simlibs_ui/models.py",
       "bytes": 14665,
       "sha256": "a86297d95497142d87d9e06322fc47ab40829d85fa7e4add597b30b026a7dc25"
@@ -138,8 +144,8 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/simlibs_ui/settings.py",
-      "bytes": 3155,
-      "sha256": "02925b9e36bd8f932f7ba88c340eebd0eebb29f17ed80e5a8d56a620204495bc"
+      "bytes": 3193,
+      "sha256": "feaa2338b715ffb7ad28ffd59dfdd696a74c424ab9f02879f37bb7a03c1812af"
     },
     {
       "kind": "python-backend-resource",
@@ -174,8 +180,8 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/web/real_backend.py",
-      "bytes": 48863,
-      "sha256": "12e9f206dc47ad15c6c7ee6b5a8d9e3bbbc01512f51cb6047abdf35ab7b7cf33"
+      "bytes": 50818,
+      "sha256": "5b178f41713d72f08209d7ff7d9d2df7402b15f9d5fe29dd3134aa75b65c1658"
     },
     {
       "kind": "python-backend-resource",

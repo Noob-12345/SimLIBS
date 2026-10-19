@@ -67,7 +67,6 @@ function saveMissing() { const job = missingTask.value?.id; if (job) void saveOu
             <SwitchHint v-model="absorptionSwitch" label="逐线自吸收" description="按布居与光程计算逐线吸收及展宽。NIST 模型开启自吸收会自动开启 Stark；关闭自吸收保留 Stark 与仪器展宽。" :disabled="disabled" />
             <SwitchHint v-model="advanced.instrumentBroadening" label="仪器展宽（Gaussian）" description="仪器响应独立开关，不改变 Stark 或自吸收。启用后由 R 控制高斯线宽；先计算内禀谱，再应用仪器响应。" :disabled="disabled" />
           </div>
-          <p class="hint">{{ nist ? '关 Stark 同时关自吸收；开自吸收自动开 Stark。仪器展宽独立。' : '离线论文模型固有 Stark，固定开启；仪器展宽独立。' }}</p>
           <details class="advanced-help"><summary>模型与线宽约定</summary>
             <template v-if="nist"><p class="hint">在线取得 NIST 线强；Stark 需要跃迁和完整逐线系数，自吸收还需要全阶段能级与布居。默认 Mg 100%、真空 285.27–285.33 nm；发射电荷范围为 0–2。</p><p class="hint">仪器 w=λ/R 为高斯 1/e 半宽，FWHM=2√ln2·λ/R，R 不进入 τ。仅 Stark 为 Lorentz，叠加仪器为 Voigt；两者都关闭时为守恒面积/重心的网格投影，高度依赖步长，不代表物理线宽。</p></template>
             <template v-else><p class="hint">离线论文 Table 1 的 Mg、Ca、Zn 共31条谱线与 NIST I/II/III 能级快照；仅此模型保留 5% 窄带限制。</p><p class="hint">离线约定：仪器 FWHM=λ/R；Stark/自吸收逐线计算在仪器响应之前，R 不进入 τ。</p></template>
