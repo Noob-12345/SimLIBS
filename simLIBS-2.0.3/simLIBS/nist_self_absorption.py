@@ -360,7 +360,7 @@ def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config, sel
             wavelength_convention='vacuum (NIST show_av=3)',
             self_absorption=False, stark_broadening=True,
             assumptions=['NIST line areas preserved; no self-absorption population/opacity calculation',
-                         'Local coefficients retain their reference convention; STARK-B uses published temperature data/fits'])
+                         'Local coefficients retain their reference convention; STARK-B HTML uses published temperature data/fits; VAMDC uses in-range linear table interpolation'])
     active = {el: p/100 for el, p in zip(elements, pcts) if p > 0}
     populations = {}
     for el in active:
@@ -398,7 +398,7 @@ def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config, sel
                     assumptions=['NIST LTE level set and Saha stages including bare nuclei',
                                  'Independent lines; no coupled overlapping-line transfer',
                                  'Paper center attenuation and empirical width exponent -0.54',
-                                 'Local coefficients retain their reference convention; STARK-B uses published temperature data/fits'])
+                                 'Local coefficients retain their reference convention; STARK-B HTML uses published temperature data/fits; VAMDC uses in-range linear table interpolation'])
     return records, metadata
 
 
@@ -476,6 +476,10 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
     info['stark_data'] = dict(source_mode=config.stark_source, methods=list(config.stark_methods),
                               local_line_count=sum('stark_dataset_id' not in r for r in records),
                               stark_b_line_count=sum('stark_dataset_id' in r for r in records),
+                               vamdc_line_count=sum(r.get('stark_source_format') == 'vamdc-xsams' for r in records),
+                               method_unreported_count=sum(r.get('stark_method') == 'unreported' for r in records),
+                               temperature_interpolated_count=sum(r.get('stark_temperature_method') ==
+                                   'linear interpolation of tabulated widths' for r in records),
                               isolated_limit_unknown_count=sum('stark_dataset_id' in r and
                                   r.get('stark_isolated_limit_cm3') is None for r in records),
                               sources=sorted({r['stark_source'] for r in records}))

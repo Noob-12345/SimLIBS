@@ -467,20 +467,50 @@ class SimulatedLIBS(object):
 
     def plot(
         self,
-        color=(random.random(), random.random(), random.random()),
+        color=None,
         title="Simulated LIBS",
     ):
-        """绘制当前 interpolated_spectrum 总谱，便于检查最新重采样结果。"""
-        plt.plot(
+        """按统一样式绘制总谱，图例标注实际生效的展宽/自吸收模式。
+
+        默认新图为 7 x 5 英寸；已有坐标轴可继续叠加光谱，颜色沿用其循环。
+        动态模式标为 NIST dynamic，其线形由网页决定。显示窗口仍由调用方控制。
+        """
+        if not plt.get_fignums():
+            plt.figure(figsize=(7, 5))
+        ax = plt.gca()
+
+        if self.webscraping == "dynamic":
+            mode = "NIST dynamic"
+        else:
+            modes = []
+            if self.instrument_broadening:
+                modes.append("instrumental")
+            if self.stark_broadening:
+                modes.append("Stark")
+            mode = " + ".join(modes) or "unbroadened"
+            if self.self_absorption:
+                mode += " + self-absorption"
+
+        ax.plot(
             self.interpolated_spectrum["wavelength"],
             self.interpolated_spectrum["intensity"],
-            label=str(self.elements) + str(self.percentages),
+            label=mode,
             color=color,
+            linewidth=2.2,
         )
-        plt.grid()
-        plt.title(title)
-        plt.xlabel(r"$\lambda$ [nm]")
-        plt.ylabel("Line Intensity [a.u.]")
+        for spine in ax.spines.values():
+            spine.set_linewidth(1.8)
+        ax.tick_params(axis="both", which="both", direction="in", top=True,
+                       right=True, width=2.0, length=6, labelsize=12)
+        for tick_label in ax.get_xticklabels() + ax.get_yticklabels():
+            tick_label.set_fontweight("semibold")
+        ax.set_title(title, fontsize=15, fontweight="semibold")
+        ax.set_xlabel(r"$\lambda$ [nm]", fontsize=15, fontweight="semibold")
+        ax.set_ylabel("Line Intensity [a.u.]", fontsize=15, fontweight="semibold")
+        ax.grid(True, alpha=0.3)
+        ax.legend(loc="upper right", prop={"weight": "semibold", "size": 12},
+                  frameon=False)
+        ax.figure.tight_layout()
 
     def plot_ion_spectra(self):
         """绘制动态或静态 Stark/自吸收结果中的各离子分量，去掉 Sum(calc) 总和列。"""

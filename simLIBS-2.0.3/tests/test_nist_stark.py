@@ -73,6 +73,21 @@ class NISTStarkTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'NIST identity'):
             nist_stark.parse_identities('<h1>service error</h1>', element='Si', charge=1, cmev=CMEV)
 
+    def test_unreported_vamdc_method_is_explicit_and_respects_method_restrictions(self):
+        row = parse_table(HTML, element='Si', charge=1, dataset_id='223', method='SCP')[0]
+        row.update(method='unreported', source_format='vamdc-xsams')
+        identity = nist_stark.identify(self.line(), self.identities())
+        out, reason = nist_stark.match_width(self.line(), identity, [row], temperature_k=10000, ne=1e17)
+        self.assertEqual(reason, '')
+        self.assertIsNotNone(out)
+        self.assertEqual(out['stark_method'], 'unreported')
+        for methods in (('SCP',), ('MSE',)):
+            with self.subTest(methods=methods):
+                out, reason = nist_stark.match_width(self.line(), identity, [row], temperature_k=10000,
+                                                     ne=1e17, methods=methods)
+                self.assertIsNone(out)
+                self.assertIn('method', reason)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -205,7 +205,16 @@ SA = (1 - exp(-tau_center)) / tau_center，tau_center=0 时 SA=1
 | `stark_source` | `"auto"` | 本地缺失时自动查 STARK-B；`"local"` 只用用户/JSON |
 | `stark_cache_dir` | `None` | 原始数据快照目录；默认 `%LOCALAPPDATA%/simLIBS/stark-v1`，其他系统为用户 `.cache` |
 | `stark_allow_network` | `True` | `False` 只读已有 Stark/身份缓存；NIST 计算谱本身仍需联网 |
-| `stark_methods` | `("SCP", "MSE")` | 真实数据库计算方法优先序；只接受 SCP 时填 `("SCP",)` |
+| `stark_methods` | `("SCP", "MSE")` | 方法优先序；默认也允许 VAMDC 未导出方法的有来源记录，标为 `unreported`；填 `("SCP",)` 则严格只接受明确标注 SCP 的数据 |
+
+STARK-B 网页表单不可用时，程序自动查询官方版本化接口
+`https://stark-b.obspm.fr/12.07/vamdc/tap/sync`。服务报告截断的响应会分段补取，未能补全时终止取数；原始 XML 和来源 URL 验证后写入缓存。
+
+这个接口提供原始温度/密度表，但未导出网页中的温度拟合系数、计算方法和 C 参数。
+因此仅对 VAMDC 来源在表内按温度线性插值，并记录 `stark_temperature_method`、插值两端温度及原始参考密度；不做温度或高密度外推。
+`stark_method="unreported"` 和 `stark_isolated_limit_cm3=None` 分别表示方法与隔离线密度上限未知。
+这些状态及计数保存在逐线诊断与元数据中，不能据此声称已验证隔离线近似。
+缺少某条跃迁的已发布系数时仍报 `MissingStarkDataError`，保留缺失清单。
 
 ### 4.2 关闭自吸收，独立调用 Stark 展宽
 

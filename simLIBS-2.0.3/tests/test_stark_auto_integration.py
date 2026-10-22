@@ -48,6 +48,17 @@ class AutoStarkTests(unittest.TestCase):
             rows = resolve_stark([self.line()], NISTSelfAbsorptionConfig(stark_data=supplied), te=1, ne=1e17, cmev=CMEV)
         self.assertEqual(rows[0]['stark_width_nm'], .123)
 
+    def test_successful_source_without_usable_density_reports_the_actual_limit(self):
+        document = dict(payload=dict(format='vamdc-xsams', status='ok', datasets=[]))
+        with tempfile.TemporaryDirectory() as folder, \
+             patch('simLIBS.stark_b.StarkBClient.species', return_value=([], document)):
+            with self.assertRaises(MissingStarkDataError) as raised:
+                resolve_stark([self.line()], NISTSelfAbsorptionConfig(stark_cache_dir=folder),
+                              te=1., ne=1e19, cmev=CMEV)
+        reason = raised.exception.missing_lines.stark_missing_reason.iloc[0]
+        self.assertNotEqual(reason, 'ok')
+        self.assertIn('density', reason)
+
     def test_partial_coverage_preserves_supported_and_missing_diagnostics(self):
         other = self.line(wavelength_nm=637.313, gA_s=136000000., upper_eV=81191.34/CMEV)
         with tempfile.TemporaryDirectory() as folder:

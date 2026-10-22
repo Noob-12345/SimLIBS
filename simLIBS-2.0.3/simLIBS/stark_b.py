@@ -1,6 +1,7 @@
 """STARK-B 数据组件：取表、缓存、解析以及有出处的温度/密度换算。
 
-使用官网表格而非 TAP：TAP 会截断大查询，且不提供温度拟合与 C 参数。
+优先使用官网表格；网页不可用时改用官方版本化 VAMDC 服务。
+VAMDC 查询须补齐截断结果；未导出的拟合、方法和 C 参数明确记为未知。
 本组件不按邻近波长猜跃迁；能级身份匹配交给 nist_stark 组件。
 调试顺序：StarkBClient.species -> parse_table -> evaluate_width。
 物理约定见 https://stark-b.obspm.fr/index.php/description ：表内 w 是
@@ -15,6 +16,7 @@ from pathlib import Path
 import re
 import tempfile
 import time
+from urllib.parse import urlsplit
 
 from bs4 import BeautifulSoup
 import requests
@@ -174,12 +176,23 @@ def evaluate_width(row, *, temperature_k, ne, wavelength_nm):
         used = [below, above]
         fit = row['fit']
         if fit is None:
-            raise StarkBUnavailable('no published temperature fit')
-        a0, a1, a2 = fit['coefficients']
-        x = math.log10(temperature_k)
-        width = 10**(a0+a1*x+a2*x*x)
-        reference_ne = fit['ne']
-        temperature_method = 'published log10 fit'
+            if (row.get('source_format') != 'vamdc-xsams' or
+                    row.get('temperature_interpolation') != 'linear'):
+                raise StarkBUnavailable('no published temperature fit')
+            if below['ne'] != above['ne']:
+                raise StarkBUnavailable('mixed reference density in temperature interpolation')
+            if any(s['fwhm_angstrom'] is None or s['fwhm_angstrom'] <= 0 for s in used):
+                raise StarkBUnavailable('missing electron width for temperature interpolation')
+            fraction = (temperature_k-below['temperature_k'])/(above['temperature_k']-below['temperature_k'])
+            width = below['fwhm_angstrom'] + fraction*(above['fwhm_angstrom']-below['fwhm_angstrom'])
+            reference_ne = below['ne']
+            temperature_method = 'linear interpolation of tabulated widths'
+        else:
+            a0, a1, a2 = fit['coefficients']
+            x = math.log10(temperature_k)
+            width = 10**(a0+a1*x+a2*x*x)
+            reference_ne = fit['ne']
+            temperature_method = 'published log10 fit'
     if any(s['flag'] or s['fwhm_angstrom'] is None or s['fwhm_angstrom'] <= 0 for s in used):
         raise StarkBUnavailable('impact validity flag or missing electron width')
     # 拟合的原始密度可高于查询后的表密度；两者均约束外推方向。
@@ -201,6 +214,9 @@ def evaluate_width(row, *, temperature_k, ne, wavelength_nm):
                 stark_source='STARK-B: '+row['source'], stark_dataset_id=row['dataset_id'],
                 stark_method=row['method'], stark_temperature_k=temperature_k,
                 stark_temperature_method=temperature_method,
+                stark_temperature_bracket_k=[s['temperature_k'] for s in used],
+                stark_table_reference_ne_cm3=reference_ne,
+                stark_source_format=row.get('source_format', 'html'),
                 stark_temperature_range_k=[samples[0]['temperature_k'], samples[-1]['temperature_k']],
                 stark_isolated_limit_cm3=limit,
                 stark_wavelength_scale=ratio**2, stark_source_url=row['source_url'])
@@ -214,56 +230,101 @@ class StarkBClient:
     """
     def __init__(self, cache):
         self.cache = cache
+        self._prefer_vamdc = False
+        self._html_error = None
 
     def species(self, element, charge, ne):
         """返回 (完整候选表, 来源快照)；缺少物种与取数失败分别处理。"""
         if not re.fullmatch('[A-Z][a-z]?', element) or type(charge) is not int or charge < 0:
             raise ValueError('Invalid Stark species')
         key = f'stark-b-html-v1:{element}:{charge}:ne={ne:.12g}'
-        document = self.cache.get(key, lambda: self._fetch(element, charge, ne))
-        rows = []
-        for data in document['payload']['datasets']:
-            if 'html' in data:
+        def fetch_validated():
+            payload = self._fetch(element, charge, ne)
+            self._parse_payload(payload, element=element, charge=charge, ne=ne)
+            return payload
+        # 保留历史缓存键以兼容已有快照；实际格式由 payload.format 标识。
+        document = self.cache.get(key, fetch_validated)
+        rows = self._parse_payload(document['payload'], element=element, charge=charge, ne=ne)
+        for row in rows:
+            row['snapshot_sha256'] = document['sha256']
+            row['retrieved_utc'] = document['retrieved_utc']
+        return rows, document
+
+    @staticmethod
+    def _parse_payload(payload, *, element, charge, ne):
+        """缓存前后均校验来源；HTML 舍入密度与 VAMDC 原始参考密度分别处理。"""
+        try:
+            if payload.get('format') == 'vamdc-xsams':
+                from .stark_vamdc import parse_payload
+                return parse_payload(payload, element=element, charge=charge, ne=ne)
+            rows = []
+            for data in payload['datasets']:
+                if 'html' not in data:
+                    continue
                 parsed = parse_table(data['html'], element=element, charge=charge,
                                      dataset_id=data['id'], method=data['method'])
                 for row in parsed:
                     row['source_url'] = data['url']
-                    row['snapshot_sha256'] = document['sha256']
-                    row['retrieved_utc'] = document['retrieved_utc']
-                    # 网站显示 N 只有四位有效数字；HTTP 查询条件才是实际密度。
-                    # 保留显示值供核对，防止任意 Ne 被错误缩放或误判超范围。
                     for sample in row['samples']:
-                        sample['printed_ne_cm3'] = sample['ne']
+                        printed = sample['ne']
+                        if printed is None or printed <= 0:
+                            raise ValueError('missing or invalid table density')
+                        rounding = .5*10**(math.floor(math.log10(printed))-3)
+                        if abs(printed-ne) > rounding*(1+1e-12):
+                            raise ValueError(f'response density {printed:g} differs from requested density {ne:g}')
+                        sample['printed_ne_cm3'] = printed
                         sample['ne'] = ne
                 rows.extend(parsed)
-        return rows, document
+            return rows
+        except (ValueError, KeyError, IndexError, TypeError, AttributeError) as exc:
+            raise StarkDataAccessError(f'Invalid STARK-B source for {element} charge={charge}: {exc}') from exc
 
     @staticmethod
     def _request(session, method, url, **kwargs):
         """正常验证 TLS，HTTP/页面错误作为取数异常抛出，避免伪报成缺失谱线。"""
+        timeout = kwargs.pop('timeout', 60)
+        source = 'NIST ASD' if urlsplit(url).hostname == 'physics.nist.gov' else 'STARK-B'
         for attempt in range(3):
             try:
-                response = session.request(method, url, timeout=60, **kwargs)
+                response = session.request(method, url, timeout=timeout, **kwargs)
                 response.raise_for_status()
                 break
             except requests.RequestException as exc:
                 status = getattr(getattr(exc, 'response', None), 'status_code', None)
-                if attempt == 2 or (status is not None and status not in (429, 500, 502, 503, 504)):
-                    raise StarkDataAccessError(f'Stark data request failed: {url}: {exc}') from exc
+                if attempt == 2 or (status is not None and status not in (429, 500, 502, 503, 504, 522)):
+                    raise StarkDataAccessError(f'{source} data request failed: {url}: {exc}') from exc
                 # 这里的 POST 只选择查询条件，不提交数据；暂时断连可安全重试。
                 time.sleep(.5*(attempt+1))
         soup = BeautifulSoup(response.text, 'html.parser')
         if soup.select_one('#error') is not None:
-            raise StarkDataAccessError(f'STARK-B service error: {url}: {soup.get_text(" ", strip=True)}')
+            raise StarkDataAccessError(f'{source} service error: {url}: {soup.get_text(" ", strip=True)}')
         return response.text
 
     def _fetch(self, element, charge, ne):
+        """网页源失败时使用正式 VAMDC 接口；同次模拟不反复请求已失败的网页。"""
+        if not self._prefer_vamdc:
+            try:
+                return self._fetch_html(element, charge, ne)
+            except (StarkDataAccessError, ValueError, IndexError) as exc:
+                self._html_error = str(exc)
+                self._prefer_vamdc = True
+        from .stark_vamdc import fetch_species
+        try:
+            return fetch_species(element, charge, ne)
+        except (requests.RequestException, ValueError) as exc:
+            raise StarkDataAccessError(
+                f'STARK-B data access failed for {element} charge={charge}, Ne={ne:g}; '
+                f'HTML source: {self._html_error}; VAMDC source: {exc}') from exc
+
+    def _fetch_html(self, element, charge, ne):
         """只读官网表单：元素 -> 电离阶段 -> 数据集 -> 密度 -> 完整表。"""
         with requests.Session() as session:
-            def post(action, **params):
+            def post(action, *, request_timeout=60, **params):
                 return self._request(session, 'POST', BASE+'/index.php',
+                                     timeout=request_timeout,
                                      data=dict(module='stark_b', action=action, **params))
-            html = post('periodictable:datasets', element=element)
+            # 首步仅取元素列表；不可用时尽快切换后端，避免连续三个 60 秒等待。
+            html = post('periodictable:datasets', element=element, request_timeout=(5, 10))
             soup = BeautifulSoup(html, 'html.parser')
             # 网站的电离阶段罗马数字由调用处的 charge 唯一生成。
             roman = _roman(charge+1)
