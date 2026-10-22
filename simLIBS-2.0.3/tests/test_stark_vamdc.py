@@ -16,6 +16,7 @@ except ImportError:
 
 
 XML = (Path(__file__).parent / 'fixtures' / 'starkb_si_ii_6347.xsams.xml').read_text(encoding='utf-8')
+FE_XML = (Path(__file__).parent / 'fixtures' / 'starkb_fe_ii.xsams.xml').read_text(encoding='utf-8')
 NS = {'x': 'http://vamdc.org/xml/xsams/1.0'}
 URL = 'https://stark-b.obspm.fr/12.07/vamdc/tap/sync'
 
@@ -70,6 +71,33 @@ class VamdcTests(unittest.TestCase):
     def test_no_high_density_extrapolation_and_no_reference_relabel(self):
         self.assertEqual(self.rows(ne=1e18), [])
         self.assertTrue(all(s['ne'] == 1e17 for s in self.rows(ne=1e16)[0]['samples']))
+
+    def test_real_fe_ii_meanion_does_not_block_electron_widths(self):
+        # Unedited official response also contains Hydrogen and unreferenced meanion.
+        rows = stark_vamdc.parse_payload(payload(FE_XML), element='Fe', charge=1, ne=1e17)
+        self.assertEqual(len(rows), 9)
+        self.assertEqual(rows[0]['samples'][0]['fwhm_angstrom'], .117)
+        self.assertEqual([s['temperature_k'] for s in rows[0]['samples']],
+                         [5000., 10000., 30000., 50000., 100000., 150000.])
+        self.assertTrue(all(s['collider_ref'] == 'Xstarkb-P1' for row in rows for s in row['samples']))
+        with patch('requests.get', return_value=response(FE_XML)):
+            fetched = stark_vamdc.fetch_species('Fe', 1, 1e17)
+        self.assertEqual(fetched['status'], 'ok')
+        self.assertEqual(fetched['pages'][0]['xml'], FE_XML)
+
+    def test_missing_electron_reference_is_still_an_error(self):
+        def remove_reference(root):
+            species = root.find('x:Environments/x:Environment/x:Composition/x:Species', NS)
+            del species.attrib['speciesRef']
+        with self.assertRaisesRegex(ValueError, 'collider reference'):
+            self.rows(edited(remove_reference))
+
+    def test_meanion_mixed_with_electrons_is_still_an_error(self):
+        def mix_colliders(root):
+            composition = root.find('x:Environments/x:Environment/x:Composition', NS)
+            ET.SubElement(composition, '{%s}Species' % NS['x'], name='meanion')
+        with self.assertRaisesRegex(ValueError, 'mixed XSAMS collision environment'):
+            self.rows(edited(mix_colliders))
 
     def test_covering_densities_are_preserved_for_temperature_aware_selection(self):
         def add_density(root):

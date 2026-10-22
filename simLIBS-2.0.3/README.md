@@ -206,6 +206,7 @@ SA = (1 - exp(-tau_center)) / tau_center，tau_center=0 时 SA=1
 | `stark_cache_dir` | `None` | 原始数据快照目录；默认 `%LOCALAPPDATA%/simLIBS/stark-v1`，其他系统为用户 `.cache` |
 | `stark_allow_network` | `True` | `False` 只读已有 Stark/身份缓存；NIST 计算谱本身仍需联网 |
 | `stark_methods` | `("SCP", "MSE")` | 方法优先序；默认也允许 VAMDC 未导出方法的有来源记录，标为 `unreported`；填 `("SCP",)` 则严格只接受明确标注 SCP 的数据 |
+| `missing_stark` | `"error"` | `"error"` 在系数缺失时报错；`"unbroadened"` 保留这些谱线及 NIST 面积，关闭其 Stark/自吸收校正，仪器展宽仍按开关执行 |
 
 STARK-B 网页表单不可用时，程序自动查询官方版本化接口
 `https://stark-b.obspm.fr/12.07/vamdc/tap/sync`。服务报告截断的响应会分段补取，未能补全时终止取数；原始 XML 和来源 URL 验证后写入缓存。
@@ -214,7 +215,7 @@ STARK-B 网页表单不可用时，程序自动查询官方版本化接口
 因此仅对 VAMDC 来源在表内按温度线性插值，并记录 `stark_temperature_method`、插值两端温度及原始参考密度；不做温度或高密度外推。
 `stark_method="unreported"` 和 `stark_isolated_limit_cm3=None` 分别表示方法与隔离线密度上限未知。
 这些状态及计数保存在逐线诊断与元数据中，不能据此声称已验证隔离线近似。
-缺少某条跃迁的已发布系数时仍报 `MissingStarkDataError`，保留缺失清单。
+默认缺少某条跃迁的已发布系数时仍报 `MissingStarkDataError`，保留缺失清单；可用 `missing_stark="unbroadened"` 继续模拟，见第 5 节。
 
 ### 4.2 关闭自吸收，独立调用 Stark 展宽
 
@@ -244,7 +245,7 @@ libs_stark = SimulatedLIBS(
 stark_spectrum = libs_stark.get_interpolated_spectrum()
 ```
 
-该路径保留 NIST 计算面积，跳过自吸收所需的完整布居表、Saha、总密度和光学厚度计算。诊断中的 `tau_center=0`、`SA=1`，仍要求逐线 Stark 系数齐全。开启自吸收但将光程设为 0 的旧用法仍然可用。
+该路径保留 NIST 计算面积，跳过自吸收所需的完整布居表、Saha、总密度和光学厚度计算。诊断中的 `tau_center=0`、`SA=1`，默认要求逐线 Stark 系数齐全；允许缺失的设置见第 5 节。开启自吸收但将光程设为 0 的旧用法仍然可用。
 
 若已有 `libs_sa`，可读取它的 `unabsorbed_interpolated_spectrum` 作为相同仪器设置下的薄谱参考，避免再次联网。比较两次调用时，要同时核对仪器开关、R 和采样网格。
 
@@ -264,7 +265,11 @@ stark_spectrum = libs_stark.get_interpolated_spectrum()
 
 STARK-B 提供的是有文献出处的理论计算数据，SCP 为半经典微扰法，MSE 为改进半经验法；不等同于每条线都有实验测量。温度优先用表值，否则使用数据库发布的拟合系数；不在表的温度区间外外推。密度不超过数据集上限，保留碰撞近似标记和 `C/W` 隔离线条件；源表未给 C 时诊断中的隔离线上限为 `None`，不能据此保证高密度下的隔离线近似成立。[STARK-B 数据约定](https://stark-b.obspm.fr/index.php/description)
 
-自动查询仍不能保证任意元素、任意电离态、任意波段都有系数。任何参与计算的非零跃迁仍缺失时，抛出 `MissingStarkDataError`：`error.missing_lines` 包含缺失原因，`error.matched_lines` 包含已经成功匹配的谱线和来源。不会把只校正部分谱线的结果当作完整 Stark/自吸收谱。
+自动查询仍不能保证任意元素、任意电离态、任意波段都有系数。默认严格模式下，任何参与计算的非零跃迁仍缺失时，抛出 `MissingStarkDataError`：`error.missing_lines` 包含缺失原因，`error.matched_lines` 包含已经成功匹配的谱线和来源。
+
+如果希望系数缺失时继续生成光谱，设置 `self_absorption_config={"missing_stark": "unbroadened"}`（可与其他配置合并）。有系数的谱线正常计算；没有系数的谱线保留原始 NIST 面积，不施加 Stark 展宽。开启仪器展宽时，这些谱线仍使用仪器高斯；关闭仪器展宽时，将离散线投影到相邻网格点并保持面积与重心。启用自吸收时，这些缺失谱线也不作自吸收校正。
+
+运行后用 `libs.missing_stark_lines.to_csv("missing_stark.csv", index=False)` 导出缺失谱线、元素、电荷态、真空波长及缺失原因；`libs.matched_stark_lines` 保存已匹配系数。逐线诊断以 `stark_missing`、`stark_broadening_applied`、`self_absorption_applied` 区分处理方式，未能计算的内禀宽度和光学厚度保留为空。元数据 `self_absorption_metadata["stark_data"]` 记录匹配数、缺失数及处理策略。`test.py` 已启用此模式，并在保存光谱后导出缺失清单。
 
 下面的 Si II 示例已实测通过，系数由数据库自动获取：
 

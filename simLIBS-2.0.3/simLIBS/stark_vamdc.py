@@ -180,6 +180,11 @@ def _page_rows(page, element, charge, ne):
             electrons = []
             for species in composition:
                 collider = species.get('speciesRef')
+                # STARK-B 的 Fe II 数据把平均离子写为无 speciesRef 的
+                # meanion；它不是电子碰撞系数，不应阻断同页电子数据。
+                # 若与电子混在同一环境中，仍由下方的混合环境校验拒绝。
+                if collider is None and species.get('name', '').strip().lower() == 'meanion':
+                    continue
                 if collider not in particles and collider not in ions:
                     raise ValueError('Dangling XSAMS collider reference')
                 if collider in particles and particles[collider].get('name', '').lower() == 'electron':

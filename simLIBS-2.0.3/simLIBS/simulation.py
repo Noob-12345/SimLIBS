@@ -118,7 +118,8 @@ class SimulatedLIBS(object):
 
         建议断点：retrieve_data_static 检查网页解析，prepare_nist_absorption
         检查跃迁/布居/Stark，_render_paper_model 检查结果回写。缺失系数时查看
-        MissingStarkDataError.missing_lines；动态模式只使用浏览器计算结果。
+        MissingStarkDataError.missing_lines；missing_stark='unbroadened' 时
+        继续合成，缺失清单保存在 missing_stark_lines。动态模式只使用浏览器结果。
 
         Parameters
         ----------
@@ -155,7 +156,9 @@ class SimulatedLIBS(object):
              Physical/data settings, including path_length_m, optional total density,
              wavelength_step_nm, instrument_broadening and per-transition stark_data.
              NIST supplies transitions and levels; missing Stark coefficients raise
-             MissingStarkDataError with a missing_lines DataFrame.
+             MissingStarkDataError with a missing_lines DataFrame by default.
+             Set missing_stark='unbroadened' in the config to keep unknown lines
+             without Stark/self-absorption correction and inspect missing_stark_lines.
 
         """
 
@@ -189,6 +192,8 @@ class SimulatedLIBS(object):
         self.unabsorbed_interpolated_spectrum = None
         self.unabsorbed_ion_spectra = None
         self.self_absorption_diagnostics = None
+        self.missing_stark_lines = pd.DataFrame()
+        self.matched_stark_lines = pd.DataFrame()
 
         validate_simulated_libs(
             Te, Ne, elements, percentages, low_w, upper_w, max_ion_charge
@@ -285,6 +290,10 @@ class SimulatedLIBS(object):
         self.unabsorbed_interpolated_spectrum = result.thin_spectrum.copy(deep=True)
         self.unabsorbed_ion_spectra = result.thin_ion_spectrum.copy(deep=True)
         self.self_absorption_diagnostics = result.line_diagnostics.copy(deep=True)
+        lines = pd.DataFrame(self._absorption_lines)
+        missing = lines.get('stark_missing', pd.Series(False, index=lines.index)).astype(bool)
+        self.missing_stark_lines = lines.loc[missing].copy(deep=True)
+        self.matched_stark_lines = lines.loc[~missing].copy(deep=True)
         self.self_absorption_metadata = deepcopy(result.metadata)
 
     def __repr__(self):
