@@ -47,7 +47,7 @@ class AdvancedNISTTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.s = replace(Settings(), output=str(self.root), line_database=str(self.root/'missing-library'))
-        self.raw = {'model': 'nist', 'matrix': False, 'stark_source': 'local'}
+        self.raw = {'model': 'nist', 'matrix': False, 'stark_source': 'local', 'missing_stark': 'error'}
         source_module(self.s.source)
         self.engine = importlib.import_module('simLIBS.nist_self_absorption')
         self.calls = []
@@ -283,7 +283,7 @@ class AdvancedNISTTests(unittest.TestCase):
             self.assertEqual(http('/api/jobs/'+failed+'/export?kind=stark-missing'), csv)
             with self.assertRaises(HTTPError): http('/api/jobs/'+failed+'/export?kind=stark-missing', token='invalid')
             # UI evidence contains actual engine arrays from captured-response math, explicitly marked as a fixture.
-            target = Path(__file__).resolve().parents[2]/'.ai-workflow/20261016-advanced-nist/ui-result.json'
+            target = Path(os.environ.get('SIMLIBS_TEST_EVIDENCE_DIR', str(self.root)))/'ui-result.json'
             target.write_text(json.dumps({'test_fixture': True, 'result': data}, ensure_ascii=False, allow_nan=False), encoding='utf-8')
 
 

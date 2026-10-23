@@ -196,7 +196,7 @@ class AdvancedBroadeningTests(unittest.TestCase):
         with patch.object(Figure,'savefig',capture): png=backend.export('mixed','png').payload
         self.assertTrue(png.startswith(b'\x89PNG'));self.assertEqual(labels,['Total','He','Li']);self.assertNotEqual(colors[1],colors[2])
         # Real engine result from invented data, for isolated component/Canvas tests only.
-        evidence=Path(__file__).resolve().parents[2]/'.ai-workflow/20261017-advanced-broadening/ui-mixed-result.json'
+        evidence=Path(os.environ.get('SIMLIBS_TEST_EVIDENCE_DIR', str(self.root)))/'ui-mixed-result.json'
         evidence.write_text(json.dumps({'synthetic_test_fixture':True,'result':data},allow_nan=False),encoding='utf-8')
 
 

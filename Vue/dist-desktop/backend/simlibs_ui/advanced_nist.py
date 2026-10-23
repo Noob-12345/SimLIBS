@@ -117,6 +117,11 @@ def options(raw):
         raise ValueError('Stark文件名须为文本')
     out['stark_name'] = name.replace('\\', '/').split('/')[-1][:240]
     out.update(stark_source='local', stark_allow_network=False, stark_methods=('SCP', 'MSE'))
+    # Vue clients predating this switch must use the same continuation default.
+    # Keep the copied engine's strict default unchanged for its other callers.
+    out['missing_stark'] = raw.get('missing_stark', 'unbroadened')
+    if out['missing_stark'] not in ('error', 'unbroadened'):
+        raise ValueError('missing_stark须为error或unbroadened')
     if out['stark_broadening']:
         if raw.get('stark_cache_dir') is not None:
             raise ValueError('Stark缓存目录由程序管理，不接受请求路径')
@@ -184,7 +189,7 @@ def _simulate(p, s, raw, cancelled, emit, request_get, request_stark):
     config = engine.NISTSelfAbsorptionConfig(path_length_m=o['path_length_m'], total_number_density_cm3=density,
             wavelength_step_nm=step, instrument_broadening=o['instrument_broadening'], stark_data=parse_stark_csv(o['stark_csv']),
             stark_source=o['stark_source'], stark_allow_network=o['stark_allow_network'], stark_methods=o['stark_methods'],
-            stark_cache_dir=cache_directory())
+            stark_cache_dir=cache_directory(), missing_stark=o['missing_stark'])
     request_get = request_get or requests.get
     directory = Path(os.environ['SIMLIBS_TASK_DIR']) if os.environ.get('SIMLIBS_TASK_DIR') else None
     cache, payloads, evidence = {}, {}, []
@@ -283,6 +288,7 @@ def _simulate(p, s, raw, cancelled, emit, request_get, request_stark):
 
     report(2, '校验Stark系数与高级参数')
     prepared, missing, matched = [], [], []
+    strict_missing = False
     for actual, condition, start, factor in [(p, '名义条件', 5, 1), (q, '有效条件', 35, scale)]:
         bands = fetch(actual, condition, start)
         check()
@@ -300,23 +306,34 @@ def _simulate(p, s, raw, cancelled, emit, request_get, request_stark):
             # Explicit, uncalibrated matrix yield: retain fetched NIST weights for audit.
             records = [dict(row, nist_strength_original=row['nist_strength'], nist_strength=row['nist_strength']*factor) for row in records]
             prepared.append((actual, records, metadata, cfg))
-            matched.extend(condition_rows(records, actual, condition))
+            missing.extend(condition_rows([row for row in records if row.get('stark_missing')], actual, condition))
+            matched.extend(condition_rows([row for row in records if not row.get('stark_missing')], actual, condition))
         except engine.MissingStarkDataError as error:
+            strict_missing = True
             missing.extend(condition_rows(error.missing_lines.to_dict('records'), actual, condition))
             matched.extend(condition_rows(error.matched_lines.to_dict('records'), actual, condition))
-    if missing:
-        merged = merge_missing(missing)
-        table = pd.DataFrame(merged)
+    merged = merge_missing(missing)
+    coverage = {'status': 'partial' if missing and matched else 'unavailable' if missing else 'complete' if o['stark_broadening'] else 'not-applied',
+                'missing_policy': o['missing_stark'], 'missing_line_count': len(merged),
+                'matched_condition_count': len(matched),
+                'conditions': {condition: {'missing_line_count': sum(row['condition'] == condition for row in missing),
+                                            'matched_line_count': sum(row['condition'] == condition for row in matched)}
+                               for condition in ('名义条件', '有效条件')}}
+    if directory and o['stark_broadening']:
+        # Empty classes still have valid CSV headers. Matched never includes unknown widths.
+        columns = ['element', 'charge', 'wavelength_nm', 'lower_eV', 'upper_eV', 'gA_s',
+                   'stark_width_nm', 'stark_reference_ne_cm3', 'stark_source', 'condition', 'Te_eV', 'Ne_cm3']
+        write_csv(directory/'missing-stark.csv', pd.DataFrame(merged) if merged else pd.DataFrame(columns=columns))
+        write_csv(directory/'matched-stark.csv', pd.DataFrame(matched) if matched else pd.DataFrame(columns=columns))
+        write_json(directory/'matched-stark.json', json_value(matched))
+        write_json(directory/'missing-stark.json', {'code': 'missing_stark' if strict_missing else 'stark_coverage',
+                        'count': len(merged), 'coverage': coverage,
+                        'csv_sha256': hashlib.sha256((directory/'missing-stark.csv').read_bytes()).hexdigest(),
+                        'matched_count': len(matched), 'matched_count_unit': 'condition-transition',
+                        'missing_conditions': json_value(missing)})
+    if strict_missing:
         error = engine.MissingStarkDataError(merged, matched)
         error.code = 'missing_stark'
-        if directory:
-            # Default pandas CSV uses round-trip double precision; never UI formatting.
-            write_csv(directory/'missing-stark.csv', table)
-            write_json(directory/'missing-stark.json', {'code': 'missing_stark', 'count': len(table),
-                        'csv_sha256': hashlib.sha256((directory/'missing-stark.csv').read_bytes()).hexdigest(),
-                        'matched_count': len(matched), 'missing_conditions': json_value(missing)})
-            write_csv(directory/'matched-stark.csv', pd.DataFrame(matched))
-            write_json(directory/'matched-stark.json', json_value(matched))
         raise error
     results, plain_tables = [], []
     for index, (actual, records, metadata, cfg) in enumerate(prepared):
@@ -355,13 +372,14 @@ def _simulate(p, s, raw, cancelled, emit, request_get, request_stark):
                         'sources': sorted({row['source'] for row in user_rows})},
         'engine_sha256': hashlib.sha256(Path(engine.__file__).read_bytes()).hexdigest(),
         'engine_modules': {name: hashlib.sha256((Path(engine.__file__).parent/name).read_bytes()).hexdigest()
-                           for name in ('nist_self_absorption.py', 'nist_stark.py', 'stark_b.py')},
+                           for name in ('nist_self_absorption.py', 'nist_stark.py', 'stark_b.py', 'stark_vamdc.py')},
+        'stark_coverage': coverage,
         'stark_data_access': {'cache_directory': str(config.stark_cache_dir), 'requests': transport.evidence,
                              'snapshots': transport.snapshots},
         'matrix': {'yield_scale': scale, 'effective_composition': dict(zip(q.elements, q.percentages)), 'effective_Te_eV': q.Te,
                    'effective_Ne_cm3': q.Ne, 'effective_number_density_cm3': result.metadata.get('total_number_density_cm3')},
-        'diagnostics': {'tau_max': float(diagnostics.tau_center.max()) if len(diagnostics) else None,
-                        'beta_min': float(diagnostics.SA.min()) if len(diagnostics) else None, 'line_count': result.metadata['line_count']},
+        'diagnostics': json_value({'tau_max': float(diagnostics.tau_center.max()) if len(diagnostics) else None,
+                        'beta_min': float(diagnostics.SA.min()) if len(diagnostics) else None, 'line_count': result.metadata['line_count']}),
         'assumptions': ['NIST photon weights; atomic populations only when SA is enabled; Stark coefficients only when Stark is enabled.',
             'Matrix yield scales effective NIST weights and absorber density; this optional response model is uncalibrated.',
             'Independent per-line SA/Voigt; no continuum, self-reversal or coupled radiative transfer. R never enters tau.']}

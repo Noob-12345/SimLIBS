@@ -40,7 +40,7 @@ export function prepareAdvanced(compositionError = '') {
     model: advanced.model, self_absorption: advanced.selfAbsorption, instrument_broadening: advanced.instrumentBroadening, matrix: advanced.matrix,
     path_length_m: advanced.model === 'nist' && !advanced.selfAbsorption ? 0 : numeric(advanced.pathLength, '光程 L', advanced.model === 'nist' ? 0 : 1e-12, 1e6), responses,
     te_factor: advanced.matrix ? numeric(advanced.teFactor, 'Te倍率', 1e-4, 1e4) : 1, ne_factor: advanced.matrix ? numeric(advanced.neFactor, 'Ne倍率', 1e-4, 1e4) : 1,
-    ...(advanced.model === 'nist' ? { stark_broadening: advanced.starkBroadening, density_mode: advanced.selfAbsorption ? advanced.densityMode : 'charge_balance', number_density_cm3: advanced.selfAbsorption && advanced.densityMode === 'specified' ? numeric(advanced.numberDensity, '总数密度', 1e-30, 1e24) : 1e16, stark_csv: advanced.starkBroadening ? advanced.starkText : '', stark_name: advanced.starkBroadening ? advanced.starkName : '' }
+    ...(advanced.model === 'nist' ? { stark_broadening: advanced.starkBroadening, density_mode: advanced.selfAbsorption ? advanced.densityMode : 'charge_balance', number_density_cm3: advanced.selfAbsorption && advanced.densityMode === 'specified' ? numeric(advanced.numberDensity, '总数密度', 1e-30, 1e24) : 1e16, stark_csv: advanced.starkBroadening ? advanced.starkText : '', stark_name: advanced.starkBroadening ? advanced.starkName : '', missing_stark: advanced.missingStark || 'unbroadened' }
       : { column_cm2: numeric(advanced.column, '总原子/离子柱密度', 0, 1e24) })
   } }
 }

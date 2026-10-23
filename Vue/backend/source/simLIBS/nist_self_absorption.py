@@ -24,14 +24,15 @@ import pandas as pd
 from scipy.constants import c
 from scipy.special import logsumexp, voigt_profile
 
-from .nist_lines import wavelength_grid
+from .nist_lines import wavelength_grid, render_sticks
 from .self_absorption import (
     PaperSpectrumResult, _number, load_paper_data, slab_attenuation_factor,
-    WIDTH_EXPONENT, MAX_LINE_POINT_WORK, MAX_SPECTRUM_CELLS,
+    WIDTH_EXPONENT, MAX_LINE_POINT_WORK,
 )
 
-# Atomic number is identity, independent of whether an ion emits in this band.
-_ELEMENT_SYMBOLS = 'H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og'.split()
+# 多元素 NIST 输出允许最多 2000 万个双精度渲染单元（约 160 MB）；
+# 独立论文模型的原有内存上限不变。未展宽线不计作全网格 Voigt 计算。
+MAX_SPECTRUM_CELLS = 20_000_000
 
 
 @dataclass(frozen=True)
@@ -39,7 +40,7 @@ class NISTSelfAbsorptionConfig:
     """当前 NIST Stark/自吸收入口的不可变配置；主类保存深拷贝快照。
 
     stark_data 接受逐线字典列表或 DataFrame；其 stark_width_nm 为 W，
-    使用约定 FWHM = 2*W*Ne/Ne_ref。缺失系数会在 resolve_stark 报错。
+    使用约定 FWHM = 2*W*Ne/Ne_ref。missing_stark 控制缺失时的处理。
     """
     # 有效吸收光程，m；设为 0 时 tau=0、SA=1，得到同线形模型的薄谱。
     path_length_m: float = 0.01
@@ -61,6 +62,8 @@ class NISTSelfAbsorptionConfig:
     stark_allow_network: bool = True
     # 有出处的计算方法优先序；同方法的多个等优先来源不自动选取。
     stark_methods: object = ('SCP', 'MSE')
+    # error：缺失时报错；unbroadened：保留线面积，仅使用可选的仪器展宽。
+    missing_stark: str = 'error'
 
     def __post_init__(self):
         """创建配置时校验光程、采样间隔、可选密度和仪器开关。"""
@@ -74,6 +77,8 @@ class NISTSelfAbsorptionConfig:
             raise ValueError('instrument_broadening must be boolean')
         if self.stark_source not in ('auto', 'local'):
             raise ValueError('stark_source must be auto or local')
+        if self.missing_stark not in ('error', 'unbroadened'):
+            raise ValueError('missing_stark must be error or unbroadened')
         if type(self.stark_allow_network) is not bool:
             raise ValueError('stark_allow_network must be boolean')
         if (not isinstance(self.stark_methods, (list, tuple)) or not self.stark_methods or
@@ -144,14 +149,6 @@ def parse_atomic_payload(html, *, include_levels=True):
             if int(z) in symbols and symbols[int(z)] != element:
                 raise ValueError('Conflicting NIST element labels')
             symbols[int(z)] = element
-    for z, element in symbols.items():
-        if not 1 <= z <= len(_ELEMENT_SYMBOLS) or _ELEMENT_SYMBOLS[z-1] != element:
-            raise ValueError('Conflicting NIST element/atomic number')
-    if include_levels:
-        for z, _ in matrices['levels']:
-            if not 1 <= z <= len(_ELEMENT_SYMBOLS):
-                raise ValueError('Invalid NIST atomic number')
-            symbols.setdefault(z, _ELEMENT_SYMBOLS[z-1])
     atoms = {}
     for z, element in (symbols.items() if include_levels else ()):
         # 要求页面提供从中性到类氢阶段的全套数据；裸核阶段由布居函数补入。
@@ -255,7 +252,7 @@ def resolve_stark(records, config, *, te=None, ne=None, cmev=None):
 
     优先级：用户 stark_data -> 本地 JSON -> STARK-B。自动查询需要 Te/Ne
     与同次 NIST 响应的 cmeV；保留旧直接调用（未传这些参数）为仅本地匹配。
-    缺失项全部收集后抛异常，matched_lines 同时保存成功匹配的来源供 debug。
+    默认收集缺失项后抛异常；unbroadened 模式返回保留缺失标记的全部谱线。
     """
     # stark展宽系数的获取：JSON 仅提供已有的逐线系数；用户 stark_data 可补充任意 NIST 跃迁。
     # 不把仪器分辨率当作 Stark 系数，不给未知谱线赋默认值，不静默跳过。
@@ -325,9 +322,14 @@ def resolve_stark(records, config, *, te=None, ne=None, cmev=None):
             del missing[indices[offset]]
         for offset, row in absent.items():
             missing[indices[offset]] = row
-    if missing:
-        # 此时不返回部分结果，防止把缺少若干吸收谱线的结果当作完整模拟。
+    if missing and config.missing_stark == 'error':
         raise MissingStarkDataError([missing[i] for i in sorted(missing)], [r for r in resolved if r is not None])
+    for index, row in missing.items():
+        # None 表示系数未知；不能用 0 或任意默认系数冒充数据库数据。
+        resolved[index] = dict(row, stark_width_nm=None, stark_reference_ne_cm3=None,
+                               stark_source='unavailable', stark_missing=True)
+    for row in resolved:
+        row.setdefault('stark_missing', False)
     return resolved
 
 
@@ -371,7 +373,7 @@ def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config, sel
             wavelength_convention='vacuum (NIST show_av=3)',
             self_absorption=False, stark_broadening=True,
             assumptions=['NIST line areas preserved; no self-absorption population/opacity calculation',
-                         'Local coefficients retain their reference convention; STARK-B uses published temperature data/fits'])
+                         'Local coefficients retain their reference convention; STARK-B HTML uses published temperature data/fits; VAMDC uses in-range linear table interpolation'])
     active = {el: p/100 for el, p in zip(elements, pcts) if p > 0}
     populations = {}
     for el in active:
@@ -409,7 +411,7 @@ def prepare_nist_absorption(bands, *, te, ne, elements, percentages, config, sel
                     assumptions=['NIST LTE level set and Saha stages including bare nuclei',
                                  'Independent lines; no coupled overlapping-line transfer',
                                  'Paper center attenuation and empirical width exponent -0.54',
-                                 'Local coefficients retain their reference convention; STARK-B uses published temperature data/fits'])
+                                 'Local coefficients retain their reference convention; STARK-B HTML uses published temperature data/fits; VAMDC uses in-range linear table interpolation'])
     return records, metadata
 
 
@@ -426,13 +428,31 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
     grid = wavelength_grid(low, high, config.wavelength_step_nm)
     r = _number(resolution, 'resolution', positive=True)
     labels = sorted({row['ion'] for row in records})
-    if len(grid)*len(records) > MAX_LINE_POINT_WORK or len(grid)*(len(labels)+2)*2 > MAX_SPECTRUM_CELLS:
+    broadened_count = sum(not row.get('stark_missing', False) for row in records)
+    channel_sets = 2 if self_absorption else 1
+    if (len(grid)*broadened_count > MAX_LINE_POINT_WORK or
+            len(grid)*(len(labels)+2)*channel_sets > MAX_SPECTRUM_CELLS):
         raise ValueError('Self absorption output exceeds work/memory limits; increase wavelength_step_nm')
     thin = {label: np.zeros(len(grid)) for label in labels}
-    absorbed = {label: np.zeros(len(grid)) for label in labels}
+    absorbed = {label: np.zeros(len(grid)) for label in labels} if self_absorption else thin
     diagnostics = []
+    missing_channels = defaultdict(list)
     for row in records:
         center = row['wavelength_nm']
+        sigma = center/r/math.sqrt(2) if config.instrument_broadening else 0.0
+        if row.get('stark_missing', False):
+            missing_channels[row['ion']].append(row)
+            # 未知内禀宽度无法用于 tau/自吸收公式；保留 NIST 面积并明确标记。
+            # SA=1 表示本次不施加衰减，NaN 表示相应物理量未计算。
+            peak = row['nist_strength']/(sigma*math.sqrt(2*math.pi)) if sigma else np.nan
+            diagnostics.append(dict(
+                row, q_m=np.nan if self_absorption else 0.0,
+                tau_center=np.nan if self_absorption else 0.0, SA=1.0,
+                thin_area=row['nist_strength'], absorbed_area=row['nist_strength'],
+                thin_fwhm_nm=np.nan, absorbed_fwhm_nm=np.nan,
+                thin_peak=peak, absorbed_peak=peak, instrument_sigma_nm=sigma,
+                stark_broadening_applied=False, self_absorption_applied=False))
+            continue
         # 将参考密度下的 W 换算成当前 Ne 下的未吸收 Stark FWHM，单位 nm。
         width = 2*row['stark_width_nm']*ne/row['stark_reference_ne_cm3']
         _number(width, 'Stark FWHM', positive=True)
@@ -458,17 +478,29 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
         _number(absorbed_area, 'absorbed area')
         # 仪器展宽：统一采用 static/datagen 的 1/e 半宽 lambda/R，故 sigma=lambda/(R*sqrt(2))。
         # Stark 洛伦兹宽度和自吸收先计算，最后与高斯仪器响应组成 Voigt 线型。
-        sigma = center/r/math.sqrt(2) if config.instrument_broadening else 0.0
         delta = grid-center
         # voigt_profile 的第三个参数 gamma 为 Lorentz 半高半宽，故 FWHM 需要除以 2。
         thin[row['ion']] += area*voigt_profile(delta, sigma, width/2)
-        absorbed[row['ion']] += absorbed_area*voigt_profile(delta, sigma, absorbed_width/2)
+        if self_absorption:
+            absorbed[row['ion']] += absorbed_area*voigt_profile(delta, sigma, absorbed_width/2)
         diagnostics.append(dict(row, q_m=q, tau_center=tau, SA=sa, thin_area=area,
                                 absorbed_area=absorbed_area, thin_fwhm_nm=width,
                                 absorbed_fwhm_nm=absorbed_width,
                                 thin_peak=2*area/(math.pi*width),
                                 absorbed_peak=2*absorbed_area/(math.pi*absorbed_width),
-                                instrument_sigma_nm=sigma))
+                                instrument_sigma_nm=sigma,
+                                stark_broadening_applied=True,
+                                self_absorption_applied=self_absorption))
+
+    # 按离子批量投影离散谱线；关闭仪器时保持梯形积分面积和重心，
+    # 开启时使用既有的局部高斯算法，避免逐线遍历整个宽波段网格。
+    for label, rows in missing_channels.items():
+        table = pd.DataFrame({'wavelength': [row['wavelength_nm'] for row in rows],
+                              label: [row['nist_strength'] for row in rows]})
+        contribution = render_sticks(table, grid, r, instrument_broadening=config.instrument_broadening)
+        thin[label] += contribution.intensity.to_numpy()
+        if self_absorption:
+            absorbed[label] += contribution.intensity.to_numpy()
 
     def frame(channels):
         """将离子数组汇总成离子宽表和 wavelength/intensity 总谱两张表。"""
@@ -479,15 +511,31 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
         return ion, pd.DataFrame({'wavelength': grid, 'intensity': ion['Sum(calc)'].to_numpy()})
     ion, spectrum = frame(absorbed)
     # 薄谱保留相同 Stark 和仪器宽度；它可直接用于隔离自吸收本身的影响。
-    thin_ion, thin_spectrum = frame(thin)
+    if self_absorption:
+        thin_ion, thin_spectrum = frame(thin)
+    else:
+        thin_ion, thin_spectrum = ion.copy(deep=True), spectrum.copy(deep=True)
     info = dict(metadata, self_absorption=self_absorption, stark_broadening=True,
                 instrument_broadening=config.instrument_broadening,
                 parameters=dict(Te_eV=te, Ne_cm3=ne, path_length_m=config.path_length_m),
                 output_points=len(grid), output_step_nm=float(grid[1]-grid[0]))
+    missing_count = sum(row.get('stark_missing', False) for row in records)
     info['stark_data'] = dict(source_mode=config.stark_source, methods=list(config.stark_methods),
-                              local_line_count=sum('stark_dataset_id' not in r for r in records),
+                              missing_policy=config.missing_stark, missing_line_count=missing_count,
+                              matched_line_count=len(records)-missing_count,
+                              self_absorption_skipped_count=missing_count if self_absorption else 0,
+                              local_line_count=sum('stark_dataset_id' not in r and not r.get('stark_missing', False)
+                                                   for r in records),
                               stark_b_line_count=sum('stark_dataset_id' in r for r in records),
+                               vamdc_line_count=sum(r.get('stark_source_format') == 'vamdc-xsams' for r in records),
+                               method_unreported_count=sum(r.get('stark_method') == 'unreported' for r in records),
+                               temperature_interpolated_count=sum(r.get('stark_temperature_method') ==
+                                   'linear interpolation of tabulated widths' for r in records),
                               isolated_limit_unknown_count=sum('stark_dataset_id' in r and
                                   r.get('stark_isolated_limit_cm3') is None for r in records),
-                              sources=sorted({r['stark_source'] for r in records}))
+                              sources=sorted({r['stark_source'] for r in records if not r.get('stark_missing', False)}))
+    if missing_count:
+        info['assumptions'] = [*info.get('assumptions', []),
+            'Missing Stark coefficients: retain NIST line areas with optional instrumental broadening only; '
+            'no Stark broadening or self-absorption correction applied to those transitions']
     return PaperSpectrumResult(spectrum, thin_spectrum, ion, thin_ion, pd.DataFrame(diagnostics), info)

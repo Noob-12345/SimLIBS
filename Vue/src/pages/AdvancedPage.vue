@@ -9,7 +9,7 @@ import AdvancedResults from '../components/AdvancedResults.vue'
 import { advanced, activeTask, runReal, tasks } from '../lib/workbench'
 import { errorOf, symbols } from '../lib/model'
 import { issueAttrs, parameterIssues } from '../lib/issues'
-import { advancedModels, applyAdvancedStark, changeAdvancedModel, clearAdvancedStark, densityChoices, prepareAdvanced, setAdvancedAbsorption, setAdvancedStark } from '../lib/advanced'
+import { advancedFlags, advancedModels, applyAdvancedStark, changeAdvancedModel, clearAdvancedStark, densityChoices, prepareAdvanced, setAdvancedAbsorption, setAdvancedStark } from '../lib/advanced'
 import { download } from '../lib/backend'
 import { desktopHost, openCsvTemplate, readBrowserCsv, useFileSave } from '../lib/fileAccess'
 const running = activeTask('advanced'), submitError = ref(''), compositionError = ref(''), fileError = ref(''), reading = ref(false)
@@ -26,6 +26,12 @@ function densityBlur() { const value = Number(advanced.params.ne); if (Number.is
 const inputError = computed(() => errorOf(() => prepareAdvanced(compositionError.value)))
 const latest = computed(() => tasks.find(task => task.kind === 'advanced'))
 const missingTask = computed(() => latest.value?.status === 'failed' && latest.value.starkMissing?.available ? latest.value : null)
+const partialResult = computed(() => {
+  const result = advanced.result
+  const coverage = result?.source.origin?.stark_coverage as { status?: string; missing_line_count?: number; matched_condition_count?: number } | undefined
+  if (!result?.jobId || !coverage || !['partial', 'unavailable'].includes(coverage.status || '') || !Number.isInteger(coverage.missing_line_count) || !(coverage.missing_line_count! > 0)) return null
+  return { jobId: result.jobId, missing: coverage.missing_line_count!, matched: coverage.matched_condition_count ?? 0, ...advancedFlags(result.source.origin) }
+})
 watch(inputError, value => { if (!value) submitError.value = '' })
 async function run() {
   try { submitError.value = ''; await runReal('advanced', nist.value ? '高级 NIST 模拟' : '高级离线论文模型', prepareAdvanced(compositionError.value)) }
@@ -43,7 +49,8 @@ async function chooseStark(event?: Event) {
   } finally { if (revision === importRevision.value) reading.value = false; if (fileInput.value) fileInput.value.value = '' }
 }
 function clearStark() { importRevision.value++; clearAdvancedStark(); fileError.value = ''; reading.value = false; if (fileInput.value) fileInput.value.value = '' }
-function saveMissing() { const job = missingTask.value?.id; if (job) void saveOutput(`SimLIBS-${job}-missing-stark.csv`, () => download(job, 'stark-missing')) }
+function saveStark(job: string, kind: 'missing' | 'matched') { void saveOutput(`SimLIBS-${job}-${kind}-stark.csv`, () => download(job, `stark-${kind}`)) }
+function runUnbroadened() { advanced.missingStark = 'unbroadened'; void run() }
 </script>
 <template>
   <WorkbenchLayout kind="advanced">
@@ -63,12 +70,13 @@ function saveMissing() { const job = missingTask.value?.id; if (job) void saveOu
           <div class="panel-heading"><h2>模型与展宽</h2><span class="section-number">02</span></div>
           <ChoiceSelect :model-value="advanced.model" label="高级模型" :options="advancedModels" :disabled="disabled" @update:model-value="changeAdvancedModel" />
           <div class="advanced-switches" role="group" aria-label="展宽机制">
-            <SwitchHint v-model="starkSwitch" label="Stark 展宽" :description="nist ? '逐线内禀 Lorentz 展宽，需要完整 Stark 系数。关闭时同时关闭自吸收；开启时不改变自吸收或仪器展宽。' : '离线论文模型使用固有 Stark 宽度，固定开启。'" :disabled="disabled || !nist" />
+            <SwitchHint v-model="starkSwitch" label="Stark 展宽" :description="nist ? '逐线内禀 Lorentz 展宽；缺失系数时按下方策略处理。关闭时同时关闭自吸收；开启时不改变自吸收或仪器展宽。' : '离线论文模型使用固有 Stark 宽度，固定开启。'" :disabled="disabled || !nist" />
             <SwitchHint v-model="absorptionSwitch" label="逐线自吸收" description="按布居与光程计算逐线吸收及展宽。NIST 模型开启自吸收会自动开启 Stark；关闭自吸收保留 Stark 与仪器展宽。" :disabled="disabled" />
             <SwitchHint v-model="advanced.instrumentBroadening" label="仪器展宽（Gaussian）" description="仪器响应独立开关，不改变 Stark 或自吸收。启用后由 R 控制高斯线宽；先计算内禀谱，再应用仪器响应。" :disabled="disabled" />
+            <SwitchHint v-if="nist && advanced.starkBroadening" :model-value="advanced.missingStark === 'unbroadened'" label="缺失系数继续模拟" description="开启后若遇数据库未收录 Stark 系数的跃迁，保留其 NIST 面积；有仪器响应时仅施加仪器展宽，否则保面积与质心投影。缺失线跳过自吸收，并保留清单。" :disabled="disabled" @update:model-value="advanced.missingStark = $event ? 'unbroadened' : 'error'" />
           </div>
           <details class="advanced-help"><summary>模型与线宽约定</summary>
-            <template v-if="nist"><p class="hint">在线取得 NIST 线强；Stark 需要跃迁和完整逐线系数，自吸收还需要全阶段能级与布居。默认 Mg 100%、真空 285.27–285.33 nm；发射电荷范围为 0–2。</p><p class="hint">仪器 w=λ/R 为高斯 1/e 半宽，FWHM=2√ln2·λ/R，R 不进入 τ。仅 Stark 为 Lorentz，叠加仪器为 Voigt；两者都关闭时为守恒面积/重心的网格投影，高度依赖步长，不代表物理线宽。</p></template>
+            <template v-if="nist"><p class="hint">在线取得 NIST 线强；Stark 需要跃迁和逐线系数；默认缺失线继续生成并标记覆盖不足，关闭继续开关则严格拒绝。自吸收还需要全阶段能级与布居。默认 Mg 100%、真空 285.27–285.33 nm；发射电荷范围为 0–2。</p><p class="hint">仪器 w=λ/R 为高斯 1/e 半宽，FWHM=2√ln2·λ/R，R 不进入 τ。仅 Stark 为 Lorentz，叠加仪器为 Voigt；两者都关闭时为守恒面积/重心的网格投影，高度依赖步长，不代表物理线宽。</p></template>
             <template v-else><p class="hint">离线论文 Table 1 的 Mg、Ca、Zn 共31条谱线与 NIST I/II/III 能级快照；仅此模型保留 5% 窄带限制。</p><p class="hint">离线约定：仪器 FWHM=λ/R；Stark/自吸收逐线计算在仪器响应之前，R 不进入 τ。</p></template>
           </details>
           <Transition name="expand"><div v-if="nist && advanced.starkBroadening" class="advanced-subpanel" data-advanced-section="stark-data">
@@ -102,8 +110,14 @@ function saveMissing() { const job = missingTask.value?.id; if (job) void saveOu
       <button class="btn primary full" :disabled="!!running || !!inputError || reading" @click="run">运行高级模拟</button>
     </template>
     <AdvancedResults :spectrum="advanced.result" />
+    <section v-if="partialResult" class="panel activity-panel" role="status" data-stark-coverage="partial">
+      <h2>Stark 覆盖不足 · 已继续生成</h2>
+      <p>当前结果 {{ partialResult.jobId }} 有 {{ partialResult.missing }} 条跃迁缺少 Stark 系数。缺失线保留 NIST 线面积，{{ partialResult.instrument ? '仅应用仪器展宽' : '按保面积与质心的网格投影显示' }}；未计算这些线的 Stark 展宽{{ partialResult.absorption ? '或自吸收' : '' }}。</p>
+      <p class="hint">已匹配线仍按所选模型计算。下载清单填写 W 与来源后，可导入上方 CSV 重新运行；当前结果和清单绑定原任务，不随草稿改变。</p>
+      <div class="row2"><button class="btn" :disabled="saving" @click="saveStark(partialResult.jobId, 'missing')">下载缺失系数清单</button><button v-if="partialResult.matched > 0" class="btn" :disabled="saving" @click="saveStark(partialResult.jobId, 'matched')">下载已匹配清单</button></div>
+    </section>
     <section class="panel activity-panel"><h2>高级物理模拟 (LTE Slab)</h2><p class="hint">名义薄谱、基体薄谱和修正谱使用共同尺度。逐线独立模型，不预测连续谱、自反转、时空梯度或重叠谱线耦合传输。新草稿不会改写已完成结果。</p></section>
-    <section v-if="missingTask" class="panel activity-panel"><h2>Stark 系数待补充</h2><p>任务 {{ missingTask.id }} 缺少 {{ missingTask.starkMissing?.count }} 条逐线系数；未生成不完整谱。</p><button class="btn" :disabled="saving" @click="saveMissing">下载完整缺失清单</button><p class="hint">填写 W 和系数出处后导入上方 Stark CSV，再运行高级模拟。上一成功结果及其导出仍保留。</p></section>
+    <section v-if="missingTask" class="panel activity-panel"><h2>Stark 系数待补充</h2><p>任务 {{ missingTask.id }} 缺少 {{ missingTask.starkMissing?.count }} 条逐线系数；未生成不完整谱。</p><div class="row2"><button class="btn" :disabled="saving" @click="saveStark(missingTask.id, 'missing')">下载完整缺失清单</button><button class="btn primary" :disabled="!!running" @click="runUnbroadened">缺失线未展宽合成 (保留面积)</button></div><p class="hint">填写 W 和系数出处后导入上方 Stark CSV，或直接选择未展宽合成（缺失线仅施加仪器响应）。</p></section>
     <p v-if="feedback" :class="saveFailed ? 'error-text' : 'hint'" role="status">{{ feedback }}</p>
     <TaskActivity kind="advanced" :error="inputError || submitError" />
   </WorkbenchLayout>

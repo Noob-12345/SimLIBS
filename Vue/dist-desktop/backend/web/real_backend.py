@@ -512,6 +512,12 @@ class RealBackend:
 
     def _job_view(self, job: Dict[str, Any]) -> Dict[str, Any]:
         view={k:job.get(k) for k in ('job_id','kind','status','summary','progress','duration','error','created','created_at','resume_from')}
+        if job.get('events'):
+            for ev in reversed(job['events']):
+                msg = ev.message if hasattr(ev, 'message') else ev.get('message', '') if isinstance(ev, dict) else ''
+                if msg and not msg.startswith('[worker]') and not msg.startswith('[ui]'):
+                    view['stage'] = msg
+                    break
         if job.get('kind') == '高级模拟' and job.get('status') == 'failed':
             error_file = self._advanced_file(job, 'stark-error.json') or self._advanced_file(job, 'error.json')
             if error_file and error_file.stat().st_size <= 65536:
@@ -521,15 +527,16 @@ class RealBackend:
                         view['error_code'] = failure['code']
                 except (OSError, ValueError, AttributeError):
                     pass
+        if job.get('kind') == '高级模拟' and job.get('status') in ('failed', 'completed'):
             summary = self._advanced_file(job, 'missing-stark.json')
             artifact = self._advanced_file(job, 'missing-stark.csv')
             if summary and artifact and summary.stat().st_size <= 4_000_000 and view.get('error_code', 'missing_stark') == 'missing_stark':
                 try:
                     data = json.loads(summary.read_text(encoding='utf-8'))
-                    if data.get('code') == 'missing_stark' and isinstance(data.get('count'), int):
-                        view['stark_missing'] = {'count': data['count'], 'available': True}
+                    if data.get('code') in ('missing_stark', 'stark_coverage') and isinstance(data.get('count'), int):
+                        view['stark_missing'] = {'count': data['count'], 'available': data['count'] > 0}
                         if isinstance(data.get('matched_count'), int):
-                            view['stark_matched'] = {'count': data['matched_count'], 'available': bool(data['matched_count']) and self._advanced_file(job, 'matched-stark.csv') is not None}
+                            view['stark_matched'] = {'count': data['matched_count'], 'available': self._advanced_file(job, 'matched-stark.csv') is not None}
                 except (OSError, ValueError, AttributeError):
                     pass
         path=Path(job.get('expected_result_path') or job.get('result_path') or str(Path(self._settings.output)/'.jobs'/job['job_id']/'result'/'manifest.json')).parent/'checkpoint.json'
@@ -731,9 +738,9 @@ class RealBackend:
             raise ApiError(404, f'任务不存在：{job_id}', 'not_found')
         if kind in ('stark-missing', 'stark-matched'):
             name = 'missing-stark.csv' if kind == 'stark-missing' else 'matched-stark.csv'
-            path = self._advanced_file(job, name) if job.get('kind') == '高级模拟' and job.get('status') == 'failed' else None
+            path = self._advanced_file(job, name) if job.get('kind') == '高级模拟' and job.get('status') in ('failed', 'completed') else None
             if not path:
-                raise ApiError(409, '此失败任务没有对应Stark诊断清单', 'no_result')
+                raise ApiError(409, '此任务没有对应Stark诊断清单', 'no_result')
             return ExportPayload(path.read_bytes(), 'text/csv; charset=utf-8', f'{job_id}_{name.replace("-", "_")}')
         if kind == 'stark-report':
             report = self._advanced_file(job, 'stark-error.json') if job.get('kind') == '高级模拟' and job.get('status') == 'failed' else None
@@ -759,7 +766,8 @@ class RealBackend:
             result=self._single_result(job,manifest)
             if kind=='json':
                 if manifest['origin'].get('opacity_table') and Path(manifest['origin']['opacity_table']).is_file():
-                    result['opacity']=pd.read_csv(manifest['origin']['opacity_table'],float_precision='round_trip').to_dict(orient='list')
+                    opacity = pd.read_csv(manifest['origin']['opacity_table'], float_precision='round_trip').astype(object)
+                    result['opacity'] = opacity.where(pd.notna(opacity), None).to_dict(orient='list')
                 return ExportPayload(json.dumps(result,ensure_ascii=False,allow_nan=False),'application/json',f'{job_id}_advanced.json')
             if 'comparison' not in result:
                 # Earliest saved advanced results may have no three-spectrum files.

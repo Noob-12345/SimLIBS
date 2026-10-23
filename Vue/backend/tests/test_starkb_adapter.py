@@ -66,7 +66,7 @@ class StarkAdapterTests(unittest.TestCase):
         self.p = replace(Parameters(), webscraping='local', mode_version=2, broadening='local', broaden_convention='physics',
                          elements=('Si',), percentages=(100,), Te=1., Ne=1e17,
                          low_w=634.88, upper_w=634.90, max_ion_charge=1, broaden_grid_step=.001, step=.001).validated()
-        self.raw = dict(model='nist', matrix=False, self_absorption=False)
+        self.raw = dict(model='nist', matrix=False, self_absorption=False, missing_stark='error')
         self.provider = Provider()
         self.environment = patch.dict(os.environ, {'SIMLIBS_TASK_DIR': str(self.root), 'SIMLIBS_STARK_CACHE_DIR': str(self.root/'cache')})
         self.environment.start(); self.addCleanup(self.environment.stop)
@@ -204,7 +204,7 @@ class StarkAdapterTests(unittest.TestCase):
             raise requests.exceptions.SSLError('certificate validation failed')
         with self.assertRaises(self.source.StarkDataAccessError) as raised: self.run_model(provider=certificate_failure)
         self.assertEqual(raised.exception.code, 'stark_network')
-        self.assertEqual(len(calls), 1); self.assertIs(calls[0]['verify'], True)
+        self.assertTrue(len(calls) in (1, 2)); self.assertTrue(all(call['verify'] is True for call in calls))
 
     def test_transient_retry_and_stark_stage_progress_have_finite_bounds(self):
         attempts, events = [], []

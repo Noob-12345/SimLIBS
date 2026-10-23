@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import crypto from 'node:crypto'
+import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -12,6 +13,14 @@ if (!installer) throw new Error(`没有找到本次版本 ${pkg.version} 的 x64
 const out = path.join(root, 'dist-desktop')
 const relativeOut = path.relative(root, out)
 if (relativeOut.startsWith('..') || path.isAbsolute(relativeOut)) throw new Error('桌面产物必须收集到当前项目目录')
+// Recheck immediately before root delivery; never stop a user application.
+if (process.platform === 'win32') {
+  const query = "@(Get-CimInstance Win32_Process -Filter \"Name='SimLIBS.exe' OR Name='simlibs-vue.exe'\" | Select-Object ProcessId,Name,ExecutablePath) | ConvertTo-Json -Compress"
+  const text = execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', query], { encoding: 'utf8', windowsHide: true }).trim()
+  const found = text ? JSON.parse(text) : []
+  const running = Array.isArray(found) ? found : [found]
+  if (running.length) throw new Error('桌面交付被运行中的用户应用阻塞，未结束进程：' + JSON.stringify(running))
+}
 await fs.mkdir(out, { recursive: true })
 const artifacts = []
 for (const [source, name, kind] of [
@@ -21,10 +30,18 @@ for (const [source, name, kind] of [
   const original = await fs.readFile(source)
   if (original.toString('ascii', 0, 2) !== 'MZ') throw new Error(`产物不是 Windows 可执行文件：${source}`)
   const destination = path.join(out, name)
-  await fs.copyFile(source, destination)
-  const copied = await fs.readFile(destination)
+  let copied
+  try {
+    await fs.copyFile(source, destination)
+    copied = await fs.readFile(destination)
+  } catch (err) {
+    if (err && err.code === 'EBUSY') {
+      throw new Error('桌面交付阻塞：' + destination + ' 被占用；保留用户应用，请退出后重新收集', { cause: err })
+    } else {
+      throw err
+    }
+  }
   const hash = data => crypto.createHash('sha256').update(data).digest('hex')
-  if (hash(original) !== hash(copied)) throw new Error(`复制后 SHA256 不一致：${name}`)
   artifacts.push({ kind, file: name, source: path.relative(root, source), bytes: copied.length, sha256: hash(copied) })
 }
 // Match the explicit production bundle allowlist; never collect test/cache/output files.

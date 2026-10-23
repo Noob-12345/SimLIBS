@@ -111,7 +111,10 @@ def match_width(line, identity, tables, *, temperature_k, ne, methods=('SCP', 'M
                   and same_state(r['lower_label'], identity['lower_label'])
                   and same_state(r['upper_label'], identity['upper_label'])]
     reasons = []
-    for method in methods:
+    # 默认接受数据库的两种方法时，也允许有来源但接口未导出方法的 VAMDC 表。
+    # 显式限定单一方法时仍拒绝未知方法，不能把它冒充 SCP 或 MSE。
+    method_order = tuple(methods) + (('unreported',) if set(methods) == {'SCP', 'MSE'} else ())
+    for method in method_order:
         usable = []
         for row in candidates:
             if row['method'] != method:
@@ -126,6 +129,24 @@ def match_width(line, identity, tables, *, temperature_k, ne, methods=('SCP', 'M
         if usable:
             best = max(item[0] for item in usable)
             usable = [item for item in usable if item[0] == best]
+            # 同一 VAMDC 跃迁/原始文献的多个密度表均通过温度及有效性检查后，
+            # 选择最低参考密度；不同量子态或文献仍是独立来源，保留歧义检查。
+            density_groups = {}
+            for item in usable:
+                _, row, width = item
+                if row.get('source_format') != 'vamdc-xsams':
+                    key = ('html', row['dataset_id'])
+                else:
+                    key = ('vamdc', row.get('lower_state_id', row['dataset_id']),
+                           row.get('upper_state_id', row['dataset_id']),
+                           tuple(row.get('source_ids', [])), row['calculated_wavelength_angstrom'])
+                group = density_groups.setdefault(key, [])
+                reference = width['stark_table_reference_ne_cm3']
+                if not group or reference < group[0][2]['stark_table_reference_ne_cm3']:
+                    density_groups[key] = [item]
+                elif reference == group[0][2]['stark_table_reference_ne_cm3']:
+                    group.append(item)
+            usable = [item for group in density_groups.values() for item in group]
             if len(usable) > 1:
                 raise ValueError(f'Ambiguous STARK-B sources for {line["element"]} {line["wavelength_nm"]} nm ({method})')
             _, row, width = usable[0]
@@ -190,6 +211,9 @@ def resolve_online(records, *, te, ne, cmev, cache_dir=None, allow_network=True,
             else:
                 if not tables:
                     data = document['payload']
-                    reason = data.get('status') or '; '.join(sorted(set(d.get('status', 'no electron data') for d in data['datasets'])))
+                    source_status = data.get('status')
+                    reason = ((source_status if source_status != 'ok' else None) or '; '.join(sorted(set(
+                        d.get('status', 'no electron data') for d in data.get('datasets', []))))
+                        or 'no published electron broadening data at an applicable reference density')
                 missing[index] = dict(line, stark_missing_reason=reason, stark_width_nm=None)
     return found, missing

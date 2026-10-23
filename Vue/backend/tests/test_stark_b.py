@@ -109,12 +109,13 @@ class StarkBTests(unittest.TestCase):
         self.assertEqual(result['datasets'][0]['html'], HTML)
 
     def test_query_density_keeps_precision_beyond_printed_table(self):
-        payload = dict(datasets=[dict(id='223', method='SCP', url='STARK-B', html=HTML)])
+        rounded = HTML.replace('1.000e+17', '9.877e+16')
+        payload = dict(datasets=[dict(id='223', method='SCP', url='STARK-B', html=rounded)])
         with tempfile.TemporaryDirectory() as folder, \
              patch.object(stark_b.StarkBClient, '_fetch', return_value=payload):
             rows, _ = stark_b.StarkBClient(stark_b.SourceCache(folder)).species('Si', 1, 9.87654321e16)
         self.assertEqual(rows[0]['samples'][0]['ne'], 9.87654321e16)
-        self.assertEqual(rows[0]['samples'][0]['printed_ne_cm3'], 1e17)
+        self.assertEqual(rows[0]['samples'][0]['printed_ne_cm3'], 9.877e16)
 
     def test_read_only_request_retries_transient_connection_error(self):
         from unittest.mock import Mock

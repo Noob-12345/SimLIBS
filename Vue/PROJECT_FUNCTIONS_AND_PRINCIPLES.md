@@ -1,6 +1,6 @@
 # SimLIBS 功能与计算原理
 
-日期：2026-10-16。高级默认模型为 `nist-lines-self-absorption-1`，可选旧离线 `paper-eq7-stark-sa-1`；当前公式、数据来源与科学边界以 [论文自吸收报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 为准。`finite-lte-slab-1` 是旧高级历史模型，本轮不再使用。实现、自测与独立验收是不同证据；本轮未更新旧 EXE/NSIS，最终审查由独立 review 完成。
+日期：2026-10-16。高级默认模型为 `nist-lines-self-absorption-1`，可选旧离线 `paper-eq7-stark-sa-1`；当前公式、数据来源与科学边界以 [论文自吸收报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 为准。`finite-lte-slab-1` 是旧高级历史模型，本轮不再使用。实现、自测与独立验收是不同证据；2026-10-16 的历史交付未更新 EXE/NSIS；2026-10-23 续接的重建与自测证据见 .ai-workflow/20261022-stark-missing-continuation/implementation.md，最终审查由独立 review 完成。
 
 ## NIST高级入口（2026-10-16）
 
@@ -10,7 +10,7 @@ NIST线强作为积分面积；布居使用全阶段及裸核态，发射电荷�
 
 名义与有效Te/Ne/组成分别请求NIST，完全相同的规范化请求在单任务内复用。可选未标定基体先改变有效组成/条件，再把产额倍率作用于有效NIST线强及吸收粒子密度；逐线诊断保留未缩放线强。不提供普适材料预测。三谱同网格同尺度，origin记录URL/响应hash/引擎版本/约定/配置/用户系数出处。
 
-Stark CSV最大2MB、最多20000行，支持BOM。必需element、非负整数charge、正W，以及真空波长或成对能级；参考Ne须为正。所有给定标识共同匹配，沿用原引擎1e-6 nm/eV阈值。完整缺失CSV按双精度保存，填W后可重导入；系数未知或歧义时报失败，不跳线出部分谱。固定job export的stark-missing仅导出失败高级任务清单；diagnostics导出成功结果的完整诊断CSV。轮询只有数量/可用标志，不塞逐线数组，刷新/重启可恢复固定任务证据。前端分别绑定失败清单和旧成功结果job，三谱CSV/JSON/PNG与诊断不串绑；更早缺字段记录防御读取。
+Stark CSV最大2MB、最多20000行，支持BOM。必需element、非负整数charge、正W，以及真空波长或成对能级；参考Ne须为正。所有给定标识共同匹配，沿用原引擎1e-6 nm/eV阈值。完整缺失CSV按双精度保存，填W后可重导入；高级 Vue 入口省略 missing_stark 时默认 unbroadened：系数未知的跃迁保留 NIST 线面积，有仪器则仅应用仪器响应，无仪器则保面积/质心投影；跳过这些线的 Stark 和自吸收，未计算的物理量在 JSON 中为 null，SA=1 仅表示未施加衰减。显式 error 保留严格拒绝与 CSV 补数重跑。网络/TLS/服务解析/歧义/缓存错误仍报错。固定 job export 的 stark-missing/stark-matched 可导出成功或失败的高级任务清单；diagnostics导出成功结果的完整诊断CSV。轮询只有数量/可用标志，不塞逐线数组，刷新/重启可恢复固定任务证据。origin.stark_coverage 记录 partial/unavailable/complete/not-applied 及名义/有效条件覆盖；缺失计数按跃迁合并，matched_condition_count 按条件-跃迁计数，不把缺失线计为已匹配。前端将成功覆盖提示及缺失/匹配下载绑定显示结果原 job，严格失败清单绑定失败 job，三谱CSV/JSON/PNG与诊断不串绑；更早缺字段记录防御读取。
 
 HTTP继承TLS、连接/读取及分段期限，增加响应大小边界，进度按取数/准备/渲染/保存真实阶段报告。原始渲染函数无逐行取消回调；网络读取和阶段边界协作检查，耗时计算由现有worker进程树取消兜底。不改物理公式，不终止用户其它进程。
 

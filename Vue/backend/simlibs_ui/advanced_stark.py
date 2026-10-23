@@ -73,6 +73,7 @@ class StarkTransport:
                 time.sleep(min(.05, max(0, until-time.monotonic())))
 
         def bounded_request(session, method, url, **kwargs):
+            kwargs.pop('timeout', None)
             for attempt in range(3):
                 announce('查询STARK-B / NIST身份数据')
                 remaining = end-time.monotonic()
@@ -139,11 +140,27 @@ class StarkTransport:
             return wrapped
 
         try:
+            class MockResponse:
+                def __init__(self, text):
+                    self.text = text
+                    self.content = text.encode('utf-8')
+                    self.status_code = 200
+                    self.headers = {'VAMDC-TRUNCATED': 'None'}
+                def raise_for_status(self):
+                    pass
+            def vamdc_get(url, **kwargs):
+                res = bounded_request(requests.Session(), 'GET', url, **kwargs)
+                return MockResponse(res)
             with ExitStack() as stack:
                 stack.enter_context(patch.object(source.StarkBClient, '_request', staticmethod(bounded_request)))
                 stack.enter_context(patch.object(source.SourceCache, 'get', cached))
                 stack.enter_context(patch.object(source, 'parse_table', checked_parser(source.parse_table)))
                 stack.enter_context(patch.object(identities, 'parse_identities', checked_parser(identities.parse_identities)))
+                try:
+                    vamdc = importlib.import_module('simLIBS.stark_vamdc')
+                    stack.enter_context(patch.object(vamdc.requests, 'get', vamdc_get))
+                except ImportError:
+                    pass
                 yield
                 check()
         except ValueError as error:

@@ -25,6 +25,7 @@ export interface ScanResult { axis: 'te' | 'ne' | 'resolution'; frames: { value:
 export interface DemoTask {
   id: string; kind: TaskKind; status: 'running' | 'completed' | 'cancelled' | 'failed'; progress: number
   startedAt: number; endedAt?: number; summary: string; detail: string
+  stage?: string
   result?: Spectrum | BatchSample[] | ScanResult
   resumable?: boolean; events?: string[]; duration?: string
   resultError?: string
