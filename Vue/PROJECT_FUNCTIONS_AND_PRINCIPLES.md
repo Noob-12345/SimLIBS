@@ -1,12 +1,12 @@
 # SimLIBS 功能与计算原理
 
-日期：2026-10-16。高级默认模型为 `nist-lines-self-absorption-1`，可选旧离线 `paper-eq7-stark-sa-1`；当前公式、数据来源与科学边界以 [论文自吸收报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 为准。`finite-lte-slab-1` 是旧高级历史模型，本轮不再使用。实现、自测与独立验收是不同证据；2026-10-16 的历史交付未更新 EXE/NSIS；2026-10-23 续接的重建与自测证据见 .ai-workflow/20261022-stark-missing-continuation/implementation.md，最终审查由独立 review 完成。
+日期：2026-10-25。高级页新请求仅提供“客户端模拟”，在线取得 NIST 谱线，使用原 nist 协议在本地计算 Stark、逐线自吸收与仪器响应；默认波段和物理联动保持。新入口不再提供论文选择、柱密度参数或论文专属校验。历史 paper-eq7-stark-sa-1 与 finite-lte-slab-1 结果仍按原版本/来源解释、查看和导出，后端实现及数据不删除。当前入口实现与自测见 [.ai-workflow/20261025-advanced-client-mode/implementation.md](.ai-workflow/20261025-advanced-client-mode/implementation.md)，最终审查由独立 review 完成。下文带日期的实现/验收段落及离线论文推导保留为历史，不代表当前可选入口。
 
-## NIST高级入口（2026-10-16）
+## 客户端模拟（原NIST高级入口，2026-10-16引入）
 
 默认Mg100%、真空285.27–285.33nm、Te=1eV、Ne=1e17cm⁻³、R=1000、步长0.001nm。高级专用适配层取得同次响应的计算光子线强、跃迁gA和全部阶段能级，复用原始 prepare_nist_absorption / render_nist_absorption，不执行网页JS。仅按原字节增加nist_lines.py/nist_self_absorption.py，旧simulation.py/self_absorption.py不变，普通local/client/server语义不变。
 
-NIST线强作为积分面积；布居使用全阶段及裸核态，发射电荷仍限定0–2。Stark W来自用户CSV或内置逐线系数，FWHM_Stark=2W·Ne/Ne_ref。仪器w=λ/R是高斯1/e半宽，FWHM_G=2√ln2·λ/R；R不进入τ。默认Ne/平均电荷反推总密度，可指定数密度；L=0及关闭自吸收均得到同Stark/Voigt薄谱。新入口不保留5%限制，但执行200000节点和源引擎工作量/内存上限。输出是NIST相对光子强度，不标成绝对光子辐亮度。
+NIST线强作为积分面积；布居使用全阶段及裸核态，发射电荷仍限定0–2。Stark W依次来自用户CSV、内置逐线系数及STARK-B自动补充，FWHM_Stark=2W·Ne/Ne_ref。仪器w=λ/R是高斯1/e半宽，FWHM_G=2√ln2·λ/R；R不进入τ。默认Ne/平均电荷反推总密度，可指定数密度；L=0及关闭自吸收均得到同Stark/Voigt薄谱。新入口不保留5%限制，但执行200000节点和源引擎工作量/内存上限。输出是NIST相对光子强度，不标成绝对光子辐亮度。
 
 名义与有效Te/Ne/组成分别请求NIST，完全相同的规范化请求在单任务内复用。可选未标定基体先改变有效组成/条件，再把产额倍率作用于有效NIST线强及吸收粒子密度；逐线诊断保留未缩放线强。不提供普适材料预测。三谱同网格同尺度，origin记录URL/响应hash/引擎版本/约定/配置/用户系数出处。
 
@@ -14,7 +14,7 @@ Stark CSV最大2MB、最多20000行，支持BOM。必需element、非负整数ch
 
 HTTP继承TLS、连接/读取及分段期限，增加响应大小边界，进度按取数/准备/渲染/保存真实阶段报告。原始渲染函数无逐行取消回调；网络读取和阶段边界协作检查，耗时计算由现有worker进程树取消兜底。不改物理公式，不终止用户其它进程。
 
-46项后端与8项SSR/组件/脚本检查通过；其中数学和HTTP闭环用捕获NIST夹具，不冒充在线实算。另一次真实NIST窄带成功：1条跃迁、61个节点，URL/hash见 [.ai-workflow/20261016-advanced-nist/](.ai-workflow/20261016-advanced-nist/)。GUI未测，不重试受拒浏览器启动；本轮只交源码及前端dist。下方高级推导保留为离线论文模型及历史证据。
+46项后端与8项SSR/组件/脚本检查通过；其中数学和HTTP闭环用捕获NIST夹具，不冒充在线实算。另一次真实NIST窄带成功：1条跃迁、61个节点，URL/hash见 [.ai-workflow/20261016-advanced-nist/](.ai-workflow/20261016-advanced-nist/)。GUI未测，不重试受拒浏览器启动；本轮只交源码及前端dist。以上检查数量与未打包说明仅对应2026-10-16历史交付；下方高级推导保留为离线论文模型及历史证据。
 
 ## 独立展宽机制与元素视图（2026-10-17）
 
@@ -37,7 +37,7 @@ HTTP继承TLS、连接/读取及分段期限，增加响应大小边界，进度
 2. [三种基础模式与单位](#三种基础模式与单位)
 3. [本地布居与展宽](#本地布居与展宽)
 4. [页面功能与任务](#页面功能与任务)
-5. [高级模拟推导](#高级模拟推导)
+5. [高级模拟推导（历史离线论文模型）](#高级模拟推导历史离线论文模型)
 6. [导出与可复现示例](#导出与可复现示例)
 7. [验证证据与适用边界](#验证证据与适用边界)
 
@@ -85,7 +85,7 @@ NIST 官方页面的线形定义与 Python 常用 FWHM 定义并非自动相同�
 n_(z+1)/n_z = (2/ne) (2π me kT/h²)^(3/2) (U_(z+1)/U_z) exp(-χ_z/kT)
 ```
 
-公式采用 SI 的 ne，需要把 cm⁻³ 乘 10⁶；Te[eV] 与 kT 的转换必须一致。源实现使用有限数据集，并非所有真实高激发态/电离级的完整配分函数。NIST高级入口使用响应中的全部阶段，离线论文选择使用其I/II/III快照。设置的最大发射电荷控制输出发射，不代表消除了其他人口。
+公式采用 SI 的 ne，需要把 cm⁻³ 乘 10⁶；Te[eV] 与 kT 的转换必须一致。源实现使用有限数据集，并非所有真实高激发态/电离级的完整配分函数。NIST高级入口使用响应中的全部阶段，历史离线论文模型使用其I/II/III快照。设置的最大发射电荷控制输出发射，不代表消除了其他人口。
 
 光学薄光子线强正比于上能级人口乘 Aki；能量谱还乘光子能量。普通本地绝对尺度有其模型约定，与高级指定柱密度辐亮度不能直接混用。
 
@@ -113,9 +113,11 @@ Gaussian 标准差 σ=FWHM/(2√(2ln2))；Lorentz 半宽 γ=FWHM/2；Voigt 是�
 
 界面启动动画表示偏好、字体和首次布局准备，不代表已经计算光谱。日间、夜间、跟随系统及五种配色与减少动态设置独立于数据；原生标题栏同步主题。参数面板保持自然长高与整页滚动，成功完成后可自动收起，也可手动展开；不会因面板收起而丢失草稿或结果。科学数据始终保留完整节点，画布尺寸不决定数据点数。
 
-## 高级模拟推导
+## 高级模拟推导（历史离线论文模型）
 
-离线选择的高级后端直接调用与原 simLIBS 相同的 `simLIBS.self_absorption.simulate_paper_spectrum`，依照 RSC Advances 2023 论文 *A numerical procedure for understanding the self-absorption effects in laser induced breakdown spectroscopy* 的 Eq.7 计算逐线吸收参数，并用论文 SA/展宽关系重建谱线。完整推导、数据核对和适用限制见 [核心中文报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md)。这里不是对已经展宽的总谱任意削峰，也没有混用旧有限 slab 的连续总 tau 算法。
+本节至本节末仅说明历史离线论文版本，包含当时Vue柱密度输入、元素/波段限制和示例，不适用于当前客户端入口。
+
+保留的离线高级后端直接调用与原 simLIBS 相同的 `simLIBS.self_absorption.simulate_paper_spectrum`，依照 RSC Advances 2023 论文 *A numerical procedure for understanding the self-absorption effects in laser induced breakdown spectroscopy* 的 Eq.7 计算逐线吸收参数，并用论文 SA/展宽关系重建谱线。完整推导、数据核对和适用限制见 [核心中文报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md)。这里不是对已经展宽的总谱任意削峰，也没有混用旧有限 slab 的连续总 tau 算法。
 
 ### 真实数据与三态布居
 
@@ -189,15 +191,15 @@ peak_abs / peak_thin = (A_abs/A_thin) × (w₀/w_abs) = SA
 
 普通 CSV 导出实际波长、总谱及元素贡献；JSON保存来源和参数；前端 PNG为当前视口。高级 CSV 包含修正、基体薄、名义薄三曲线；后端 JSON自包含 comparison、逐线 line_diagnostics、逐线中心 opacity/tau/beta及网格参数，不仅是本机文件路径。当前opacity每行对应一条线中心，tau映射tau_center、beta映射SA，origin明确标记per-line-center，不是连续总光学厚度。可缺省的Stark参考温度等字段读回JSON null，不产生NaN。后端 PNG三谱共用模型强度尺度并带图例和单位；前端 Canvas PNG包含绘入画布的三谱图例，共同归一化时注明尺度。批量参数/训练ZIP、扫描GIF按任务实际文件导出。
 
-可复现高级示例：Mg100%，284.5–286nm，Te=1eV、Ne=1e17cm⁻³、R=1000，输出步长0.005nm，最大发射电荷2；柱密度1e16cm⁻²，L=0.01m，响应与倍率均1，仪器Gaussian启用。得到301个输出节点。关闭自吸收比较修正谱与基体薄谱；令Mg响应2比较薄谱与名义薄谱。默认Fe不具备本模型所需Stark数据，不能继续使用旧Fe高级示例。真实worker/API/三谱导出证据见 [Vue实施说明](.ai-workflow/20261015-paper-self-absorption/implementation.md)。
+历史离线论文示例（当前高级页不再提交此模型）：Mg100%，284.5–286nm，Te=1eV、Ne=1e17cm⁻³、R=1000，输出步长0.005nm，最大发射电荷2；柱密度1e16cm⁻²，L=0.01m，响应与倍率均1，仪器Gaussian启用。得到301个输出节点。关闭自吸收比较修正谱与基体薄谱；令Mg响应2比较薄谱与名义薄谱。默认Fe不具备本模型所需Stark数据，不能继续使用旧Fe高级示例。真实worker/API/三谱导出证据见 [Vue实施说明](.ai-workflow/20261015-paper-self-absorption/implementation.md)。
 
 可复现普通对照：server Fe100%、240–260nm、Te1、Ne1e17、R1000、charge1，保持Photon及官方节点，与同次参数的独立官方CSV比较。在线失败应保留错误并有限重试，不能伪造 Google Charts 对象或替换官方计算。
 
 ## 验证证据与适用边界
 
-当前源码的Vue高级测试与models/storage/web_api回归共38项通过，父plan复跑也通过；便携Node22.16环境下Vue类型检查和静态构建已通过。独立真实RealBackend worker完成301节点Mg模拟，三谱CSV/严格JSON/PNG导出已逐值核对并保存 [请求、进度与文件证据](.ai-workflow/20261015-paper-self-absorption/evidence/20261015-154332/summary.json)。共享原核心的科学验收和最新边界修复以 [核心报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 为准。
+2026-10-15历史论文版本的Vue高级测试与models/storage/web_api回归共38项通过，父plan复跑也通过；便携Node22.16环境下Vue类型检查和静态构建已通过。独立真实RealBackend worker完成301节点Mg模拟，三谱CSV/严格JSON/PNG导出已逐值核对并保存 [请求、进度与文件证据](.ai-workflow/20261015-paper-self-absorption/evidence/20261015-154332/summary.json)。共享原核心的科学验收和最新边界修复以 [核心报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 为准。
 
-本轮只交付源码、Python后端和Markdown报告，未重打包或更新dist-desktop旧EXE/NSIS。Tauri资源白名单及collect-desktop脚本已补论文JSON路径；收集规则通过隔离临时项目的真实Node脚本验证，生产发行目录未被该测试修改。实际安装包资源、原生文件对话框与新桌面程序的运行行为仍需在具备Rust/Cargo的环境重新构建后验证。
+2026-10-15当轮只交付源码、Python后端和Markdown报告，未重打包或更新dist-desktop旧EXE/NSIS。Tauri资源白名单及collect-desktop脚本已补论文JSON路径；收集规则通过隔离临时项目的真实Node脚本验证，生产发行目录未被该测试修改。实际安装包资源、原生文件对话框与新桌面程序的运行行为仍需在具备Rust/Cargo的环境重新构建后验证。
 
 ### 2026-10-14历史基础模式与旧高级验收
 
