@@ -10,6 +10,7 @@ from scipy.integrate import trapezoid
 
 from simLIBS import SimulatedLIBS, MissingStarkDataError, NISTSelfAbsorptionConfig
 from simLIBS import nist_self_absorption as model
+from stark_fixtures import partial_provider
 
 
 HTML = (Path(__file__).parent / 'fixtures' / 'nist_mg_280_290.html').read_text(encoding='utf-8')
@@ -20,11 +21,12 @@ class MissingStarkTests(unittest.TestCase):
         args = dict(Te=1., Ne=1e17, elements=['Mg'], percentages=[100.],
                     low_w=280., upper_w=290., resolution=3000,
                     stark_broadening=True, instrument_broadening=False,
-                    self_absorption_config={'stark_source': 'local', 'missing_stark': 'unbroadened'})
+                    self_absorption_config={'missing_stark': 'unbroadened'})
         args.update(changes)
         response = Mock(text=HTML)
         response.raise_for_status.return_value = None
-        with patch('simLIBS.simulation.requests.get', return_value=response):
+        with patch('simLIBS.simulation.requests.get', return_value=response), \
+                patch('simLIBS.nist_stark.resolve_online', side_effect=partial_provider):
             return SimulatedLIBS(**args)
 
     def test_partial_coverage_keeps_all_line_areas_and_reports_missing(self):
@@ -45,7 +47,9 @@ class MissingStarkTests(unittest.TestCase):
         np.testing.assert_allclose(libs.raw_spectrum, libs.unabsorbed_raw_spectrum)
         counts = libs.self_absorption_metadata['stark_data']
         self.assertEqual((counts['missing_line_count'], counts['matched_line_count']), (18, 2))
-        self.assertEqual(counts['local_line_count'], 2)
+        self.assertEqual(counts['stark_b_line_count'], 2)
+        self.assertEqual(counts['source_mode'], 'STARK-B')
+        self.assertNotIn('local_line_count', counts)
         self.assertNotIn('unavailable', counts['sources'])
 
     def test_all_missing_with_instrument_matches_analytic_gaussian(self):
@@ -102,7 +106,7 @@ class MissingStarkTests(unittest.TestCase):
 
     def test_default_remains_strict_and_policy_is_validated(self):
         with self.assertRaises(MissingStarkDataError):
-            self.make(self_absorption_config={'stark_source': 'local'})
+            self.make(self_absorption_config={})
         for value in ('skip', '', None, True):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'missing_stark'):
                 NISTSelfAbsorptionConfig(missing_stark=value)

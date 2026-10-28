@@ -10,14 +10,11 @@ import numpy as np
 import pandas as pd
 
 from simLIBS import SimulatedLIBS, simulation
-from simLIBS.nist_self_absorption import parse_atomic_payload, MissingStarkDataError
+from simLIBS.nist_self_absorption import MissingStarkDataError
+from stark_fixtures import provider_response, missing_provider
 
 
 NIST_HTML = (Path(__file__).parent/'fixtures'/'nist_mg_280_290.html').read_text(encoding='utf-8')
-# Synthetic coefficients for tests ONLY, deliberately covering all NIST transitions.
-TEST_STARK = [dict(row, stark_width_nm=.002, stark_reference_ne_cm3=1e16,
-                   source='synthetic test fixture, not physical data')
-              for row in parse_atomic_payload(NIST_HTML)['transitions']]
 
 
 def nist_response():
@@ -37,8 +34,8 @@ class CorePaperIntegrationTests(unittest.TestCase):
                     self_absorption=True, self_absorption_config={"path_length_m": 0.001,
                     "total_number_density_cm3": 1e16, "wavelength_step_nm": 0.001})
         args.update(changes)
-        args['self_absorption_config'] = dict(stark_data=TEST_STARK, **args['self_absorption_config'])
         with patch.object(simulation.requests, "get", return_value=nist_response()) as fetch, \
+                patch('simLIBS.nist_stark.resolve_online', side_effect=provider_response), \
                 patch.object(simulation.webdriver, "Chrome", side_effect=AssertionError("static must not open Chrome")):
             result = SimulatedLIBS(**args)
             fetch.assert_called_once()
@@ -132,24 +129,24 @@ class CorePaperIntegrationTests(unittest.TestCase):
         pd.testing.assert_frame_equal(*outputs)
 
     def test_missing_stark_data_reports_all_missing_nist_transitions(self):
-        with patch.object(simulation.requests, 'get', return_value=nist_response()) as fetch:
+        with patch.object(simulation.requests, 'get', return_value=nist_response()) as fetch, \
+                patch('simLIBS.nist_stark.resolve_online', side_effect=missing_provider):
             with self.assertRaises(MissingStarkDataError) as raised:
                 SimulatedLIBS(elements=['Mg'], percentages=[100], low_w=280, upper_w=290,
-                              self_absorption=True, self_absorption_config={'stark_source': 'local'})
+                              self_absorption=True)
         fetch.assert_called_once()
-        self.assertEqual(len(raised.exception.missing_lines), 18)
+        self.assertEqual(len(raised.exception.missing_lines), 20)
         self.assertTrue((raised.exception.missing_lines.element == 'Mg').all())
 
     def test_dataset_forwards_paper_configuration(self):
         composition = pd.DataFrame({"Mg": [100.], "name": ["sample"]})
         with patch.object(simulation.requests, "get", return_value=nist_response()), \
+                patch('simLIBS.nist_stark.resolve_online', side_effect=provider_response), \
                 patch.object(simulation.time, 'sleep'):
             a = SimulatedLIBS.create_dataset(composition, size=2, Te_min=1, Te_max=1, Ne_min=1e17, Ne_max=1e17,
-                self_absorption=True, self_absorption_config={"path_length_m": 0, "wavelength_step_nm": 100,
-                                                            "stark_data": TEST_STARK})
+                self_absorption=True, self_absorption_config={"path_length_m": 0, "wavelength_step_nm": 100})
             b = SimulatedLIBS.create_dataset(composition, size=2, Te_min=1, Te_max=1, Ne_min=1e17, Ne_max=1e17,
-                self_absorption=True, self_absorption_config={"path_length_m": .01, "wavelength_step_nm": 100,
-                                                            "stark_data": TEST_STARK})
+                self_absorption=True, self_absorption_config={"path_length_m": .01, "wavelength_step_nm": 100})
         cols = [str(v) for v in np.linspace(200, 1000, 9)]
         self.assertFalse(np.allclose(a[cols].to_numpy(dtype=float), b[cols].to_numpy(dtype=float)))
         self.assertTrue((b["name"] == "sample").all())

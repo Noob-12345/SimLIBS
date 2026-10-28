@@ -1,10 +1,10 @@
 # Stark 数据覆盖与验证记录
 
-日期：2026-10-18。适用于此目录中的 `SimulatedLIBS` 静态入口；独立离线论文模型仍使用自己的本地数据。
+更新日期：2026-10-28。适用于此目录中的 `SimulatedLIBS` 静态入口。原有联网验证记录保留；当前版本已删除内置 JSON 和本地 Stark 模型。
 
 ## 已实现的扩展
 
-不再把 Mg、Ca、Zn 当成允许元素清单。任何输入元素都会先查用户和本地系数；仍有缺失时，按物种请求 STARK-B，并通过 NIST ASD 补齐量子态后匹配。已有本地系数继续优先，方便复现旧结果。
+全部元素按物种请求 STARK-B，或复用已验证的数据库响应缓存，再通过 NIST ASD 补齐量子态后匹配。不接受本地 JSON、CSV 或手工系数覆盖；Mg、Ca、Zn 也使用同一数据库流程。
 
 新增两个组件均有中文注释和函数说明：
 
@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | `simLIBS/stark_b.py` | 官网查询、原始响应缓存、电子 FWHM 解析、温度拟合、密度和近似适用条件 | `species()`、`parse_table()`、`evaluate_width()` |
 | `simLIBS/nist_stark.py` | NIST TSV 身份补全、组态/项/J 识别、跨库匹配、缺失原因 | `identify()`、`same_state()`、`match_width()`、`resolve_online()` |
-| `simLIBS/nist_self_absorption.py` | 用户→本地→数据库的优先序；合成 Stark 或带自吸收的总谱 | `resolve_stark()`、`render_nist_absorption()` |
+| `simLIBS/nist_self_absorption.py` | 全部系数查询 STARK-B；合成 Stark 或带自吸收的总谱 | `resolve_stark()`、`render_nist_absorption()` |
 
 ## 真实联网验证
 
@@ -28,7 +28,7 @@
 | K I | 693.81995 | 0.93822977 | SCP，多重态数据 |
 | Li I | 610.522、610.533、610.535 | 0.37174947、0.37176286、0.37176530 | SCP，多重态数据 |
 
-与原有 Mg/Ca/Zn 数据相比，已经验证了七个额外元素的谱线。Si 的仅 Stark 和自吸收两个分支还使用真实捕获响应做了离线集成测试。重新采样只使用已匹配的数据，不再次联网。
+以上记录验证了七种元素的部分谱线。Si 的仅 Stark 和自吸收两个分支还使用真实捕获响应做了自动化集成测试。重新采样只使用已匹配的数据，不再次联网。
 
 例如从项目目录运行：
 
@@ -48,7 +48,6 @@ python examples/nist_self_absorption_demo.py --element Li --low 610.50 --high 61
 - 电子碰撞宽度与质子/离子宽度分开，当前只接入电子碰撞部分。星号表示碰撞近似接近或超出有效范围，这类数据不自动采用。
 - C 已给出时检查隔离线条件；C 未给出时 `stark_isolated_limit_cm3=None`，元数据统计未知上限条数。来源有出处不等于近似在所有密度下都有效。
 - 理论方法包含 SCP 和 MSE，默认优先 SCP，再查 MSE；可以配置 `stark_methods=("SCP",)`。同等优先的多个来源会报歧义，不取平均。
-- 本地旧系数保留原来的参考密度约定，不凭空增加温度依赖；其适用温度仍应核对原始文献。
 
 用户此前样例中的 Pr、Sm、Tb、Ho、Er、Tm、Yb 在已核查的 STARK-B 元素表中未开放数据。其他数据源或文献可能另有数据；本组件不会为它们生成虚构系数。
 
@@ -64,7 +63,7 @@ except MissingStarkDataError as error:
     error.matched_lines.to_csv("matched_stark.csv", index=False)
 ```
 
-缺失清单中的 `stark_missing_reason` 区分无物种数据、密度超范围、NIST 身份未确认、没有对应状态、温度超范围或拟合缺失。网络和缓存错误另抛 `StarkDataAccessError`，不会伪报成“元素没有数据”。缺失时不输出被误认为完整的部分 Stark/自吸收总谱。
+缺失清单中的 `stark_missing_reason` 区分无物种数据、密度超范围、NIST 身份未确认、没有对应状态、温度超范围或拟合缺失。网络和缓存错误另抛 `StarkDataAccessError`，不会伪报成“元素没有数据”。默认严格模式在缺失时中止；显式设置 `missing_stark="unbroadened"` 可保留缺失谱线的 NIST 面积，并在诊断中明确标记未施加 Stark/自吸收校正。
 
 ## 数据来源
 

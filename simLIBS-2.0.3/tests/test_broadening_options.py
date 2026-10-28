@@ -19,12 +19,10 @@ from scipy.special import voigt_profile
 from simLIBS import SimulatedLIBS, simulation
 from simLIBS import nist_self_absorption as model
 from simLIBS.nist_lines import render_sticks
+from stark_fixtures import provider_response, partial_provider
 
 
 HTML = (Path(__file__).parent/'fixtures'/'nist_mg_280_290.html').read_text(encoding='utf-8')
-# 只供批量测试覆盖整段夹具使用；禁止作为实际模拟的物理系数。
-TEST_STARK = [dict(row, stark_width_nm=.002, source='synthetic test fixture only')
-              for row in model.parse_atomic_payload(HTML)['transitions']]
 
 
 def response(body=HTML):
@@ -48,6 +46,7 @@ class IndependentBroadeningTests(unittest.TestCase):
                     self_absorption_config={'path_length_m': .001, 'wavelength_step_nm': .001})
         args.update(changes)
         with patch.object(simulation.requests, 'get', return_value=response(body)), \
+                patch('simLIBS.nist_stark.resolve_online', side_effect=partial_provider), \
                 patch.object(simulation.webdriver, 'Chrome', side_effect=AssertionError('browser used')):
             return SimulatedLIBS(**args)
 
@@ -156,18 +155,19 @@ class IndependentBroadeningTests(unittest.TestCase):
 
     def test_stark_only_still_reports_missing_coefficients(self):
         with self.assertRaises(model.MissingStarkDataError) as raised:
-            self.make(low_w=280., upper_w=290., self_absorption_config={'stark_source': 'local'})
+            self.make(low_w=280., upper_w=290., self_absorption_config={})
         self.assertEqual(len(raised.exception.missing_lines), 18)
 
     def test_dataset_forwards_both_options_and_uses_stark_sampling_grid(self):
         composition = pd.DataFrame({'Mg': [100.], 'name': ['sample']})
         with patch.object(simulation.requests, 'get', return_value=response()), \
+                patch('simLIBS.nist_stark.resolve_online', side_effect=provider_response), \
                 patch.object(simulation.time, 'sleep'), \
                 patch.object(model, 'nist_populations', side_effect=AssertionError('Saha used')):
             dataset = SimulatedLIBS.create_dataset(
                 composition, size=1, Te_min=1, Te_max=1, Ne_min=1e17, Ne_max=1e17,
                 self_absorption=False, stark_broadening=True, instrument_broadening=False,
-                self_absorption_config={'wavelength_step_nm': 100., 'stark_data': TEST_STARK})
+                self_absorption_config={'wavelength_step_nm': 100.})
         self.assertEqual(dataset.shape, (1, 13))  # 9 个波长点 + Mg/name/Te/Ne
         self.assertGreater(dataset['200.0'].iloc[0], 0)
 
@@ -220,9 +220,11 @@ class ExampleCLITests(unittest.TestCase):
         spec.loader.exec_module(example)
         with tempfile.TemporaryDirectory(prefix='simlibs-cli-') as directory:
             self.assertTrue(Path(directory).resolve().is_relative_to(Path(tempfile.gettempdir()).resolve()))
-            arguments = [str(path), '--stark-only', '--no-instrument-broadening', '--output', directory]
+            arguments = [str(path), '--element', 'Mg', '--low', '285.27', '--high', '285.33',
+                         '--stark-only', '--no-instrument-broadening', '--output', directory]
             with patch.object(sys, 'argv', arguments), \
                     patch.object(simulation.requests, 'get', return_value=response()), \
+                    patch('simLIBS.nist_stark.resolve_online', side_effect=partial_provider), \
                     contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
                 try:
                     code = example.main()

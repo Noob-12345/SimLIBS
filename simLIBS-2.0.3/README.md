@@ -27,7 +27,7 @@ python -m pip install -e .
 
 - `static`：需要联网访问 NIST，使用本地 Python 计算线形。
 - `dynamic`：需要 Chrome，程序通过 Selenium 操作 NIST 页面并导出结果；驱动由 `webdriver-manager` 获取。
-- 独立离线论文模型：使用随项目提供的本地数据，见第 10 节。
+- Stark 系数统一来自 STARK-B 数据库，可复用已验证的数据库响应缓存。
 
 确认实际导入的是正在编辑的源码，可以运行：
 
@@ -125,7 +125,7 @@ FWHM = 2 * sqrt(ln(2)) * w
 
 ## 4. 调用静态逐线自吸收
 
-建议先使用下面的 Mg 窄窗口确认调用流程。该真空波长窗口对应一条可匹配内置 Stark 系数的 Mg I 跃迁。
+建议先使用下面的 Si II 窄窗口确认调用流程。该真空波长窗口已有真实 STARK-B 数据验证。
 
 ```python
 from pathlib import Path
@@ -139,10 +139,10 @@ try:
     libs_sa = SimulatedLIBS(
         Te=1.0,
         Ne=1e17,
-        elements=["Mg"],
+        elements=["Si"],
         percentages=[100.0],
-        low_w=285.27,
-        upper_w=285.33,
+        low_w=634.88,
+        upper_w=634.90,
         resolution=3000,
         max_ion_charge=2,
         webscraping="static",
@@ -167,7 +167,7 @@ print(libs_sa.self_absorption_diagnostics[
 ])
 ```
 
-窄窗口适合验证单线流程；要查看完整线翼，可扩大输出波段，并补齐新进入波段的其他跃迁所需系数。
+窄窗口适合验证单线流程；要查看完整线翼，可扩大输出波段，并检查新进入波段的其他跃迁在数据库中是否有可用系数。
 
 自吸收路径依次完成以下工作：
 
@@ -188,11 +188,11 @@ SA = (1 - exp(-tau_center)) / tau_center，tau_center=0 时 SA=1
 
 `SA` 表示仪器响应前的内禀 Lorentz 峰高比；经过仪器展宽后，最终峰高比可能改变。仪器宽度不参与光学厚度计算，仪器高斯标准差为 `sigma = wavelength / (R * sqrt(2))`。
 
-这里采用各谱线独立计算的经验模型，尚未处理谱线之间的耦合辐射传输。当前 Stark 系数按电子密度线性缩放，不另行推断系数的温度依赖。
+这里采用各谱线独立计算的经验模型，尚未处理谱线之间的耦合辐射传输。Stark 宽度采用数据库温度表值、已发布拟合或 VAMDC 表内插值，再按电子密度线性缩放；不推断额外的温度依赖。
 
 ### 4.1 自吸收配置参数
 
-`self_absorption_config` 可以使用字典，也可以使用包入口导出的 `NISTSelfAbsorptionConfig` 对象。为兼容已有代码保留了这个名称；仅做 Stark 展宽时同样从这里读取系数及采样步长。
+`self_absorption_config` 可以使用字典，也可以使用包入口导出的 `NISTSelfAbsorptionConfig` 对象。为兼容已有代码保留了这个名称；仅做 Stark 展宽时同样从这里读取数据库选项及采样步长。
 
 | 配置项 | 默认值 | 含义 |
 | --- | --- | --- |
@@ -200,9 +200,6 @@ SA = (1 - exp(-tau_center)) / tau_center，tau_center=0 时 SA=1
 | `total_number_density_cm3` | `None` | 总粒子数密度，cm^-3；默认通过 `Ne / 平均电荷` 反推 |
 | `wavelength_step_nm` | `0.005` | 期望输出采样步长，nm |
 | `instrument_broadening` | `True` | 兼容旧调用的仪器开关；顶层同名参数显式传值时优先 |
-| `stark_data` | `None` | 用户逐线系数，可用字典列表或 `DataFrame` |
-| `data_path` | `None` | 自定义本地 JSON 路径；当前 NIST 引擎从其中读取 Stark 系数 |
-| `stark_source` | `"auto"` | 本地缺失时自动查 STARK-B；`"local"` 只用用户/JSON |
 | `stark_cache_dir` | `None` | 原始数据快照目录；默认 `%LOCALAPPDATA%/simLIBS/stark-v1`，其他系统为用户 `.cache` |
 | `stark_allow_network` | `True` | `False` 只读已有 Stark/身份缓存；NIST 计算谱本身仍需联网 |
 | `stark_methods` | `("SCP", "MSE")` | 方法优先序；默认也允许 VAMDC 未导出方法的有来源记录，标为 `unreported`；填 `("SCP",)` 则严格只接受明确标注 SCP 的数据 |
@@ -249,17 +246,9 @@ stark_spectrum = libs_stark.get_interpolated_spectrum()
 
 若已有 `libs_sa`，可读取它的 `unabsorbed_interpolated_spectrum` 作为相同仪器设置下的薄谱参考，避免再次联网。比较两次调用时，要同时核对仪器开关、R 和采样网格。
 
-## 5. Stark 数据覆盖与外部系数
+## 5. Stark 数据来源与覆盖
 
-**已接入 STARK-B 自动查询与缓存，覆盖不再局限于三个内置元素。** 系数匹配顺序为“用户 `stark_data` → 本地 JSON → STARK-B”。内置表仍包含以下部分跃迁，供已有结果复现：
-
-| 元素 | 内置记录数 |
-| --- | ---: |
-| Mg | 13 |
-| Ca | 14 |
-| Zn | 4 |
-
-这些数量不代表覆盖了三个元素的全部谱线。NIST 会根据请求返回谱线；JSON 在当前入口中只用于查系数。即使元素属于 Mg/Ca/Zn，扩大波段后也可能遇到缺失系数。
+**Stark 系数统一从 STARK-B 数据库取得，或复用已验证的数据库响应缓存。** 项目已删除内置系数 JSON 和独立离线论文模型；不再接受用户本地系数表或本地数据文件。所有元素和跃迁均执行相同的数据库查询与匹配流程。
 
 自动流程先用 NIST ASD 导出补齐上下态，确认真空 Ritz 波长、上下能量及 `gA`，然后按 STARK-B 的组态、项和 J 匹配。数据库明确给出多重态平均系数时，才允许覆盖相同组态/项的细结构分量，并按来源规定的波长平方比换算。不会按最近波长猜系数。
 
@@ -284,7 +273,6 @@ libs_si = SimulatedLIBS(
     webscraping="static",
     stark_broadening=True, self_absorption=False,
     self_absorption_config={
-        "stark_source": "auto",      # 默认值，无需手工准备 JSON
         "stark_cache_dir": "cache/stark",
         "wavelength_step_nm": 0.001,
     },
@@ -294,72 +282,42 @@ print(libs_si.self_absorption_diagnostics[[
 ]])
 ```
 
-开启自吸收仍使用同一数据源，只需设 `self_absorption=True` 并提供所需光程。`stark_allow_network=False` 适合重用已下载快照；`stark_source="local"` 可复现此前只查本地 JSON 的行为。`interpolate()` 直接复用本次已匹配的线宽，不再次查询数据库。更改 Te/Ne 应重新创建模拟，重新检查适用范围。
+开启自吸收仍使用同一数据源，只需设 `self_absorption=True` 并提供所需光程。`stark_allow_network=False` 只复用已下载的数据库响应，缓存缺失会报取数错误；它不启用本地系数模型。`interpolate()` 直接复用本次已匹配的线宽，不再次查询数据库。更改 Te/Ne 应重新创建模拟，重新检查适用范围。
 
 原始响应按物种/密度缓存，包含取数时间和 SHA-256；结果诊断保留数据集、计算方法、温度处理方式、量子态、NIST 能级 ID 和引用。调试新增组件可依次查看：`stark_b.py`（取表、缓存、单位与适用条件）→ `nist_stark.py`（NIST 身份补全与跨库匹配）→ `nist_self_absorption.py`（组织系数并合成线形）。
 
-### 5.1 外部系数字段与单位
+### 5.1 线宽字段与单位
 
-| 字段 | 要求 | 含义 |
-| --- | --- | --- |
-| `element` | 必填 | 元素符号，例如 `Fe` |
-| `charge` | 必填 | 从 0 开始的电荷态：0 为中性，1 为一价离子 |
-| `stark_width_nm` | 必填 | 系数 `W`，nm，须为正值 |
-| `stark_reference_ne_cm3` | 可选，默认 `1e16` | 系数对应的参考电子密度，cm^-3 |
-| `wavelength_nm` | 作为跃迁标识时填写 | 真空波长，nm，匹配绝对容差为 `1e-6 nm` |
-| `lower_eV`、`upper_eV` | 可代替波长，须成对填写 | 上下能级，eV，匹配绝对容差为 `1e-6 eV` |
-| `source` | 建议填写 | 原始文献、数据库记录或 DOI |
-
-波长和能级两种标识至少提供一种；同时填写时需要全部匹配。同波长未分辨跃迁建议补充上下能级，避免身份混淆。内置表通过能级与 `gA` 匹配，以处理论文空气波长和 NIST 真空波长的差别。
-
-代码采用的系数约定为：
+`stark_width_nm` 是数据库宽度换算后供渲染器使用的半高半宽 W；`stark_reference_ne_cm3` 是其参考密度。最终内禀宽度为：
 
 ```text
-当前 Stark FWHM_nm = 2 * stark_width_nm * Ne / stark_reference_ne_cm3
+Stark FWHM_nm = 2 * stark_width_nm * Ne / stark_reference_ne_cm3
 ```
 
-文献若给出参考密度下的 FWHM，先统一到 nm，再除以 2 得到此接口需要的 `W`；`stark_reference_ne_cm3` 填文献对应的电子密度。Å 转 nm 的换算为 `1 Å = 0.1 nm`。系数应保留来源，并核对原文的宽度定义及适用条件。
+数据库原始电子 FWHM 从 Å 换算为 nm，并按来源约定处理波长平方比。在线数据已经缩放到目标 Ne 后，参考密度字段也设为目标 Ne，避免重复缩放；原表参考密度另存于 `stark_table_reference_ne_cm3`。
 
-### 5.2 补齐系数后重新运行
+### 5.2 命令行运行与缺失数据处理
 
-先运行第 4 节示例或下面的命令导出缺失模板，在 CSV 中按有出处的逐线数据填写 `stark_width_nm`、参考密度和来源。完成后可通过 Python 读取：
-
-```python
-import pandas as pd
-from simLIBS import NISTSelfAbsorptionConfig
-
-stark_table = pd.read_csv("stark_coefficients.csv")
-config = NISTSelfAbsorptionConfig(
-    path_length_m=0.001,
-    wavelength_step_nm=0.001,
-    stark_data=stark_table,
-)
-# 将 config 作为 SimulatedLIBS(..., self_absorption_config=config) 的参数。
-```
-
-也可以直接运行配套脚本。以下命令均在 `simLIBS-2.0.3` 目录执行：
+以下命令均在项目目录执行，所有 Stark 宽度使用同一数据库流程：
 
 ```powershell
-# 默认窄窗口：导出吸收谱、薄谱、NIST 线强、逐线诊断和元数据
+# 默认 Si II 窄窗口：吸收谱、薄谱、NIST 线强、诊断和元数据
 python examples/nist_self_absorption_demo.py --output output/nist_self_absorption
 
-# 关闭自吸收及仪器高斯，仅做 Stark 展宽，主结果保存为 stark_only.csv
+# 仅做 Stark 展宽，关闭自吸收和仪器高斯
 python examples/nist_self_absorption_demo.py --stark-only --no-instrument-broadening --output output/stark_only
 
-# Si II：无需外部 CSV，自动查真实数据库；第一次取数后保存快照
-python examples/nist_self_absorption_demo.py --element Si --low 634.88 --high 634.90 --stark-only --cache-dir cache/stark --output output/si_stark
+# 下载数据库响应到指定缓存目录
+python examples/nist_self_absorption_demo.py --stark-only --cache-dir cache/stark --output output/si_stark
 
-# 同样的元素、窗口、密度重用 Stark 缓存；NIST 计算谱仍需联网
-python examples/nist_self_absorption_demo.py --element Si --low 634.88 --high 634.90 --stark-only --cache-dir cache/stark --offline-stark --output output/si_repeat
+# 复用数据库缓存；NIST 计算谱仍需联网
+python examples/nist_self_absorption_demo.py --stark-only --cache-dir cache/stark --offline-stark --output output/si_repeat
 
-# 扩大窗口：若仍缺系数，导出 missing_stark.csv 和 matched_stark.csv，返回 2
-python examples/nist_self_absorption_demo.py --low 280 --high 290 --output output/nist_self_absorption
-
-# 填好 CSV 后重新运行
-python examples/nist_self_absorption_demo.py --low 280 --high 290 --stark-csv stark_coefficients.csv --output output/nist_self_absorption
+# 扩大波段，数据库缺少系数时保留未展宽谱线并记录缺失原因
+python examples/nist_self_absorption_demo.py --element Mg --low 280 --high 290 --stark-only --missing-stark unbroadened --output output/mg_stark
 ```
 
-命令行还可用 `--te`、`--ne`、`--max-charge`、`--stark-source local` 和 `--stark-methods SCP`。网络/缓存取数失败返回 3，与真实缺系数的返回码 2 区分。实际验证过的元素与限制见 [Stark 数据覆盖记录](STARK_DATA_COVERAGE.md)。
+还可设置 `--te`、`--ne`、`--max-charge` 和 `--stark-methods SCP`。默认缺系数时导出 `missing_stark.csv` 和 `matched_stark.csv`，返回 2；网络或缓存取数失败返回 3。没有本地系数导入选项。
 
 ## 6. 主类参数
 
@@ -486,40 +444,17 @@ dataset.to_csv(dataset_dir / "samples.csv", index=False)
 
 当前批量接口没有暴露波段、仪器分辨率和最大发射电荷态参数，内部使用主类默认值，即 `200–1000 nm`、`R=1000`、`max_ion_charge=3`。它会转发 `stark_broadening`、`instrument_broadening`、自吸收开关与配置；启用 Stark 时，各随机样本在默认波段内同样需要完整的逐线系数。样本并发数随 `size` 增加，建议先用小批量确认调用和数据覆盖。
 
-## 10. 独立离线论文模型
+## 10. 数据来源迁移说明
 
-`self_absorption.py` 另保留 `simulate_paper_spectrum()`，用于从本地跃迁和 I/II/III 能级表直接计算光谱。它使用 `PaperSelfAbsorptionConfig`，配置中的 `line_data`、`atomic_data` 和 `intensity_scale` 属于此入口。
+2026-10-28 起，本项目删除内置 Stark 系数 JSON、独立离线论文模型及其运行示例。配置不再接受 `stark_source`、`stark_data`、`data_path`；示例也不再提供 `--stark-source` 和 `--stark-csv`，传入旧选项会明确报错。
 
-```python
-from simLIBS.self_absorption import simulate_paper_spectrum
+数据库响应缓存继续用于避免重复下载，它保存真实原始响应和来源信息，仍走相同的解析、量子态匹配与适用条件检查。`stark_allow_network=False` 和 `--offline-stark` 仅限制数据库请求，不是本地系数模拟模式；没有对应缓存时会报错。
 
-paper_result = simulate_paper_spectrum(
-    Te=1.0,
-    Ne=1e17,
-    elements=["Mg"],
-    percentages=[100.0],
-    low_w=280.0,
-    upper_w=290.0,
-    resolution=3000,
-    max_ion_charge=2,
-    config={
-        "path_length_m": 0.001,
-        "wavelength_step_nm": 0.005,
-        "instrument_broadening": False,
-    },
-)
+已有 `saved/` 和 `docs/self_absorption_results/` 输出保留为历史结果，不参与后续模拟。尤其旧匹配清单可能含 `paper coefficient table` 来源，不能视为当前数据库路径的覆盖统计，需重新运行才能取得新结果。
 
-offline_spectrum = paper_result.spectrum
-offline_diagnostics = paper_result.line_diagnostics
-```
-
-离线入口默认使用内置 Mg/Ca/Zn 部分跃迁及本地能级快照，其他元素需要相应的用户数据。它的可选仪器高斯宽度约定为 `FWHM=lambda/R`；当前 NIST 入口则采用 `1/e 半宽=lambda/R`。比较两种输出时应同时核对数据来源、线强尺度和宽度定义。
-
-相关材料：
-
-- [NIST 自吸收示例](examples/nist_self_absorption_demo.py)：当前主入口的联网示例。
-- [离线论文模型示例](examples/paper_self_absorption_demo.py)：导出单线、混合谱和光程扫描结果。
-- [自吸收原理与历史实现报告](SELF_ABSORPTION_REPORT.md)：主要描述独立离线论文模型；当前 NIST 入口以本 README 为准。
+- [当前 NIST 示例](examples/nist_self_absorption_demo.py)
+- [数据库覆盖与精度边界](STARK_DATA_COVERAGE.md)
+- [自吸收历史报告](SELF_ABSORPTION_REPORT.md)：保留旧原理与结果记录，旧 API 已移除。
 
 ## 11. 模块职责与调试顺序
 
@@ -531,8 +466,7 @@ offline_diagnostics = paper_result.line_diagnostics
 | [simLIBS/nist_self_absorption.py](simLIBS/nist_self_absorption.py) | 当前 NIST Stark/逐线自吸收模型 | `resolve_stark()`、`prepare_nist_absorption()`、`render_nist_absorption()` |
 | [simLIBS/nist_stark.py](simLIBS/nist_stark.py) | NIST 身份补全和跨库量子态匹配 | `identify()`、`same_state()`、`match_width()`、`resolve_online()` |
 | [simLIBS/stark_b.py](simLIBS/stark_b.py) | STARK-B 取表、缓存、宽度换算与适用条件 | `species()`、`parse_table()`、`evaluate_width()` |
-| [simLIBS/self_absorption.py](simLIBS/self_absorption.py) | 共享数值工具、结果容器、独立离线模型 | `slab_attenuation_factor()`、`paper_line_parameters()` |
-| [simLIBS/data/paper_atomic_data.json](simLIBS/data/paper_atomic_data.json) | 内置逐线系数与离线能级快照 | 系数记录、参考密度、原子数据出处 |
+| [simLIBS/self_absorption.py](simLIBS/self_absorption.py) | 共享数值工具与结果容器 | `slab_attenuation_factor()`、`SpectrumResult` |
 
 静态自吸收适合按以下顺序下断点：
 
@@ -545,7 +479,7 @@ SimulatedLIBS.__init__
      -> attach_nist_strengths      检查同波长跃迁的面积分配
      -> nist_populations           仅自吸收时计算配分函数和电离比例
      -> resolve_stark              检查系数匹配、缺失和歧义
-        -> resolve_online          本地缺失时补全 NIST 态身份并查数据库
+        -> resolve_online          为全部跃迁补全 NIST 态身份并查 STARK-B
            -> species/parse_table  检查快照、电子宽度表和拟合
            -> match_width          检查组态/项/J、Te/Ne 和来源优先序
   -> _render_paper_model
@@ -560,7 +494,7 @@ SimulatedLIBS.__init__
 | `MissingStarkDataError` | 导出 `error.missing_lines`，核对每条跃迁及其系数来源 |
 | `StarkDataAccessError` | 检查网络、缓存路径或快照校验；不要按“物理缺系数”处理 |
 | `self_absorption requires Stark broadening` | 开启自吸收时保留 Stark；如只需展宽，设置 `self_absorption=False`、`stark_broadening=True` |
-| `Ambiguous Stark coefficients` | 检查是否存在重复系数或多个记录匹配同一跃迁，补充能级标识 |
+| `Ambiguous STARK-B sources` | 核对数据库数据集、量子态及原始文献；可用 `stark_methods` 限定明确的方法 |
 | 找不到 `dataSticksArray` 或原子数组 | 查看 `response.text`，确认返回的是 NIST 数据页；静态请求最多尝试 3 次 |
 | 把 `resolution=0.01` 传给初始化后线宽异常 | 初始化需要仪器 R；`0.01 nm` 步长应传给 `interpolate()` 或自吸收配置 |
 | 关闭自吸收后两张谱仍有差别 | 同时核对 Stark、仪器高斯、R 和网格；纯高斯与 Stark 薄谱使用不同线形 |

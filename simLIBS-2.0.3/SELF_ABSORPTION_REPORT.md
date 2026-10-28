@@ -1,6 +1,6 @@
 # SimLIBS 论文逐线自吸收模型：原理、实现与验证
 
-> 历史模型说明：本文描述保留在 `self_absorption.simulate_paper_spectrum()` 中的离线论文模型。当前 `SimulatedLIBS(static, self_absorption=True)` 使用 NIST 谱线 + 逐线自吸收；2026-10-18 已加入 STARK-B 自动查询和缓存，Stark 也可以独立开启。最新入口见 [README 第 4、5 节](README.md#5-stark-数据覆盖与外部系数)，实测覆盖见 [Stark 数据覆盖记录](STARK_DATA_COVERAGE.md)。本文下方 Mg/Ca/Zn 限制及旧调用示例仅适用于独立离线论文模型。
+> 历史存档，2026-10-28 更新：本文下方记录的是已移除的离线论文模型，旧 API、示例命令和本地数据文件均不再提供，不作为当前使用说明。当前 Python 版本的 Stark 系数统一来自 STARK-B 数据库或其已验证响应缓存，自吸收仍采用本文所述逐线经验关系。最新调用见 [README](README.md)，数据边界见 [Stark 数据覆盖记录](STARK_DATA_COVERAGE.md)。历史图、CSV 和结果元数据仅作旧结果记录。
 
 日期：2026-10-15。适用代码：原始 `simLIBS-2.0.3` 核心与 Vue 高级模拟后端。
 

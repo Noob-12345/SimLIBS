@@ -154,7 +154,7 @@ class SimulatedLIBS(object):
              Manual tau is no longer accepted when enabling the paper model.
         self_absorption_config : dict or NISTSelfAbsorptionConfig
              Physical/data settings, including path_length_m, optional total density,
-             wavelength_step_nm, instrument_broadening and per-transition stark_data.
+             wavelength_step_nm, instrument_broadening and STARK-B cache/method settings.
              NIST supplies transitions and levels; missing Stark coefficients raise
              MissingStarkDataError with a missing_lines DataFrame by default.
              Set missing_stark='unbroadened' in the config to keep unknown lines
@@ -226,8 +226,7 @@ class SimulatedLIBS(object):
                 except TypeError as error:
                     raise ValueError("invalid self_absorption_config: {}".format(error)) from None
             else:
-                raise ValueError("self_absorption_config must be a dictionary or NISTSelfAbsorptionConfig; "
-                                 "the offline PaperSelfAbsorptionConfig belongs to simulate_paper_spectrum")
+                raise ValueError("self_absorption_config must be a dictionary or NISTSelfAbsorptionConfig")
             # 顶层仪器选项优先；不修改调用方的不可变配置对象或原始字典。
             if instrument_broadening is not None:
                 config = replace(config, instrument_broadening=instrument_broadening)

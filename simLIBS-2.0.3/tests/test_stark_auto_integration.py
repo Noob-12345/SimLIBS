@@ -14,6 +14,8 @@ from scipy.constants import e, k
 from simLIBS import SimulatedLIBS, NISTSelfAbsorptionConfig, MissingStarkDataError
 from simLIBS.nist_self_absorption import resolve_stark
 from simLIBS.stark_b import parse_table, StarkDataAccessError
+from simLIBS import self_absorption
+from stark_fixtures import missing_provider
 
 
 FIXTURES = Path(__file__).parent/'fixtures'
@@ -42,11 +44,46 @@ class AutoStarkTests(unittest.TestCase):
                 cached = resolve_stark([self.line()], config, te=10000*k/e, ne=1e17, cmev=CMEV)
             self.assertEqual(rows, cached)
 
-    def test_local_override_prevents_external_requests(self):
-        supplied = [dict(self.line(), stark_width_nm=.123, source='user published coefficient')]
-        with patch('simLIBS.nist_stark.resolve_online', side_effect=AssertionError('provider called')):
-            rows = resolve_stark([self.line()], NISTSelfAbsorptionConfig(stark_data=supplied), te=1, ne=1e17, cmev=CMEV)
-        self.assertEqual(rows[0]['stark_width_nm'], .123)
+    def test_removed_local_options_are_rejected_before_network(self):
+        for change in ({'stark_source': 'local'}, {'stark_source': 'auto'},
+                       {'stark_data': []}, {'data_path': 'coefficients.json'}):
+            with self.subTest(change=change), \
+                 patch('simLIBS.simulation.requests.get', side_effect=AssertionError('network used')):
+                with self.assertRaisesRegex(ValueError, 'invalid self_absorption_config'):
+                    SimulatedLIBS(elements=['Mg'], percentages=[100], stark_broadening=True,
+                                  self_absorption_config=change)
+
+    def test_removed_json_and_offline_model_are_unavailable(self):
+        self.assertFalse((Path(__file__).parents[1]/'simLIBS/data/paper_atomic_data.json').exists())
+        for name in ('load_paper_data', 'simulate_paper_spectrum', 'PaperSelfAbsorptionConfig',
+                     'paper_line_parameters', 'saha_populations'):
+            with self.subTest(name=name):
+                self.assertFalse(hasattr(self_absorption, name))
+
+    def test_database_cache_miss_is_not_replaced_by_local_coefficients(self):
+        with tempfile.TemporaryDirectory() as folder, \
+             patch('requests.sessions.Session.request', side_effect=AssertionError('network used')):
+            config = NISTSelfAbsorptionConfig(stark_cache_dir=folder, stark_allow_network=False)
+            with self.assertRaises(StarkDataAccessError):
+                resolve_stark([self.line()], config, te=1, ne=1e17, cmev=CMEV)
+
+    def test_former_builtin_lines_all_go_to_database_and_remain_missing(self):
+        from simLIBS.nist_self_absorption import parse_atomic_payload
+        lines = parse_atomic_payload((FIXTURES/'nist_mg_280_290.html').read_text(encoding='utf-8'))['transitions']
+        with patch('simLIBS.nist_stark.resolve_online', side_effect=missing_provider) as provider:
+            with self.assertRaises(MissingStarkDataError) as raised:
+                resolve_stark(lines, NISTSelfAbsorptionConfig(), te=1, ne=1e17, cmev=CMEV)
+        self.assertEqual(len(raised.exception.missing_lines), len(lines))
+        self.assertTrue(raised.exception.matched_lines.empty)
+        self.assertEqual(provider.call_args.args[0], lines)
+
+    def test_source_failure_never_falls_back_to_builtin_width(self):
+        from simLIBS.nist_self_absorption import parse_atomic_payload
+        lines = parse_atomic_payload((FIXTURES/'nist_mg_280_290.html').read_text(encoding='utf-8'))['transitions']
+        with patch('simLIBS.nist_stark.resolve_online', side_effect=StarkDataAccessError('source unavailable')):
+            with self.assertRaisesRegex(StarkDataAccessError, 'source unavailable'):
+                resolve_stark(lines, NISTSelfAbsorptionConfig(missing_stark='unbroadened'),
+                              te=1, ne=1e17, cmev=CMEV)
 
     def test_successful_source_without_usable_density_reports_the_actual_limit(self):
         document = dict(payload=dict(format='vamdc-xsams', status='ok', datasets=[]))
@@ -74,7 +111,7 @@ class AutoStarkTests(unittest.TestCase):
         self.assertIn('state', raised.exception.missing_lines.stark_missing_reason.iloc[0])
 
     def test_configuration_validation(self):
-        for change in ({'stark_source': 'guessed'}, {'stark_allow_network': 1}, {'stark_methods': []},
+        for change in ({'stark_allow_network': 1}, {'stark_methods': []},
                        {'stark_methods': ['unknown']}, {'stark_methods': ['SCP', 'SCP']}):
             with self.subTest(), self.assertRaises(ValueError):
                 NISTSelfAbsorptionConfig(**change)

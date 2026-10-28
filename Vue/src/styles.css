@@ -166,6 +166,14 @@ svg{display:block}
 .workbench-grid.single-workbench{grid-template-columns:var(--single-controls-width,var(--single-expanded-width)) minmax(0,1fr);column-gap:var(--workbench-gap)}
 .single-workbench.controls-collapsed{--single-controls-width:0px;--workbench-gap:0px}
 .single-controls-wrap{position:relative;min-width:0;align-self:stretch;overflow:clip}
+.workbench-results-viewport{min-width:0}
+.synchronized-scroll{height:var(--workbench-viewport-height);min-height:0}
+.synchronized-scroll>.single-controls-wrap,.synchronized-scroll>.workbench-results-viewport{height:100%;min-height:0}
+.synchronized-scroll .workbench-controls-viewport,.synchronized-scroll>.workbench-results-viewport{overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scroll-behavior:auto;overflow-anchor:none}
+.synchronized-scroll .workbench-controls-viewport{height:100%;width:var(--single-expanded-width);overflow-x:hidden}
+.synchronized-scroll .single-parameter-panel{width:100%}
+.synchronized-scroll.controls-collapsed .single-parameter-panel{position:relative}
+.synchronized-scroll.controls-collapsed .workbench-controls-viewport{overflow:hidden}
 .single-parameter-panel{position:relative;width:var(--single-expanded-width);transition:opacity .2s,transform .36s cubic-bezier(.22,1,.36,1)}
 .controls-collapsed .single-parameter-panel{position:absolute;top:0;left:0;opacity:0;transform:translateX(-12px);pointer-events:none}
 .workbench-edge{--edge-ink:var(--accent-text);--edge-frame:var(--accent);position:fixed;z-index:40;width:22px;min-height:32px;border:1px solid var(--edge-frame);border-radius:7px;color:var(--edge-ink);background:color-mix(in srgb,var(--edge-frame) 10%,var(--panel));box-shadow:0 0 0 3px color-mix(in srgb,var(--edge-frame) 28%,transparent),inset 0 1px 4px color-mix(in srgb,var(--edge-frame) 8%,transparent);display:grid;place-items:center;padding:0;opacity:0;outline:none;transition:opacity .18s,color .15s,border-color .15s,background .15s,box-shadow .15s}
@@ -264,7 +272,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:16px;cursor:point
 .workbench-grid.single-workbench.controls-collapsed{grid-template-columns:0px minmax(0,1fr)}
 .controls-collapsed>.single-controls-wrap{order:0}
 .parameter-panel{order:2}
-.workbench-grid.single-workbench>.spectrum-stage{order:1}
+.workbench-grid.single-workbench>.workbench-results-viewport{order:1}
 .chart-surface{height:300px}
 .workspace{padding:22px 18px}
 .page-heading{margin-bottom:22px}

@@ -3,11 +3,13 @@ from copy import deepcopy
 from pathlib import Path
 import math
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
 from scipy.constants import c
 from scipy.special import voigt_profile
+from stark_fixtures import provider_response, missing_provider
 
 from simLIBS.nist_lines import parse_sticks
 from simLIBS.nist_self_absorption import (
@@ -24,12 +26,12 @@ class NISTAbsorptionTests(unittest.TestCase):
     def setUp(self):
         self.payload = parse_atomic_payload(HTML)
         self.table = parse_sticks(HTML)
-        # Arbitrary test input, never a fallback for production calculations.
-        self.stark = [dict(row, stark_width_nm=.002, source='synthetic test coefficient')
-                      for row in self.payload['transitions']]
+        provider_patch = patch('simLIBS.nist_stark.resolve_online', side_effect=provider_response)
+        self.provider = provider_patch.start()
+        self.addCleanup(provider_patch.stop)
 
     def prepare(self, **changes):
-        config = NISTSelfAbsorptionConfig(stark_data=self.stark, **changes)
+        config = NISTSelfAbsorptionConfig(**changes)
         rows, info = prepare_nist_absorption([(self.table, self.payload)], te=1, ne=1e17,
                                             elements=['Mg'], percentages=[100], config=config)
         return rows, info, config
@@ -68,18 +70,18 @@ class NISTAbsorptionTests(unittest.TestCase):
             with self.subTest(), self.assertRaises(ValueError):
                 parse_atomic_payload(html)
 
-    def test_stark_missing_list_and_user_override(self):
+    def test_database_missing_list_and_complete_response(self):
         lines = attach_nist_strengths(self.table, self.payload, 1)
+        self.provider.side_effect = missing_provider
         with self.assertRaises(MissingStarkDataError) as raised:
-            resolve_stark(lines, NISTSelfAbsorptionConfig())
-        self.assertEqual(len(raised.exception.missing_lines), 18)
+            resolve_stark(lines, NISTSelfAbsorptionConfig(), te=1, ne=1e17, cmev=self.payload['cmeV'])
+        self.assertEqual(len(raised.exception.missing_lines), len(lines))
         self.assertIn('upper_eV', raised.exception.missing_lines)
-        resolved = resolve_stark(lines, NISTSelfAbsorptionConfig(stark_data=self.stark))
+        self.provider.side_effect = provider_response
+        resolved = resolve_stark(lines, NISTSelfAbsorptionConfig(), te=1, ne=1e17, cmev=self.payload['cmeV'])
         self.assertEqual(len(resolved), len(lines))
         self.assertTrue(all(r['stark_width_nm'] == .002 for r in resolved))
-        self.assertTrue(all(r['stark_source'] == 'synthetic test coefficient' for r in resolved))
-        with self.assertRaisesRegex(ValueError, 'Ambiguous'):
-            resolve_stark(lines, NISTSelfAbsorptionConfig(stark_data=self.stark+self.stark))
+        self.assertTrue(all(r['stark_source'].startswith('STARK-B') for r in resolved))
 
     def test_opacity_formula_peak_width_area_and_instrument_order(self):
         rows, info, config = self.prepare(total_number_density_cm3=1e16)

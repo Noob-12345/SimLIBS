@@ -1,8 +1,8 @@
 """当前 NIST Stark/逐线自吸收示例：联网取元素谱线并导出逐线诊断。
 
 从项目目录运行 python examples/nist_self_absorption_demo.py --help 查看参数。
-默认采用真空波长窄窗口，便于检查一条有内置 Stark 系数的跃迁；扩大窗口后
-会自动查 STARK-B，仍缺数据时可用 --stark-csv。调试顺序：config -> SimulatedLIBS -> line_diagnostics.csv。
+默认采用 Si II 真空波长窄窗口，Stark 系数统一查询 STARK-B。
+调试顺序：config -> SimulatedLIBS -> line_diagnostics.csv。
 --stark-only 关闭自吸收；--no-instrument-broadening 关闭仪器高斯响应。
 系数缺失时导出 missing_stark.csv 和已匹配清单，返回 2；取数失败返回 3。
 """
@@ -10,8 +10,6 @@ import argparse
 import json
 from pathlib import Path
 import sys
-
-import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 # 从源码运行示例时优先导入本项目的 simLIBS，便于对正在编辑的函数下断点。
@@ -22,17 +20,17 @@ from simLIBS import SimulatedLIBS, MissingStarkDataError, StarkDataAccessError
 def main():
     """读取命令行配置，运行当前主入口，并按结果类别分别导出文件。"""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--element', default='Mg', help='单元素符号，例如 Si、Fe、Al')
+    parser.add_argument('--element', default='Si', help='单元素符号，例如 Si、Fe、Al')
     parser.add_argument('--te', type=float, default=1., help='电子温度，eV')
     parser.add_argument('--ne', type=float, default=1e17, help='电子密度，cm^-3')
     parser.add_argument('--max-charge', type=int, default=2, help='最高离子电荷，0 为仅中性')
-    # 默认窄窗口包含一条有内置 Stark 数据的 Mg I 线；全波段可用 --low 280 --high 290。
-    parser.add_argument('--low', type=float, default=285.27)
-    parser.add_argument('--high', type=float, default=285.33)
+    # 默认窄窗口包含已有真实 STARK-B 响应夹具验证的 Si II 线。
+    parser.add_argument('--low', type=float, default=634.88)
+    parser.add_argument('--high', type=float, default=634.90)
     parser.add_argument('--step', type=float, default=.001)
     parser.add_argument('--path-length', type=float, default=.001)
-    parser.add_argument('--stark-csv', type=Path)
-    parser.add_argument('--stark-source', choices=['auto', 'local'], default='auto')
+    parser.add_argument('--missing-stark', choices=['error', 'unbroadened'], default='error',
+                        help='数据库缺系数时：报错，或保留未展宽谱线')
     parser.add_argument('--cache-dir', type=Path, help='STARK-B 与 NIST 身份快照目录')
     parser.add_argument('--offline-stark', action='store_true', help='Stark 数据只读缓存；NIST 计算谱仍需联网')
     parser.add_argument('--stark-methods', nargs='+', choices=['SCP', 'MSE'], default=['SCP', 'MSE'])
@@ -42,12 +40,10 @@ def main():
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    # 光程使用 m，采样步长使用 nm；CSV 中 W 的约定为 FWHM=2*W*Ne/Ne_ref。
+    # 光程使用 m，采样步长使用 nm；数据库响应缓存保留完整来源。
     config = dict(path_length_m=args.path_length, wavelength_step_nm=args.step,
-                  stark_source=args.stark_source, stark_cache_dir=args.cache_dir,
+                  missing_stark=args.missing_stark, stark_cache_dir=args.cache_dir,
                   stark_allow_network=not args.offline_stark, stark_methods=args.stark_methods)
-    if args.stark_csv:
-        config['stark_data'] = pd.read_csv(args.stark_csv)
     try:
         libs = SimulatedLIBS(Te=args.te, Ne=args.ne, elements=[args.element], percentages=[100],
                              low_w=args.low, upper_w=args.high, resolution=3000,
@@ -57,14 +53,13 @@ def main():
                              instrument_broadening=not args.no_instrument_broadening,
                              self_absorption_config=config)
     except MissingStarkDataError as error:
-        # missing_lines 是完整缺失清单；错误消息只预览部分谱线，补数应以 CSV 为准。
+        # missing_lines 是完整缺失清单；错误消息只预览部分谱线。
         path = output/'missing_stark.csv'
         error.missing_lines.to_csv(path, index=False)
         error.matched_lines.to_csv(output/'matched_stark.csv', index=False)
         print(str(error))
-        print(f'Missing coefficient template: {path}')
-        print('Fill stark_width_nm from a cited source, then rerun with --stark-csv. '
-              'W is the coefficient in FWHM=2*W*Ne/Ne_ref.')
+        print(f'Missing STARK-B coefficients: {path}')
+        print('Use --missing-stark unbroadened to retain these lines without Stark correction.')
         return 2
     except StarkDataAccessError as error:
         # 区分“数据库没有系数”和“请求/缓存失败”，避免按错误原因补数据。

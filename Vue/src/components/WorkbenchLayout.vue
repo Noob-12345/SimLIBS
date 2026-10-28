@@ -4,11 +4,14 @@ import AppIcon from './AppIcon.vue'
 import SpectrumStage from './SpectrumStage.vue'
 import { starting, tasks } from '../lib/workbench'
 import type { TaskKind } from '../lib/model'
+import { useSynchronizedScroll } from '../lib/useSynchronizedScroll'
 const props = defineProps<{ kind: TaskKind }>()
 const running = computed(() => tasks.some(task => task.kind === props.kind && task.status === 'running'))
 const collapsed = ref(false)
 const controls = ref<HTMLElement>(), reveal = ref<HTMLButtonElement>()
 const workbench = ref<HTMLElement>(), wrap = ref<HTMLElement>(), pointerActive = ref(false), edgeHovered = ref(false)
+const leftViewport = ref<HTMLElement>(), rightViewport = ref<HTMLElement>(), results = ref<HTMLElement>()
+const synchronized = useSynchronizedScroll(workbench, leftViewport, rightViewport, controls, results, collapsed)
 const edgePosition = ref({ left: 0, top: 0, height: 220, visible: false })
 let observer: ResizeObserver | undefined, frame = 0, activityTimer: ReturnType<typeof setTimeout> | undefined
 function showEdge() {
@@ -57,13 +60,15 @@ async function expandControls() {
 }
 </script>
 <template>
-  <div ref="workbench" :class="['workbench-grid', 'single-workbench', { 'controls-collapsed': collapsed }]" :data-workbench="kind">
+  <div ref="workbench" :class="['workbench-grid', 'single-workbench', { 'controls-collapsed': collapsed, 'synchronized-scroll': synchronized }]" :data-workbench="kind">
     <div ref="wrap" class="single-controls-wrap">
+      <div ref="leftViewport" class="workbench-controls-viewport">
       <section :id="`${kind}-controls`" ref="controls" class="panel parameter-panel single-parameter-panel" :inert="collapsed" :aria-hidden="collapsed">
         <fieldset class="control-fieldset workbench-controls-fields" :disabled="disabled"><slot name="controls" :disabled="disabled" /></fieldset>
       </section>
+      </div>
     </div>
-    <SpectrumStage><div class="result-column"><slot name="spectrum" /><slot /></div></SpectrumStage>
+    <div ref="rightViewport" class="workbench-results-viewport"><SpectrumStage><div ref="results" class="result-column"><slot name="spectrum" /><slot /></div></SpectrumStage></div>
     <Teleport to="body">
       <button v-show="edgePosition.visible" ref="reveal" type="button" :class="['workbench-edge', { 'edge-active': pointerActive, 'edge-hover': edgeHovered }, collapsed ? 'single-reveal' : 'single-collapse']" :style="{ left: edgePosition.left + 'px', top: edgePosition.top + 'px', height: edgePosition.height + 'px' }" :aria-label="`${collapsed ? '展开' : '收起'}${label}参数`" :title="`${collapsed ? '展开' : '收起'}参数`" :aria-controls="`${kind}-controls`" :aria-expanded="!collapsed" @pointerenter="enterEdge" @pointerleave="leaveEdge" @click="collapsed ? expandControls() : collapseControls(true)"><AppIcon name="chevron" :size="18" /></button>
     </Teleport>

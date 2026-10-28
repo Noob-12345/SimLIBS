@@ -2,7 +2,7 @@
 
 常用方式：from simLIBS import SimulatedLIBS, NISTSelfAbsorptionConfig,
 MissingStarkDataError。导入只暴露对象；实例化 SimulatedLIBS 时才开始取数和计算。
-独立离线模型可从 simLIBS.self_absorption 导入 simulate_paper_spectrum。
+Stark 系数统一使用 STARK-B 数据库及其已验证响应缓存。
 """
 
 # 公共基础参数校验；更严格的物理/数据校验由对应模型完成。
