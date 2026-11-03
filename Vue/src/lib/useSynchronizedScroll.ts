@@ -1,5 +1,48 @@
 import { nextTick, onMounted, onUnmounted, ref, watch, type Ref } from 'vue'
 
+export function installAutoHideScrollbar(viewport: HTMLElement) {
+  const documentViewport = viewport === document.documentElement
+  const scrollTarget = documentViewport ? document : viewport
+  let timer: ReturnType<typeof setTimeout> | undefined, dragging = false
+  function hideLater() {
+    clearTimeout(timer)
+    if (!dragging) timer = setTimeout(() => viewport.classList.remove('scrollbar-active'), 800)
+  }
+  function show() { viewport.classList.add('scrollbar-active'); hideLater() }
+  function atEdge(event: PointerEvent) {
+    if (viewport.scrollHeight <= viewport.clientHeight) return false
+    const bounds = viewport.getBoundingClientRect()
+    const right = documentViewport ? window.innerWidth : bounds.right
+    const top = documentViewport ? 0 : bounds.top
+    const bottom = documentViewport ? window.innerHeight : bounds.bottom
+    return event.clientY >= top && event.clientY <= bottom && event.clientX >= right - 12 && event.clientX <= right
+  }
+  function scroll(event: Event) { if (event.target === scrollTarget) show() }
+  function pointer(event: PointerEvent) {
+    if (!atEdge(event)) return
+    if (event.type === 'pointerdown' && event.button === 0) dragging = true
+    show()
+  }
+  function release() { if (dragging) { dragging = false; hideLater() } }
+  viewport.classList.add('auto-hide-scrollbar')
+  scrollTarget.addEventListener('scroll', scroll, { passive: true })
+  window.addEventListener('pointermove', pointer, { passive: true })
+  window.addEventListener('pointerdown', pointer, { passive: true, capture: true })
+  window.addEventListener('pointerup', release, true)
+  window.addEventListener('pointercancel', release, true)
+  window.addEventListener('blur', release)
+  return () => {
+    clearTimeout(timer)
+    scrollTarget.removeEventListener('scroll', scroll)
+    window.removeEventListener('pointermove', pointer)
+    window.removeEventListener('pointerdown', pointer, true)
+    window.removeEventListener('pointerup', release, true)
+    window.removeEventListener('pointercancel', release, true)
+    window.removeEventListener('blur', release)
+    viewport.classList.remove('auto-hide-scrollbar', 'scrollbar-active')
+  }
+}
+
 export function useSynchronizedScroll(root: Ref<HTMLElement | undefined>, left: Ref<HTMLElement | undefined>, right: Ref<HTMLElement | undefined>, leftContent: Ref<HTMLElement | undefined>, rightContent: Ref<HTMLElement | undefined>, collapsed: Ref<boolean>) {
   const enabled = ref(false)
   let observer: ResizeObserver | undefined, frame = 0, media: MediaQueryList | undefined

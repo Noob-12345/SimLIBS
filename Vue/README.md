@@ -19,6 +19,8 @@
 
 ## 当前功能与数据边界
 
+四个模拟页的波长上下限后显示只读彩色跨度条，随当前草稿更新，按区间交集长度分配比例，不表示强度或谱线数。本图采用互斥显示分区：其他短波＜10、EUV 10–100、DUV 100–280、其余紫外 280–380、可见光 380–780、红外≥780 nm；边界归入后一段。DUV 范围仅为本图口径，分区并非唯一标准，界面颜色只作区分。范围无效时显示中性状态，不改变输入、校验或计算。分区参考：[NIST 波长范围](https://www.nist.gov/pml/atomic-spectroscopy-compendium-basic-ideas-notation-data-and-formulas/atomic-spectroscopy-5)、[CIE 可见辐射](https://cie.co.at/eilvterm/17-21-003)。
+
 已复制并连接真实 Python 后端。local 使用本地谱线库及 LTE/Saha 计算；client 在线获取 NIST 谱线跃迁与强度，由本地引擎进行线型展宽；server 由 NIST LIBS 在线服务生成光谱并进行展宽，未承诺连续谱能力。默认空谱，真实进度，失败/取消保留上一成功结果，无合成谱回退。当前源码的高级模拟仅提供“客户端模拟”：在线获取 NIST 谱线，由本地引擎计算所选 Stark、逐线自吸收及仪器展宽；内部 nist 协议与科学行为保持。论文模型不再用于新请求，历史论文结果仍按原版本、来源、单位与诊断查看和导出。客户端模拟提供名义薄谱、基体薄谱、自吸收修正谱的共同尺度对照与可携带导出。参数化基体仍需实验标定。完整公式、单位、真实数据来源与适用边界见 [论文自吸收报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 和 [功能与原理](PROJECT_FUNCTIONS_AND_PRINCIPLES.md)。本轮入口调整与验证见 [.ai-workflow/20261025-advanced-client-mode/implementation.md](.ai-workflow/20261025-advanced-client-mode/implementation.md)，最终审查由独立 review 完成。
 
 高级客户端入口在线获取线强、跃迁及全部电离阶段能级，默认Mg100%、真空285.27–285.33nm、输出步长0.001nm；任意元素或宽波段不保证逐线 Stark 覆盖完整；默认缺失系数继续模拟，也可显式启用严格拒绝。仪器w=λ/R为高斯1/e半宽，FWHM=2√ln2·λ/R；输出为NIST相对光子强度，不是绝对辐亮度。默认总密度由Ne与平均电荷按电荷守恒反推，也可指定数密度，L=0可作薄谱极限。Stark CSV最大2MB、支持BOM；W为stark_width_nm，内禀FWHM=2W·Ne/Ne_ref。缺失清单保留双精度，填W后可重导入，物理系数缺失时保留该线 NIST 面积，有仪器响应时仅施加仪器展宽，否则保面积/质心投影，跳过该线 Stark 与自吸收并明确标记；网络、TLS、解析、歧义与缓存错误仍报错。成功与严格失败的缺失/匹配清单、三谱及诊断分别绑定原 job，刷新/重启后仍可导出；所有新增自吸收入口仅在高级页。新入口不使用旧5%限制；未带model的旧请求继续旧离线语义。

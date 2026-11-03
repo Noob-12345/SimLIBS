@@ -4,7 +4,7 @@ import AppIcon from './AppIcon.vue'
 import SpectrumStage from './SpectrumStage.vue'
 import { starting, tasks } from '../lib/workbench'
 import type { TaskKind } from '../lib/model'
-import { useSynchronizedScroll } from '../lib/useSynchronizedScroll'
+import { installAutoHideScrollbar, useSynchronizedScroll } from '../lib/useSynchronizedScroll'
 const props = defineProps<{ kind: TaskKind }>()
 const running = computed(() => tasks.some(task => task.kind === props.kind && task.status === 'running'))
 const collapsed = ref(false)
@@ -14,6 +14,7 @@ const leftViewport = ref<HTMLElement>(), rightViewport = ref<HTMLElement>(), res
 const synchronized = useSynchronizedScroll(workbench, leftViewport, rightViewport, controls, results, collapsed)
 const edgePosition = ref({ left: 0, top: 0, height: 220, visible: false })
 let observer: ResizeObserver | undefined, frame = 0, activityTimer: ReturnType<typeof setTimeout> | undefined
+let disposeScrollbar: (() => void) | undefined
 function showEdge() {
   pointerActive.value = true; clearTimeout(activityTimer)
   activityTimer = setTimeout(() => { pointerActive.value = false }, 600)
@@ -36,13 +37,14 @@ function positionEdge() {
 function schedulePosition() { if (!frame) frame = requestAnimationFrame(() => { frame = 0; positionEdge() }) }
 watch(collapsed, async () => { await nextTick(); schedulePosition() })
 onMounted(() => {
+  if (rightViewport.value) disposeScrollbar = installAutoHideScrollbar(rightViewport.value)
   observer = new ResizeObserver(positionEdge)
   if (workbench.value) observer.observe(workbench.value)
   if (wrap.value) observer.observe(wrap.value)
   window.addEventListener('scroll', schedulePosition, true); window.addEventListener('resize', schedulePosition)
   window.addEventListener('pointermove', showEdge, { passive: true, capture: true }); window.addEventListener('pointerdown', touchActivity, { passive: true, capture: true }); schedulePosition()
 })
-onUnmounted(() => { observer?.disconnect(); window.removeEventListener('scroll', schedulePosition, true); window.removeEventListener('resize', schedulePosition); window.removeEventListener('pointermove', showEdge, true); window.removeEventListener('pointerdown', touchActivity, true); clearTimeout(activityTimer); if (frame) cancelAnimationFrame(frame) })
+onUnmounted(() => { disposeScrollbar?.(); observer?.disconnect(); window.removeEventListener('scroll', schedulePosition, true); window.removeEventListener('resize', schedulePosition); window.removeEventListener('pointermove', showEdge, true); window.removeEventListener('pointerdown', touchActivity, true); clearTimeout(activityTimer); if (frame) cancelAnimationFrame(frame) })
 const label = computed(() => ({ single: '单次', batch: '批量', scan: '扫描', advanced:'高级' })[props.kind])
 const disabled = computed(() => collapsed.value || starting.has(props.kind) || running.value)
 async function collapseControls(restoreFocus = false) {

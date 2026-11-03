@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import ProcessingModeSelect from './ProcessingModeSelect.vue'
 import ChoiceSelect from './ChoiceSelect.vue'
 import SwitchHint from './SwitchHint.vue'
+import WavelengthBandBar from './WavelengthBandBar.vue'
 import { format, type ParameterDraft } from '../lib/model'
 import { issueAttrs, parameterIssues } from '../lib/issues'
 const model = defineModel<ParameterDraft>({ required: true })
@@ -30,6 +31,7 @@ function densityBlur() { const n = Number(model.value.ne); if (Number.isFinite(n
       <label :for="`${scope}-low`" class="field compact">波长下限 / nm<input :id="`${scope}-low`" v-model="model.low" type="text" inputmode="decimal" aria-label="波长下限 / nm" v-bind="attrs('low')" /></label>
       <label :for="`${scope}-high`" class="field compact">波长上限 / nm<input :id="`${scope}-high`" v-model="model.high" type="text" inputmode="decimal" aria-label="波长上限 / nm" v-bind="attrs('high')" /></label>
     </div>
+    <WavelengthBandBar :low="model.low" :high="model.high" />
     <div class="row2"><label class="field compact">采样步长 / nm<input :id="`${scope}-step`" v-model="model.step" type="text" inputmode="decimal" aria-label="采样步长 nm" v-bind="attrs('step')" /></label><ChoiceSelect v-model="model.charge" label="最大离子电荷" :options="chargeChoices" :disabled="disabled" :issue="issues.charge" :issue-id="`${scope}-draft-error`" /></div>
   </section>
   <section class="parameter-section"><h2>计算模式</h2><ProcessingModeSelect v-model="model.mode" :disabled="disabled" /><ChoiceSelect v-if="model.mode !== 'local'" v-model="model.flux" label="强度尺度" :options="fluxChoices" :disabled="disabled" /><div v-else class="local-flux"><span>强度尺度</span><b>光子通量</b></div></section>

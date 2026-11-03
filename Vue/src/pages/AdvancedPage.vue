@@ -6,6 +6,7 @@ import TaskActivity from '../components/TaskActivity.vue'
 import ChoiceSelect from '../components/ChoiceSelect.vue'
 import SwitchHint from '../components/SwitchHint.vue'
 import AdvancedResults from '../components/AdvancedResults.vue'
+import WavelengthBandBar from '../components/WavelengthBandBar.vue'
 import { advanced, activeTask, runReal, tasks } from '../lib/workbench'
 import { errorOf, symbols } from '../lib/model'
 import { issueAttrs, parameterIssues } from '../lib/issues'
@@ -63,6 +64,7 @@ function runUnbroadened() { advanced.missingStark = 'unbroadened'; void run() }
             <label for="advanced-low" class="field compact">波长下限 / nm<input id="advanced-low" v-model="advanced.params.low" type="text" inputmode="decimal" aria-label="波长下限 / nm" v-bind="attrs('low')" /></label>
             <label for="advanced-high" class="field compact">波长上限 / nm<input id="advanced-high" v-model="advanced.params.high" type="text" inputmode="decimal" aria-label="波长上限 / nm" v-bind="attrs('high')" /></label>
           </div>
+          <WavelengthBandBar :low="advanced.params.low" :high="advanced.params.high" />
           <div class="row2"><label class="field compact">输出步长 / nm<input id="advanced-step" v-model="advanced.params.step" type="text" inputmode="decimal" v-bind="attrs('step')" /></label><ChoiceSelect v-model="advanced.params.charge" label="最大发射电荷" :options="chargeChoices" :disabled="disabled" :issue="issues.charge" issue-id="advanced-draft-error" /></div>
         </section>
         <section class="parameter-section">

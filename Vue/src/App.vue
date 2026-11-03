@@ -16,7 +16,11 @@ import { appearancePhase, disposePreferences, nativeThemeError, preferences, set
 import { connectBackend, service } from './lib/backend'
 import { savedPreferences } from './lib/preferences'
 import type { Page } from './lib/model'
+import { installAutoHideScrollbar } from './lib/useSynchronizedScroll'
 import './styles.css'
+let disposeScrollbar: (() => void) | undefined
+onMounted(() => { disposeScrollbar = installAutoHideScrollbar(document.documentElement) })
+onUnmounted(() => disposeScrollbar?.())
 const pages: { id: Page; label: string; subtitle: string }[] = [
   { id: 'single', label: '单次模拟', subtitle: '' },
   { id: 'batch', label: '批量模拟', subtitle: '' },
