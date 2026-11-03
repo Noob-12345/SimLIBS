@@ -4,9 +4,9 @@ import { numeric } from '../lib/model'
 const props = defineProps<{ low: string; high: string }>()
 const bands = [
   { name: '其他短波', from: 1, to: 10, color: '#64748b' },
-  { name: '极紫外 (EUV)', from: 10, to: 100, color: '#a855f7' },
-  { name: '深紫外 (DUV)', from: 100, to: 280, color: '#6366f1' },
-  { name: '紫外（其余）', from: 280, to: 380, color: '#b34ca4' },
+  { name: '极紫外', from: 10, to: 100, color: '#a855f7' },
+  { name: '深紫外', from: 100, to: 280, color: '#6366f1' },
+  { name: '紫外', from: 280, to: 380, color: '#b34ca4' },
   { name: '可见光', from: 380, to: 780, color: '#25876d' },
   { name: '红外', from: 780, to: 100000, color: '#c76236' }
 ]
