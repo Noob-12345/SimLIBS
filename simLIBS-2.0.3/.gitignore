@@ -154,3 +154,16 @@ fabric.properties
 
 .mypy_cache
 .pytest_cache
+
+# STARK/NIST downloaded snapshots and generated detail tables.
+# Keep source code, test fixtures, reports, plots and compact summaries.
+# Patterns are scoped so unrelated JSON/CSV source files remain trackable.
+/stark-b/**/*.json
+!/stark-b/manifest.json
+!/stark-b/comparison/summary.json
+/stark-b/**/*.xml
+/stark-b/diagnostics/*.txt
+/stark-b/comparison/*.csv
+!/stark-b/comparison/element_metrics.csv
+/sample/**/*.json
+!/sample/manifest.json

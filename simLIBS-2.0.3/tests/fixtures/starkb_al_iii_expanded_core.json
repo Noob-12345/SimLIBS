@@ -1,0 +1,82 @@
+{
+  "kind": "verbatim normalized STARK-B row from verified collector snapshot",
+  "species_path": "species/Al_q2.json",
+  "species_sha256": "3aec8455f6b9f5313dbdbc8f1f9ee3b0fdf32172c558e544862a83cebb086cbc",
+  "table": {
+    "c_angstrom_cm3": null,
+    "calculated_wavelength_angstrom": 1857.4,
+    "charge": 2,
+    "dataset_id": "vamdc:Pstarkb-R4203",
+    "element": "Al",
+    "fit": null,
+    "lower_label": "2s2.2p6.3s 2S",
+    "lower_state_id": "Sstarkb-2097",
+    "metadata": {
+      "limitations": "STARK-B tabulated FWHM, not HWHM; linear temperature interpolation only inside the table. C, published fits and calculation method are not exported; absence of a warning does not establish validity.",
+      "reference_ne_cm3": 1000000000000000.0
+    },
+    "method": "unreported",
+    "samples": [
+      {
+        "collider_ref": "Xstarkb-P1",
+        "environment_id": "Estarkb-184962",
+        "flag": "",
+        "fwhm_angstrom": 0.000518,
+        "ne": 1000000000000000.0,
+        "temperature_k": 10000.0
+      },
+      {
+        "collider_ref": "Xstarkb-P1",
+        "environment_id": "Estarkb-184965",
+        "flag": "",
+        "fwhm_angstrom": 0.000371,
+        "ne": 1000000000000000.0,
+        "temperature_k": 20000.0
+      },
+      {
+        "collider_ref": "Xstarkb-P1",
+        "environment_id": "Estarkb-184968",
+        "flag": "",
+        "fwhm_angstrom": 0.00024,
+        "ne": 1000000000000000.0,
+        "temperature_k": 50000.0
+      },
+      {
+        "collider_ref": "Xstarkb-P1",
+        "environment_id": "Estarkb-184971",
+        "flag": "",
+        "fwhm_angstrom": 0.000179,
+        "ne": 1000000000000000.0,
+        "temperature_k": 100000.0
+      },
+      {
+        "collider_ref": "Xstarkb-P1",
+        "environment_id": "Estarkb-184974",
+        "flag": "",
+        "fwhm_angstrom": 0.000142,
+        "ne": 1000000000000000.0,
+        "temperature_k": 200000.0
+      },
+      {
+        "collider_ref": "Xstarkb-P1",
+        "environment_id": "Estarkb-184977",
+        "flag": "",
+        "fwhm_angstrom": 0.000113,
+        "ne": 1000000000000000.0,
+        "temperature_k": 500000.0
+      }
+    ],
+    "source": "Dimitrijević M.S. Sahal-Bréchot S. Stark broadening of spectral lines of multicharged ions of astrophysical interest. VII : Al III lines journal 1993 A&AS 99 http://cdsads.u-strasbg.fr/abs/1993A%26AS...99..585D | Dimitrijević M.S. Sahal-Bréchot S. Stark broadening parameters tables for Al III lines journal 1993 Bull. Astron. Belgrade 147 http://cdsads.u-strasbg.fr/abs/1993BABel.147...35D | Dimitrijević M. S. Djurić Z. Mihajlov A. A. Stark broadening of Al III and Cu IV lines for diagnostic of the rail gun arc plasma journal 1994 J.Phys.D 27 http://cdsads.u-strasbg.fr/abs/1994JPhD...27..247D",
+    "source_format": "vamdc-xsams",
+    "source_ids": [
+      "Bstarkb-28",
+      "Bstarkb-29",
+      "Bstarkb-186"
+    ],
+    "source_url": "https://stark-b.obspm.fr/12.07/vamdc/tap/sync?REQUEST=doQuery&LANG=VSS2&FORMAT=XSAMS&QUERY=SELECT+ALL+WHERE+AtomSymbol+%3D+%27Al%27+AND+IonCharge+%3D+2+AND+EnvironmentTotalNumberDensity+%3E%3D+1e-300",
+    "temperature_interpolation": "linear",
+    "transition_id": "Pstarkb-R4203",
+    "upper_label": "2s2.2p6.3p 2Po",
+    "upper_state_id": "Sstarkb-2098"
+  }
+}
