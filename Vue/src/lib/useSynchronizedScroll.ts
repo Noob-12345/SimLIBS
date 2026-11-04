@@ -20,10 +20,10 @@ export function installAutoHideScrollbar(viewport: HTMLElement) {
   function scroll(event: Event) { if (event.target === scrollTarget) show() }
   function pointer(event: PointerEvent) {
     if (!atEdge(event)) return
-    if (event.type === 'pointerdown' && event.button === 0) dragging = true
+    if (event.type === 'pointerdown' && event.button === 0) { dragging = true; viewport.classList.add('scrollbar-dragging') }
     show()
   }
-  function release() { if (dragging) { dragging = false; hideLater() } }
+  function release() { if (dragging) { dragging = false; viewport.classList.remove('scrollbar-dragging'); hideLater() } }
   viewport.classList.add('auto-hide-scrollbar')
   scrollTarget.addEventListener('scroll', scroll, { passive: true })
   window.addEventListener('pointermove', pointer, { passive: true })
@@ -39,7 +39,7 @@ export function installAutoHideScrollbar(viewport: HTMLElement) {
     window.removeEventListener('pointerup', release, true)
     window.removeEventListener('pointercancel', release, true)
     window.removeEventListener('blur', release)
-    viewport.classList.remove('auto-hide-scrollbar', 'scrollbar-active')
+    viewport.classList.remove('auto-hide-scrollbar', 'scrollbar-active', 'scrollbar-dragging')
   }
 }
 

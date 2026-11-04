@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "deliveryDirectory": "dist-desktop",
-  "collectedAt": "2026-11-03T11:25:27.048Z",
+  "collectedAt": "2026-11-03T14:42:03.767Z",
   "runtime": "Windows x64 / system WebView2 / external Python 3.11",
   "frontend": "embedded static dist",
   "scientificSource": "real Python / local LTE-Saha / NIST",
@@ -11,15 +11,15 @@
       "kind": "windows-x64-application",
       "file": "SimLIBS.exe",
       "source": "src-tauri\\target\\release\\simlibs-vue.exe",
-      "bytes": 5127168,
-      "sha256": "b08cae4be15409f8380b0c33b3c6acc6532ed77c89b737584512ea7713840ddf"
+      "bytes": 5127680,
+      "sha256": "614f0d8a9d7fd720680bb0c30a3843128f5ebc42dce13077e47632547f7e0e23"
     },
     {
       "kind": "nsis-installer",
       "file": "SimLIBS-Setup.exe",
       "source": "src-tauri\\target\\release\\bundle\\nsis\\SimLIBS_0.1.0_x64-setup.exe",
-      "bytes": 1794339,
-      "sha256": "57ab4a69b29ca5f1196ae467c17e6ad8561eb3ca94d06a403db6a81b0d136d4e"
+      "bytes": 1794436,
+      "sha256": "09fb6fa8372a0b78a3dbaf0641d04d26ebc26d1e134808e910e1ef28c880d06c"
     },
     {
       "kind": "python-backend-resource",
