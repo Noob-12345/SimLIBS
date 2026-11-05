@@ -1,5 +1,11 @@
 # SimLIBS 功能与计算原理
 
+2026-11-05 高级 Stark 当前链路：JSON → 在线 STARK-B → NIST＋DK1980 → missing，仅处理各层尚未解决的谱线。生产默认读取本包 data/stark_broadening.json，不向父目录发现源库/sample。固定导出 f40995bbb87ffeedb069d29e8e42c7fa6e64d939ceaceeb19fe902b7185f5a54 的 rows、内嵌 manifest 与172个 gzip 原始 payload 均校验；原始非正/空系数保留标记且不可用于展宽。下文历史 CSV 补数/重导入已被自动链替代。
+
+实际 charge=q：0/I中性，1/II一次电离，2/III二次电离，3/IV三次电离。DK1980 只允许 q2/3，要求严格数值＋组态/term/J身份、可信闭芯单价电子 LS 阵列和完整 E1 Aki/统计权重/电离阈值；无数据不代零或phi=1。STARK-B电子FWHM Å先除10再除2为renderer W；DK1980直接取hwhm_nm，仅换算一次，均满足FWHM=2W·Ne/Ne_ref。Te eV按e/k换K，名义/有效条件分别计算。DOI 10.1016/0022-4073(80)90014-X及原子输入出处逐线保存，不冒充数据库实测。
+
+输出记录 JSON/STARK-B/DK1980/missing 来源层、温密范围、URL/hash、故障和每层缺失原因；缺失下载用于审计，strict拒绝和默认保面积unbroadened保持。传输/格式/缓存故障不能记成物理missing；验证替代来源成功时也保留故障证据。元素级阶段经resolver→受控transport→worker emit持久化原job，混合LIBS线强仍按混合组成请求，进度列出组成/波段，前端detail完整显示当前stage，badge仅作简写。旧任务来源与单位不迁移。
+
 日期：2026-10-25。高级页新请求仅提供“客户端模拟”，在线取得 NIST 谱线，使用原 nist 协议在本地计算 Stark、逐线自吸收与仪器响应；默认波段和物理联动保持。新入口不再提供论文选择、柱密度参数或论文专属校验。历史 paper-eq7-stark-sa-1 与 finite-lte-slab-1 结果仍按原版本/来源解释、查看和导出，后端实现及数据不删除。当前入口实现与自测见 [.ai-workflow/20261025-advanced-client-mode/implementation.md](.ai-workflow/20261025-advanced-client-mode/implementation.md)，最终审查由独立 review 完成。下文带日期的实现/验收段落及离线论文推导保留为历史，不代表当前可选入口。
 
 ## 客户端模拟（原NIST高级入口，2026-10-16引入）

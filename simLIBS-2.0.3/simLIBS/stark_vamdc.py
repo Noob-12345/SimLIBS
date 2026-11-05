@@ -63,7 +63,7 @@ def _text(parent, path, name):
     return text.strip()
 
 
-def _value(parent, path, unit):
+def _value(parent, path, unit, *, source_width=False):
     node = _one(parent, path, 'value')
     if node.get('units') != unit:
         raise ValueError('Unexpected XSAMS unit: ' + str(node.get('units')))
@@ -71,7 +71,7 @@ def _value(parent, path, unit):
         value = float(node.text)
     except (TypeError, ValueError, OverflowError) as exc:
         raise ValueError('Invalid XSAMS number') from exc
-    if not math.isfinite(value) or value <= 0:
+    if not math.isfinite(value) or (value <= 0 and not source_width):
         raise ValueError('XSAMS value must be finite and positive')
     return value
 
@@ -201,10 +201,17 @@ def _page_rows(page, element, charge, ne):
             parameter = _one(lineshape, 'x:LineshapeParameter', 'width parameter')
             if lineshape.get('name') != 'Lorentzian' or parameter.get('name') != 'gammaL':
                 raise ValueError('Unknown STARK-B width convention')
+            # Some official high-ionization tables publish nonpositive widths.
+            # Preserve and flag those points instead of losing the entire ion;
+            # they must never be used as a positive simulation coefficient.
+            width = _value(parameter, 'x:Value', 'A', source_width=True)
+            flag = _comments(env, broadening)
+            if width <= 0:
+                flag = "; ".join(filter(None, (flag, "nonpositive source electron width")))
             samples.append(dict(ne=_value(env, 'x:TotalNumberDensity/x:Value', '1/cm3'),
                                 temperature_k=_value(env, 'x:Temperature/x:Value', 'K'),
-                                fwhm_angstrom=_value(parameter, 'x:Value', 'A'),
-                                flag=_comments(env, broadening),
+                                fwhm_angstrom=width,
+                                flag=flag,
                                 environment_id=env_id, collider_ref=electrons[0]))
         covering = [sample['ne'] for sample in samples if sample['ne'] >= ne]
         if not covering:

@@ -1,0 +1,613 @@
+{
+  "levels": [
+    {
+      "configuration": "4p6.4d",
+      "term": "2D",
+      "j": "3/2",
+      "energy_ev": 0.0,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.4d",
+        "term": "2D",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "0.0",
+        "suffix": "",
+        "uncertaintycm1": "0.2",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.4d",
+      "term": "2D",
+      "j": "5/2",
+      "energy_ev": 0.1550670369804036,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.4d",
+        "term": "2D",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "1250.7",
+        "suffix": "",
+        "uncertaintycm1": "0.4",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.5s",
+      "term": "2S",
+      "j": "1/2",
+      "energy_ev": 4.743430858126828,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.5s",
+        "term": "2S",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "38258.35",
+        "suffix": "",
+        "uncertaintycm1": "0.10",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.5p",
+      "term": "2P*",
+      "j": "1/2",
+      "energy_ev": 10.163790642859244,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.5p",
+        "term": "2P*",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "81976.50",
+        "suffix": "",
+        "uncertaintycm1": "0.11",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.5p",
+      "term": "2P*",
+      "j": "3/2",
+      "energy_ev": 10.471872778335982,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.5p",
+        "term": "2P*",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "84461.35",
+        "suffix": "",
+        "uncertaintycm1": "0.10",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.5d",
+      "term": "2D",
+      "j": "3/2",
+      "energy_ev": 18.182580262305063,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.5d",
+        "term": "2D",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "146652.40",
+        "suffix": "",
+        "uncertaintycm1": "0.03",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.5d",
+      "term": "2D",
+      "j": "5/2",
+      "energy_ev": 18.22598217080859,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.5d",
+        "term": "2D",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "147002.46",
+        "suffix": "",
+        "uncertaintycm1": "0.03",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.6s",
+      "term": "2S",
+      "j": "1/2",
+      "energy_ev": 18.909202055642677,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.6s",
+        "term": "2S",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "152513.0",
+        "suffix": "",
+        "uncertaintycm1": "0.2",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.4f",
+      "term": "2F*",
+      "j": "5/2",
+      "energy_ev": 19.72176349612426,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.4f",
+        "term": "2F*",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "159066.75",
+        "suffix": "",
+        "uncertaintycm1": "0.07",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.4f",
+      "term": "2F*",
+      "j": "7/2",
+      "energy_ev": 19.724263017564677,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.4f",
+        "term": "2F*",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "159086.91",
+        "suffix": "",
+        "uncertaintycm1": "0.07",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.6p",
+      "term": "2P*",
+      "j": "1/2",
+      "energy_ev": 21.053720780524195,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.6p",
+        "term": "2P*",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "169809.71",
+        "suffix": "",
+        "uncertaintycm1": "0.04",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.6p",
+      "term": "2P*",
+      "j": "3/2",
+      "energy_ev": 21.178374493628933,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.6p",
+        "term": "2P*",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "170815.11",
+        "suffix": "",
+        "uncertaintycm1": "0.03",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.6d",
+      "term": "2D",
+      "j": "3/2",
+      "energy_ev": 24.5197474015617,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.6d",
+        "term": "2D",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "197765.10",
+        "suffix": "",
+        "uncertaintycm1": "0.03",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.6d",
+      "term": "2D",
+      "j": "5/2",
+      "energy_ev": 24.54024570908866,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.6d",
+        "term": "2D",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "197930.43",
+        "suffix": "",
+        "uncertaintycm1": "0.03",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.7s",
+      "term": "2S",
+      "j": "1/2",
+      "energy_ev": 24.81217529214426,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.7s",
+        "term": "2S",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "200123.69",
+        "suffix": "",
+        "uncertaintycm1": "0.06",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.5f",
+      "term": "2F*",
+      "j": "5/2",
+      "energy_ev": 24.934975441482425,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.5f",
+        "term": "2F*",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "201114.14",
+        "suffix": "",
+        "uncertaintycm1": "0.06",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.5f",
+      "term": "2F*",
+      "j": "7/2",
+      "energy_ev": 24.940989914948418,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.5f",
+        "term": "2F*",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "201162.65",
+        "suffix": "",
+        "uncertaintycm1": "0.06",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.5g",
+      "term": "2G",
+      "j": "7/2",
+      "energy_ev": 25.647919298048887,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.5g",
+        "term": "2G",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "206864.42",
+        "suffix": "",
+        "uncertaintycm1": "0.13",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.5g",
+      "term": "2G",
+      "j": "9/2",
+      "energy_ev": 25.64795153394048,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.5g",
+        "term": "2G",
+        "j": "9/2",
+        "prefix": "",
+        "levelcm1": "206864.68",
+        "suffix": "",
+        "uncertaintycm1": "0.13",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.7p",
+      "term": "2P*",
+      "j": "1/2",
+      "energy_ev": 25.88583753579029,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.7p",
+        "term": "2P*",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "208783.36",
+        "suffix": "",
+        "uncertaintycm1": "0.19",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.7p",
+      "term": "2P*",
+      "j": "3/2",
+      "energy_ev": 25.949602609044486,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.7p",
+        "term": "2P*",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "209297.66",
+        "suffix": "",
+        "uncertaintycm1": "0.14",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.6f",
+      "term": "2F*",
+      "j": "5/2",
+      "energy_ev": 27.824521413958966,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.6f",
+        "term": "2F*",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "224419.90",
+        "suffix": "",
+        "uncertaintycm1": "0.03",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.6f",
+      "term": "2F*",
+      "j": "7/2",
+      "energy_ev": 27.832978376134093,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.6f",
+        "term": "2F*",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "224488.11",
+        "suffix": "",
+        "uncertaintycm1": "0.04",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.8s",
+      "term": "2S",
+      "j": "1/2",
+      "energy_ev": 27.873319114778305,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.8s",
+        "term": "2S",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "224813.48",
+        "suffix": "",
+        "uncertaintycm1": "0.11",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.6g",
+      "term": "2G",
+      "j": "7/2",
+      "energy_ev": 28.32789230022982,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.6g",
+        "term": "2G",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "228479.86",
+        "suffix": "",
+        "uncertaintycm1": "0.07",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.6g",
+      "term": "2G",
+      "j": "9/2",
+      "energy_ev": 28.327919576753477,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.6g",
+        "term": "2G",
+        "j": "9/2",
+        "prefix": "",
+        "levelcm1": "228480.08",
+        "suffix": "",
+        "uncertaintycm1": "0.07",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.6h",
+      "term": "2H*",
+      "j": "9/2",
+      "energy_ev": 28.36062536845817,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.6h",
+        "term": "2H*",
+        "j": "9/2",
+        "prefix": "",
+        "levelcm1": "228743.87",
+        "suffix": "",
+        "uncertaintycm1": "0.13",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.6h",
+      "term": "2H*",
+      "j": "11/2",
+      "energy_ev": 28.36062536845817,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.6h",
+        "term": "2H*",
+        "j": "11/2",
+        "prefix": "",
+        "levelcm1": "228743.87",
+        "suffix": "",
+        "uncertaintycm1": "0.13",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.7g",
+      "term": "2G",
+      "j": "7/2",
+      "energy_ev": 29.945452145088566,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.7g",
+        "term": "2G",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "241526.36",
+        "suffix": "",
+        "uncertaintycm1": "0.10",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.7g",
+      "term": "2G",
+      "j": "9/2",
+      "energy_ev": 29.945471982560317,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.7g",
+        "term": "2G",
+        "j": "9/2",
+        "prefix": "",
+        "levelcm1": "241526.52",
+        "suffix": "",
+        "uncertaintycm1": "0.10",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.8g",
+      "term": "2G",
+      "j": "7/2",
+      "energy_ev": 30.995470602093388,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.8g",
+        "term": "2G",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "249995.33",
+        "suffix": "",
+        "uncertaintycm1": "0.13",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.8g",
+      "term": "2G",
+      "j": "9/2",
+      "energy_ev": 30.995484240355218,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.8g",
+        "term": "2G",
+        "j": "9/2",
+        "prefix": "",
+        "levelcm1": "249995.44",
+        "suffix": "",
+        "uncertaintycm1": "0.13",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.9g",
+      "term": "2G",
+      "j": "7/2",
+      "energy_ev": 31.71518275605232,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.9g",
+        "term": "2G",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "255800.2",
+        "suffix": "",
+        "uncertaintycm1": "0.5",
+        "reference": "L11645"
+      }
+    },
+    {
+      "configuration": "4p6.9g",
+      "term": "2G",
+      "j": "9/2",
+      "energy_ev": 31.715343935510283,
+      "level_id": "",
+      "raw": {
+        "configuration": "4p6.9g",
+        "term": "2G",
+        "j": "9/2",
+        "prefix": "",
+        "levelcm1": "255801.5",
+        "suffix": "",
+        "uncertaintycm1": "0.9",
+        "reference": "L11645"
+      }
+    }
+  ],
+  "lines": [],
+  "limits": [
+    {
+      "energy_ev": 34.41836064081201,
+      "label": "Zr V (4p6 1S<0>) Limit",
+      "raw": {
+        "configuration": "Zr V (4p6 1S<0>)",
+        "term": "Limit",
+        "j": "---",
+        "prefix": "",
+        "levelcm1": "277602.8",
+        "suffix": "",
+        "uncertaintycm1": "0.5",
+        "reference": "L11645"
+      }
+    }
+  ],
+  "ionization_energy_ev": 34.41836,
+  "atomic_source": {
+    "levels_url": "https://physics.nist.gov/cgi-bin/ASD/energy1.pl?spectrum=Zr+IV&units=0&format=3&output=0&page_size=1000&conf_out=on&term_out=on&j_out=on&level_out=on&unc_out=on&biblio=on&multiplet_ordered=0&submit=Retrieve+Data",
+    "lines_url": "https://physics.nist.gov/cgi-bin/ASD/lines1.pl?spectra=Zr+IV&output_type=0&low_w=&upp_w=&unit=1&de=0&plot_out=0&format=3&line_out=0&remove_js=on&no_spaces=on&en_unit=0&output=0&bibrefs=1&page_size=100&show_obs_wl=1&show_calc_wl=1&unc_out=1&order_out=0&ids_out=1&show_av=3&A_out=0&allowed_out=1&conf_out=on&term_out=on&enrg_out=on&J_out=on&g_out=on",
+    "ionization_url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?spectra=Zr+IV&units=1&format=3&order=0&ion_charge_out=on&sp_name_out=on&e_out=0&biblio=on",
+    "levels_sha256": "0117e45ac29659fde0acf32863840fa6c2b766b0ceca9bc15ad132a1b653cb3c",
+    "lines_sha256": "0799a25ec7cc10b3bb6c58de3e8cedabeb25801e656d2130e3def6ecdadfd9e1",
+    "ionization_sha256": "f5a910d355613d2dfdf4a69c8d8e03e5a8304e406a254f30360cfe4b28b3b4a4"
+  },
+  "line_data": {
+    "status": "ok",
+    "exported_lines": 76,
+    "e1_lines": 0
+  }
+}

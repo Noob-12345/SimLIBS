@@ -6,6 +6,8 @@
 这里只验证采集及缓存契约，既有 XSAMS 科学解析由其原有测试覆盖。
 """
 import hashlib
+import gzip
+import base64
 import importlib.util
 import json
 from pathlib import Path
@@ -225,6 +227,46 @@ class StarkDataCollectTests(unittest.TestCase):
         page['headers']['VAMDC-COUNT-SPECIES'] = '2'
         with self.assertRaises(ValueError):
             collector._species_from_page(real_client, page)
+
+    def test_portable_export_retains_all_ions_samples_and_provenance(self):
+        self.fetch()
+        output = self.directory / "stark_broadening.json"
+        result = self.collector.export_stark_database(self.directory, output)
+        document = json.loads(output.read_text(encoding="utf-8"))
+        self.assertTrue(result["complete"])
+        self.assertEqual(document["source"], "STARK-B")
+        self.assertEqual(document["counts"],
+                         dict(species=3, elements=3, lines=3, tables=6, samples=12))
+        self.assertEqual(self.identities(document["rows"]), set(SPECIES))
+        self.assertEqual(len(document["raw_payloads"]), 3)
+        self.assertEqual(document["rows_sha256"],
+                         hashlib.sha256(json.dumps(document["rows"], ensure_ascii=False, sort_keys=True,
+                                                   separators=(',', ':'), allow_nan=False).encode()).hexdigest())
+        self.assertEqual(result["sha256"], hashlib.sha256(output.read_bytes()).hexdigest())
+        from simLIBS.stark_resolver import load_database
+        self.assertEqual(len(load_database(output)["rows"]), 6)
+        self.assertTrue(all(r["method"] == "unreported" for r in document["rows"]))
+        stored = document["raw_payloads"][0]
+        raw = gzip.decompress(base64.b64decode(stored["payload_gzip_base64"]))
+        self.assertEqual(stored["uncompressed_sha256"], hashlib.sha256(raw).hexdigest())
+        self.assertIn("TestTables", json.loads(raw)["pages"][0]["xml"])
+
+    def test_partial_export_is_explicit_and_preserves_failure_manifest(self):
+        self.service.fail_species.add(("Fe", 2))
+        self.fetch()
+        output = self.directory / "partial.json"
+        with self.assertRaises(ValueError):
+            self.collector.export_stark_database(self.directory, output)
+        self.assertFalse(output.exists())
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.collector.export_stark_database(self.directory, output, allow_partial=True)
+        document = json.loads(output.read_text(encoding="utf-8"))
+        self.assertFalse(document["complete"])
+        self.assertEqual(document["counts"]["species"], 2)
+        self.assertTrue(document["manifest"]["failures"])
+        with self.assertRaisesRegex(ValueError, "overwrite"):
+            self.collector.export_stark_database(self.directory, self.directory / "manifest.json")
 
     def test_all_scope_deduplicates_atoms_keeps_neutral_and_high_charge(self):
         manifest = self.fetch()

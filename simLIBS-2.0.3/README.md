@@ -27,7 +27,7 @@ python -m pip install -e .
 
 - `static`：需要联网访问 NIST，使用本地 Python 计算线形。
 - `dynamic`：需要 Chrome，程序通过 Selenium 操作 NIST 页面并导出结果；驱动由 `webdriver-manager` 获取。
-- Stark 系数统一来自 STARK-B 数据库，可复用已验证的数据库响应缓存。
+- Stark 宽度按 STARK-B → DK1980 修正半经验公式 → 缺失解析，保留逐线来源及各层原因。
 
 确认实际导入的是正在编辑的源码，可以运行：
 
@@ -248,7 +248,15 @@ stark_spectrum = libs_stark.get_interpolated_spectrum()
 
 ## 5. Stark 数据来源与覆盖
 
-**Stark 系数统一从 STARK-B 数据库取得，或复用已验证的数据库响应缓存。** 项目已删除内置系数 JSON 和独立离线论文模型；不再接受用户本地系数表或本地数据文件。所有元素和跃迁均执行相同的数据库查询与匹配流程。
+**Stark 宽度固定按 STARK-B → DK1980 修正半经验公式 → 缺失解析。** 优先读取官方离线导出 `stark-b/stark_broadening.json`；文件不存在时保留既有 STARK-B 在线/快照客户端。离线文件存在时，表中未命中直接进入公式层，不在模拟中重新爬库。格式及完整性见 [STARK 数据库说明](docs/STARK_DATABASE.md)。不恢复旧内置系数或用户 CSV 覆盖优先级。
+
+DK1980 仅支持实际电荷 q=2、3。解析器自动读取 `sample/<元素>_<电荷>_atomic.json` 中有出处的完整 NIST 能级、E1 Aki、对应电离阈值，并调用 `build_model_input` 构造同 n 扰动阵列；也读取 `models.json` 与按原表身份键关联的 `manual_inputs.json`。数据库没有相应表的真实跃迁，也能在原子数据足够时自动计算。准备命令见 [比较工具说明](docs/STARK_COMPARISON.md) 的 `fetch-atomic`；仅保留 `models.json` 不足以覆盖库外跃迁，还需保留 `*_atomic.json`。包内提供同实现的 `simLIBS.stark_atomic_data` 与 `simLIBS.stark_semiempirical`。
+
+新增 `self_absorption_config` 配置：`stark_database_path=None` 自动发现官方导出，空字符串禁用离线发现；`stark_atomic_dir=None` 自动发现同级 `sample/`；`stark_mse_inputs=None` 可由 Python 调用者传入有出处的显式原子模型。部署可设置 `SIMLIBS_STARK_DATABASE`、`SIMLIBS_STARK_ATOMIC_DIR`。`stark_allow_network=False` 禁止 Stark 与 ASD 身份补齐请求，但主模拟 NIST 线强请求仍需联网。只有数值线位/能量/gA 的谱线必须通过 ASD 身份缓存或原子 E1 表精确补齐上下态，无缓存时不会按最近波长猜测。
+
+`stark_mse_inputs` 每项须含 `element/charge/wavelength_nm/lower_eV/upper_eV/gA_s`、`atomic_source` 和 `lower/upper`（结构同 `stark_semiempirical.Level`）。数值身份按既有四 ULP 规则匹配，不放宽物理约束、不补猜 φ。缺少完整 E1 分量、离子芯阈值或其他必需输入时保存公式缺失原因。公式仍假设孤立谱线、电子碰撞近似和 LS 耦合，不自动保证这些适用条件。
+
+离线库按绝对路径、mtime_ns、ctime_ns、大小缓存解析，文件变化后重新校验；内存只保留标准表和 manifest。JSON 宽度为电子 FWHM Å，渲染参数为当前 Ne 下的 HWHM nm；DK1980 同样只转换一次，不重复乘二或缩放密度。官方非正宽度带 `nonpositive` 标记保留原值，绝不用于模拟。逐线 `stark_resolution_layer`、`stark_b_missing_reason`、`stark_mse_missing_reason` 与汇总 `dk1980_line_count` 区分来源，完整采集 manifest 保存一次。两层均不可用时仍执行下述 `MissingStarkDataError` / `unbroadened` 策略。
 
 自动流程先用 NIST ASD 导出补齐上下态，确认真空 Ritz 波长、上下能量及 `gA`，然后按 STARK-B 的组态、项和 J 匹配。数据库明确给出多重态平均系数时，才允许覆盖相同组态/项的细结构分量，并按来源规定的波长平方比换算。不会按最近波长猜系数。
 

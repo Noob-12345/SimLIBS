@@ -48,8 +48,11 @@ class StarkTransport:
         """Each worker owns its imports; patches are scoped and restored even on cancellation."""
         source = importlib.import_module('simLIBS.stark_b')
         identities = importlib.import_module('simLIBS.nist_stark')
+        resolver = importlib.import_module('simLIBS.stark_resolver')
         access_error = source.StarkDataAccessError
         end = time.monotonic()+min(600., max(180., self.settings.static_deadline*3))
+        current_message = ['Stark数据级联']
+        last_response = {}
 
         def failure(message, code='stark_data_access'):
             error = access_error(message)
@@ -64,6 +67,7 @@ class StarkTransport:
 
         def announce(message):
             check()
+            current_message[0] = message
             self.report(progress, condition+'：'+message, max(1., end-time.monotonic())+10)
 
         def pause(seconds):
@@ -75,7 +79,7 @@ class StarkTransport:
         def bounded_request(session, method, url, **kwargs):
             kwargs.pop('timeout', None)
             for attempt in range(3):
-                announce('查询STARK-B / NIST身份数据')
+                announce(current_message[0])
                 remaining = end-time.monotonic()
                 response = None
                 try:
@@ -99,6 +103,8 @@ class StarkTransport:
                     self.response_bytes += size
                     self.evidence.append(dict(method=method, url=getattr(response, 'url', None) or url,
                                               response_sha256=hashlib.sha256(content).hexdigest(), bytes=size))
+                    last_response.update(status_code=getattr(response, 'status_code', 200),
+                                         headers=dict(getattr(response, 'headers', {})))
                     return text
                 except requests.RequestException as error:
                     status = getattr(getattr(error, 'response', None), 'status_code', None)
@@ -128,6 +134,10 @@ class StarkTransport:
                 raise failure('Stark缓存读写失败：'+str(error), 'stark_cache_io') from error
             check()
             self.snapshots.append(dict(key=key, cache_hit=hit, sha256=document['sha256'], retrieved_utc=document['retrieved_utc']))
+            parts = key.split(':')
+            species = parts[1]+' '+source._roman(int(parts[2])+1) if len(parts)>2 and parts[2].isdigit() else ''
+            label = 'NIST' if key.startswith('nist-') else 'STARK-B'
+            announce(label+'：'+species+'，'+('读取已校验缓存' if hit else '已校验并保存来源缓存'))
             return document
 
         def checked_parser(parser):
@@ -144,18 +154,21 @@ class StarkTransport:
                 def __init__(self, text):
                     self.text = text
                     self.content = text.encode('utf-8')
-                    self.status_code = 200
-                    self.headers = {'VAMDC-TRUNCATED': 'None'}
+                    self.status_code = last_response['status_code']
+                    self.headers = last_response['headers']
                 def raise_for_status(self):
                     pass
             def vamdc_get(url, **kwargs):
-                res = bounded_request(requests.Session(), 'GET', url, **kwargs)
+                with requests.Session() as session:
+                    res = bounded_request(session, 'GET', url, **kwargs)
                 return MockResponse(res)
             with ExitStack() as stack:
                 stack.enter_context(patch.object(source.StarkBClient, '_request', staticmethod(bounded_request)))
                 stack.enter_context(patch.object(source.SourceCache, 'get', cached))
                 stack.enter_context(patch.object(source, 'parse_table', checked_parser(source.parse_table)))
                 stack.enter_context(patch.object(identities, 'parse_identities', checked_parser(identities.parse_identities)))
+                stack.enter_context(patch.object(resolver, 'report_progress', announce))
+                stack.enter_context(patch.object(resolver, 'check_cancelled', check))
                 try:
                     vamdc = importlib.import_module('simLIBS.stark_vamdc')
                     stack.enter_context(patch.object(vamdc.requests, 'get', vamdc_get))
@@ -167,6 +180,10 @@ class StarkTransport:
             if str(error).startswith('Ambiguous '):
                 error.code = 'stark_ambiguous'
             raise
+        except access_error as error:
+            if not getattr(error, 'code', None):
+                error.code = 'stark_service_format'
+            raise
 
 
 def merge_missing(rows):
@@ -176,11 +193,11 @@ def merge_missing(rows):
     for row in rows:
         key = tuple(row.get(name) for name in keys)
         group = groups.setdefault(key, dict(row, conditions=[], condition_details=[]))
-        if group.get('stark_reference_ne_cm3') is None:
-            group['stark_reference_ne_cm3'] = 1e16
         if row['condition'] not in group['conditions']:
             group['conditions'].append(row['condition'])
-        detail = {name: row.get(name) for name in ('condition','Te_eV','Ne_cm3','stark_missing_reason')}
+        detail = {name: row.get(name) for name in ('condition','Te_eV','Ne_cm3','stark_missing_reason',
+                                                  'stark_b_missing_reason','stark_mse_missing_reason',
+                                                  'stark_layer_reasons','stark_access_failures')}
         if detail not in group['condition_details']:
             group['condition_details'].append(detail)
     for group in groups.values():

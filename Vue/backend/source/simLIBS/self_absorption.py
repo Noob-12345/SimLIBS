@@ -278,6 +278,11 @@ class PaperSpectrumResult:
     metadata: dict
 
 
+# Shared result name used by the current STARK-B/DK1980 NIST engine.
+# Keep the historical name available for stored paper-model callers.
+SpectrumResult = PaperSpectrumResult
+
+
 def simulate_paper_spectrum(*, Te, Ne, elements, percentages, low_w, upper_w,
                             resolution=1000, max_ion_charge=2, config=None, cancelled=None, progress=None):
     """Generate a paper-model spectrum directly from transitions, offline.

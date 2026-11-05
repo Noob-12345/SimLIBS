@@ -37,9 +37,11 @@ table_count=0；counts.no_data_count 单列数量，不会用合成数据填补�
 from __future__ import annotations
 
 import argparse
+import base64
 from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
+import gzip
 import importlib.util
 import json
 import math
@@ -51,7 +53,7 @@ import tempfile
 import time
 import threading
 import warnings
-from requests.exceptions import ChunkedEncodingError
+from requests.exceptions import ChunkedEncodingError, HTTPError
 
 
 SCHEMA_VERSION = 1
@@ -447,9 +449,13 @@ def _payload_rows(client, payload, element, charge):
     pages = payload.get('pages')
     if not isinstance(pages, list):
         raise ValueError('Missing original payload pages')
-    for page in pages:
-        _page(page, client.TAP_URL)
-    rows = client.parse_payload(payload, element=element, charge=charge, ne=_MIN_NE)
+    if payload.get('format') == 'starkb-html':
+        from stark_html_collect import parse_payload
+        rows = parse_payload(payload, element=element, charge=charge, ne=_MIN_NE)
+    else:
+        for page in pages:
+            _page(page, client.TAP_URL)
+        rows = client.parse_payload(payload, element=element, charge=charge, ne=_MIN_NE)
     if payload.get('status') != ('ok' if rows else 'no data'):
         raise ValueError('Payload status disagrees with its electron tables')
     _json_bytes(rows)
@@ -673,7 +679,14 @@ def fetch_stark_database(output_dir: Path, *, refresh=False, delay=1.0,
             worker_transport = _Transport(worker_client.requests, delay, limiter=limiter)
             worker_client.requests = worker_transport
             try:
-                payload = worker_client.fetch_species(element, charge, _MIN_NE)
+                try:
+                    payload = worker_client.fetch_species(element, charge, _MIN_NE)
+                except HTTPError as exc:
+                    if exc.response is None or exc.response.status_code != 400:
+                        raise
+                    from stark_html_collect import fetch_species
+                    payload = fetch_species(element, charge, limiter=limiter)
+                    payload['vamdc_error'] = str(exc)
                 rows = _payload_rows(worker_client, payload, element, charge)
                 timestamp = _utc()
                 document = {'schema_version': SCHEMA_VERSION, 'endpoint': client.TAP_URL,
@@ -768,6 +781,71 @@ def load_stark_tables(directory: Path, *, allow_partial=False) -> list[dict]:
     return rows
 
 
+def export_stark_database(directory: Path, output: Path, *, allow_partial=False):
+    """Write a portable, provenance-preserving JSON for simulation.
+
+    All downloaded electron tables are retained, regardless of whether the
+    semiempirical model supports their ion or has sufficient atomic inputs.
+    Raw XSAMS payloads preserve the other colliders, shifts and source text.
+    A partial export must be explicitly requested and remains labelled partial.
+    """
+    directory = Path(directory).expanduser().resolve()
+    output = Path(output).expanduser().resolve()
+    if output in (directory / "manifest.json", directory / _INDEX_PATH) or directory / "species" in output.parents:
+        raise ValueError("Export must not overwrite the collection manifest or species cache")
+    rows = load_stark_tables(directory, allow_partial=allow_partial)
+    manifest = _read_json(directory / "manifest.json")
+    raw_payloads = []
+    client = _client()
+    for record in manifest["species"]:
+        if record["status"] != "ok":
+            continue
+        try:
+            _read_species(directory, record, client)
+            document = _read_hashed(directory, record)
+        except ValueError:
+            if not allow_partial:
+                raise
+            continue
+        raw = _json_bytes(document["payload"])
+        raw_payloads.append({"element": record["element"], "charge": record["charge"],
+                             "retrieved_utc": document["retrieved_utc"],
+                             "sha256": record["sha256"], "encoding": "gzip+base64",
+                             "uncompressed_sha256": hashlib.sha256(raw).hexdigest(),
+                             "payload_gzip_base64": base64.b64encode(
+                                 gzip.compress(raw, mtime=0)).decode("ascii")})
+    line_ids = {(r["element"], r["charge"], r["dataset_id"],
+                 r.get("lower_state_id", r["lower_label"]),
+                 r.get("upper_state_id", r["upper_label"]), r["source"])
+                for r in rows}
+    document = {
+        "schema_version": 1, "source": "STARK-B", "exported_utc": _utc(),
+        "endpoint": manifest["endpoint"],
+        "complete": manifest["complete"] and len(raw_payloads) == len(manifest["species"]),
+        "scope": manifest["scope"],
+        "units": {"fwhm_angstrom": "angstrom (FWHM, not HWHM)",
+                  "temperature_k": "K", "ne": "cm^-3",
+                  "calculated_wavelength_angstrom": "angstrom"},
+        "counts": {"species": len(raw_payloads), "elements": len({r["element"] for r in rows}),
+                   "lines": len(line_ids), "tables": len(rows),
+                   "samples": sum(len(r["samples"]) for r in rows)},
+        "rows_sha256": hashlib.sha256(json.dumps(
+            rows, ensure_ascii=False, sort_keys=True, separators=(',', ':'),
+            allow_nan=False).encode('utf-8')).hexdigest(),
+        "manifest_sha256": hashlib.sha256((directory / "manifest.json").read_bytes()).hexdigest(),
+        "manifest": manifest, "rows": rows, "raw_payloads": raw_payloads,
+        "notes": [
+            "rows contains all downloaded electron FWHM tables, without MSE applicability filtering.",
+            "raw_payloads retains lossless gzip+base64 original XSAMS/HTML payload JSON including other colliders and shifts.",
+            "Unknown methods, C and fits remain unknown. Flags are retained, not silently removed.",
+            "complete describes retrieval of the discovered scope; it does not establish physical validity.",
+        ],
+    }
+    digest = _atomic_json(output, document)
+    return {"path": str(output), "sha256": digest, "complete": document["complete"],
+            "scope": document["scope"], "counts": document["counts"]}
+
+
 def _cli(argv=None):
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -779,18 +857,31 @@ def _cli(argv=None):
     parser.add_argument('--delay', type=float, default=1.0, help='每个 HTTP 请求的最小间隔秒数')
     parser.add_argument('--elements', nargs='+', help='元素符号列表，可空格或逗号分隔')
     parser.add_argument('--charges', nargs='+', help='实际电荷 q 列表，可空格或逗号分隔；含 0')
+    parser.add_argument('--export-json', type=Path, help='导出供模拟使用的单个 JSON（含原始 XSAMS）')
+    parser.add_argument('--export-only', action='store_true', help='仅校验和导出已有下载，不联网')
+    parser.add_argument('--allow-partial', action='store_true', help='显式允许导出带失败清单的部分数据')
     args = parser.parse_args(argv)
+    if args.export_only and args.export_json is None:
+        parser.error('--export-only requires --export-json')
     try:
         elements = ([item for value in args.elements for item in value.replace(',', ' ').split()]
                     if args.elements is not None else None)
         charges = ([int(item) for value in args.charges for item in value.replace(',', ' ').split()]
                    if args.charges is not None else None)
-        manifest = fetch_stark_database(args.output_dir, refresh=args.refresh, delay=args.delay,
-                                         elements=elements, charges=charges, workers=args.workers)
+        if args.export_only:
+            manifest = _read_json(args.output_dir / 'manifest.json')
+        else:
+            manifest = fetch_stark_database(args.output_dir, refresh=args.refresh, delay=args.delay,
+                                             elements=elements, charges=charges, workers=args.workers)
+        if args.export_json is not None:
+            result = export_stark_database(args.output_dir, args.export_json,
+                                           allow_partial=args.allow_partial)
+            print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
     except Exception as exc:
         print('STARK-B 采集失败：{}: {}'.format(type(exc).__name__, exc), file=sys.stderr)
         return 1
-    print(json.dumps(manifest, ensure_ascii=False, indent=2, allow_nan=False))
+    print(json.dumps({key: manifest[key] for key in ('complete', 'scope', 'counts', 'failures')},
+                     ensure_ascii=False, indent=2, allow_nan=False))
     return 0 if manifest['complete'] else 1
 
 

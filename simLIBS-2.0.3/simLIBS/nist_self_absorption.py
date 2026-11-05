@@ -4,8 +4,8 @@
 （拆分未分辨跃迁、按需计算布居、匹配 Stark）-> render_nist_absorption
 （计算 tau/SA、更新面积与宽度、叠加 Voigt 线形）。
 
-数据来源：NIST HTML 提供谱线和能级；全部 Stark 系数由
-nist_stark -> stark_b 查询 STARK-B 数据库，或复用已验证的数据库响应缓存。
+数据来源：NIST HTML 提供谱线和能级；stark_resolver 优先使用 STARK-B
+官方离线表/数据库缓存，缺失时用可靠原子输入计算 DK1980，仍缺失则明确报告。
 NIST lines 的六列为 [真空波长 nm, g_upper*Aki, 上能级 cm^-1,
 原子序数 Z, 电离阶段 charge+1, 下能级 cm^-1]，网页 JavaScript 仅作为数据解析。
 
@@ -39,8 +39,8 @@ MAX_SPECTRUM_CELLS = 20_000_000
 class NISTSelfAbsorptionConfig:
     """当前 NIST Stark/自吸收入口的不可变配置；主类保存深拷贝快照。
 
-    Stark 数据统一来自 STARK-B，使用约定 FWHM = 2*W*Ne/Ne_ref。
-    missing_stark 控制数据库缺少系数时的处理，不接受本地系数表。
+    Stark 数据优先 STARK-B，缺失后计算 DK1980，使用 FWHM = 2*W*Ne/Ne_ref。
+    离线文件仅接受带来源的标准 STARK-B 表；MSE 需要完整可信原子输入。
     """
     # 有效吸收光程，m；设为 0 时 tau=0、SA=1，得到同线形模型的薄谱。
     path_length_m: float = 0.01
@@ -56,6 +56,12 @@ class NISTSelfAbsorptionConfig:
     stark_allow_network: bool = True
     # 有出处的计算方法优先序；同方法的多个等优先来源不自动选取。
     stark_methods: object = ('SCP', 'MSE')
+    # None 自动发现官方导出；空字符串禁用发现，使用原数据库在线/快照路径。
+    stark_database_path: object = None
+    # stark_atomic_data.prepare_atomic_samples 的 sample 目录；None 自动发现。
+    stark_atomic_dir: object = None
+    # 显式原子模型列表：完整数值跃迁身份、atomic_source、lower/upper Level。
+    stark_mse_inputs: object = None
     # error：缺失时报错；unbroadened：保留线面积，仅使用可选的仪器展宽。
     missing_stark: str = 'error'
 
@@ -89,7 +95,7 @@ class MissingStarkDataError(ValueError):
         self.matched_lines = pd.DataFrame(matched)
         examples = ', '.join(f"{r['element']} charge={r['charge']} {r['wavelength_nm']:.8g} nm" for r in rows[:8])
         super().__init__(f'Missing Stark coefficients for {len(rows)} NIST transitions: {examples}. '
-                         'STARK-B has no usable coefficient for these transitions; '
+                         'STARK-B and DK1980 have no usable width for these transitions; '
                          'use missing_stark="unbroadened" to retain them without Stark correction. '
                          'The complete list is in exception.missing_lines.')
 
@@ -241,20 +247,16 @@ def nist_populations(atom, te, ne, cmev, koeff):
 
 
 def resolve_stark(records, config, *, te, ne, cmev):
-    """为全部跃迁查询 STARK-B，或复用已验证的数据库响应缓存。
+    """按 STARK-B -> DK1980 -> 缺失顺序解析，保留各层原因。
 
     物理数据缺失与网络/缓存故障分别报告。不读取内置或用户本地系数。
     缺失时默认报错；unbroadened 模式保留线面积并明确标记未知宽度。
     """
-    from .nist_stark import resolve_online
+    from .stark_resolver import resolve_widths
 
     if not records:
         return []
-    found, missing = resolve_online(
-        records, te=te, ne=ne, cmev=cmev,
-        cache_dir=config.stark_cache_dir, allow_network=config.stark_allow_network,
-        methods=config.stark_methods,
-    )
+    found, missing = resolve_widths(records, config, te=te, ne=ne, cmev=cmev)
     if missing and config.missing_stark == 'error':
         raise MissingStarkDataError(
             [missing[i] for i in sorted(missing)],
@@ -458,11 +460,15 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
                 parameters=dict(Te_eV=te, Ne_cm3=ne, path_length_m=config.path_length_m),
                 output_points=len(grid), output_step_nm=float(grid[1]-grid[0]))
     missing_count = sum(row.get('stark_missing', False) for row in records)
-    info['stark_data'] = dict(source_mode='STARK-B', methods=list(config.stark_methods),
+    info['stark_data'] = dict(source_mode='STARK-B -> DK1980 -> missing',
+                              priority=['STARK-B', 'DK1980', 'missing'], methods=list(config.stark_methods),
                               missing_policy=config.missing_stark, missing_line_count=missing_count,
                               matched_line_count=len(records)-missing_count,
                               self_absorption_skipped_count=missing_count if self_absorption else 0,
                               stark_b_line_count=sum('stark_dataset_id' in r for r in records),
+                              dk1980_line_count=sum(r.get('stark_method') == 'DK1980' for r in records),
+                              database_paths=sorted({r['stark_database_path'] for r in records
+                                                     if r.get('stark_database_path')}),
                               vamdc_line_count=sum(r.get('stark_source_format') == 'vamdc-xsams' for r in records),
                               method_unreported_count=sum(r.get('stark_method') == 'unreported' for r in records),
                               temperature_interpolated_count=sum(r.get('stark_temperature_method') ==
@@ -470,6 +476,9 @@ def render_nist_absorption(records, metadata, *, te, ne, low, high, resolution, 
                               isolated_limit_unknown_count=sum('stark_dataset_id' in r and
                                   r.get('stark_isolated_limit_cm3') is None for r in records),
                               sources=sorted({r['stark_source'] for r in records if not r.get('stark_missing', False)}))
+    manifests = [r['stark_collection_manifest'] for r in records if 'stark_collection_manifest' in r]
+    if manifests:
+        info['stark_data']['collection_manifest'] = manifests[0]
     if missing_count:
         info['assumptions'] = [*info.get('assumptions', []),
             'Missing Stark coefficients: retain NIST line areas with optional instrumental broadening only; '

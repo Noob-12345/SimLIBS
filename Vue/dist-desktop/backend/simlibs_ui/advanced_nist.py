@@ -130,6 +130,13 @@ def options(raw):
         methods = raw.get('stark_methods', ('SCP', 'MSE'))
         if out['stark_source'] not in ('auto', 'local'):
             raise ValueError('stark_source须为auto或local')
+        if out['stark_source'] == 'local':
+            raise ValueError('Stark来源已统一为STARK-B → DK1980 → 缺失；请使用auto')
+        if out['stark_csv'].strip():
+            raise ValueError('Stark系数CSV已停用；使用官方STARK-B数据库或经核验的DK1980原子输入')
+        for name in ('stark_database_path', 'stark_atomic_dir', 'stark_mse_inputs'):
+            if raw.get(name) is not None:
+                raise ValueError('Stark数据库和原子输入由程序管理，不接受请求路径或模型')
         if type(out['stark_allow_network']) is not bool:
             raise ValueError('stark_allow_network须为布尔值')
         if (not isinstance(methods, (tuple, list)) or not methods or
@@ -171,6 +178,8 @@ def simulate(p, s, raw, cancelled=lambda: False, emit=None, request_get=None, re
             if os.environ.get('SIMLIBS_TASK_DIR'):
                 name = 'nist-response-error.json' if code.startswith('nist_') else 'stark-error.json'
                 data = {'code': code, 'message': str(error)}
+                if getattr(error, 'stark_access_failures', None):
+                    data['source_failures'] = error.stark_access_failures
                 if isinstance(error, NISTResponseDataError):
                     data['response_evidence'] = error.response_evidence
                 write_json(Path(os.environ['SIMLIBS_TASK_DIR'])/name, data)
@@ -187,8 +196,8 @@ def _simulate(p, s, raw, cancelled, emit, request_get, request_stark):
         raise ValueError('高级输出超过200000节点，请加大步长或缩小范围')
     density = o['number_density_cm3'] if o['density_mode'] == 'specified' else None
     config = engine.NISTSelfAbsorptionConfig(path_length_m=o['path_length_m'], total_number_density_cm3=density,
-            wavelength_step_nm=step, instrument_broadening=o['instrument_broadening'], stark_data=parse_stark_csv(o['stark_csv']),
-            stark_source=o['stark_source'], stark_allow_network=o['stark_allow_network'], stark_methods=o['stark_methods'],
+            wavelength_step_nm=step, instrument_broadening=o['instrument_broadening'],
+            stark_allow_network=o['stark_allow_network'], stark_methods=o['stark_methods'],
             stark_cache_dir=cache_directory(), missing_stark=o['missing_stark'])
     request_get = request_get or requests.get
     directory = Path(os.environ['SIMLIBS_TASK_DIR']) if os.environ.get('SIMLIBS_TASK_DIR') else None
@@ -234,7 +243,8 @@ def _simulate(p, s, raw, cancelled, emit, request_get, request_stark):
                 'int_scale': 2, 'libs': 1, 'low_w': f'{req_low:.17g}', 'upp_w': f'{req_high:.17g}'}
             url = 'https://physics.nist.gov/cgi-bin/ASD/lines1.pl?'+urlencode(fields)
             detail = '及全阶段能级' if o['self_absorption'] else '及跃迁' if o['stark_broadening'] else ''
-            report(start+25*index/len(bands), f'{condition}：获取NIST线强{detail} {index+1}/{len(bands)}', s.static_deadline)
+            report(start+25*index/len(bands),
+                   f'{condition}：NIST混合组成 {", ".join(elements)}，{low:g}–{high:g} nm，获取线强{detail} {index+1}/{len(bands)}', s.static_deadline)
             if url not in cache:
                 end = time.monotonic()+s.static_deadline
                 for attempt in range(3):
@@ -368,11 +378,11 @@ def _simulate(p, s, raw, cancelled, emit, request_get, request_stark):
         'created_at': now(), 'paper_model': result.metadata, 'nominal_paper_model': nominal.metadata,
         'instrument_convention': 'w=lambda/R (Gaussian 1/e half width); FWHM=2*sqrt(ln(2))*lambda/R',
         'opacity_diagnostic_kind': 'per-line-center' if o['stark_broadening'] else 'not-applicable',
-        'stark_input': {'name': o['stark_name'], 'rows': len(user_rows), 'text_utf8_sha256': hashlib.sha256(o['stark_csv'].encode()).hexdigest(),
-                        'sources': sorted({row['source'] for row in user_rows})},
+        'stark_input': {'mode': 'automatic', 'priority': ['JSON', 'STARK-B', 'NIST + DK1980', 'missing']},
         'engine_sha256': hashlib.sha256(Path(engine.__file__).read_bytes()).hexdigest(),
         'engine_modules': {name: hashlib.sha256((Path(engine.__file__).parent/name).read_bytes()).hexdigest()
-                           for name in ('nist_self_absorption.py', 'nist_stark.py', 'stark_b.py', 'stark_vamdc.py')},
+                           for name in ('nist_self_absorption.py', 'nist_stark.py', 'stark_b.py', 'stark_vamdc.py',
+                                        'stark_resolver.py', 'stark_atomic_data.py', 'stark_semiempirical.py')},
         'stark_coverage': coverage,
         'stark_data_access': {'cache_directory': str(config.stark_cache_dir), 'requests': transport.evidence,
                              'snapshots': transport.snapshots},

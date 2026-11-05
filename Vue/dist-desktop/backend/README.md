@@ -1,6 +1,14 @@
 # SimLIBS Vue 真实后端资源
 
-2026-10-17 高级模拟新增三卡一行、独立展宽分支（自吸收/Stark/仪器 6 种物理组合）与元素光谱视图。更新源库 nist_lines.py、nist_self_absorption.py 至 ee7b66a 字节。新增 advanced_nist_render.py 实现无 Stark 路径的高斯与棒状投影。SA 开启严格要求 Stark 开启；纯 Stark 跳过全阶段能级与 Saha；无 Stark 仅依赖 sticks payload。
+当前高级自动级联为 JSON → 在线STARK-B → NIST完整原子输入＋DK1980 → 明确missing。生产只读 source/simLIBS/data/stark_broadening.json（固定SHA256 f40995bbb87ffeedb069d29e8e42c7fa6e64d939ceaceeb19fe902b7185f5a54），不依赖开发父目录或sample；以下旧自动发现路径/CSV说明为历史，已被本段替代。原始gzip payload、rows和内嵌manifest完整校验。动态NIST能级/E1 Aki/权重/电离阈值通过有限transport/TLS/重试/大小/取消及用户state缓存。实际q2/3（III/IV）才可DK1980；HTTP不接受数据路径或原子模型，新CSV覆盖停用。逐线resolution层、来源、DOI、条件和原因进入导出，下载清单不重新导入。worker原job进度明确包含“Json抓取”和具体元素/电离阶段；缓存命中如实标记，detail不以截断badge替代。数据故障不伪missing，验证替代来源仍保留故障证据。
+
+2026-11-05 Stark 模拟按 **STARK-B → DK1980 → 缺失** 执行，以下历史“用户 CSV / 内置 JSON 优先”的说明已被替代。源引擎解析与渲染同步核心版本，原 paper 结果容器通过 `SpectrumResult` 别名兼容。
+
+开发仓库自动发现 `simLIBS-2.0.3/stark-b/stark_broadening.json` 和 `simLIBS-2.0.3/sample/`；独立部署须提供数据或设置受信任进程环境 `SIMLIBS_STARK_DATABASE`、`SIMLIBS_STARK_ATOMIC_DIR`。HTTP 不接受数据库路径、原子目录或模型输入，旧 Stark CSV/local 覆盖请求明确拒绝。表未命中后读取完整 NIST 原子输入构造 DK1980；q=0/1 不套用公式，q=2/3 必须满足可靠输入约束。
+
+离线库按文件修订缓存并校验 rows。数值身份的 NIST 线仍需 ASD 身份缓存或本地原子 E1 表严格匹配；关闭 Stark 联网后不会在线补身份。缺失继续/严格失败策略保持，清单保存两层原因，未知宽度与参考密度为空。来源及归档见 [数据库说明](../../simLIBS-2.0.3/docs/STARK_DATABASE.md)。本次未构建 EXE/安装包。
+
+2026-10-17 高级模拟新增独立展宽分支（自吸收/Stark/仪器 6 种物理组合）与元素光谱视图。SA 开启严格要求 Stark 开启；纯 Stark 跳过全阶段能级与 Saha；无 Stark 仅依赖 sticks payload。
 
 simlibs_ui、web API、源 simLIBS 模块/许可证及 62 份谱线 CSV 复制自原 UI/源库/线库，仅修改 Vue 副本。原样复制 SHA256 见 .ai-workflow/20261013-backend-migration/copied-files.json。data.csv 与 mock_backend 仅测试 fixture，不进入桌面资源，生产禁止 mock fallback。
 

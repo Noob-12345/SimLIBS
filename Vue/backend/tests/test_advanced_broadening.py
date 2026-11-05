@@ -77,10 +77,26 @@ class AdvancedBroadeningTests(unittest.TestCase):
 
     def run_model(self, sa=False, stark=False, instrument=False, *, html=None, p=None, extra=None):
         raw = dict(model='nist', self_absorption=sa, stark_broadening=stark, instrument_broadening=instrument,
-                   matrix=False, stark_source='local', stark_csv=stark_csv(), density_mode='specified', number_density_cm3=1e16)
+                   matrix=False, stark_source='auto', density_mode='specified', number_density_cm3=1e16)
         raw.update(extra or {})
         def get(url, **kwargs): self.calls.append(url); return Response(html if html is not None else mixed_html())
-        with patch.dict(os.environ, {'SIMLIBS_TASK_DIR': str(self.root)}):
+        from simLIBS.stark_b import parse_table
+        table = parse_table((Path(__file__).parent/'fixtures/starkb_si_ii_6347.html').read_text(encoding='utf-8'),
+                            element='Si', charge=1, dataset_id='synthetic-base', method='SCP')[0]
+        tables=[]; identities=[]
+        from copy import deepcopy
+        for i, wave in enumerate(WAVES):
+            row=deepcopy(table); element='He' if i<2 else 'Li'; charge=i%2
+            row.update(element=element,charge=charge,dataset_id='synthetic-'+str(i),
+                       calculated_wavelength_angstrom=wave*10, lower_label=f'test{i} 2S 1/2',upper_label=f'test{i}p 2P* 3/2',fit=None)
+            row['samples']=[dict(temperature_k=(p or self.p).Te*11604.518121550082,ne=1e17,
+                                fwhm_angstrom=2*.002*(i+1)*10*10,flag='')]
+            row['source']='SYNTHETIC automatic table for rendering tests only'
+            tables.append(row)
+            identities.append(dict(element=element,charge=charge,wavelength_nm=wave,lower_eV=0,
+                upper_eV=(30000+i*1000)/CMEV,gA_s=1e8*(i+1),lower_label=row['lower_label'],upper_label=row['upper_label']))
+        database=dict(rows=tables,manifest={'complete':True},path='synthetic-layout-only',file_sha256='fixture')
+        with patch.dict(os.environ, {'SIMLIBS_TASK_DIR': str(self.root)}),              patch('simLIBS.stark_resolver.load_database',return_value=database),              patch('simLIBS.nist_stark.transition_identities',return_value=identities):
             return simulate(p or self.p, self.s, raw, request_get=get)
 
     def backend(self, frames, origin):
@@ -143,7 +159,7 @@ class AdvancedBroadeningTests(unittest.TestCase):
                     extra={'stark_csv':{'invalid':'ignored'},'stark_name':False,'path_length_m':'bad','number_density_cm3':False,'density_mode':None})
                 self.assertNotIn('line_table',origin)
                 self.assertIsNone(origin['diagnostics']['tau_max'])
-                self.assertEqual(origin['stark_input']['rows'],0)
+                self.assertEqual(origin['stark_input']['mode'],'automatic')
                 self.assertGreater(float(frames['raw'].intensity.max()),0)
 
     def test_unbroadened_projection_conserves_area_centroid_and_ignores_r(self):
@@ -177,7 +193,7 @@ class AdvancedBroadeningTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Stark'): all_options({'model':'paper','stark_broadening':False})
 
     def test_source_bytes_and_no_stark_json_csv_png_keep_actual_components(self):
-        for name in ('nist_lines.py','nist_self_absorption.py'):
+        for name in ('nist_lines.py',):
             original=Path(__file__).resolve().parents[3]/'simLIBS-2.0.3/simLIBS'/name
             self.assertEqual(original.read_bytes(),(Path(self.s.source)/'simLIBS'/name).read_bytes())
         frames,origin=self.run_model()

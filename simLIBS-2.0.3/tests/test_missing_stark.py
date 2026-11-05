@@ -48,7 +48,7 @@ class MissingStarkTests(unittest.TestCase):
         counts = libs.self_absorption_metadata['stark_data']
         self.assertEqual((counts['missing_line_count'], counts['matched_line_count']), (18, 2))
         self.assertEqual(counts['stark_b_line_count'], 2)
-        self.assertEqual(counts['source_mode'], 'STARK-B')
+        self.assertEqual(counts['priority'], ['STARK-B', 'DK1980', 'missing'])
         self.assertNotIn('local_line_count', counts)
         self.assertNotIn('unavailable', counts['sources'])
 

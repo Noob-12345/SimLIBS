@@ -172,6 +172,21 @@ class VamdcTests(unittest.TestCase):
             with self.subTest(new=new), self.assertRaises(ValueError):
                 self.rows(XML.replace(old, new))
 
+    def test_zero_source_width_is_preserved_flagged_and_not_usable(self):
+        row, = self.rows(XML.replace('>2.74<', '>0.0<'))
+        self.assertEqual(row['samples'][0]['fwhm_angstrom'], 0.0)
+        self.assertIn('nonpositive source', row['samples'][0]['flag'])
+        from simLIBS.stark_b import evaluate_width, StarkBUnavailable
+        with self.assertRaises(StarkBUnavailable):
+            evaluate_width(row, temperature_k=5000, ne=1e17, wavelength_nm=634.7)
+        self.assertGreater(evaluate_width(row, temperature_k=10000, ne=1e17,
+                                          wavelength_nm=634.7)['stark_width_nm'], 0)
+        negative, = self.rows(XML.replace('>2.74<', '>-2.74<'))
+        self.assertEqual(negative['samples'][0]['fwhm_angstrom'], -2.74)
+        self.assertIn('nonpositive source', negative['samples'][0]['flag'])
+        with self.assertRaises(StarkBUnavailable):
+            evaluate_width(negative, temperature_k=5000, ne=1e17, wavelength_nm=634.7)
+
     def test_bad_xml_html_entities_and_nonfinite_values_are_errors(self):
         for xml in ['<broken', '<html>502</html>', XML.replace('2.74', 'NaN'),
                     '<!DOCTYPE x [<!ENTITY n "unsafe">]>' + XML]:

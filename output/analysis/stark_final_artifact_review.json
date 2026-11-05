@@ -1,0 +1,17 @@
+{
+  "path": "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\stark-b\\stark_broadening.json",
+  "bytes": 30599499,
+  "sha256": "61b45775f1b8c61eca8e1db4025f4de5eccd6d31eb2b2e6695facde6ba8abdfb",
+  "complete": true,
+  "counts": {
+    "elements": 60,
+    "lines": 5329,
+    "samples": 66851,
+    "species": 172,
+    "tables": 11819
+  },
+  "raw_payloads": 172,
+  "raw_roundtrip_errors": [],
+  "rows_sha256_matches": true,
+  "simulation_load": "StarkDataAccessError: Invalid STARK-B database D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\stark-b\\stark_broadening.json: rows_sha256 checksum mismatch"
+}

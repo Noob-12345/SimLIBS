@@ -13,7 +13,7 @@ export function parameterIssues(p: ParameterDraft, overrides: Partial<Record<'te
   const low = numberIssue(out, 'low', p.low, '波长下界', 1, 100000), high = numberIssue(out, 'high', p.high, '波长上界', 1, 100000)
   if (low !== undefined && high !== undefined && high <= low) out.high = '波长上界须大于下界'
   numberIssue(out, 'step', p.step, '采样步长', .000001, low !== undefined && high !== undefined && high > low ? high - low : Number.MAX_VALUE)
-  numberIssue(out, 'charge', p.charge, '离子上限', 0, 2, true)
+  numberIssue(out, 'charge', p.charge, '离子上限', 0, 3, true)
   if (p.mode === 'local' && p.broaden) {
     numberIssue(out, 'gaussian', p.gaussian, '高斯 FWHM', 0, 100); numberIssue(out, 'lorentz', p.lorentz, '洛伦兹 FWHM', 0, 100)
     if (p.temperatureMode === 'manual') numberIssue(out, 'temperature', p.temperature, '重粒子温度', 0, 1e8)

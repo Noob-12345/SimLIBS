@@ -68,7 +68,7 @@ class StarkAdapterTests(unittest.TestCase):
                          low_w=634.88, upper_w=634.90, max_ion_charge=1, broaden_grid_step=.001, step=.001).validated()
         self.raw = dict(model='nist', matrix=False, self_absorption=False, missing_stark='error')
         self.provider = Provider()
-        self.environment = patch.dict(os.environ, {'SIMLIBS_TASK_DIR': str(self.root), 'SIMLIBS_STARK_CACHE_DIR': str(self.root/'cache')})
+        self.environment = patch.dict(os.environ, {'SIMLIBS_TASK_DIR': str(self.root), 'SIMLIBS_STARK_CACHE_DIR': str(self.root/'cache'), 'SIMLIBS_STARK_DATABASE': ''})
         self.environment.start(); self.addCleanup(self.environment.stop)
         source_module(self.s.source)
         self.core = importlib.import_module('simLIBS.nist_self_absorption')
@@ -125,35 +125,28 @@ class StarkAdapterTests(unittest.TestCase):
             self.assertIsNone(lines[0]['stark_isolated_limit_cm3'])
             self.assertIn('nist_lower_id', lines[0]); self.assertIn('stark_snapshot_sha256', lines[0])
 
-    def test_user_csv_and_builtin_priority_avoid_provider(self):
-        _, _ = self.run_model()
-        line = json.loads((self.root/'advanced-lines.json').read_text(encoding='utf-8'))[0]
-        keys = ('element','charge','wavelength_nm','lower_eV','upper_eV','stark_width_nm','stark_reference_ne_cm3')
-        csv = pd.DataFrame([dict({key:line[key] for key in keys}, source='TEST published user override')]).to_csv(index=False)
-        def denied(*a, **k): raise AssertionError('provider used despite local coefficient')
-        self.run_model(raw=dict(self.raw, stark_csv=csv), provider=denied)
-        p = replace(self.p, elements=('Mg',), low_w=285.27, upper_w=285.33)
-        mg = (FIXTURES/'nist_mg_280_290.html').read_bytes()
-        simulate(p, self.s, self.raw, request_get=lambda *a, **k: Response(mg), request_stark=denied)
+    def test_removed_csv_new_input_is_rejected_before_provider(self):
+        with self.assertRaisesRegex(ValueError, 'CSV'):
+            self.run_model(raw=dict(self.raw, stark_csv='element,charge,stark_width_nm\nSi,1,.002'))
+        self.assertEqual(self.provider.calls, [])
+        with self.assertRaises(ValueError): self.run_model(raw=dict(self.raw, stark_source='local'))
 
-    def test_partial_missing_matched_report_and_editable_csv_roundtrip(self):
+    def test_partial_missing_reports_download_and_auto_continuation(self):
         p = replace(self.p, upper_w=637.33)
         with self.assertRaises(self.core.MissingStarkDataError) as raised: self.run_model(p=p)
         self.assertEqual(raised.exception.code, 'missing_stark')
         self.assertGreater(len(raised.exception.matched_lines), 0)
         missing = pd.read_csv(self.root/'missing-stark.csv', float_precision='round_trip')
         self.assertTrue(all(len(json.loads(value)) == 2 for value in missing.conditions))
-        self.assertFalse(missing.duplicated(subset=['element','charge','wavelength_nm','lower_eV','upper_eV']).any())
         backend, job = self.backend()
-        self.assertEqual(backend._job_view(job)['error_code'], 'missing_stark')
-        self.assertGreater(backend._job_view(job)['stark_matched']['count'], 0)
+        self.assertGreater(backend._job_view(job)['stark_missing']['count'], 0)
         self.assertTrue(backend.export('fixture','stark-matched').payload)
         report = json.loads(backend.export('fixture','stark-report').payload)
         self.assertGreater(len(report['matched']), 0)
-        missing['stark_width_nm'] = .002; missing['source'] = 'TEST ONLY supplemented coefficient'
-        text = missing.to_csv(index=False)
-        self.assertEqual(len(parse_stark_csv(text)), len(missing))
-        self.run_model(p=p, raw=dict(self.raw, stark_csv=text))
+        frames, origin = self.run_model(p=p, raw=dict(self.raw, missing_stark='unbroadened'))
+        self.assertEqual(origin['stark_coverage']['status'], 'partial')
+        self.assertTrue(np.isfinite(frames['raw'].to_numpy()).all())
+        self.assertEqual(origin['stark_input']['mode'], 'automatic')
 
     def test_network_and_source_format_errors_are_not_physical_missing(self):
         for provider, expected in ((lambda *a, **k: (_ for _ in ()).throw(requests.ConnectionError('offline')), 'stark_network'),

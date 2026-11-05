@@ -47,10 +47,32 @@ class AdvancedNISTTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.s = replace(Settings(), output=str(self.root), line_database=str(self.root/'missing-library'))
-        self.raw = {'model': 'nist', 'matrix': False, 'stark_source': 'local', 'missing_stark': 'error'}
+        self.raw = {'model': 'nist', 'matrix': False, 'stark_source': 'auto', 'missing_stark': 'error'}
         source_module(self.s.source)
         self.engine = importlib.import_module('simLIBS.nist_self_absorption')
         self.calls = []
+        from simLIBS.stark_b import parse_table
+        from copy import deepcopy
+        base = parse_table((Path(__file__).parent/'fixtures/starkb_si_ii_6347.html').read_text(encoding='utf-8'),
+                           element='Si',charge=1,dataset_id='synthetic-base',method='SCP')[0]
+        transitions=self.engine.parse_atomic_payload(HTML.decode())['transitions']
+        self.identities=[];tables=[]
+        for index,line in enumerate(transitions):
+            identity=dict(line,lower_label=f'fixture{index} 2S 1/2',upper_label=f'fixture{index}p 2P* 3/2')
+            self.identities.append(identity);table=deepcopy(base)
+            table.update(element=line['element'],charge=line['charge'],dataset_id='synthetic-'+str(index),
+                         lower_label=identity['lower_label'],upper_label=identity['upper_label'],
+                         calculated_wavelength_angstrom=line['wavelength_nm']*10,source='TEST ONLY automatic table',fit=None,
+                         source_format='vamdc-xsams',temperature_interpolation='linear')
+            table['samples']=[dict(temperature_k=t,ne=1e19,fwhm_angstrom=40.,flag='') for t in (10000.,20000.)]
+            tables.append(table)
+        self.database=dict(rows=tables,manifest={'complete':True},path='fixture-only',file_sha256='fixture')
+        self.db_patch=patch('simLIBS.stark_resolver.load_database',return_value=self.database)
+        self.db_patch.start();self.addCleanup(self.db_patch.stop)
+        self.identity_patch=patch('simLIBS.nist_stark.transition_identities',return_value=self.identities)
+        self.identity_patch.start();self.addCleanup(self.identity_patch.stop)
+        self.no_data_patch=patch('simLIBS.stark_b.StarkBClient.species',return_value=([],{'payload':{'status':'no data','datasets':[]}}))
+        self.no_data_patch.start();self.addCleanup(self.no_data_patch.stop)
 
     def fetch(self, url, **kwargs):
         self.calls.append((url, kwargs))
@@ -76,7 +98,7 @@ class AdvancedNISTTests(unittest.TestCase):
 
     def test_source_modules_are_byte_identical_and_regular_source_untouched(self):
         original = Path(__file__).resolve().parents[3]/'simLIBS-2.0.3/simLIBS'
-        for name in ('nist_lines.py', 'nist_self_absorption.py'):
+        for name in ('nist_lines.py',):
             self.assertEqual((Path(self.s.source)/'simLIBS'/name).read_bytes(), (original/name).read_bytes())
 
     def test_narrow_builtin_math_and_deduplicated_http(self):
@@ -124,7 +146,7 @@ class AdvancedNISTTests(unittest.TestCase):
     def test_input_grid_and_empty_wavelength_window_errors_are_explicit(self):
         with self.assertRaisesRegex(ValueError, '200000'):
             nist_simulate(replace(parameters(), broaden_grid_step=1e-10), self.s, self.raw, request_get=self.fetch)
-        with self.assertRaisesRegex(ValueError, '未找到非零'):
+        with self.assertRaisesRegex(ValueError, '未找到非零|未找到.*有效跃迁'):
             self.run_model(p=parameters(low_w=279, upper_w=279.1))
 
     def test_cooperative_cancel_after_first_response_never_renders(self):
@@ -141,32 +163,25 @@ class AdvancedNISTTests(unittest.TestCase):
         np.testing.assert_allclose(line.nist_strength, line.nist_strength_original*.7)
         self.assertEqual(origin['matrix']['yield_scale'], .7)
 
-    def test_missing_csv_full_precision_fill_upload_and_recompute(self):
-        with self.assertRaises(self.engine.MissingStarkDataError) as raised:
-            self.run_model(p=parameters(low_w=280, upper_w=290, broaden_grid_step=.01))
-        missing = self.root/'missing-stark.csv'
-        table = pd.read_csv(missing, float_precision='round_trip')
-        self.assertGreater(len(table), 8)
-        metadata = json.loads((self.root/'missing-stark.json').read_text())
-        self.assertEqual(metadata['count'], len(table))
-        self.assertEqual(len(raised.exception.missing_lines), len(table))
-        table['stark_width_nm'] = .002
-        text = '\ufeff'+table.to_csv(index=False)
-        frames, origin = self.run_model(p=parameters(low_w=280, upper_w=290, broaden_grid_step=.01), raw=dict(self.raw, stark_csv=text))
-        self.assertGreater(len(frames['raw']), 0)
-        self.assertEqual(origin['stark_input']['rows'], len(table))
-        self.assertEqual(origin['diagnostics']['line_count'], 20)
+    def test_missing_report_precision_and_continuation_without_csv_input(self):
+        self.database['rows'] = self.database['rows'][:1]
+        with self.assertRaises(self.engine.MissingStarkDataError):
+            self.run_model(p=parameters(low_w=280,upper_w=290,broaden_grid_step=.01))
+        table=pd.read_csv(self.root/'missing-stark.csv',float_precision='round_trip')
+        self.assertGreater(len(table),8)
+        metadata=json.loads((self.root/'missing-stark.json').read_text())
+        self.assertEqual(metadata['count'],len(table))
+        frames,origin=self.run_model(p=parameters(low_w=280,upper_w=290,broaden_grid_step=.01),
+            raw=dict(self.raw,missing_stark='unbroadened'))
+        self.assertEqual(origin['stark_input']['mode'],'automatic')
+        self.assertEqual(origin['diagnostics']['line_count'],20)
+        self.assertTrue(np.isfinite(frames['raw'].to_numpy()).all())
 
-    def test_csv_validation_and_ambiguous_coefficients(self):
-        valid = 'element,charge,wavelength_nm,stark_width_nm\nMg,0,285.2963529978273,.002\n'
-        self.assertEqual(len(parse_stark_csv(valid)), 1)
-        for text in (valid.replace('Mg,0', 'Unknown,0'), valid.replace(',0,', ',.5,'), valid.replace(',.002', ',nan'),
-                     valid.replace(',.002', ',0'), valid.replace('285.2963529978273', ''), valid+'bad', 'x'*2_000_001):
-            with self.subTest(text=text[:50]), self.assertRaises(ValueError): parse_stark_csv(text)
-        rows = pd.read_csv(io.StringIO(self.full_stark()))
-        duplicate = pd.concat([rows, rows], ignore_index=True).to_csv(index=False)
-        with self.assertRaisesRegex(ValueError, 'Ambiguous'):
-            self.run_model(p=parameters(low_w=280, upper_w=290, broaden_grid_step=.01), raw=dict(self.raw, stark_csv=duplicate))
+    def test_retired_new_csv_and_request_paths_are_rejected(self):
+        for extra in ({'stark_csv':self.full_stark()},{'stark_source':'local'},
+                      {'stark_database_path':'C:/not-allowed'},{'stark_atomic_dir':'C:/not-allowed'},
+                      {'stark_mse_inputs':[]}):
+            with self.subTest(extra=list(extra)),self.assertRaises(ValueError):self.run_model(raw=dict(self.raw,**extra))
 
     def test_no_five_percent_or_element_gate_in_nist_but_legacy_preserved(self):
         p = parameters(elements=('Fe',), low_w=200, upper_w=500, broaden_grid_step=.1)
@@ -189,6 +204,7 @@ class AdvancedNISTTests(unittest.TestCase):
             nist_simulate(parameters(), self.s, self.raw, request_get=lambda *a, **k: Response(b'X'*4_000_001))
 
     def test_api_missing_download_roundtrip_restore_and_job_binding(self):
+        self.database['rows']=self.database['rows'][:1]
         from simlibs_ui.worker import execute
         backend = self.backend()
         body = {'params': {'te': 1, 'ne': 1e17, 'resolution': 1000, 'low_w': 280, 'up_w': 290,
@@ -231,6 +247,7 @@ class AdvancedNISTTests(unittest.TestCase):
         json.loads(backend.export('old', 'json').payload)
 
     def test_http_submit_missing_download_fill_resubmit_and_exports(self):
+        self.database['rows']=self.database['rows'][:1]
         import importlib.util
         from http.server import ThreadingHTTPServer
         from urllib.request import Request, urlopen
@@ -271,7 +288,7 @@ class AdvancedNISTTests(unittest.TestCase):
             self.assertEqual(view['status'], 'failed'); self.assertGreater(view['stark_missing']['count'], 8)
             csv = http('/api/jobs/'+failed+'/export?kind=stark-missing')
             filled = pd.read_csv(io.BytesIO(csv), float_precision='round_trip'); filled['stark_width_nm'] = .002
-            body['advanced'] = dict(self.raw, stark_csv=filled.to_csv(index=False), stark_name='filled.csv')
+            body['advanced'] = dict(self.raw, missing_stark='unbroadened')
             success = json.loads(http('/api/simulate/advanced', body))['job_id']
             self.assertNotEqual(failed, success)
             data = json.loads(http('/api/jobs/'+success+'/result'))

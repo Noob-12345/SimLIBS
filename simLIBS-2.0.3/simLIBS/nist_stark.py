@@ -174,7 +174,34 @@ def _fetch_identities(element, charge, low, high):
     return dict(text=text, url=url)
 
 
-def resolve_online(records, *, te, ne, cmev, cache_dir=None, allow_network=True, methods=('SCP', 'MSE')):
+def transition_identities(records, *, cmev, cache):
+    """Read the same verified ASD identity snapshot for online and offline widths.
+
+    A line carrying source-resolved configuration/term/J labels already has an
+    identity. Numerical-only NIST LIBS lines still require the exact ASD join.
+    """
+    element, charge = records[0]['element'], records[0]['charge']
+    if all(_state(r.get('lower_label', '')) and _state(r.get('upper_label', ''))
+           and _state(r['lower_label'])[2] is not None
+           and _state(r['upper_label'])[2] is not None for r in records):
+        return records
+    low = max(0, min(r['wavelength_nm'] for r in records)-.05)
+    high = max(r['wavelength_nm'] for r in records)+.05
+    key = f'nist-asd-identity-v1:{element}:{charge}:{low:.12g}:{high:.12g}'
+
+    def fetch_validated():
+        payload = _fetch_identities(element, charge, low, high)
+        try:
+            parse_identities(payload['text'], element=element, charge=charge, cmev=cmev)
+        except ValueError as exc:
+            raise StarkDataAccessError(f'NIST identity response invalid: {payload["url"]}: {exc}') from exc
+        return payload
+
+    snapshot = cache.get(key, fetch_validated)
+    return parse_identities(snapshot['payload']['text'], element=element, charge=charge, cmev=cmev)
+
+
+def resolve_online(records, *, te, ne, cmev, cache_dir=None, allow_network=True, methods=('SCP', 'MSE'), progress=None, cancelled=None):
     """按物种批量获取，不逐线联网；返回已匹配和带原因的缺失行，保持输入次序。
 
     网络/源格式错误不伪装成物理无数据；缺失原因区分物种、密度、量子态和温度。
@@ -188,22 +215,16 @@ def resolve_online(records, *, te, ne, cmev, cache_dir=None, allow_network=True,
         groups[(line['element'], line['charge'])].append((index, line))
     found, missing = {}, {}
     for (element, charge), indexed in groups.items():
+        if cancelled and cancelled():
+            raise InterruptedError('STARK-B retrieval cancelled')
+        if progress:
+            progress('STARK-B：'+element+' '+_roman(charge+1)+'，获取Stark展宽系数')
         tables, document = client.species(element, charge, ne)
         identities = []
         if tables:
-            low = max(0, min(line['wavelength_nm'] for _, line in indexed)-.05)
-            high = max(line['wavelength_nm'] for _, line in indexed)+.05
-            key = f'nist-asd-identity-v1:{element}:{charge}:{low:.12g}:{high:.12g}'
-            def fetch_validated():
-                """先验证纯数据响应再写快照，防止临时 HTTP 200 错误页污染缓存。"""
-                payload = _fetch_identities(element, charge, low, high)
-                try:
-                    parse_identities(payload['text'], element=element, charge=charge, cmev=cmev)
-                except ValueError as exc:
-                    raise StarkDataAccessError(f'NIST identity response invalid: {payload["url"]}: {exc}') from exc
-                return payload
-            snapshot = cache.get(key, fetch_validated)
-            identities = parse_identities(snapshot['payload']['text'], element=element, charge=charge, cmev=cmev)
+            if progress:
+                progress('NIST：'+element+' '+_roman(charge+1)+'，核对完整跃迁身份')
+            identities = transition_identities([line for _, line in indexed], cmev=cmev, cache=cache)
         for index, line in indexed:
             out, reason = match_width(line, identify(line, identities), tables, temperature_k=te*e/k, ne=ne, methods=methods)
             if out is not None:
@@ -216,4 +237,9 @@ def resolve_online(records, *, te, ne, cmev, cache_dir=None, allow_network=True,
                         d.get('status', 'no electron data') for d in data.get('datasets', []))))
                         or 'no published electron broadening data at an applicable reference density')
                 missing[index] = dict(line, stark_missing_reason=reason, stark_width_nm=None)
+        if client._html_error:
+            fault = dict(layer='STARK-B HTML', code='stark_data_access', message=client._html_error,
+                         alternative='validated STARK-B VAMDC')
+            for index, _ in indexed:
+                (found.get(index) or missing[index])['stark_access_failures'] = [fault]
     return found, missing

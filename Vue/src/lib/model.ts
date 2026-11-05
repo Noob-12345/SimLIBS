@@ -51,7 +51,7 @@ export function validateParams(p: ParameterDraft, overrides: Partial<Record<'te'
   const low = numeric(p.low, '波长下界', 1, 100000), high = numeric(p.high, '波长上界', 1, 100000)
   if (high <= low) throw new Error('波长上界须大于下界')
   const broaden = p.mode !== 'local' || p.broaden
-  return { te, ne, resolution, low, high, step: numeric(p.step, '采样步长', .000001, high - low), charge: numeric(p.charge, '离子上限', 0, 2, true), mode: p.mode, flux: p.mode === 'local' ? 'photon' : p.flux, broaden,
+  return { te, ne, resolution, low, high, step: numeric(p.step, '采样步长', .000001, high - low), charge: numeric(p.charge, '离子上限', 0, 3, true), mode: p.mode, flux: p.mode === 'local' ? 'photon' : p.flux, broaden,
     gaussian: p.mode === 'local' && broaden ? numeric(p.gaussian, '高斯 FWHM', 0, 100) : 0,
     lorentz: p.mode === 'local' && broaden ? numeric(p.lorentz, '洛伦兹 FWHM', 0, 100) : 0,
     temperature: p.mode === 'local' && broaden ? p.temperatureMode === 'linked' ? te * 11604.518 : numeric(p.temperature, '重粒子温度', 0, 1e8) : 0,

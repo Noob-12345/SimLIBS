@@ -2,6 +2,8 @@
 
 这是基于 Tauri 2、Vue 3、TypeScript 的 **Windows 桌面软件**。Vue 是原生桌面窗口中的界面层；正式程序嵌入静态界面，双击启动，无需浏览器网址或 Vite 服务；程序自动启动并管理本应用拥有的 Python 后端。Python runtime 未打包，需已有 Python 3.11 及原后端依赖，可通过 SIMLIBS_UI_PYTHON 或设置指定解释器。便携 EXE 必须与 backend 资源目录一起分发。
 
+2026-11-05 源码的高级模拟 Stark 优先序更新为 **STARK-B → DK1980 修正半经验公式 → 缺失**，逐线保留来源及两层缺失原因。旧 CSV 系数优先入口已移除，最大发射电荷支持 0–3；DK1980 只用于原子输入齐全的 2+、3+ 离子。数据部署与离线身份条件见 [后端说明](backend/README.md) 和 [数据库说明](../simLIBS-2.0.3/docs/STARK_DATABASE.md)。本次只更新源码，未更新 EXE/安装包。
+
 ## 双击使用
 
 正式产物直接收集并更新到 [`dist-desktop/`](dist-desktop/)，不使用版本子目录。覆盖前核对运行进程；遇到实际文件占用则保留用户进程并报告，不另交目录。
@@ -18,6 +20,8 @@
 本轮输出目录、快照摘要卡与字段校验的实际 release 验收由 plan 执行，记录位于 [.ai-workflow/20261012-output-validation-layout/](.ai-workflow/20261012-output-validation-layout/)。旧原生文件对话框完整验收仍暂停，SDK模拟/浏览器导入自查不等于OS对话框全量验收；安装过程尚未测试。
 
 ## 当前功能与数据边界
+
+2026-11-05 高级 Stark 自动链为 JSON → 在线 STARK-B → NIST 原子输入＋DK1980 → 明确缺失。只读 bundled 数据文件 backend/source/simLIBS/data/stark_broadening.json（60元素、172物种、11,819表、66,851样本；SHA256 f40995bbb87ffeedb069d29e8e42c7fa6e64d939ceaceeb19fe902b7185f5a54），不依赖同级源库/sample。完整采集不表示每条线都满足身份、温密范围及有效性条件；未决线才进入后层。DK1980 只用于实际 q=2/3（III/IV）且完整能级、E1 Aki/统计权重和电离阈值可信的谱线，不以零或默认矩阵元填缺。新 CSV 覆盖与重导入已停用，下述历史 CSV 说明不再代表当前新入口。缺失/匹配清单仍可下载，按原 job 保留各层原因及来源。工作台详情按真实元素显示“Json抓取”、在线来源、NIST输入、修正半经验及缓存命中；网络/TLS/解析/歧义/损坏缓存不是物理缺失。验证替代来源成功时仍保留降级故障证据，动态数据只写用户state/cache。
 
 四个模拟页的波长上下限后显示只读彩色跨度条，随当前草稿更新，按区间交集长度分配比例，不表示强度或谱线数。本图采用互斥显示分区：其他短波＜10、EUV 10–100、DUV 100–280、其余紫外 280–380、可见光 380–780、红外≥780 nm；边界归入后一段。DUV 范围仅为本图口径，分区并非唯一标准，界面颜色只作区分。范围无效时显示中性状态，不改变输入、校验或计算。分区参考：[NIST 波长范围](https://www.nist.gov/pml/atomic-spectroscopy-compendium-basic-ideas-notation-data-and-formulas/atomic-spectroscopy-5)、[CIE 可见辐射](https://cie.co.at/eilvterm/17-21-003)。
 

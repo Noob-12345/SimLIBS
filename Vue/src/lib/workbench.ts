@@ -26,6 +26,7 @@ function update(task: DemoTask, data: any) {
   task.starkMissing = task.kind === 'advanced' ? data.stark_missing : undefined
   task.events = (data.events ?? []).map((e: any) => `${e.ts} ${e.message}`); task.detail = data.error || task.events?.[task.events.length - 1] || ''
   const rawStage = data.stage || (data.events ?? [])[(data.events ?? []).length - 1]?.message || (task.events?.[task.events.length - 1] ? task.events[task.events.length - 1].replace(/^\d{2}:\d{2}:\d{2}\s*/, '') : '')
+  if (task.kind === 'advanced' && task.status === 'running') task.detail = data.error || rawStage || ''
   task.stage = rawStage ? (rawStage.length > 20 ? rawStage.slice(0, 18) + '…' : rawStage) : ''
   if (task.status !== 'running') task.endedAt ??= Date.now()
 }

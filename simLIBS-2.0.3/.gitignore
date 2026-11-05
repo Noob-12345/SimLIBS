@@ -161,9 +161,13 @@ fabric.properties
 /stark-b/**/*.json
 !/stark-b/manifest.json
 !/stark-b/comparison/summary.json
+!/stark-b/stark_broadening.json
 /stark-b/**/*.xml
 /stark-b/diagnostics/*.txt
+/stark-b/diagnostics/
 /stark-b/comparison/*.csv
 !/stark-b/comparison/element_metrics.csv
 /sample/**/*.json
 !/sample/manifest.json
+!/sample/models.json
+!/sample/*_atomic.json
