@@ -19,6 +19,10 @@ const visible = computed(() => rows.value.slice(page.value*pageSize, (page.value
 const { pending: saving, feedback, failed, run: saveOutput } = useFileSave()
 const cell = (row: Record<string, unknown>, key: string) => typeof row[key] === 'number' ? format(row[key] as number) : row[key] == null ? '—' : String(row[key])
 function saveDiagnostics() { const job = props.spectrum?.jobId; if (job) void saveOutput(`SimLIBS-${job}-line-diagnostics.csv`, () => download(job, 'diagnostics')) }
+const sourceDialog = ref<HTMLDialogElement>(), selectedSource = ref(''), sourceTitleId = useId()
+const sourceOf = (row: Record<string, unknown>) => String(row.stark_source || row.source || '原始论文记录')
+function showSource(row: Record<string, unknown>) { selectedSource.value = sourceOf(row); sourceDialog.value?.showModal() }
+watch(() => props.spectrum?.id, () => sourceDialog.value?.close())
 </script>
 <template>
     <SpectrumChart v-if="spectrum" :spectrum="spectrum" :view-mode="viewMode" :label="viewMode === 'elements' ? '元素组分' : '三谱对照'" />
@@ -29,17 +33,40 @@ function saveDiagnostics() { const job = props.spectrum?.jobId; if (job) void sa
     <div class="segmented" aria-label="高级光谱视图"><button :class="{selected:viewMode === 'elements'}" :aria-pressed="viewMode === 'elements'" @click="viewMode='elements'">元素组分</button><button :class="{selected:viewMode === 'comparison'}" :aria-pressed="viewMode === 'comparison'" :disabled="!spectrum.comparison" @click="viewMode='comparison'">三谱对照</button></div>
     <p v-if="!spectrum.elements.length" class="hint">此历史结果未保存元素贡献，仅显示已有总谱；不补造组分曲线。</p>
     <p class="hint">切换只影响显示，CSV/JSON保留完整三谱与元素数据；前端PNG按所选视图，后端PNG为固定元素视图。</p>
-    <section class="panel activity-panel">
+    <section class="panel activity-panel diagnostics-panel">
       <div class="panel-heading diagnostics-heading"><h2>逐线诊断</h2><div class="diagnostics-actions"><button type="button" class="btn sm" :aria-expanded="diagnosticsExpanded" :aria-controls="diagnosticsId" @click="diagnosticsExpanded = !diagnosticsExpanded">{{ diagnosticsExpanded ? '收起' : '展开' }}</button><button class="btn sm" :disabled="!rows.length || !spectrum.jobId || saving" @click="saveDiagnostics">导出完整诊断 CSV</button></div></div>
       <div :id="diagnosticsId" v-show="diagnosticsExpanded">
       <p v-if="!rows.length" class="hint">{{ flags.known && !flags.stark ? '未启用Stark：不生成τ、SA或Stark系数诊断，真实NIST线位/面积随来源JSON保留。' : '此历史结果未保存逐线诊断，已有图谱及来源仍可查看。' }}</p>
-      <template v-else><p class="hint">共 {{ rows.length }} 条；τ 为逐线中心光学厚度，SA 为峰高衰减因子。界面读数为简写，CSV 保留完整精度；诊断不是连续总光学厚度场。</p><div class="table-scroll"><table><thead><tr><th>λ / nm</th><th>离子</th><th>τ</th><th>SA</th><th>薄谱 FWHM / nm</th><th>吸收 FWHM / nm</th><th>薄谱面积</th><th>吸收面积</th><th>系数出处</th></tr></thead><tbody><tr v-for="(row,index) in visible" :key="index"><td class="mono">{{ cell(row,'wavelength_nm') }}</td><td>{{ row.ion || `${row.element || ''} ${row.charge ?? ''}+` }}</td><td>{{ cell(row,'tau_center') }}</td><td>{{ cell(row,'SA') }}</td><td>{{ cell(row,'thin_fwhm_nm') }}</td><td>{{ cell(row,'absorbed_fwhm_nm') }}</td><td>{{ cell(row,'thin_area') }}</td><td>{{ cell(row,'absorbed_area') }}</td><td>{{ row.stark_source || row.source || '原始论文记录' }}</td></tr></tbody></table></div><div class="pager"><span>{{ page*pageSize+1 }}–{{ Math.min(rows.length,(page+1)*pageSize) }} / {{ rows.length }}</span><div><button class="btn sm" :disabled="page === 0" @click="page--">上一页</button><button class="btn sm" :disabled="(page+1)*pageSize >= rows.length" @click="page++">下一页</button></div></div></template>
+      <template v-else><p class="hint">共 {{ rows.length }} 条；τ 为逐线中心光学厚度，SA 为峰高衰减因子。界面读数为简写，CSV 保留完整精度；诊断不是连续总光学厚度场。</p><div class="table-scroll diagnostics-scroll"><table class="diagnostics-table"><colgroup><col class="diagnostics-wavelength" /><col class="diagnostics-ion" /><col span="2" class="diagnostics-factor" /><col span="2" class="diagnostics-width" /><col span="2" class="diagnostics-area" /><col class="diagnostics-source" /></colgroup><thead><tr><th>λ / nm</th><th>离子</th><th>τ</th><th>SA</th><th>薄谱 FWHM / nm</th><th>吸收 FWHM / nm</th><th>薄谱面积</th><th>吸收面积</th><th>系数出处</th></tr></thead><tbody><tr v-for="(row,index) in visible" :key="index"><td class="mono">{{ cell(row,'wavelength_nm') }}</td><td>{{ row.ion || `${row.element || ''} ${row.charge ?? ''}+` }}</td><td>{{ cell(row,'tau_center') }}</td><td>{{ cell(row,'SA') }}</td><td>{{ cell(row,'thin_fwhm_nm') }}</td><td>{{ cell(row,'absorbed_fwhm_nm') }}</td><td>{{ cell(row,'thin_area') }}</td><td>{{ cell(row,'absorbed_area') }}</td><td><button type="button" class="diagnostics-source-button" :title="sourceOf(row)" :aria-label="'查看系数出处全文：' + sourceOf(row)" @click="showSource(row)"><span class="diagnostics-source-summary">{{ sourceOf(row) }}</span><span class="diagnostics-source-label" aria-hidden="true">查看全文</span></button></td></tr></tbody></table></div><div class="pager diagnostics-pager"><span>{{ page*pageSize+1 }}–{{ Math.min(rows.length,(page+1)*pageSize) }} / {{ rows.length }}</span><div><button class="btn sm" :disabled="page === 0" @click="page--">上一页</button><button class="btn sm" :disabled="(page+1)*pageSize >= rows.length" @click="page++">下一页</button></div></div></template>
       </div>
       <p v-if="feedback" :class="failed ? 'error-text' : 'hint'" role="status">{{ feedback }}</p>
     </section>
+    <dialog ref="sourceDialog" class="diagnostics-source-dialog" :aria-labelledby="sourceTitleId"><header><h2 :id="sourceTitleId">系数出处全文</h2><button type="button" class="btn sm" autofocus @click="sourceDialog?.close()">关闭</button></header><div class="diagnostics-source-full">{{ selectedSource }}</div></dialog>
   </template>
 </template>
 <style scoped>
 .diagnostics-heading { flex-wrap: wrap; }
 .diagnostics-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.diagnostics-panel, .diagnostics-scroll, .diagnostics-pager { width: 100%; min-width: 0; max-width: 100%; }
+.diagnostics-table { table-layout: fixed; width: 1140px; }
+.diagnostics-wavelength { width: 108px; }
+.diagnostics-ion { width: 80px; }
+.diagnostics-factor { width: 84px; }
+.diagnostics-width { width: 160px; }
+.diagnostics-area { width: 122px; }
+.diagnostics-source { width: 220px; }
+.diagnostics-table th, .diagnostics-table td { overflow-wrap: anywhere; }
+.diagnostics-source-button { display: block; width: 100%; min-width: 0; padding: 0; border: 0; background: transparent; color: var(--text); text-align: left; line-height: 20px; }
+.diagnostics-source-summary { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.diagnostics-source-label { display: block; color: var(--accent-text); font-size: var(--text-aux); }
+.diagnostics-source-button:hover .diagnostics-source-label { text-decoration: underline; }
+.diagnostics-source-button:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 3px; border-radius: 3px; }
+.diagnostics-pager { flex-wrap: wrap; }
+.diagnostics-pager > div { flex-wrap: wrap; }
+.diagnostics-source-dialog { width: min(640px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--border); border-radius: 13px; background: var(--panel); color: var(--text); box-shadow: var(--shadow-overlay); }
+.diagnostics-source-dialog[open] { display: flex; flex-direction: column; }
+.diagnostics-source-dialog::backdrop { background: #0b111966; }
+.diagnostics-source-dialog > header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); flex: none; }
+.diagnostics-source-dialog h2 { font-size: 16px; }
+.diagnostics-source-full { padding: 16px 18px; min-height: 0; overflow: auto; overflow-wrap: anywhere; white-space: pre-wrap; line-height: 1.7; }
 </style>

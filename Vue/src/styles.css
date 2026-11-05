@@ -152,7 +152,7 @@ svg{display:block}
 .engine-status span{margin-left:auto;color:var(--sidebar-muted)}
 .sidebar-bottom>small{display:block;color:var(--sidebar-muted);margin-top:21px}
 .main-shell{min-width:0}
-.topbar{--topbar-icon-gap:8px;height:64px;border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;color:var(--muted);}
+.topbar{--topbar-icon-gap:8px;position:relative;z-index:calc(var(--layer-tooltip,70) + 1);height:64px;border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;color:var(--muted);}
 .topbar-title{display:flex;align-items:baseline;gap:12px;min-width:0;font-size:20px;font-weight:700;line-height:1.35;color:var(--text);white-space:nowrap}
 .topbar-context{display:flex;gap:12px;flex:none;font-size:16px;font-weight:600;color:var(--muted)}
 .topbar-context>span{color:var(--faint)}
