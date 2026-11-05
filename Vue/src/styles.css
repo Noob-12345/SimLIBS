@@ -159,6 +159,16 @@ svg{display:block}
 .topbar-current{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .topbar>div{display:flex;gap:18px;align-items:center;flex:none;margin-left:auto}
 .topbar-actions{display:flex;align-items:center;gap:var(--topbar-icon-gap)}
+.icon-btn.task-status-button{--task-status-ink:var(--muted);position:relative;width:36px;height:36px;flex:none;border-radius:7px;color:var(--task-status-ink);border-color:color-mix(in srgb,var(--task-status-ink) 35%,var(--border));background:color-mix(in srgb,var(--task-status-ink) 12%,var(--panel))}
+.icon-btn.task-status-running{--task-status-ink:#946400}
+.icon-btn.task-status-completed{--task-status-ink:#217951}
+.icon-btn.task-status-failed{--task-status-ink:#b33f47}
+:root[data-theme=dark] .task-status-running{--task-status-ink:#f0c357}
+:root[data-theme=dark] .task-status-completed{--task-status-ink:#7bd4a2}
+:root[data-theme=dark] .task-status-failed{--task-status-ink:#ff9ba3}
+.icon-btn.task-status-button:hover{color:var(--task-status-ink);background:color-mix(in srgb,var(--task-status-ink) 19%,var(--panel));border-color:var(--task-status-ink)}
+.task-status-button:focus-visible{outline:2px solid var(--task-status-ink);outline-offset:3px}
+.task-status-count{position:absolute;top:0;right:1px;min-width:12px;max-width:24px;padding:0 2px;border-radius:4px;background:var(--panel);color:var(--task-status-ink);font-size:9px;font-weight:700;line-height:13px}
 .topbar-version{color:var(--faint)}
 .workspace{padding:32px;max-width:1700px;margin:auto}
 .workbench-grid{display:grid;grid-template-columns:288px minmax(0,1fr);gap:22px;align-items:start}

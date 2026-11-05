@@ -31,7 +31,24 @@ const pages: { id: Page; label: string; subtitle: string }[] = [
   { id: 'settings', label: '设置', subtitle: '' }
 ]
 const current = computed(() => pages.find(p => p.id === page.value)!)
-const runningCount = computed(() => tasks.filter(t => t.status === 'running').length)
+const taskStatus = computed(() => {
+  const running = tasks.filter(task => task.status === 'running')
+  const candidates = running.length ? running : tasks.filter(task => ['completed', 'failed', 'cancelled'].includes(task.status))
+  const target = candidates.reduce<(typeof tasks)[number] | undefined>((latest, task) => {
+    const time = running.length ? task.startedAt : task.endedAt ?? task.startedAt
+    const latestTime = latest ? (running.length ? latest.startedAt : latest.endedAt ?? latest.startedAt) : -Infinity
+    return !latest || time > latestTime ? task : latest
+  }, undefined)
+  if (!target) return null
+  const state = {
+    running: { icon: 'jobs', text: '进行中' }, completed: { icon: 'check', text: '已完成' },
+    failed: { icon: 'close', text: '失败' }, cancelled: { icon: 'pause', text: '已取消' }
+  }[target.status]
+  const destination = pages.find(item => item.id === target.kind)!.label
+  return { target, count: running.length, icon: state.icon,
+    label: running.length ? String(running.length) + ' 项任务进行中，前往' + destination : '最近 1 项任务' + state.text + '，前往' + destination }
+})
+function goToTask() { if (taskStatus.value) page.value = taskStatus.value.target.kind }
 const repositoryUrl = 'https://github.com/Noob-12345/SimLIBS'
 const repositoryOpening = ref(false), repositoryError = ref('')
 async function openRepository() {
@@ -53,7 +70,7 @@ onUnmounted(() => { disposeTimers(); disposePreferences() })
       <RuntimeStatus />
     </aside>
     <main class="main-shell">
-      <header class="topbar"><h1 class="topbar-title"><span class="topbar-context">工作空间 <span aria-hidden="true">/</span></span><span class="topbar-current">{{ current.label }}</span></h1><div><span v-if="runningCount" class="badge neutral">{{ runningCount }} 项任务进行中</span><div class="topbar-actions"><ThemeMenu :mode="preferences.mode" :palette="preferences.palette" @select="setThemeMode" @palette="setPalette" /><div class="repository-control"><button type="button" class="icon-btn theme-trigger" aria-label="打开 GitHub 项目" title="GitHub 项目" :disabled="repositoryOpening" @click="openRepository"><AppIcon name="github" :size="18" /></button><p v-if="repositoryError" class="repository-feedback" role="status">{{ repositoryError }}</p></div></div></div></header>
+      <header class="topbar"><h1 class="topbar-title"><span class="topbar-context">工作空间 <span aria-hidden="true">/</span></span><span class="topbar-current">{{ current.label }}</span></h1><div><div class="topbar-actions"><button v-if="taskStatus" type="button" :class="['icon-btn', 'task-status-button', 'task-status-' + taskStatus.target.status]" :title="taskStatus.label" :aria-label="taskStatus.label" @click="goToTask"><AppIcon :name="taskStatus.icon" :size="18" /><span v-if="taskStatus.count > 1" class="task-status-count" aria-hidden="true">{{ taskStatus.count > 99 ? '99+' : taskStatus.count }}</span></button><ThemeMenu :mode="preferences.mode" :palette="preferences.palette" @select="setThemeMode" @palette="setPalette" /><div class="repository-control"><button type="button" class="icon-btn theme-trigger" aria-label="打开 GitHub 项目" title="GitHub 项目" :disabled="repositoryOpening" @click="openRepository"><AppIcon name="github" :size="18" /></button><p v-if="repositoryError" class="repository-feedback" role="status">{{ repositoryError }}</p></div></div></div></header>
       <div class="workspace"><p v-if="service.error" class="error-text" role="alert">{{ service.error }}</p><p v-if="nativeThemeError" class="error-text" role="alert">{{ nativeThemeError }}</p>
         <Transition name="page" mode="out-in"><SinglePage v-if="page === 'single'" /><BatchPage v-else-if="page === 'batch'" /><ScanPage v-else-if="page === 'scan'" /><AdvancedPage v-else-if="page === 'advanced'" /><LinksPage v-else-if="page === 'links'" /><JobsPage v-else-if="page === 'jobs'" /><SettingsPage v-else /></Transition>
       </div>
