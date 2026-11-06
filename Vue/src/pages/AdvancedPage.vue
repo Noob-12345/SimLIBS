@@ -37,7 +37,6 @@ async function run() {
   catch (error) { submitError.value = error instanceof Error ? error.message : String(error) }
 }
 function saveStark(job: string, kind: 'missing' | 'matched') { void saveOutput(`SimLIBS-${job}-${kind}-stark.csv`, () => download(job, `stark-${kind}`)) }
-function runUnbroadened() { advanced.missingStark = 'unbroadened'; void run() }
 </script>
 <template>
   <WorkbenchLayout kind="advanced">
@@ -58,13 +57,12 @@ function runUnbroadened() { advanced.missingStark = 'unbroadened'; void run() }
           <div class="panel-heading"><h2>模型与展宽</h2><span class="section-number">02</span></div>
           <ChoiceSelect :model-value="advanced.model" label="模拟方式" :options="advancedModels" :disabled="disabled" @update:model-value="changeAdvancedModel" />
           <div class="advanced-switches" role="group" aria-label="展宽机制">
-            <SwitchHint v-model="starkSwitch" label="Stark 展宽" description="逐线内禀 Lorentz 展宽；缺失系数时按下方策略处理。关闭时同时关闭自吸收；开启时不改变自吸收或仪器展宽。" :disabled="disabled" />
+            <SwitchHint v-model="starkSwitch" label="Stark 展宽" description="逐线内禀 Lorentz 展宽；缺失系数时自动继续并保留清单。关闭时同时关闭自吸收；开启时不改变自吸收或仪器展宽。" :disabled="disabled" />
             <SwitchHint v-model="absorptionSwitch" label="逐线自吸收" description="按布居与光程计算逐线吸收及展宽。客户端模拟开启自吸收会自动开启 Stark；关闭自吸收保留 Stark 与仪器展宽。" :disabled="disabled" />
             <SwitchHint v-model="advanced.instrumentBroadening" label="仪器展宽（Gaussian）" description="仪器响应独立开关，不改变 Stark 或自吸收。启用后由 R 控制高斯线宽；先计算内禀谱，再应用仪器响应。" :disabled="disabled" />
-            <SwitchHint v-if="advanced.starkBroadening" :model-value="advanced.missingStark === 'unbroadened'" label="缺失系数继续模拟" description="开启后若遇数据库未收录 Stark 系数的跃迁，保留其 NIST 面积；有仪器响应时仅施加仪器展宽，否则保面积与质心投影。缺失线跳过自吸收，并保留清单。" :disabled="disabled" @update:model-value="advanced.missingStark = $event ? 'unbroadened' : 'error'" />
           </div>
           <details class="advanced-help"><summary>模型与线宽约定</summary>
-            <p class="hint">在线取得 NIST 谱线与线强，由本地引擎计算展宽及逐线自吸收；Stark 需要跃迁和逐线系数；默认缺失线继续生成并标记覆盖不足，关闭继续开关则严格拒绝。自吸收还需要全阶段能级与布居。默认 Mg 100%、真空 285.27–285.33 nm；发射电荷范围为 0–2。</p><p class="hint">仪器 w=λ/R 为高斯 1/e 半宽，FWHM=2√ln2·λ/R，R 不进入 τ。仅 Stark 为 Lorentz，叠加仪器为 Voigt；两者都关闭时为守恒面积/重心的网格投影，高度依赖步长，不代表物理线宽。</p>
+            <p class="hint">在线取得 NIST 谱线与线强，由本地引擎计算展宽及逐线自吸收；Stark 需要跃迁和逐线系数；缺失系数时自动继续并标记覆盖不足：保留 NIST 面积，缺失线跳过 Stark 和自吸收，仪器展宽仍按开关应用。自吸收还需要全阶段能级与布居。默认 Mg 100%、真空 285.27–285.33 nm；发射电荷范围为 0–2。</p><p class="hint">仪器 w=λ/R 为高斯 1/e 半宽，FWHM=2√ln2·λ/R，R 不进入 τ。仅 Stark 为 Lorentz，叠加仪器为 Voigt；两者都关闭时为守恒面积/重心的网格投影，高度依赖步长，不代表物理线宽。</p>
           </details>
           <Transition name="expand"><div v-if="advanced.starkBroadening" class="advanced-subpanel" data-advanced-section="stark-data">
             <h3>Stark 数据与计算</h3>
@@ -102,7 +100,7 @@ function runUnbroadened() { advanced.missingStark = 'unbroadened'; void run() }
       <div class="row2"><button class="btn" :disabled="saving" @click="saveStark(partialResult.jobId, 'missing')">下载缺失系数清单</button><button v-if="partialResult.matched > 0" class="btn" :disabled="saving" @click="saveStark(partialResult.jobId, 'matched')">下载已匹配清单</button></div>
     </section>
     <section class="panel activity-panel"><h2>高级物理模拟 (LTE Slab)</h2><p class="hint">名义薄谱、基体薄谱和修正谱使用共同尺度。逐线独立模型，不预测连续谱、自反转、时空梯度或重叠谱线耦合传输。新草稿不会改写已完成结果。</p></section>
-    <section v-if="missingTask" class="panel activity-panel"><h2>Stark 数据待补充</h2><p>任务 {{ missingTask.id }} 有 {{ missingTask.starkMissing?.count }} 条跃迁在 JSON、在线 STARK-B 和 NIST＋DK1980 级联后仍无适用宽度。</p><div class="row2"><button class="btn" :disabled="saving" @click="saveStark(missingTask.id, 'missing')">下载完整缺失清单</button><button class="btn primary" :disabled="!!running" @click="runUnbroadened">缺失线未展宽合成 (保留面积)</button></div><p class="hint">清单保留各层原因和实际适用限制；可选择保留面积的未展宽合成。</p></section>
+    <section v-if="missingTask" class="panel activity-panel"><h2>Stark 数据待补充</h2><p>任务 {{ missingTask.id }} 有 {{ missingTask.starkMissing?.count }} 条跃迁在 JSON、在线 STARK-B 和 NIST＋DK1980 级联后仍无适用宽度。</p><div class="row2"><button class="btn" :disabled="saving" @click="saveStark(missingTask.id, 'missing')">下载完整缺失清单</button><button class="btn primary" :disabled="!!running" @click="run">缺失线未展宽合成 (保留面积)</button></div><p class="hint">清单保留各层原因和实际适用限制；重试时缺失线自动保留面积并继续生成。</p></section>
     <p v-if="feedback" :class="saveFailed ? 'error-text' : 'hint'" role="status">{{ feedback }}</p>
   </WorkbenchLayout>
 </template>

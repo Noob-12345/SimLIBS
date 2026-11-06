@@ -32,7 +32,7 @@ export function prepareAdvanced(compositionError = '') {
     model: 'nist', self_absorption: advanced.selfAbsorption, instrument_broadening: advanced.instrumentBroadening, matrix: advanced.matrix,
     path_length_m: !advanced.selfAbsorption ? 0 : numeric(advanced.pathLength, '光程 L', 0, 1e6), responses,
     te_factor: advanced.matrix ? numeric(advanced.teFactor, 'Te倍率', 1e-4, 1e4) : 1, ne_factor: advanced.matrix ? numeric(advanced.neFactor, 'Ne倍率', 1e-4, 1e4) : 1,
-    stark_broadening: advanced.starkBroadening, density_mode: advanced.selfAbsorption ? advanced.densityMode : 'charge_balance', number_density_cm3: advanced.selfAbsorption && advanced.densityMode === 'specified' ? numeric(advanced.numberDensity, '总数密度', 1e-30, 1e24) : 1e16, stark_source: 'auto', missing_stark: advanced.missingStark || 'unbroadened'
+    stark_broadening: advanced.starkBroadening, density_mode: advanced.selfAbsorption ? advanced.densityMode : 'charge_balance', number_density_cm3: advanced.selfAbsorption && advanced.densityMode === 'specified' ? numeric(advanced.numberDensity, '总数密度', 1e-30, 1e24) : 1e16, stark_source: 'auto', missing_stark: 'unbroadened'
   } }
 }
 export function isNistAdvanced(version: unknown) { return typeof version === 'string' && version.startsWith('nist-lines-') }
