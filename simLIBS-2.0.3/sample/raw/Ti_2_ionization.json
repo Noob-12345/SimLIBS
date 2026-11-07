@@ -1,0 +1,17 @@
+{
+  "text": "Sp. Name\tIon Charge\tPrefix\tIonization Energy (eV)\tSuffix\tReferences\t\n\"Ti III\"\t\"+2\"\t\"\"\t\"27.49171\"\t\"\"\t\"L7185,L3593\"\t\nNotes:\n(a) Uncertainty of the listed value is unknown. \n\n",
+  "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?spectra=Ti+III&units=1&format=3&order=0&ion_charge_out=on&sp_name_out=on&e_out=0&biblio=on",
+  "endpoint": "https://physics.nist.gov/cgi-bin/ASD/ie.pl",
+  "request_params": {
+    "spectra": "Ti III",
+    "units": 1,
+    "format": 3,
+    "order": 0,
+    "ion_charge_out": "on",
+    "sp_name_out": "on",
+    "e_out": 0,
+    "biblio": "on"
+  },
+  "sha256": "0ffde4fe7ee2040a25b6e74e7ef54fe65281800c8603994b8b9e05976406a031",
+  "retrieved_utc": "2026-11-04T15:54:55.358210+00:00"
+}

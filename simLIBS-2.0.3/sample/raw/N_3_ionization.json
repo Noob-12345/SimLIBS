@@ -1,0 +1,17 @@
+{
+  "text": "Sp. Name\tIon Charge\tPrefix\tIonization Energy (eV)\tSuffix\tReferences\t\n\"N IV\"\t\"+3\"\t\"\"\t\"77.4735\"\t\"\"\t\"L7288,L876\"\t\nNotes:\n(a) Uncertainty of the listed value is unknown. \n\n",
+  "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?spectra=N+IV&units=1&format=3&order=0&ion_charge_out=on&sp_name_out=on&e_out=0&biblio=on",
+  "endpoint": "https://physics.nist.gov/cgi-bin/ASD/ie.pl",
+  "request_params": {
+    "spectra": "N IV",
+    "units": 1,
+    "format": 3,
+    "order": 0,
+    "ion_charge_out": "on",
+    "sp_name_out": "on",
+    "e_out": 0,
+    "biblio": "on"
+  },
+  "sha256": "585b9cef6b7bf7c6da7731a58d8b0bef600c3e449679b5319d3af997a48b9317",
+  "retrieved_utc": "2026-11-04T15:52:57.496999+00:00"
+}

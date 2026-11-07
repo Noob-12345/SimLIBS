@@ -1,0 +1,17 @@
+{
+  "text": "Sp. Name\tIon Charge\tPrefix\tIonization Energy (eV)\tSuffix\tReferences\t\n\"B III\"\t\"+2\"\t\"\"\t\"37.93059\"\t\"\"\t\"L12547\"\t\nNotes:\n(a) Uncertainty of the listed value is unknown. \n\n",
+  "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?spectra=B+III&units=1&format=3&order=0&ion_charge_out=on&sp_name_out=on&e_out=0&biblio=on",
+  "endpoint": "https://physics.nist.gov/cgi-bin/ASD/ie.pl",
+  "request_params": {
+    "spectra": "B III",
+    "units": 1,
+    "format": 3,
+    "order": 0,
+    "ion_charge_out": "on",
+    "sp_name_out": "on",
+    "e_out": 0,
+    "biblio": "on"
+  },
+  "sha256": "63a7ebcc799bea084979bc4ca362149fc6b9ce447601fbf9b5a05b2a4c4b993b",
+  "retrieved_utc": "2026-11-04T15:49:36.289454+00:00"
+}

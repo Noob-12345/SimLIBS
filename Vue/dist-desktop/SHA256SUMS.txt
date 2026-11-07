@@ -1,5 +1,10 @@
+<<<<<<< Updated upstream
 faf22d97fca95eddfb190301fe4635678e6795faac10a69e147cd7f19a0bdcf3  SimLIBS.exe
 80bcddb95c966ab77d4cbe6f0c49df442e620bd00d26ea2ff332484f5018cae9  SimLIBS-Setup.exe
+=======
+a8ff1c25f84ac21190feb4a41471ef3028ee46d01bf61616acf894d2ae049911  SimLIBS.exe
+01e77f0265d4b56eaebca8c096404f1563e87a9af1cafb458a0a4d02140e30df  SimLIBS-Setup.exe
+>>>>>>> Stashed changes
 887bbb7a28c03d725032f37f5e81e0dc725d7580785b415d9ea43d70824488c2  backend/simlibs_ui/adapter.py
 ce1487530034dd85e9e4a39800156de9096098bfe5343393b1826a6951373a35  backend/simlibs_ui/advanced.py
 0eecd726a0eb0ddce04c186d260f01038004864cc308ddae959fa1c34e81135d  backend/simlibs_ui/batch_pipeline.py

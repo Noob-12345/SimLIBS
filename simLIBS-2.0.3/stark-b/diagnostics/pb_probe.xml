@@ -1,0 +1,5 @@
+<VOTABLE>
+  <RESOURCE type="RESULTS">
+    <INFO name="QUERY_STATUS" value="ERROR">Error in TAP service: Query processing in setupResults() failed: invalid syntax (&lt;string&gt;, line 1)</INFO>
+  </RESOURCE>
+</VOTABLE>
