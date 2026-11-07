@@ -1,0 +1,143 @@
+{
+  "cmeV": 8065.54393734921,
+  "transitions": [
+    {
+      "element": "Si",
+      "charge": 1,
+      "wavelength_nm": 634.886,
+      "gA_s": 233600000.0,
+      "lower_eV": 8.121023269947882,
+      "upper_eV": 10.073879781839457
+    },
+    {
+      "element": "Si",
+      "charge": 1,
+      "wavelength_nm": 637.313,
+      "gA_s": 136000000.0,
+      "lower_eV": 8.121023269947882,
+      "upper_eV": 10.066443209617432
+    }
+  ],
+  "matches": [
+    {
+      "payload": {
+        "element": "Si",
+        "charge": 1,
+        "wavelength_nm": 634.886,
+        "gA_s": 233600000.0,
+        "lower_eV": 8.121023269947882,
+        "upper_eV": 10.073879781839457
+      },
+      "enrichment": {
+        "nist": {
+          "obs_wl_vac(nm)": "634.885",
+          "ritz_wl_vac(nm)": "634.886",
+          "Aki(s^-1)": "5.84e+07",
+          "Acc": "B+",
+          "Ei(cm-1)": "65500.47",
+          "Ek(cm-1)": "81251.32",
+          "conf_i": "3s2.4s",
+          "term_i": "2S",
+          "J_i": "1/2",
+          "conf_k": "3s2.4p",
+          "term_k": "2P*",
+          "J_k": "3/2",
+          "g_i": "2",
+          "g_k": "4",
+          "Type": "",
+          "tp_ref": "c22,T7222",
+          "line_ref": "L3541",
+          "ID_i": "014002.000009",
+          "ID_k": "014002.000014",
+          "": ""
+        },
+        "nist_eV_export": {
+          "Ei": "8.121023",
+          "Ek": "10.073880"
+        },
+        "air_observed_nm": "634.710",
+        "air_ritz_nm": "634.711",
+        "ritz_from_displayed_energy_nm": "634.8863712117123837761136701",
+        "numeric_pairs": [
+          [
+            634.886,
+            634.886
+          ],
+          [
+            8.121023269947882,
+            8.121023269947882
+          ],
+          [
+            10.073879781839457,
+            10.073879781839457
+          ],
+          [
+            233600000.0,
+            233600000.0
+          ]
+        ]
+      },
+      "identity_match": "exact displayed Ritz and gA, same-source cm-1 energies re-converted with payload cmeV; numerical allowance <=4 ULP"
+    },
+    {
+      "payload": {
+        "element": "Si",
+        "charge": 1,
+        "wavelength_nm": 637.313,
+        "gA_s": 136000000.0,
+        "lower_eV": 8.121023269947882,
+        "upper_eV": 10.066443209617432
+      },
+      "enrichment": {
+        "nist": {
+          "obs_wl_vac(nm)": "637.312",
+          "ritz_wl_vac(nm)": "637.313",
+          "Aki(s^-1)": "6.80e+07",
+          "Acc": "C+",
+          "Ei(cm-1)": "65500.47",
+          "Ek(cm-1)": "81191.34",
+          "conf_i": "3s2.4s",
+          "term_i": "2S",
+          "J_i": "1/2",
+          "conf_k": "3s2.4p",
+          "term_k": "2P*",
+          "J_k": "1/2",
+          "g_i": "2",
+          "g_k": "2",
+          "Type": "",
+          "tp_ref": "c22,T7222",
+          "line_ref": "L3541",
+          "ID_i": "014002.000009",
+          "ID_k": "014002.000013",
+          "": ""
+        },
+        "nist_eV_export": {
+          "Ei": "8.121023",
+          "Ek": "10.066443"
+        },
+        "air_observed_nm": "637.136",
+        "air_ritz_nm": "637.137",
+        "ritz_from_displayed_energy_nm": "637.3132911049546647190372490",
+        "numeric_pairs": [
+          [
+            637.313,
+            637.313
+          ],
+          [
+            8.121023269947882,
+            8.121023269947882
+          ],
+          [
+            10.066443209617432,
+            10.066443209617432
+          ],
+          [
+            136000000.0,
+            136000000.0
+          ]
+        ]
+      },
+      "identity_match": "exact displayed Ritz and gA, same-source cm-1 energies re-converted with payload cmeV; numerical allowance <=4 ULP"
+    }
+  ]
+}

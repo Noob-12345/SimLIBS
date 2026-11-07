@@ -1,0 +1,7 @@
+{
+  "request_url": "https://physics.nist.gov/cgi-bin/ASD/energy1.pl?spectrum=Mg+II&units=1&format=1&output=0&page_size=10000&multiplet_ordered=1&conf_out=on&term_out=on&level_out=on&j_out=on&g_out=on&ids_out=1&unc_out=1&submit=Retrieve+Data",
+  "retrieved_utc": "2026-10-15T02:09:15.771913+00:00",
+  "response_sha256": "a381bca1dcb6f19cf0205635e9c2ecd0b901e6a9f88e65e87f76529b8abc2c7a",
+  "http_status": 200,
+  "response_bytes": 49433
+}

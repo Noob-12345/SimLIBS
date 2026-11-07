@@ -29,6 +29,7 @@ class Settings:
     static_deadline: float = 60
     dynamic_deadline: float = 180
     tls_verify: bool = True
+    line_database_override: str = ''
 
     def validated(self):
         if not Path(self.python).is_file():

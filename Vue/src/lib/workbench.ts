@@ -4,13 +4,13 @@ import type { RandomRules } from './demo'
 import { request, spectrumResult, fromParameters } from './backend'
 export const page = ref<Page>('single')
 export const single = reactive({ params: defaults(), composition: [elementDraft()], result: null as Spectrum | null })
-export const advanced = reactive({ params: {...defaults(),low:'248',high:'249',step:'.005',charge:'1',broaden:true}, composition:[elementDraft()], result:null as Spectrum|null, selfAbsorption:true,matrix:true,column:'1e16',teFactor:'1',neFactor:'1',gaussian:'.01',lorentz:'.002',temperature:'10000',responses:{} as Record<string,string> })
+export const advanced = reactive({ model:'nist' as 'nist', densityMode:'charge_balance' as 'charge_balance'|'specified', numberDensity:'1e16', starkText:'',starkName:'', params: {...defaults(),low:'285.27',high:'285.33',step:'0.01',charge:'2',broaden:true}, composition:[elementDraft('Mg')], result:null as Spectrum|null, selfAbsorption:true,starkBroadening:true,instrumentBroadening:true,matrix:true,column:'1e16',pathLength:'.01',teFactor:'1',neFactor:'1',gaussian:'.01',lorentz:'.002',temperature:'10000',responses:{} as Record<string,string> })
 export const batch = reactive({ params: defaults(), composition: [elementDraft()], generation: 'fixed' as 'fixed' | 'random' | 'template', count: '24', packageSize: '8', seed: '42', rules: { te: true, teMin: '0.8', teMax: '1.5', ne: true, neMin: '5e16', neMax: '2e17' } as RandomRules, templateText: '', templateName: '', result: null as BatchSample[] | null, jobId: '', manifest: null as any })
 export const scan = reactive({ params: defaults(), composition: [elementDraft()], axis: 'te' as ScanResult['axis'], from: '0.6', to: '1.8', count: '12', result: null as ScanResult | null, frame: 0, spectrum: null as Spectrum | null, loading: false, error: '' })
 export const tasks = reactive<DemoTask[]>([])
 export const activeTask = (kind: TaskKind) => computed(() => tasks.find(t => t.kind === kind && t.status === 'running'))
 const timers = new Map<string, ReturnType<typeof setTimeout>>()
-const starting = new Set<TaskKind>()
+export const starting = reactive(new Set<TaskKind>())
 const polling = new Map<string,Promise<void>>()
 const failures = new Map<string,number>()
 const resultRevision: Record<TaskKind,number> = {single:0,batch:0,scan:0,advanced:0}
@@ -18,12 +18,16 @@ let disposed=false
 export async function runReal(kind: TaskKind, summary: string, payload: unknown) {
   if (starting.has(kind) || tasks.some(t => t.kind === kind && t.status === 'running')) return
   const snapshot = JSON.parse(JSON.stringify(payload)); starting.add(kind);resultRevision[kind]++
-  try { const data = await request(`/simulate/${kind}`, snapshot); const task: DemoTask = reactive({ id: data.job_id, kind, status: 'running', progress: 0, startedAt: Date.now(), summary, detail: '已提交真实后端' }); tasks.unshift(task); void poll(task) }
+  try { const data = await request(`/simulate/${kind}`, snapshot); const task: DemoTask = reactive({ id: data.job_id, kind, status: 'running', progress: 0, startedAt: Date.now(), summary, detail: '已提交计算引擎' }); tasks.unshift(task); void poll(task) }
   finally { starting.delete(kind) }
 }
 function update(task: DemoTask, data: any) {
   task.status = data.status === 'queued' ? 'running' : data.status; task.progress = data.progress ?? 0; task.summary = data.summary; task.resumable = data.resumable; task.duration = data.duration; if (data.created_at) task.startedAt = new Date(data.created_at).getTime()
+  task.starkMissing = task.kind === 'advanced' ? data.stark_missing : undefined
   task.events = (data.events ?? []).map((e: any) => `${e.ts} ${e.message}`); task.detail = data.error || task.events?.[task.events.length - 1] || ''
+  const rawStage = data.stage || (data.events ?? [])[(data.events ?? []).length - 1]?.message || (task.events?.[task.events.length - 1] ? task.events[task.events.length - 1].replace(/^\d{2}:\d{2}:\d{2}\s*/, '') : '')
+  if (task.kind === 'advanced' && task.status === 'running') task.detail = data.error || rawStage || ''
+  task.stage = rawStage ? (rawStage.length > 20 ? rawStage.slice(0, 18) + '…' : rawStage) : ''
   if (task.status !== 'running') task.endedAt ??= Date.now()
 }
 function schedule(task:DemoTask,delay:number) {
@@ -64,7 +68,7 @@ async function loadResult(task: DemoTask) {
 }
 export async function cancelTask(task?: DemoTask) {
   if (!task || task.status !== 'running') return
-  try { await request(`/jobs/${task.id}/cancel`, {}); task.detail = '正在取消真实任务；保留上一成功图谱'; if (!timers.has(task.id)) void poll(task) }
+  try { await request(`/jobs/${task.id}/cancel`, {}); task.detail = '正在取消任务；保留上一成功图谱'; if (!timers.has(task.id)) void poll(task) }
   catch (e) { task.detail = String(e) }
 }
 export async function resumeTask(task: DemoTask) { const data = await request(`/jobs/${task.id}/resume`, {}); await refreshTasks(); if(tasks.some(t=>t.id===data.job_id))page.value='batch' }

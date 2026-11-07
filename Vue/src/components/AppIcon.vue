@@ -5,6 +5,13 @@ const paths: Record<string, string> = {
   batch: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
   scan: 'M2 12h4l3-8 4 16 3-8h6',
   advanced: 'M12 3 3 8l9 5 9-5-9-5M3 12l9 5 9-5M3 16l9 5 9-5',
+  links: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18',
+  'external-link': 'M14 3h7v7M21 3 11 13M10 4H4v16h16v-6',
+  'nist-spectrum': 'M3 5h18M3 19h18M12 5v10m-3-3 3 3 3-3M7 15v4M17 15v4',
+  'spectrum-list': 'M4 4v16M4 7h16M4 12h16M4 17h16M9 5v4M15 10v4M12 15v4',
+  'atom-portal': 'M14 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0M21 12a9 4 0 1 1-18 0 9 4 0 0 1 18 0M16.5 4.2a4 9 30 1 1-9 15.6 4 9 30 0 1 9-15.6',
+  'stark-plasma': 'M2 19h20M4 19c3-1 4-11 8-11s5 10 8 11M12 8V3M9 4h6M7 14h10',
+  'scholar-academic': 'm12 3-10 5 10 5 10-5-10-5M6 10v6c0 2 2.5 3 6 3s6-1 6-3v-6M22 8v7',
   jobs: 'M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9M12 7v5l3 2',
   settings: 'M4 6h16M4 12h16M4 18h16M9 3v6M15 9v6M8 15v6',
   plus: 'M12 5v14M5 12h14', minus: 'M5 12h14', close: 'M6 6l12 12M18 6 6 18',
@@ -19,4 +26,4 @@ const paths: Record<string, string> = {
   github: 'M9 19c-4.3 1.3-4.3-2.5-6-3m12 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 19 4.77 5.07 5.07 0 0 0 18.91 1S17.73.65 15 2.48a13.38 13.38 0 0 0-7 0C5.27.65 4.09 1 4.09 1A5.07 5.07 0 0 0 4 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 8 18.13V22'
 }
 </script>
-<template><svg :width="size || 18" :height="size || 18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="app-icon"><path :d="paths[name] || paths.info" /></svg></template>
+<template><svg :width="size || 18" :height="size || 18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="app-icon"><path :d="paths[name] || paths.info" /></svg></template>

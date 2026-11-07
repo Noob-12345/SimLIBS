@@ -1,0 +1,17 @@
+{
+  "text": "Sp. Name\tIon Charge\tPrefix\tIonization Energy (eV)\tSuffix\tReferences\t\n\"Al III\"\t\"+2\"\t\"\"\t\"28.447642\"\t\"\"\t\"L4714,L277\"\t\nNotes:\n(a) Uncertainty of the listed value is unknown. \n\n",
+  "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?spectra=Al+III&units=1&format=3&order=0&ion_charge_out=on&sp_name_out=on&e_out=0&biblio=on",
+  "endpoint": "https://physics.nist.gov/cgi-bin/ASD/ie.pl",
+  "request_params": {
+    "spectra": "Al III",
+    "units": 1,
+    "format": 3,
+    "order": 0,
+    "ion_charge_out": "on",
+    "sp_name_out": "on",
+    "e_out": 0,
+    "biblio": "on"
+  },
+  "sha256": "e68a882ebd16af6652ea9ea5454495e90fc3cd17a44b237106f2fb5bd1094901",
+  "retrieved_utc": "2026-11-04T06:48:56.273916+00:00"
+}

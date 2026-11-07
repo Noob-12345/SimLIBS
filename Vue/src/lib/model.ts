@@ -1,4 +1,4 @@
-export type Page = 'single' | 'batch' | 'scan' | 'advanced' | 'jobs' | 'settings'
+export type Page = 'single' | 'batch' | 'scan' | 'advanced' | 'links' | 'jobs' | 'settings'
 export type TaskKind = 'single' | 'batch' | 'scan' | 'advanced'
 export type Mode = 'local' | 'server' | 'client'
 export interface ParameterDraft {
@@ -25,9 +25,11 @@ export interface ScanResult { axis: 'te' | 'ne' | 'resolution'; frames: { value:
 export interface DemoTask {
   id: string; kind: TaskKind; status: 'running' | 'completed' | 'cancelled' | 'failed'; progress: number
   startedAt: number; endedAt?: number; summary: string; detail: string
+  stage?: string
   result?: Spectrum | BatchSample[] | ScanResult
   resumable?: boolean; events?: string[]; duration?: string
   resultError?: string
+  starkMissing?: { count: number; available: boolean }
 }
 export const symbols = 'H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og'.split(' ')
 let nextElement = 1
@@ -49,7 +51,7 @@ export function validateParams(p: ParameterDraft, overrides: Partial<Record<'te'
   const low = numeric(p.low, '波长下界', 1, 100000), high = numeric(p.high, '波长上界', 1, 100000)
   if (high <= low) throw new Error('波长上界须大于下界')
   const broaden = p.mode !== 'local' || p.broaden
-  return { te, ne, resolution, low, high, step: numeric(p.step, '采样步长', .000001, high - low), charge: numeric(p.charge, '离子上限', 0, 2, true), mode: p.mode, flux: p.mode === 'local' ? 'photon' : p.flux, broaden,
+  return { te, ne, resolution, low, high, step: numeric(p.step, '采样步长', .000001, high - low), charge: numeric(p.charge, '离子上限', 0, 3, true), mode: p.mode, flux: p.mode === 'local' ? 'photon' : p.flux, broaden,
     gaussian: p.mode === 'local' && broaden ? numeric(p.gaussian, '高斯 FWHM', 0, 100) : 0,
     lorentz: p.mode === 'local' && broaden ? numeric(p.lorentz, '洛伦兹 FWHM', 0, 100) : 0,
     temperature: p.mode === 'local' && broaden ? p.temperatureMode === 'linked' ? te * 11604.518 : numeric(p.temperature, '重粒子温度', 0, 1e8) : 0,
@@ -61,12 +63,12 @@ export function validateParams(p: ParameterDraft, overrides: Partial<Record<'te'
 }
 export function canonical(value: string): string { return symbols.find(s => s.toLowerCase() === value.trim().toLowerCase()) || '' }
 export function validateComposition(rows: ElementDraft[]): Composition[] {
-  if (!rows.length || rows.length > 32) throw new Error('组成须包含 1 至 32 个元素')
-  if (rows.slice(0, -1).reduce((sum, e) => sum + Number(e.pct), 0) > 100 + 1e-6) throw new Error('已输入占比超过 100%，请减少前置元素占比；余额暂不可用')
+  if (!rows.length || rows.length > 32) throw new Error('请添加 1 至 32 个元素。')
+  if (rows.slice(0, -1).reduce((sum, e) => sum + Number(e.pct), 0) > 100 + 1e-6) throw new Error('前序元素比例合计已超过 100%，请调小前序元素比例，为最后一个元素释放余额。')
   const comp = rows.map(e => { const symbol = canonical(e.symbol); if (!symbol) throw new Error(`无效元素：${e.symbol || '空值'}`); return { symbol, pct: numeric(e.pct, `${symbol} 比例`, 0, 100) } })
-  if (new Set(comp.map(e => e.symbol)).size !== comp.length) throw new Error('元素重复，请使用不同元素')
-  if (Math.abs(comp.reduce((sum, e) => sum + e.pct, 0) - 100) > 1e-6) throw new Error('元素占比总和须为 100%，请检查余额')
-  if (!comp.some(e => e.pct > 0)) throw new Error('至少一个元素的比例须大于 0')
+  if (new Set(comp.map(e => e.symbol)).size !== comp.length) throw new Error('每种元素只能添加一次，请移除重复元素。')
+  if (Math.abs(comp.reduce((sum, e) => sum + e.pct, 0) - 100) > 1e-6) throw new Error(`元素比例合计应为 100%，当前总计 ${Number(comp.reduce((sum, e) => sum + e.pct, 0).toFixed(8))}%，请调整各元素比例。`)
+  if (!comp.some(e => e.pct > 0)) throw new Error('请至少为一个元素设置大于 0 的比例。')
   return comp
 }
 export function balance(rows: ElementDraft[]) {

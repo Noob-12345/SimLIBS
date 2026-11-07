@@ -1,6 +1,41 @@
 # SimLIBS 功能与计算原理
 
-日期：2026-10-14。本文对应 Vue 桌面真实后端及 `finite-lte-slab-1` 高级模型。实现、自测与独立验收是不同证据；本轮最终验收以 plan 的 review 为准。
+2026-11-05 高级 Stark 当前链路：JSON → 在线 STARK-B → NIST＋DK1980 → missing，仅处理各层尚未解决的谱线。生产默认读取本包 data/stark_broadening.json，不向父目录发现源库/sample。固定导出 f40995bbb87ffeedb069d29e8e42c7fa6e64d939ceaceeb19fe902b7185f5a54 的 rows、内嵌 manifest 与172个 gzip 原始 payload 均校验；原始非正/空系数保留标记且不可用于展宽。下文历史 CSV 补数/重导入已被自动链替代。
+
+实际 charge=q：0/I中性，1/II一次电离，2/III二次电离，3/IV三次电离。DK1980 只允许 q2/3，要求严格数值＋组态/term/J身份、可信闭芯单价电子 LS 阵列和完整 E1 Aki/统计权重/电离阈值；无数据不代零或phi=1。STARK-B电子FWHM Å先除10再除2为renderer W；DK1980直接取hwhm_nm，仅换算一次，均满足FWHM=2W·Ne/Ne_ref。Te eV按e/k换K，名义/有效条件分别计算。DOI 10.1016/0022-4073(80)90014-X及原子输入出处逐线保存，不冒充数据库实测。
+
+输出记录 JSON/STARK-B/DK1980/missing 来源层、温密范围、URL/hash、故障和每层缺失原因；缺失下载用于审计，strict拒绝和默认保面积unbroadened保持。传输/格式/缓存故障不能记成物理missing；验证替代来源成功时也保留故障证据。元素级阶段经resolver→受控transport→worker emit持久化原job，混合LIBS线强仍按混合组成请求，进度列出组成/波段，前端detail完整显示当前stage，badge仅作简写。旧任务来源与单位不迁移。
+
+日期：2026-10-25。高级页新请求仅提供“客户端模拟”，在线取得 NIST 谱线，使用原 nist 协议在本地计算 Stark、逐线自吸收与仪器响应；默认波段和物理联动保持。新入口不再提供论文选择、柱密度参数或论文专属校验。历史 paper-eq7-stark-sa-1 与 finite-lte-slab-1 结果仍按原版本/来源解释、查看和导出，后端实现及数据不删除。当前入口实现与自测见 [.ai-workflow/20261025-advanced-client-mode/implementation.md](.ai-workflow/20261025-advanced-client-mode/implementation.md)，最终审查由独立 review 完成。下文带日期的实现/验收段落及离线论文推导保留为历史，不代表当前可选入口。
+
+## 客户端模拟（原NIST高级入口，2026-10-16引入）
+
+默认Mg100%、真空285.27–285.33nm、Te=1eV、Ne=1e17cm⁻³、R=1000、步长0.01nm。高级专用适配层取得同次响应的计算光子线强、跃迁gA和全部阶段能级，复用原始 prepare_nist_absorption / render_nist_absorption，不执行网页JS。仅按原字节增加nist_lines.py/nist_self_absorption.py，旧simulation.py/self_absorption.py不变，普通local/client/server语义不变。
+
+NIST线强作为积分面积；布居使用全阶段及裸核态，发射电荷仍限定0–2。Stark W依次来自用户CSV、内置逐线系数及STARK-B自动补充，FWHM_Stark=2W·Ne/Ne_ref。仪器w=λ/R是高斯1/e半宽，FWHM_G=2√ln2·λ/R；R不进入τ。默认Ne/平均电荷反推总密度，可指定数密度；L=0及关闭自吸收均得到同Stark/Voigt薄谱。新入口不保留5%限制，但执行200000节点和源引擎工作量/内存上限。输出是NIST相对光子强度，不标成绝对光子辐亮度。
+
+名义与有效Te/Ne/组成分别请求NIST，完全相同的规范化请求在单任务内复用。可选未标定基体先改变有效组成/条件，再把产额倍率作用于有效NIST线强及吸收粒子密度；逐线诊断保留未缩放线强。不提供普适材料预测。三谱同网格同尺度，origin记录URL/响应hash/引擎版本/约定/配置/用户系数出处。
+
+Stark CSV最大2MB、最多20000行，支持BOM。必需element、非负整数charge、正W，以及真空波长或成对能级；参考Ne须为正。所有给定标识共同匹配，沿用原引擎1e-6 nm/eV阈值。完整缺失CSV按双精度保存，填W后可重导入；高级 Vue 入口省略 missing_stark 时默认 unbroadened：系数未知的跃迁保留 NIST 线面积，有仪器则仅应用仪器响应，无仪器则保面积/质心投影；跳过这些线的 Stark 和自吸收，未计算的物理量在 JSON 中为 null，SA=1 仅表示未施加衰减。显式 error 保留严格拒绝与 CSV 补数重跑。网络/TLS/服务解析/歧义/缓存错误仍报错。固定 job export 的 stark-missing/stark-matched 可导出成功或失败的高级任务清单；diagnostics导出成功结果的完整诊断CSV。轮询只有数量/可用标志，不塞逐线数组，刷新/重启可恢复固定任务证据。origin.stark_coverage 记录 partial/unavailable/complete/not-applied 及名义/有效条件覆盖；缺失计数按跃迁合并，matched_condition_count 按条件-跃迁计数，不把缺失线计为已匹配。前端将成功覆盖提示及缺失/匹配下载绑定显示结果原 job，严格失败清单绑定失败 job，三谱CSV/JSON/PNG与诊断不串绑；更早缺字段记录防御读取。
+
+HTTP继承TLS、连接/读取及分段期限，增加响应大小边界，进度按取数/准备/渲染/保存真实阶段报告。原始渲染函数无逐行取消回调；网络读取和阶段边界协作检查，耗时计算由现有worker进程树取消兜底。不改物理公式，不终止用户其它进程。
+
+46项后端与8项SSR/组件/脚本检查通过；其中数学和HTTP闭环用捕获NIST夹具，不冒充在线实算。另一次真实NIST窄带成功：1条跃迁、61个节点，URL/hash见 [.ai-workflow/20261016-advanced-nist/](.ai-workflow/20261016-advanced-nist/)。GUI未测，不重试受拒浏览器启动；本轮只交源码及前端dist。以上检查数量与未打包说明仅对应2026-10-16历史交付；下方高级推导保留为离线论文模型及历史证据。
+
+## 独立展宽机制与元素视图（2026-10-17）
+
+高级模拟支持三个独立布尔开关：self_absorption、stark_broadening、instrument_broadening，对应 6 种有效物理分支：
+1. 纯棒状投影（SA=False, Stark=False, Instrument=False）：调用 nist_lines.render_sticks(instrument_broadening=False)，在共享网格上做精确线位与面积离散投影，不伪造物理线宽，高度依赖步长；跳过原子能级与 Stark 数据。
+2. 纯仪器高斯（SA=False, Stark=False, Instrument=True）：调用 nist_lines.render_sticks(instrument_broadening=True)，以 w=λ/R (1/e 半宽) 进行仪器高斯卷积；跳过原子能级与 Stark 数据。
+3. 纯 Stark Lorentz（SA=False, Stark=True, Instrument=False）：调用 prepare_nist_absorption(self_absorption=False) 与 render_nist_absorption(self_absorption=False)，直接解析跃迁与 Stark 宽度，生成解析 Lorentz 轮廓，跳过全能级布居与 Saha 计算；光程与吸收密度不影响结果。
+4. Stark + 仪器 Voigt 薄谱（SA=False, Stark=True, Instrument=True）：同上并在内禀 Stark 基础上叠加仪器高斯响应，生成解析 Voigt 轮廓，无自吸收衰减。
+5. 逐线自吸收 + 内禀 Stark（SA=True, Stark=True, Instrument=False）：计算全阶段布居、吸收密度、tau 与 SA，输出经自吸收修正但未经仪器卷积的光谱。
+6. 逐线自吸收 + Stark + 仪器响应（SA=True, Stark=True, Instrument=True）：完整物理自吸收与仪器响应 Voigt 光谱。
+
+约束：开启自吸收必须启用 Stark 展宽（前端约束联动，后端严格校验拒绝）。
+界面布局与展示：
+- AdvancedPage 实验参数顶部采用 Te / eV、Ne / cm⁻³、R (λ/Δλ) 三张横排方卡，与单次模拟一致。
+- AdvancedResults 增加“元素组分”与“三谱对照”分段切换，默认元素组分；元素组分视图共享总谱尺度，可独立切换各元素可见性，导出 PNG/CSV 与当前视图严格一致。
 
 ## 目录
 
@@ -8,7 +43,7 @@
 2. [三种基础模式与单位](#三种基础模式与单位)
 3. [本地布居与展宽](#本地布居与展宽)
 4. [页面功能与任务](#页面功能与任务)
-5. [高级模拟推导](#高级模拟推导)
+5. [高级模拟推导（历史离线论文模型）](#高级模拟推导历史离线论文模型)
 6. [导出与可复现示例](#导出与可复现示例)
 7. [验证证据与适用边界](#验证证据与适用边界)
 
@@ -56,7 +91,7 @@ NIST 官方页面的线形定义与 Python 常用 FWHM 定义并非自动相同�
 n_(z+1)/n_z = (2/ne) (2π me kT/h²)^(3/2) (U_(z+1)/U_z) exp(-χ_z/kT)
 ```
 
-公式采用 SI 的 ne，需要把 cm⁻³ 乘 10⁶；Te[eV] 与 kT 的转换必须一致。源实现使用有限数据集，并非所有真实高激发态/电离级的完整配分函数。高级模型只采用有数据的 I/II，不虚构 III 能级。设置的最大发射电荷控制输出发射，不代表消除了其他人口。
+公式采用 SI 的 ne，需要把 cm⁻³ 乘 10⁶；Te[eV] 与 kT 的转换必须一致。源实现使用有限数据集，并非所有真实高激发态/电离级的完整配分函数。NIST高级入口使用响应中的全部阶段，历史离线论文模型使用其I/II/III快照。设置的最大发射电荷控制输出发射，不代表消除了其他人口。
 
 光学薄光子线强正比于上能级人口乘 Aki；能量谱还乘光子能量。普通本地绝对尺度有其模型约定，与高级指定柱密度辐亮度不能直接混用。
 
@@ -82,70 +117,99 @@ Gaussian 标准差 σ=FWHM/(2√(2ln2))；Lorentz 半宽 γ=FWHM/2；Voigt 是�
 
 设置保存连接、Python、输出目录与显示偏好。保存失败需恢复实际连接/后台输出及已保存偏好，避免只回滚界面。切换 Python 受控重启自身服务，活动任务期间拒绝重启。新输出目录用于新任务；历史任务仍引用原文件。原生打开/保存对话框仅授权用户选中的文件，取消不写文件；旧对话框全量点击验收仍暂停。
 
-界面启动动画表示偏好、字体和首次布局准备，不代表已经计算光谱。日间、夜间、跟随系统及五种配色与减少动态设置独立于数据；原生标题栏同步主题。参数面板保持自然长高与整页滚动，成功完成后可自动收起，也可手动展开；不会因面板收起而丢失草稿或结果。科学数据始终保留完整节点，画布尺寸不决定数据点数。
+界面启动动画表示偏好、字体和首次布局准备，不代表已经计算光谱。日间、夜间、跟随系统及五种配色与减少动态设置独立于数据；原生标题栏同步主题。四模拟页在双列时按实际视口剩余高度滚动，普通竖向滚轮对左右各自当前位置施加相同增量并独立clamp；一侧到边界不阻挡另一侧，反向立即响应，短内容保持原位。内部菜单/候选/tooltip及canvas缩放优先；仅横向表格上的竖滑继续同步。收起参数只滚右侧，展开保留左侧；不超过740px恢复单列自然整页滚动。生成按钮保留参数末尾，不设固定footer。成功完成后可自动收起，也可手动展开，不丢失草稿或结果。科学数据始终保留完整节点，画布尺寸不决定数据点数。
 
-## 高级模拟推导
+## 高级模拟推导（历史离线论文模型）
 
-模型是均匀、等温、无外来背景的有限能级 LTE slab。真实本地 Aki、上下能级和 g 决定发射与吸收，不是对普通谱任意削峰。用户输入总原子/离子柱密度 N[cm⁻²]，它不是 Ne；两者为独立指定条件，没有求解电荷中性或羽流动力学。
+本节至本节末仅说明历史离线论文版本，包含当时Vue柱密度输入、元素/波段限制和示例，不适用于当前客户端入口。
 
-### 参数化基体
+保留的离线高级后端直接调用与原 simLIBS 相同的 `simLIBS.self_absorption.simulate_paper_spectrum`，依照 RSC Advances 2023 论文 *A numerical procedure for understanding the self-absorption effects in laser induced breakdown spectroscopy* 的 Eq.7 计算逐线吸收参数，并用论文 SA/展宽关系重建谱线。完整推导、数据核对和适用限制见 [核心中文报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md)。这里不是对已经展宽的总谱任意削峰，也没有混用旧有限 slab 的连续总 tau 算法。
+
+### 真实数据与三态布居
+
+默认快照位于 `backend/source/simLIBS/data/paper_atomic_data.json`，包含论文 Table 1 的 Mg、Ca、Zn 共31条线及 NIST I/II/III 九份能级表。第一、第二电离能来自带URL和响应哈希的 Royal Society of Chemistry 元数据，不标为NIST来源。未列出的 Stark 参数不从旧 UI 线库补造；默认数据中 Fe 等缺少必要输入的元素会在高级提交时明确拒绝。Table 1 发射线覆盖 I/II；电荷上限0–2只筛选实际存在的发射线，不伪造 III 谱线。三态 Saha 布居始终计算 I/II/III，III 人口可影响 I/II 的浓度。
+
+每个元素的配分函数使用所提供的真实束缚能级；被标记为非束缚的记录不进入求和。Te 与能级能量同用 eV；Ne 用 cm⁻³。给定 Te、Ne 后，Saha 方程与人口归一化给出各态分数。有限数据、LTE、无更高态和无连续降低的近似都保存在结果元数据中。数据文件位置、SHA256、人口、配分函数和电荷平衡诊断可从 `origin.paper_model` 追溯。
+
+### 柱密度、光程与参数化基体
+
+Vue 输入总原子/离子柱密度 `N_col[cm⁻²]` 与光程 `L[m]`（默认0.01 m），换算：
+
+```
+N_total[cm⁻³] = N_col / (100 × L)
+```
+
+Ne 与 N_total 为独立指定条件。Vue 采用显式总数密度模式，不强迫二者满足电荷中性；共享引擎同时记录这些布居对应的电子密度及相对差异。原核心还支持缺省总密度时的电荷平衡闭合，Vue 当前参数表不使用该缺省分支。
 
 令名义元素分数 x_e 合计1，用户响应 r_e≥0。基体开启时：
 
 ```
 Y = Σ x_e r_e
-q_e = x_e r_e / Y
+x_eff,e = x_e r_e / Y
 Te_eff = Te × f_Te ; Ne_eff = Ne × f_Ne
-N_eff = N × Y
+N_total,eff = N_total × Y
+N_col,eff = N_col × Y
 ```
 
-Y须正，响应默认1，倍率有限且为正；不是通过归一化 q 抹掉总产额。所有响应乘2会使薄谱产额乘2，同时改变自吸收柱密度。关闭基体提交恒等响应与倍率，保留界面草稿便于再开启；禁用草稿的非法文本不阻塞运行。开启后仍严格校验。此模型表达可校准元素响应和等离子体条件，不提供无需实验标定的普适材料预测。
+Y须正，默认响应与Te/Ne倍率均1。总产额倍率直接改变有效总数密度，没有被归一化组成消掉。各态数密度为 `N_s = N_total,eff × x_eff,e × f_s`，其中 f_s 为该元素Saha态分数。关闭基体时使用名义条件，禁用草稿保留以便再开启。此处表达可校准元素响应与等离子体修正，不提供无需实验标定的普适材料预测。共同响应倍率与柱密度有退化关系，不能只凭一条归一化谱唯一反演；实验校准仍需参考样品、独立诊断和独立验证样品。
 
-后续实验校准建议：先用有证书组成的标准样品，固定激光能量、延迟、门宽和收光几何，并完成波长与仪器响应校准；利用尽量光学薄的谱线约束相对元素响应，用独立诊断或合适线比约束 Te/Ne，再利用同元素不同光学厚度的线约束柱密度。使用另一组样品验证，记录参数、实验条件、适用组成范围与误差。共同响应倍率和 N 在 `N_eff=N×Y` 中有退化关系，不能只凭一条归一化谱同时唯一反演；必须固定参考尺度或引入独立信息。当前程序提供参数输入与追溯导出，尚未实现实验拟合器、校准数据集管理或自动材料识别。
+### Eq.7、SA 与逐线峰高/积分
 
-### 从能级到光学厚度
-
-各级人口以有效组成、有限配分函数及 Saha 求得；柱密度乘10⁴把 cm⁻²转为 m⁻²。N_l、N_u 单位 m⁻²。内部频率 ν₀=(E_u-E_l)/h 来自能级差；λ₀=c/ν₀。原始波长空气/真空归属未明确，保留表中 nm 作为线位置，只在每条窄线的 Jacobian 处用能级差定义 λ₀，不强行把原始位置改成真空。
-
-归一化 φ_ν 的单位 Hz⁻¹，Einstein 关系给出：
+每条线使用论文 Aki、上下能级、统计权重和 Stark 参数。以 m 为波长/光程单位、s⁻¹为Aki单位，并将 N_s 从 cm⁻³乘10⁶转为m⁻³，Eq.7为：
 
 ```
-τ_ν = A_ul c²/(8πν₀²) [(g_u/g_l)N_l - N_u] φ_ν
+q[m] = N_s[m⁻³] × g_u × λ₀[m]^4 × A_ul[s⁻¹] × L[m]
+       / (4π² c[m/s] U_s) × exp(-E_l/Te_eff)
+w₀[nm] = 2 × W_table[nm] × (Ne_eff / Ne_reference)
+tau_center = q[m] / (w₀[nm] × 10⁻⁹)
+SA = -expm1(-tau_center) / tau_center          # tau=0 时取1
+w_abs = w₀ × SA^(-0.54)
 ```
 
-采用 φ_λ[nm⁻¹] 时，φ_ν=φ_λ λ₀²/(c×10⁻⁹)。因此：
+表中的 W 是论文 Stark 宽度参数，未吸收 FWHM 为2W并按Ne线性缩放。没有自行添加论文未给出的温度依赖。tau只使用未吸收的Stark FWHM；仪器分辨率和吸收后的线宽不进入分母。
+
+谱线使用积分归一化的 Lorentz 轮廓 φ，单位 nm⁻¹。论文薄谱表达式作为相对积分权重使用；photon 权重与 energy 权重相差该线的光子能量 `hc/λ₀`。Vue 使用 photon，与普通本地页面约定一致，不宣称标定辐亮度或探测器计数。
+
+论文 SA 表示仪器卷积前的内禀线中心峰高之比。因为轮廓按积分归一化且 FWHM 变宽，积分权重必须同时更新：
 
 ```
-Cτ = A_ul λ₀⁴/(8π c ×10⁻⁹) × ΔN       [nm]
-τ_λ = Cτ φ_λ                            [无量纲]
-ΔN = (g_u/g_l) N_l × [-expm1(-(E_u-E_l)/Te_eff)]
+A_abs / A_thin = SA^(1 - 0.54) = SA^0.46
+peak_abs / peak_thin = (A_abs/A_thin) × (w₀/w_abs) = SA
 ```
 
-最后一式使用稳定的 LTE 受激辐射差；能隙与 Te 同用 eV，不从可能为空气波长的线位推导另一个能隙。光学薄光子谱为 J_λ=N_u A_ul φ_λ/(4π)，单位 photons·s⁻¹·m⁻²·sr⁻¹·nm⁻¹。
+因此，不能把积分权重直接乘SA后又按SA展宽，否则线中心峰高会多衰减一次。各条线分别用自己的tau、SA、吸收FWHM和积分权重重建后，才按离子/元素叠加；没有再对总谱乘共享总tau/beta，也没有声称求解重叠谱线间耦合辐射输运。
 
-### 先传输，再仪器卷积
+### 仪器响应、三谱与网格
 
-在共同内禀轴上累加所有线的 τ 和各离子薄谱。采用沿该柱方向均匀 slab 的因子 β(τ)=[1-exp(-τ)]/τ，稳定计算 `-expm1(-τ)/τ`，τ=0时β=1。所有元素共享总τ及β：J_corrected,e=J_thin,e β(Στ)，故分量仍可相加。这里不是角平均逃逸概率或反馈修正布居模型。
+仪器 Gaussian 可选，默认为启用，FWHM=λ_line/R。在逐线自吸收更新之后，按解析 Voigt 轮廓应用仪器响应，R不改变q、Stark FWHM、tau或SA。旧热Doppler、附加Gaussian/Lorentz和refinement草稿仅用于兼容，不参与论文模型；不能把这些输入当成Stark数据。
 
-内禀 Voigt 包含热 Doppler、指定 Gaussian 和 Lorentz；即使关闭自吸收也用于薄谱，仍须有效。随后才对三个谱施加同一个归一化仪器 Gaussian。仪器 FWHM=窗口中点/R；R不改变内禀光学厚度系数。数值网格会随 R/padding 变化，因此不同 R 的离散 τ 数组不能无条件逐节点相等，应对比系数或统一轴。
+三条对照分别为名义薄谱（原组成、Te/Ne及总数密度）、基体薄谱（有效条件，无吸收）、修正谱（有效条件，逐线SA/展宽）。它们使用相同输出网格、仪器设置和显示尺度，不能分别归一化来隐藏产额或吸收变化。关闭自吸收时修正谱等于基体薄谱；关闭基体时两薄谱相等；柱密度0时三谱均0且tau=0、SA=1。
 
-三条对照分别是：名义薄谱（原组成、原Te/Ne、原N、无基体）、基体薄谱（有效条件、N_eff、无吸收）、修正谱（有效条件、共享总τ传输后）。它们均经过同一仪器卷积且共用显示最大值，不能各自归一化，否则统一响应倍率和衰减会被隐藏。关闭自吸收时修正谱等于基体薄谱；关闭基体时两条薄谱相等；N=0时三谱为0。
+当前Vue仍将相对波段跨度限制为中心5%，默认示例为Mg 284.5–286 nm、步长0.005 nm。共享引擎以请求步长建立严格递增输出轴，最多200000节点；单谱通道数组最多5000000单元，谱线×节点工作量最多50000000。重复浮点节点、非法/非有限数据或超限输入会明确拒绝，不静默稀疏采样。Lorentz翼包含窗外线贡献，因此逐线诊断数可能大于窗口内线中心数；有限窗口积分不等于整条线的无限区间积分。
 
-### 网格与近似边界
+### 历史模型与科学边界
 
-相对波段跨度不超过中点5%，以限定中点仪器近似。内禀步长取最窄近似Voigt FWHM/8、输出步长/2和仪器σ/3的最小值，再除 refinement（1–4）。两端加8仪器σ padding，FFT卷积后输出到统一轴。内部最多200000点，通道数组单元最多5000000，谱线×点最多30000000；超过限制明确拒绝，引导缩小范围/减少元素/增大物理线宽，不偷偷降低分辨率。
+`finite-lte-slab-1` 是2026-10-14的旧高级模型，使用有限I/II能级、Voigt内禀谱、累加连续总tau后乘beta，再做FFT仪器卷积。它不等于当前论文逐线算法，其旧EXE、历史结果与验收记录不能作为新模型验证。历史结果仍按原版本重开，页面和PNG不将旧诊断冒称新逐线中心诊断。
 
-有限窗口/线库和 Voigt 长尾仍是截断近似；padding不能代替完整远翼物理。模型不含时空梯度、背景照射、散射、连续吸收、完整Stark碰撞数据库、非LTE或布居反馈。可以给出饱和与展平，不声称预测温度梯度造成的自反转。模型光子辐亮度未校准为真实仪器读数。
+当前模型不含时空梯度、外来背景、散射、连续吸收、非LTE、布居反馈或更高电离态，不预测温度梯度导致的自反转。Table 1有限谱线/固定Stark参数和有限束缚能级表不是通用完整碰撞数据库；本次实现也不是对作者未公开源码的逐字复现。原核心可接受具有真实必要字段的自定义线/原子数据；Vue默认页面当前只提供论文Mg/Ca/Zn快照。更完整的限制与数据可追溯说明以核心报告和每次实际origin为准。
 
 ## 导出与可复现示例
 
-普通 CSV 导出实际波长、总谱及元素贡献；JSON保存来源和参数；前端 PNG为当前视口。高级 CSV 包含修正、基体薄、名义薄三曲线；后端 JSON自包含 comparison、逐线 line_diagnostics、全内禀 opacity/tau/beta及网格参数，不仅是本机文件路径。后端 PNG三谱共同绝对尺度并带图例和单位；前端 Canvas PNG包含绘入画布的三谱图例，共同归一化时注明尺度。批量参数/训练ZIP、扫描GIF按任务实际文件导出。
+普通 CSV 导出实际波长、总谱及元素贡献；JSON保存来源和参数；前端 PNG为当前视口。高级 CSV 包含修正、基体薄、名义薄三曲线；后端 JSON自包含 comparison、逐线 line_diagnostics、逐线中心 opacity/tau/beta及网格参数，不仅是本机文件路径。当前opacity每行对应一条线中心，tau映射tau_center、beta映射SA，origin明确标记per-line-center，不是连续总光学厚度。可缺省的Stark参考温度等字段读回JSON null，不产生NaN。后端 PNG三谱共用模型强度尺度并带图例和单位；前端 Canvas PNG包含绘入画布的三谱图例，共同归一化时注明尺度。批量参数/训练ZIP、扫描GIF按任务实际文件导出。
 
-可复现高级示例：Fe100%，248–249nm，Te=1eV、Ne=1e17cm⁻³、R=1000，输出步长0.005nm，最大发射电荷1；N=1e16cm⁻²，内禀Gaussian FWHM=0.01nm、Lorentz FWHM=0.002nm、重粒子T=10000K，响应与倍率均1。运行得到201个输出节点。关闭自吸收比较修正谱与基体薄谱；令Fe响应2比较薄谱与名义薄谱；不要将这些绝对单位数值与普通任意强度直接混合。
+历史离线论文示例（当前高级页不再提交此模型）：Mg100%，284.5–286nm，Te=1eV、Ne=1e17cm⁻³、R=1000，输出步长0.005nm，最大发射电荷2；柱密度1e16cm⁻²，L=0.01m，响应与倍率均1，仪器Gaussian启用。得到301个输出节点。关闭自吸收比较修正谱与基体薄谱；令Mg响应2比较薄谱与名义薄谱。默认Fe不具备本模型所需Stark数据，不能继续使用旧Fe高级示例。真实worker/API/三谱导出证据见 [Vue实施说明](.ai-workflow/20261015-paper-self-absorption/implementation.md)。
 
 可复现普通对照：server Fe100%、240–260nm、Te1、Ne1e17、R1000、charge1，保持Photon及官方节点，与同次参数的独立官方CSV比较。在线失败应保留错误并有限重试，不能伪造 Google Charts 对象或替换官方计算。
 
 ## 验证证据与适用边界
+
+2026-10-15历史论文版本的Vue高级测试与models/storage/web_api回归共38项通过，父plan复跑也通过；便携Node22.16环境下Vue类型检查和静态构建已通过。独立真实RealBackend worker完成301节点Mg模拟，三谱CSV/严格JSON/PNG导出已逐值核对并保存 [请求、进度与文件证据](.ai-workflow/20261015-paper-self-absorption/evidence/20261015-154332/summary.json)。共享原核心的科学验收和最新边界修复以 [核心报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md) 为准。
+
+2026-10-15当轮只交付源码、Python后端和Markdown报告，未重打包或更新dist-desktop旧EXE/NSIS。Tauri资源白名单及collect-desktop脚本已补论文JSON路径；收集规则通过隔离临时项目的真实Node脚本验证，生产发行目录未被该测试修改。实际安装包资源、原生文件对话框与新桌面程序的运行行为仍需在具备Rust/Cargo的环境重新构建后验证。
+
+### 2026-10-14历史基础模式与旧高级验收
+
+以下为此前工况和旧finite-slab版本的历史事实，不是本轮论文引擎或新EXE的验收结果。
 
 上一阶段 [科学验收](.ai-workflow/20261014-backend-connect/plan-native-science-results.json) 记录正式server该示例386节点与独立NIST CSV完全相等；client在统一NIST线宽约定下的归一化RMSE为0.0022976。此结果限定到该工况和比较规则，不证明任意工况等价。本地有限模型的差异需单独解释，未通过调整本地物理去拟合官方谱。server插值曾因外部图表 `google is not defined` 失败，定向重试成功，仍依赖外网页面。
 
@@ -164,12 +228,12 @@ Cτ = A_ul λ₀⁴/(8π c ×10⁻⁹) × ΔN       [nm]
 
 [本地模型对照图](.ai-workflow/20261014-backend-connect/plan-native-science-1791911894821949000/local-broadened.png)和[FWHM约定对照图](.ai-workflow/20261014-backend-connect/plan-native-science-1791911894821949000/client-fwhm-convention.png)保留了模型差异。官方离子列与总谱独立舍入，验收按 CSV 的有效位数核对允许舍入界限，不篡改官方值以强制浮点求和相等。
 
-本轮 [独立物理检查](.ai-workflow/20261014-advanced-batch-scan/plan-physics-results.json) 包含解析双能级/Saha/Planck光子源与单位、独立quad积分、传输后卷积、网格细化、R不改系数、Fe/Cu混合总τ、开关/薄极限/非法输入/取消。[独立API检查](.ai-workflow/20261014-advanced-batch-scan/plan-api-results.json) 覆盖真实任务、重启历史、取消及三谱可携带导出；[code浏览器检查](.ai-workflow/20261014-advanced-batch-scan/code-browser-results.json) 覆盖真实页面和受控传输失败的恢复流程。最终正式桌面与冻结hash以本轮 implementation/files/code-ready 和 plan review 为准。
+2026-10-14旧高级模型的 [独立物理检查](.ai-workflow/20261014-advanced-batch-scan/plan-physics-results.json) 包含解析双能级/Saha/Planck光子源与单位、独立quad积分、传输后卷积、网格细化、R不改系数、Fe/Cu混合总τ、开关/薄极限/非法输入/取消。[独立API检查](.ai-workflow/20261014-advanced-batch-scan/plan-api-results.json) 覆盖真实任务、重启历史、取消及三谱可携带导出；[code浏览器检查](.ai-workflow/20261014-advanced-batch-scan/code-browser-results.json) 覆盖真实页面和受控传输失败的恢复流程。这组证据和下列EXE哈希仅对应2026-10-14历史交付，不用于声明本轮论文引擎已进入发行物。
 
 2026-10-14 最终验收通过，见 [plan review](.ai-workflow/20261014-advanced-batch-scan/review.md)。独立正式 EXE 的 [12项桌面检查](.ai-workflow/20261014-advanced-batch-scan/plan-native-results.json) 已通过，包含三谱所有绘制节点与 API 数值及共享尺度核对、实际响应2倍和吸收开关、批量旧响应隔离与失败重试、扫描暂停/快切/离页/首帧重入/失败目标重试、历史重开及正常退出清理。测试通过 WebView/CDP 操作实际正式程序，不冒称物理鼠标或原生文件对话框点击。
 
 独立物理9项、API6项、原有本地三组逐节点回归均通过；code 另有普通后端78项、浏览器21项、轮询恢复3项、物理5项和原生7项自测。交付核对包含96个文件、94个后端资源和62份线表，原项目156项保护检查通过。最终 EXE SHA256 为 `faf22d97fca95eddfb190301fe4635678e6795faac10a69e147cd7f19a0bdcf3`；NSIS 为 `80bcddb95c966ab77d4cbe6f0c49df442e620bd00d26ea2ff332484f5018cae9`。安装过程及原生文件对话框全量测试仍未覆盖。
 
-实现入口：[本地布居](backend/simlibs_ui/offline_engine.py)、[线库解析](backend/simlibs_ui/offline_database.py)、[高级模型](backend/simlibs_ui/advanced.py)、[API结果与导出](backend/web/real_backend.py)、[前端任务状态](src/lib/workbench.ts)。原子来源以每次 origin.atomic_sources、library签名和coverage为准；通用参考为 [NIST ASD](https://physics.nist.gov/asd) 与 [NIST LIBS](https://physics.nist.gov/PhysRefData/ASD/LIBS/libs-form.html)。数据可追溯不等于全部原子数据完整，也不等于实验校准。
+实现入口：[本地布居](backend/simlibs_ui/offline_engine.py)、[线库解析](backend/simlibs_ui/offline_database.py)、[高级模型](backend/simlibs_ui/advanced.py)、[API结果与导出](backend/web/real_backend.py)、[前端任务状态](src/lib/workbench.ts)。普通本地原子来源以每次 origin.atomic_sources、library签名和coverage为准；当前高级来源以 origin.paper_model / nominal_paper_model 的数据SHA256、人口、配分函数和参数为准；通用参考为 [NIST ASD](https://physics.nist.gov/asd) 与 [NIST LIBS](https://physics.nist.gov/PhysRefData/ASD/LIBS/libs-form.html)。数据可追溯不等于全部原子数据完整，也不等于实验校准。
 
-物理背景可参考 Tatum 的 [Boltzmann/Saha 与恒星大气讲义](https://www.astro.uvic.ca/~tatum/stellatm/atm8.pdf)及[谱线轮廓讲义](https://www.astro.uvic.ca/~tatum/stellatm/atm10.pdf)。这些资料说明基础关系；本项目的有限数据、窄带仪器和参数化基体近似仍以本文件及实际代码为准。
+物理背景可参考 Tatum 的 [Boltzmann/Saha 与恒星大气讲义](https://www.astro.uvic.ca/~tatum/stellatm/atm8.pdf)及[谱线轮廓讲义](https://www.astro.uvic.ca/~tatum/stellatm/atm10.pdf)。这些资料说明基础关系；普通模式的有限数据与展宽以本文件及实际代码为准，当前论文逐线高级模型以 [核心报告](../simLIBS-2.0.3/SELF_ABSORPTION_REPORT.md)、本文件高级章节和实际代码为准。

@@ -1,0 +1,25 @@
+{
+  "50000": {
+    "wavelength_nm": 69.58289,
+    "temperature_k": 50000,
+    "electron_density_cm3": 1000000000000000.0,
+    "layer": "STARK-B",
+    "hwhm_nm": 3.2646442911426445e-06,
+    "source": "STARK-B: Dimitrijević M. S. Electron-impact widths of doubly and triply charged ion lines of astrophysical importance journal 1988 A&AS 76 http://cdsads.u-strasbg.fr/abs/1988A%26AS...76...53D | Dimitrijević M. S. Konjević N. Stark widths of doubly- and triply-ionized atom lines journal 1980 JQSRT 24 http://cdsads.u-strasbg.fr/abs/1980JQSRT..24..451D | Dimitrijević M. S. Konjević N. Modified Semiempirical Formula for the Electron-Impact Width of Ionized Atom Lines: Theory and Applications journal 1981 5th ICSLS Conf. Proc. http://cdsads.u-strasbg.fr/abs/1981sls..conf..211D"
+  },
+  "1000": {
+    "wavelength_nm": 69.58289,
+    "temperature_k": 1000,
+    "electron_density_cm3": 1000000000000000.0,
+    "layer": "DK1980",
+    "hwhm_nm": 3.281572671287962e-05,
+    "source": "DK1980 modified semiempirical"
+  },
+  "missing": [
+    {
+      "stark_resolution_layer": "missing",
+      "stark_b_missing_reason": "no electron table for species in offline snapshot",
+      "stark_mse_missing_reason": "unsupported ion charge; DK1980 requires q=2 or 3"
+    }
+  ]
+}

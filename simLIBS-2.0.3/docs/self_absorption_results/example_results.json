@@ -1,0 +1,236 @@
+{
+  "description": "Actual implementation output; not digitized paper data or an exact Figure 2 reproduction",
+  "single_line": {
+    "species_density_cm3": 3895932107638750.0,
+    "partition_function": 2.371257213806479,
+    "q_m": 1.35308848570109e-10,
+    "tau_center": 0.9664917755007785,
+    "SA": 0.6410656910505399,
+    "thin_fwhm_nm": 0.14,
+    "absorbed_fwhm_nm": 0.17799207538702463,
+    "thin_peak": 7911832776.538112,
+    "absorbed_peak": 5072004546.367716,
+    "thin_area": 1739902900.9042149,
+    "absorbed_area": 1418078191.670043
+  },
+  "parameters": {
+    "Te_eV": 1.0,
+    "Ne_cm3": 1e+17,
+    "elements": [
+      "Mg"
+    ],
+    "percentages": [
+      100.0
+    ],
+    "low_w": 283.212,
+    "upper_w": 287.212,
+    "resolution": 3000,
+    "max_ion_charge": 2,
+    "path_length_m": 0.0001
+  },
+  "path_scan": [
+    {
+      "tau_center": 0.0,
+      "SA": 1.0,
+      "thin_fwhm_nm": 0.14,
+      "absorbed_fwhm_nm": 0.14,
+      "path_length_m": 0.0
+    },
+    {
+      "tau_center": 0.09664917755007808,
+      "SA": 0.9531953537999781,
+      "thin_fwhm_nm": 0.14,
+      "absorbed_fwhm_nm": 0.14367122694042267,
+      "path_length_m": 1e-05
+    },
+    {
+      "tau_center": 0.9664917755007785,
+      "SA": 0.6410656910505399,
+      "thin_fwhm_nm": 0.14,
+      "absorbed_fwhm_nm": 0.17799207538702463,
+      "path_length_m": 0.0001
+    },
+    {
+      "tau_center": 9.664917755007796,
+      "SA": 0.10346042808968367,
+      "thin_fwhm_nm": 0.14,
+      "absorbed_fwhm_nm": 0.47659549107745486,
+      "path_length_m": 0.001
+    },
+    {
+      "tau_center": 96.64917755007806,
+      "SA": 0.010346699530700686,
+      "thin_fwhm_nm": 0.14,
+      "absorbed_fwhm_nm": 1.652475554334462,
+      "path_length_m": 0.01
+    }
+  ],
+  "metadata": {
+    "model_version": "john-anoop-2023-lines-1",
+    "paper_doi": "10.1039/D3RA06226K",
+    "data_sha256": "1ca430a38bc0a05c12f90b9179cbcee5a11e52c4817ce558316588b90036705c",
+    "source_dataset_sha256": "0c944167ac036a6c3820b08717662e753664619aab77563aca0c8a750f1664f7",
+    "source_dataset": "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\simLIBS\\data\\paper_atomic_data.json",
+    "density_mode": "charge_balance",
+    "total_number_density_cm3": 1.0305096503617464e+17,
+    "charge_balance_ne_cm3": 1e+17,
+    "charge_balance_relative_error": 0.0,
+    "ion_populations": {
+      "Mg": [
+        0.03780587698786844,
+        0.953994616378036,
+        0.008199506634095799
+      ]
+    },
+    "partition_functions": {
+      "Mg": [
+        2.371257213806479,
+        2.074217480821745,
+        1.0
+      ]
+    },
+    "bound_level_counts": {
+      "Mg": [
+        221,
+        78,
+        105
+      ]
+    },
+    "intensity_scale": "energy",
+    "intensity_units": "relative energy spectral weight / nm; uncalibrated",
+    "instrument_broadening": false,
+    "resolution_applied": false,
+    "optical_depth_width": "unabsorbed Stark FWHM",
+    "width_exponent": -0.54,
+    "population_stages": [
+      0,
+      1,
+      2
+    ],
+    "emission_stages": [
+      0
+    ],
+    "line_count": 1,
+    "line_centers_in_window": 1,
+    "output_points": 8001,
+    "output_step_nm": 0.0004999999999881766,
+    "parameters": {
+      "Te_eV": 1.0,
+      "Ne_cm3": 1e+17,
+      "elements": [
+        "Mg"
+      ],
+      "percentages": [
+        100.0
+      ],
+      "low_w": 283.212,
+      "upper_w": 287.212,
+      "resolution": 3000,
+      "max_ion_charge": 2,
+      "path_length_m": 0.0001
+    },
+    "assumptions": [
+      "uniform LTE; finite bound-level I/II/III Saha; no higher stages or continuum lowering",
+      "Table 1 fixed Stark W; no invented temperature dependence",
+      "Eq.6 uses pre-absorption Stark FWHM; Eq.8 applied once",
+      "Eq.2 is a relative integrated line weight; peak ratio enforced by SA^(1+alpha) area scaling",
+      "independent line reconstruction/summation, not coupled overlapping-line radiative transfer",
+      "optional analytic Gaussian instrument response after intrinsic self-absorption",
+      "finite line coverage; Lorentz wings retained; finite output window and sampling",
+      "not a digit-for-digit reproduction of the authors' unpublished source code"
+    ]
+  },
+  "mixture_metadata": {
+    "model_version": "john-anoop-2023-lines-1",
+    "paper_doi": "10.1039/D3RA06226K",
+    "data_sha256": "20b92d670b4779817d2a38a53c1b018ac6b2ce4674aa7810e97ad6c74d66275f",
+    "source_dataset_sha256": "0c944167ac036a6c3820b08717662e753664619aab77563aca0c8a750f1664f7",
+    "source_dataset": "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\simLIBS\\data\\paper_atomic_data.json",
+    "density_mode": "charge_balance",
+    "total_number_density_cm3": 9.777908986077634e+16,
+    "charge_balance_ne_cm3": 1e+17,
+    "charge_balance_relative_error": 0.0,
+    "ion_populations": {
+      "Mg": [
+        0.03780587698786844,
+        0.953994616378036,
+        0.008199506634095799
+      ],
+      "Ca": [
+        0.016314594624327248,
+        0.8923373425919807,
+        0.09134806278369216
+      ]
+    },
+    "partition_functions": {
+      "Mg": [
+        2.371257213806479,
+        2.074217480821745,
+        1.0
+      ],
+      "Ca": [
+        10.064795000482828,
+        4.11943207215471,
+        1.0000000001768627
+      ]
+    },
+    "bound_level_counts": {
+      "Mg": [
+        221,
+        78,
+        105
+      ],
+      "Ca": [
+        455,
+        69,
+        175
+      ]
+    },
+    "intensity_scale": "energy",
+    "intensity_units": "relative energy spectral weight / nm; uncalibrated",
+    "instrument_broadening": false,
+    "resolution_applied": false,
+    "optical_depth_width": "unabsorbed Stark FWHM",
+    "width_exponent": -0.54,
+    "population_stages": [
+      0,
+      1,
+      2
+    ],
+    "emission_stages": [
+      0,
+      1
+    ],
+    "line_count": 27,
+    "line_centers_in_window": 27,
+    "output_points": 45001,
+    "output_step_nm": 0.009999999999990905,
+    "parameters": {
+      "Te_eV": 1.0,
+      "Ne_cm3": 1e+17,
+      "elements": [
+        "Mg",
+        "Ca"
+      ],
+      "percentages": [
+        50.0,
+        50.0
+      ],
+      "low_w": 200.0,
+      "upper_w": 650.0,
+      "resolution": 3000,
+      "max_ion_charge": 2,
+      "path_length_m": 0.0001
+    },
+    "assumptions": [
+      "uniform LTE; finite bound-level I/II/III Saha; no higher stages or continuum lowering",
+      "Table 1 fixed Stark W; no invented temperature dependence",
+      "Eq.6 uses pre-absorption Stark FWHM; Eq.8 applied once",
+      "Eq.2 is a relative integrated line weight; peak ratio enforced by SA^(1+alpha) area scaling",
+      "independent line reconstruction/summation, not coupled overlapping-line radiative transfer",
+      "optional analytic Gaussian instrument response after intrinsic self-absorption",
+      "finite line coverage; Lorentz wings retained; finite output window and sampling",
+      "not a digit-for-digit reproduction of the authors' unpublished source code"
+    ]
+  }
+}

@@ -1,0 +1,390 @@
+0 verbose cli D:\LIBS\SimLIBS\tmp\toolchains\node-v22.16.0-win-x64\node.exe D:\LIBS\SimLIBS\tmp\toolchains\node-v22.16.0-win-x64\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.2
+2 info using node@v22.16.0
+3 silly config load:file:D:\LIBS\SimLIBS\tmp\toolchains\node-v22.16.0-win-x64\node_modules\npm\npmrc
+4 silly config load:file:D:\LIBS\SimLIBS\Vue\.npmrc
+5 silly config load:file:C:\Users\32957\.npmrc
+6 silly config load:file:D:\LIBS\SimLIBS\tmp\toolchains\node-v22.16.0-win-x64\etc\npmrc
+7 verbose title npm ci
+8 verbose argv "ci" "--no-audit" "--no-fund" "--cache" "..\\tmp\\npm-cache"
+9 verbose logfile logs-max:10 dir:D:\LIBS\SimLIBS\tmp\npm-cache\_logs\2026-10-15T07_33_54_609Z-
+10 verbose logfile D:\LIBS\SimLIBS\tmp\npm-cache\_logs\2026-10-15T07_33_54_609Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+13 silly idealTree buildDeps
+14 silly reify moves {}
+15 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\lightningcss-win32-arm64-msvc
+16 silly reify mark deleted [
+16 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\lightningcss-win32-arm64-msvc'
+16 silly reify ]
+17 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\lightningcss-linux-x64-musl
+18 silly reify mark deleted [ 'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\lightningcss-linux-x64-musl' ]
+19 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\lightningcss-linux-x64-gnu
+20 silly reify mark deleted [ 'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\lightningcss-linux-x64-gnu' ]
+21 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\lightningcss-linux-arm64-musl
+22 silly reify mark deleted [
+22 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\lightningcss-linux-arm64-musl'
+22 silly reify ]
+23 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\lightningcss-linux-arm64-gnu
+24 silly reify mark deleted [
+24 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\lightningcss-linux-arm64-gnu'
+24 silly reify ]
+25 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\lightningcss-linux-arm-gnueabihf
+26 silly reify mark deleted [
+26 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\lightningcss-linux-arm-gnueabihf'
+26 silly reify ]
+27 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\lightningcss-freebsd-x64
+28 silly reify mark deleted [ 'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\lightningcss-freebsd-x64' ]
+29 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\lightningcss-darwin-x64
+30 silly reify mark deleted [ 'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\lightningcss-darwin-x64' ]
+31 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\lightningcss-darwin-arm64
+32 silly reify mark deleted [ 'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\lightningcss-darwin-arm64' ]
+33 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\lightningcss-android-arm64
+34 silly reify mark deleted [ 'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\lightningcss-android-arm64' ]
+35 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\fsevents
+36 silly reify mark deleted [ 'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\fsevents' ]
+37 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@tauri-apps\cli-win32-ia32-msvc
+38 silly reify mark deleted [
+38 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@tauri-apps\\cli-win32-ia32-msvc'
+38 silly reify ]
+39 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@tauri-apps\cli-win32-arm64-msvc
+40 silly reify mark deleted [
+40 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@tauri-apps\\cli-win32-arm64-msvc'
+40 silly reify ]
+41 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@tauri-apps\cli-linux-x64-musl
+42 silly reify mark deleted [
+42 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@tauri-apps\\cli-linux-x64-musl'
+42 silly reify ]
+43 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@tauri-apps\cli-linux-x64-gnu
+44 silly reify mark deleted [
+44 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@tauri-apps\\cli-linux-x64-gnu'
+44 silly reify ]
+45 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@tauri-apps\cli-linux-riscv64-gnu
+46 silly reify mark deleted [
+46 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@tauri-apps\\cli-linux-riscv64-gnu'
+46 silly reify ]
+47 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@tauri-apps\cli-linux-arm64-musl
+48 silly reify mark deleted [
+48 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@tauri-apps\\cli-linux-arm64-musl'
+48 silly reify ]
+49 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@tauri-apps\cli-linux-arm64-gnu
+50 silly reify mark deleted [
+50 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@tauri-apps\\cli-linux-arm64-gnu'
+50 silly reify ]
+51 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@tauri-apps\cli-linux-arm-gnueabihf
+52 silly reify mark deleted [
+52 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@tauri-apps\\cli-linux-arm-gnueabihf'
+52 silly reify ]
+53 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@tauri-apps\cli-darwin-x64
+54 silly reify mark deleted [ 'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@tauri-apps\\cli-darwin-x64' ]
+55 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@tauri-apps\cli-darwin-arm64
+56 silly reify mark deleted [
+56 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@tauri-apps\\cli-darwin-arm64'
+56 silly reify ]
+57 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-win32-arm64-msvc
+58 silly reify mark deleted [
+58 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-win32-arm64-msvc'
+58 silly reify ]
+59 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-openharmony-arm64
+60 silly reify mark deleted [
+60 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-openharmony-arm64'
+60 silly reify ]
+61 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-linux-x64-musl
+62 silly reify mark deleted [
+62 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-linux-x64-musl'
+62 silly reify ]
+63 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-linux-x64-gnu
+64 silly reify mark deleted [
+64 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-linux-x64-gnu'
+64 silly reify ]
+65 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-linux-s390x-gnu
+66 silly reify mark deleted [
+66 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-linux-s390x-gnu'
+66 silly reify ]
+67 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-linux-ppc64-gnu
+68 silly reify mark deleted [
+68 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-linux-ppc64-gnu'
+68 silly reify ]
+69 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-linux-arm64-musl
+70 silly reify mark deleted [
+70 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-linux-arm64-musl'
+70 silly reify ]
+71 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-linux-arm64-gnu
+72 silly reify mark deleted [
+72 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-linux-arm64-gnu'
+72 silly reify ]
+73 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-linux-arm-gnueabihf
+74 silly reify mark deleted [
+74 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-linux-arm-gnueabihf'
+74 silly reify ]
+75 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-freebsd-x64
+76 silly reify mark deleted [
+76 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-freebsd-x64'
+76 silly reify ]
+77 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-darwin-x64
+78 silly reify mark deleted [
+78 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-darwin-x64'
+78 silly reify ]
+79 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-darwin-arm64
+80 silly reify mark deleted [
+80 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-darwin-arm64'
+80 silly reify ]
+81 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-android-arm64
+82 silly reify mark deleted [
+82 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-android-arm64'
+82 silly reify ]
+83 verbose reify failed optional dependency D:\LIBS\SimLIBS\Vue\node_modules\@rolldown\binding-android-arm-eabi
+84 silly reify mark deleted [
+84 silly reify   'D:\\LIBS\\SimLIBS\\Vue\\node_modules\\@rolldown\\binding-android-arm-eabi'
+84 silly reify ]
+85 http cache vue-tsc@https://registry.npmjs.org/vue-tsc/-/vue-tsc-3.3.12.tgz 1ms (cache hit)
+86 http cache vscode-uri@https://registry.npmjs.org/vscode-uri/-/vscode-uri-3.2.0.tgz 0ms (cache hit)
+87 http cache vue@https://registry.npmjs.org/vue/-/vue-3.5.43.tgz 1ms (cache hit)
+88 http cache vite@https://registry.npmjs.org/vite/-/vite-8.3.4.tgz 0ms (cache hit)
+89 http cache typescript@https://registry.npmjs.org/typescript/-/typescript-6.0.3.tgz 0ms (cache hit)
+90 http cache tinyglobby@https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.17.tgz 0ms (cache hit)
+91 http cache rolldown@https://registry.npmjs.org/rolldown/-/rolldown-1.2.13.tgz 0ms (cache hit)
+92 http cache source-map-js@https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.2.tgz 0ms (cache hit)
+93 http cache picocolors@https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz 0ms (cache hit)
+94 http cache postcss@https://registry.npmjs.org/postcss/-/postcss-8.5.29.tgz 0ms (cache hit)
+95 http cache path-browserify@https://registry.npmjs.org/path-browserify/-/path-browserify-1.0.1.tgz 0ms (cache hit)
+96 http cache picomatch@https://registry.npmjs.org/picomatch/-/picomatch-4.0.7.tgz 0ms (cache hit)
+97 http cache nanoid@https://registry.npmjs.org/nanoid/-/nanoid-3.3.20.tgz 0ms (cache hit)
+98 http cache magic-string@https://registry.npmjs.org/magic-string/-/magic-string-0.30.21.tgz 0ms (cache hit)
+99 http cache muggle-string@https://registry.npmjs.org/muggle-string/-/muggle-string-0.4.1.tgz 0ms (cache hit)
+100 http cache lightningcss-win32-x64-msvc@https://registry.npmjs.org/lightningcss-win32-x64-msvc/-/lightningcss-win32-x64-msvc-1.33.0.tgz 0ms (cache hit)
+101 http cache fdir@https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz 0ms (cache hit)
+102 http cache estree-walker@https://registry.npmjs.org/estree-walker/-/estree-walker-2.0.2.tgz 0ms (cache hit)
+103 http cache lightningcss@https://registry.npmjs.org/lightningcss/-/lightningcss-1.33.0.tgz 0ms (cache hit)
+104 http cache detect-libc@https://registry.npmjs.org/detect-libc/-/detect-libc-2.1.2.tgz 0ms (cache hit)
+105 http cache entities@https://registry.npmjs.org/entities/-/entities-7.0.1.tgz 0ms (cache hit)
+106 http cache alien-signals@https://registry.npmjs.org/alien-signals/-/alien-signals-3.2.1.tgz 0ms (cache hit)
+107 http cache csstype@https://registry.npmjs.org/csstype/-/csstype-3.2.3.tgz 0ms (cache hit)
+108 http cache @vue/shared@https://registry.npmjs.org/@vue/shared/-/shared-3.5.43.tgz 0ms (cache hit)
+109 http cache @vue/runtime-dom@https://registry.npmjs.org/@vue/runtime-dom/-/runtime-dom-3.5.43.tgz 0ms (cache hit)
+110 http cache @vue/runtime-core@https://registry.npmjs.org/@vue/runtime-core/-/runtime-core-3.5.43.tgz 0ms (cache hit)
+111 http cache @vue/reactivity@https://registry.npmjs.org/@vue/reactivity/-/reactivity-3.5.43.tgz 0ms (cache hit)
+112 http cache @vue/server-renderer@https://registry.npmjs.org/@vue/server-renderer/-/server-renderer-3.5.43.tgz 0ms (cache hit)
+113 http cache @vue/compiler-ssr@https://registry.npmjs.org/@vue/compiler-ssr/-/compiler-ssr-3.5.43.tgz 0ms (cache hit)
+114 http cache @vue/language-core@https://registry.npmjs.org/@vue/language-core/-/language-core-3.3.12.tgz 0ms (cache hit)
+115 http cache @vue/compiler-sfc@https://registry.npmjs.org/@vue/compiler-sfc/-/compiler-sfc-3.5.43.tgz 0ms (cache hit)
+116 http cache @vue/compiler-dom@https://registry.npmjs.org/@vue/compiler-dom/-/compiler-dom-3.5.43.tgz 0ms (cache hit)
+117 http cache @vue/compiler-core@https://registry.npmjs.org/@vue/compiler-core/-/compiler-core-3.5.43.tgz 1ms (cache hit)
+118 http cache @volar/language-core@https://registry.npmjs.org/@volar/language-core/-/language-core-2.4.28.tgz 0ms (cache hit)
+119 http cache @volar/typescript@https://registry.npmjs.org/@volar/typescript/-/typescript-2.4.28.tgz 0ms (cache hit)
+120 http cache @vitejs/plugin-vue@https://registry.npmjs.org/@vitejs/plugin-vue/-/plugin-vue-6.0.9.tgz 0ms (cache hit)
+121 http cache @volar/source-map@https://registry.npmjs.org/@volar/source-map/-/source-map-2.4.28.tgz 0ms (cache hit)
+122 http cache @tauri-apps/plugin-fs@https://registry.npmjs.org/@tauri-apps/plugin-fs/-/plugin-fs-2.6.0.tgz 0ms (cache hit)
+123 http cache @tauri-apps/plugin-dialog@https://registry.npmjs.org/@tauri-apps/plugin-dialog/-/plugin-dialog-2.8.1.tgz 0ms (cache hit)
+124 http cache @tauri-apps/plugin-opener@https://registry.npmjs.org/@tauri-apps/plugin-opener/-/plugin-opener-2.7.0.tgz 0ms (cache hit)
+125 http cache @tauri-apps/cli-win32-x64-msvc@https://registry.npmjs.org/@tauri-apps/cli-win32-x64-msvc/-/cli-win32-x64-msvc-2.12.1.tgz 0ms (cache hit)
+126 http cache @tauri-apps/cli@https://registry.npmjs.org/@tauri-apps/cli/-/cli-2.12.1.tgz 0ms (cache hit)
+127 http cache @rolldown/pluginutils@https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.1.tgz 0ms (cache hit)
+128 http cache @tauri-apps/api@https://registry.npmjs.org/@tauri-apps/api/-/api-2.12.1.tgz 0ms (cache hit)
+129 http cache @rolldown/binding-win32-x64-msvc@https://registry.npmjs.org/@rolldown/binding-win32-x64-msvc/-/binding-win32-x64-msvc-1.2.13.tgz 0ms (cache hit)
+130 http cache @babel/types@https://registry.npmjs.org/@babel/types/-/types-7.29.8.tgz 0ms (cache hit)
+131 http cache @jridgewell/sourcemap-codec@https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.6.0.tgz 0ms (cache hit)
+132 http cache @oxc-project/types@https://registry.npmjs.org/@oxc-project/types/-/types-0.153.0.tgz 0ms (cache hit)
+133 http cache @babel/parser@https://registry.npmjs.org/@babel/parser/-/parser-7.29.9.tgz 0ms (cache hit)
+134 http cache @babel/helper-validator-identifier@https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.29.7.tgz 0ms (cache hit)
+135 http cache @babel/helper-string-parser@https://registry.npmjs.org/@babel/helper-string-parser/-/helper-string-parser-7.29.7.tgz 0ms (cache hit)
+136 silly tarball no local data for vue-tsc@https://registry.npmjs.org/vue-tsc/-/vue-tsc-3.3.12.tgz. Extracting by manifest.
+137 silly tarball no local data for vscode-uri@https://registry.npmjs.org/vscode-uri/-/vscode-uri-3.2.0.tgz. Extracting by manifest.
+138 silly tarball no local data for vue@https://registry.npmjs.org/vue/-/vue-3.5.43.tgz. Extracting by manifest.
+139 silly tarball no local data for vite@https://registry.npmjs.org/vite/-/vite-8.3.4.tgz. Extracting by manifest.
+140 silly tarball no local data for typescript@https://registry.npmjs.org/typescript/-/typescript-6.0.3.tgz. Extracting by manifest.
+141 silly tarball no local data for tinyglobby@https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.17.tgz. Extracting by manifest.
+142 silly tarball no local data for rolldown@https://registry.npmjs.org/rolldown/-/rolldown-1.2.13.tgz. Extracting by manifest.
+143 silly tarball no local data for source-map-js@https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.2.tgz. Extracting by manifest.
+144 silly tarball no local data for picocolors@https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz. Extracting by manifest.
+145 silly tarball no local data for postcss@https://registry.npmjs.org/postcss/-/postcss-8.5.29.tgz. Extracting by manifest.
+146 silly tarball no local data for path-browserify@https://registry.npmjs.org/path-browserify/-/path-browserify-1.0.1.tgz. Extracting by manifest.
+147 silly tarball no local data for picomatch@https://registry.npmjs.org/picomatch/-/picomatch-4.0.7.tgz. Extracting by manifest.
+148 silly tarball no local data for nanoid@https://registry.npmjs.org/nanoid/-/nanoid-3.3.20.tgz. Extracting by manifest.
+149 silly tarball no local data for magic-string@https://registry.npmjs.org/magic-string/-/magic-string-0.30.21.tgz. Extracting by manifest.
+150 silly tarball no local data for muggle-string@https://registry.npmjs.org/muggle-string/-/muggle-string-0.4.1.tgz. Extracting by manifest.
+151 silly tarball no local data for lightningcss-win32-x64-msvc@https://registry.npmjs.org/lightningcss-win32-x64-msvc/-/lightningcss-win32-x64-msvc-1.33.0.tgz. Extracting by manifest.
+152 silly tarball no local data for fdir@https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz. Extracting by manifest.
+153 silly tarball no local data for estree-walker@https://registry.npmjs.org/estree-walker/-/estree-walker-2.0.2.tgz. Extracting by manifest.
+154 silly tarball no local data for lightningcss@https://registry.npmjs.org/lightningcss/-/lightningcss-1.33.0.tgz. Extracting by manifest.
+155 silly tarball no local data for detect-libc@https://registry.npmjs.org/detect-libc/-/detect-libc-2.1.2.tgz. Extracting by manifest.
+156 silly tarball no local data for entities@https://registry.npmjs.org/entities/-/entities-7.0.1.tgz. Extracting by manifest.
+157 silly tarball no local data for alien-signals@https://registry.npmjs.org/alien-signals/-/alien-signals-3.2.1.tgz. Extracting by manifest.
+158 silly tarball no local data for csstype@https://registry.npmjs.org/csstype/-/csstype-3.2.3.tgz. Extracting by manifest.
+159 silly tarball no local data for @vue/shared@https://registry.npmjs.org/@vue/shared/-/shared-3.5.43.tgz. Extracting by manifest.
+160 silly tarball no local data for @vue/runtime-dom@https://registry.npmjs.org/@vue/runtime-dom/-/runtime-dom-3.5.43.tgz. Extracting by manifest.
+161 silly tarball no local data for @vue/runtime-core@https://registry.npmjs.org/@vue/runtime-core/-/runtime-core-3.5.43.tgz. Extracting by manifest.
+162 silly tarball no local data for @vue/reactivity@https://registry.npmjs.org/@vue/reactivity/-/reactivity-3.5.43.tgz. Extracting by manifest.
+163 silly tarball no local data for @vue/server-renderer@https://registry.npmjs.org/@vue/server-renderer/-/server-renderer-3.5.43.tgz. Extracting by manifest.
+164 silly tarball no local data for @vue/compiler-ssr@https://registry.npmjs.org/@vue/compiler-ssr/-/compiler-ssr-3.5.43.tgz. Extracting by manifest.
+165 silly tarball no local data for @vue/language-core@https://registry.npmjs.org/@vue/language-core/-/language-core-3.3.12.tgz. Extracting by manifest.
+166 silly tarball no local data for @vue/compiler-sfc@https://registry.npmjs.org/@vue/compiler-sfc/-/compiler-sfc-3.5.43.tgz. Extracting by manifest.
+167 silly tarball no local data for @vue/compiler-dom@https://registry.npmjs.org/@vue/compiler-dom/-/compiler-dom-3.5.43.tgz. Extracting by manifest.
+168 silly tarball no local data for @vue/compiler-core@https://registry.npmjs.org/@vue/compiler-core/-/compiler-core-3.5.43.tgz. Extracting by manifest.
+169 silly tarball no local data for @volar/language-core@https://registry.npmjs.org/@volar/language-core/-/language-core-2.4.28.tgz. Extracting by manifest.
+170 silly tarball no local data for @volar/typescript@https://registry.npmjs.org/@volar/typescript/-/typescript-2.4.28.tgz. Extracting by manifest.
+171 silly tarball no local data for @vitejs/plugin-vue@https://registry.npmjs.org/@vitejs/plugin-vue/-/plugin-vue-6.0.9.tgz. Extracting by manifest.
+172 silly tarball no local data for @volar/source-map@https://registry.npmjs.org/@volar/source-map/-/source-map-2.4.28.tgz. Extracting by manifest.
+173 silly tarball no local data for @tauri-apps/plugin-fs@https://registry.npmjs.org/@tauri-apps/plugin-fs/-/plugin-fs-2.6.0.tgz. Extracting by manifest.
+174 silly tarball no local data for @tauri-apps/plugin-dialog@https://registry.npmjs.org/@tauri-apps/plugin-dialog/-/plugin-dialog-2.8.1.tgz. Extracting by manifest.
+175 silly tarball no local data for @tauri-apps/plugin-opener@https://registry.npmjs.org/@tauri-apps/plugin-opener/-/plugin-opener-2.7.0.tgz. Extracting by manifest.
+176 silly tarball no local data for @tauri-apps/cli-win32-x64-msvc@https://registry.npmjs.org/@tauri-apps/cli-win32-x64-msvc/-/cli-win32-x64-msvc-2.12.1.tgz. Extracting by manifest.
+177 silly tarball no local data for @tauri-apps/cli@https://registry.npmjs.org/@tauri-apps/cli/-/cli-2.12.1.tgz. Extracting by manifest.
+178 silly tarball no local data for @rolldown/pluginutils@https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.1.tgz. Extracting by manifest.
+179 silly tarball no local data for @tauri-apps/api@https://registry.npmjs.org/@tauri-apps/api/-/api-2.12.1.tgz. Extracting by manifest.
+180 silly tarball no local data for @rolldown/binding-win32-x64-msvc@https://registry.npmjs.org/@rolldown/binding-win32-x64-msvc/-/binding-win32-x64-msvc-1.2.13.tgz. Extracting by manifest.
+181 silly tarball no local data for @babel/types@https://registry.npmjs.org/@babel/types/-/types-7.29.8.tgz. Extracting by manifest.
+182 silly tarball no local data for @jridgewell/sourcemap-codec@https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.6.0.tgz. Extracting by manifest.
+183 silly tarball no local data for @oxc-project/types@https://registry.npmjs.org/@oxc-project/types/-/types-0.153.0.tgz. Extracting by manifest.
+184 silly tarball no local data for @babel/parser@https://registry.npmjs.org/@babel/parser/-/parser-7.29.9.tgz. Extracting by manifest.
+185 silly tarball no local data for @babel/helper-validator-identifier@https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.29.7.tgz. Extracting by manifest.
+186 silly tarball no local data for @babel/helper-string-parser@https://registry.npmjs.org/@babel/helper-string-parser/-/helper-string-parser-7.29.7.tgz. Extracting by manifest.
+187 http fetch GET 200 https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz 1668ms (cache miss)
+188 http fetch GET 200 https://registry.npmjs.org/vue-tsc/-/vue-tsc-3.3.12.tgz 1686ms (cache miss)
+189 http fetch GET 200 https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.17.tgz 1726ms (cache miss)
+190 http fetch GET 200 https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz 1893ms (cache miss)
+191 http fetch GET 200 https://registry.npmjs.org/detect-libc/-/detect-libc-2.1.2.tgz 1922ms (cache miss)
+192 http fetch GET 200 https://registry.npmjs.org/alien-signals/-/alien-signals-3.2.1.tgz 1953ms (cache miss)
+193 http fetch GET 200 https://registry.npmjs.org/npm 2149ms
+194 http fetch GET 200 https://registry.npmjs.org/picomatch/-/picomatch-4.0.7.tgz 2040ms (cache miss)
+195 http fetch GET 200 https://registry.npmjs.org/@vue/compiler-ssr/-/compiler-ssr-3.5.43.tgz 2130ms (cache miss)
+196 http fetch GET 200 https://registry.npmjs.org/path-browserify/-/path-browserify-1.0.1.tgz 2234ms (cache miss)
+197 http fetch GET 200 https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.2.tgz 2259ms (cache miss)
+198 http fetch GET 200 https://registry.npmjs.org/@vue/shared/-/shared-3.5.43.tgz 2276ms (cache miss)
+199 http fetch GET 200 https://registry.npmjs.org/magic-string/-/magic-string-0.30.21.tgz 2321ms (cache miss)
+200 http fetch GET 200 https://registry.npmjs.org/@volar/source-map/-/source-map-2.4.28.tgz 2328ms (cache miss)
+201 http fetch GET 200 https://registry.npmjs.org/nanoid/-/nanoid-3.3.20.tgz 2352ms (cache miss)
+202 http fetch GET 200 https://registry.npmjs.org/vscode-uri/-/vscode-uri-3.2.0.tgz 2397ms (cache miss)
+203 http fetch GET 200 https://registry.npmjs.org/estree-walker/-/estree-walker-2.0.2.tgz 2414ms (cache miss)
+204 http fetch GET 200 https://registry.npmjs.org/@volar/language-core/-/language-core-2.4.28.tgz 2520ms (cache miss)
+205 http fetch GET 200 https://registry.npmjs.org/@tauri-apps/plugin-dialog/-/plugin-dialog-2.8.1.tgz 2559ms (cache miss)
+206 http fetch GET 200 https://registry.npmjs.org/@vue/reactivity/-/reactivity-3.5.43.tgz 2607ms (cache miss)
+207 http fetch GET 200 https://registry.npmjs.org/@tauri-apps/plugin-opener/-/plugin-opener-2.7.0.tgz 2622ms (cache miss)
+208 http fetch GET 200 https://registry.npmjs.org/@vitejs/plugin-vue/-/plugin-vue-6.0.9.tgz 2644ms (cache miss)
+209 http fetch GET 200 https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.1.tgz 2661ms (cache miss)
+210 http fetch GET 200 https://registry.npmjs.org/muggle-string/-/muggle-string-0.4.1.tgz 2719ms (cache miss)
+211 http fetch GET 200 https://registry.npmjs.org/lightningcss/-/lightningcss-1.33.0.tgz 2720ms (cache miss)
+212 http fetch GET 200 https://registry.npmjs.org/@vue/server-renderer/-/server-renderer-3.5.43.tgz 2791ms (cache miss)
+213 http fetch GET 200 https://registry.npmjs.org/@oxc-project/types/-/types-0.153.0.tgz 2791ms (cache miss)
+214 http fetch GET 200 https://registry.npmjs.org/@vue/runtime-core/-/runtime-core-3.5.43.tgz 2862ms (cache miss)
+215 http fetch GET 200 https://registry.npmjs.org/@vue/compiler-core/-/compiler-core-3.5.43.tgz 2882ms (cache miss)
+216 http fetch GET 200 https://registry.npmjs.org/csstype/-/csstype-3.2.3.tgz 2901ms (cache miss)
+217 http fetch GET 200 https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.29.7.tgz 2956ms (cache miss)
+218 http fetch GET 200 https://registry.npmjs.org/@tauri-apps/plugin-fs/-/plugin-fs-2.6.0.tgz 3006ms (cache miss)
+219 http fetch GET 200 https://registry.npmjs.org/@vue/runtime-dom/-/runtime-dom-3.5.43.tgz 3089ms (cache miss)
+220 http fetch GET 200 https://registry.npmjs.org/@tauri-apps/cli/-/cli-2.12.1.tgz 3128ms (cache miss)
+221 http fetch GET 200 https://registry.npmjs.org/@vue/compiler-dom/-/compiler-dom-3.5.43.tgz 3175ms (cache miss)
+222 http fetch GET 200 https://registry.npmjs.org/postcss/-/postcss-8.5.29.tgz 3293ms (cache miss)
+223 http fetch GET 200 https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.6.0.tgz 3310ms (cache miss)
+224 http fetch GET 200 https://registry.npmjs.org/@volar/typescript/-/typescript-2.4.28.tgz 3381ms (cache miss)
+225 http fetch GET 200 https://registry.npmjs.org/rolldown/-/rolldown-1.2.13.tgz 3483ms (cache miss)
+226 http fetch GET 200 https://registry.npmjs.org/@babel/helper-string-parser/-/helper-string-parser-7.29.7.tgz 3592ms (cache miss)
+227 http fetch GET 200 https://registry.npmjs.org/vite/-/vite-8.3.4.tgz 3610ms (cache miss)
+228 http fetch GET 200 https://registry.npmjs.org/@babel/parser/-/parser-7.29.9.tgz 3622ms (cache miss)
+229 http fetch GET 200 https://registry.npmjs.org/vue/-/vue-3.5.43.tgz 3642ms (cache miss)
+230 http fetch GET 200 https://registry.npmjs.org/@tauri-apps/api/-/api-2.12.1.tgz 3854ms (cache miss)
+231 http fetch GET 200 https://registry.npmjs.org/entities/-/entities-7.0.1.tgz 3927ms (cache miss)
+232 http fetch GET 200 https://registry.npmjs.org/@vue/language-core/-/language-core-3.3.12.tgz 4096ms (cache miss)
+233 http fetch GET 200 https://registry.npmjs.org/@babel/types/-/types-7.29.8.tgz 4291ms (cache miss)
+234 http fetch GET 200 https://registry.npmjs.org/lightningcss-win32-x64-msvc/-/lightningcss-win32-x64-msvc-1.33.0.tgz 4625ms (cache miss)
+235 http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-6.0.3.tgz 4788ms (cache miss)
+236 http fetch GET 200 https://registry.npmjs.org/@vue/compiler-sfc/-/compiler-sfc-3.5.43.tgz 6990ms (cache miss)
+237 http fetch GET 200 https://registry.npmjs.org/@tauri-apps/cli-win32-x64-msvc/-/cli-win32-x64-msvc-2.12.1.tgz 14741ms (cache miss)
+238 http fetch GET 200 https://registry.npmjs.org/@rolldown/binding-win32-x64-msvc/-/binding-win32-x64-msvc-1.2.13.tgz 15323ms (cache miss)
+239 silly ADD node_modules/vue-tsc
+240 silly ADD node_modules/vue
+241 silly ADD node_modules/vscode-uri
+242 silly ADD node_modules/vite
+243 silly ADD node_modules/typescript
+244 silly ADD node_modules/tinyglobby
+245 silly ADD node_modules/source-map-js
+246 silly ADD node_modules/rolldown
+247 silly ADD node_modules/postcss
+248 silly ADD node_modules/picomatch
+249 silly ADD node_modules/picocolors
+250 silly ADD node_modules/path-browserify
+251 silly ADD node_modules/nanoid
+252 silly ADD node_modules/muggle-string
+253 silly ADD node_modules/magic-string
+254 silly ADD node_modules/lightningcss-win32-x64-msvc
+255 silly ADD
+256 silly ADD
+257 silly ADD
+258 silly ADD
+259 silly ADD
+260 silly ADD
+261 silly ADD
+262 silly ADD
+263 silly ADD
+264 silly ADD
+265 silly ADD node_modules/lightningcss
+266 silly ADD
+267 silly ADD node_modules/fdir
+268 silly ADD node_modules/estree-walker
+269 silly ADD node_modules/entities
+270 silly ADD node_modules/detect-libc
+271 silly ADD node_modules/csstype
+272 silly ADD node_modules/alien-signals
+273 silly ADD node_modules/@vue/shared
+274 silly ADD node_modules/@vue/server-renderer
+275 silly ADD node_modules/@vue/runtime-dom
+276 silly ADD node_modules/@vue/runtime-core
+277 silly ADD node_modules/@vue/reactivity
+278 silly ADD node_modules/@vue/language-core
+279 silly ADD node_modules/@vue/compiler-ssr
+280 silly ADD node_modules/@vue/compiler-sfc
+281 silly ADD node_modules/@vue/compiler-dom
+282 silly ADD node_modules/@vue/compiler-core
+283 silly ADD node_modules/@volar/typescript
+284 silly ADD node_modules/@volar/source-map
+285 silly ADD node_modules/@volar/language-core
+286 silly ADD node_modules/@vitejs/plugin-vue
+287 silly ADD node_modules/@tauri-apps/plugin-opener
+288 silly ADD node_modules/@tauri-apps/plugin-fs
+289 silly ADD node_modules/@tauri-apps/plugin-dialog
+290 silly ADD node_modules/@tauri-apps/cli-win32-x64-msvc
+291 silly ADD
+292 silly ADD
+293 silly ADD
+294 silly ADD
+295 silly ADD
+296 silly ADD
+297 silly ADD
+298 silly ADD
+299 silly ADD
+300 silly ADD
+301 silly ADD node_modules/@tauri-apps/cli
+302 silly ADD node_modules/@tauri-apps/api
+303 silly ADD node_modules/@rolldown/pluginutils
+304 silly ADD node_modules/@rolldown/binding-win32-x64-msvc
+305 silly ADD
+306 silly ADD
+307 silly ADD
+308 silly ADD
+309 silly ADD
+310 silly ADD
+311 silly ADD
+312 silly ADD
+313 silly ADD
+314 silly ADD
+315 silly ADD
+316 silly ADD
+317 silly ADD
+318 silly ADD
+319 silly ADD node_modules/@oxc-project/types
+320 silly ADD node_modules/@jridgewell/sourcemap-codec
+321 silly ADD node_modules/@babel/types
+322 silly ADD node_modules/@babel/parser
+323 silly ADD node_modules/@babel/helper-validator-identifier
+324 silly ADD node_modules/@babel/helper-string-parser
+325 verbose cwd D:\LIBS\SimLIBS\Vue
+326 verbose os Windows_NT 10.0.26200
+327 verbose node v22.16.0
+328 verbose npm  v10.9.2
+329 notice
+329 notice New major version of npm available! 10.9.2 -> 12.2.0
+329 notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+329 notice To update run: npm install -g npm@12.2.0
+329 notice  { force: true, [Symbol(proc-log.meta)]: true }
+330 verbose exit 0
+331 info ok

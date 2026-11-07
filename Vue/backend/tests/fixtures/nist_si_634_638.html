@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html class="libs-output" xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+<title>NIST LIBS Database Output</title>
+<link rel="stylesheet" type="text/css" href="https://physics.nist.gov/PhysRefData/ASD/LIBS/css/libs_output.css" />
+<link rel="stylesheet" type="text/css" href="https://physics.nist.gov/PhysRefData/ASD/LIBS/css/libs.css" />
+<!-- Google Analtyics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9SLN1VEEJ2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9SLN1VEEJ2');
+</script>
+<!-- End of Google Analytics 4 -->
+<SCRIPT async id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&amp;subagency=NIST&amp;pua=UA-37115410-46&amp;yt=false&amp;exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c" type="text/javascript"></script>
+<script src="https://www.gstatic.com/charts/loader.js" type="text/javascript"></script>
+<script src="/js/clickjack.js" type="text/javascript"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body style="margin-top:0">
+<h1><a href="/PhysRefData/ASD/LIBS/libs-form.html">NIST LIBS Database</a>
+  <a href="/PhysRefData/ASD/Html/libshelp.html#LIBS_OUTPUT" class="help" target="_Help" title="Help on LIBS Interace">&nbsp;?&nbsp;</a></h1>
+<script type="text/javascript">
+<!-- //
+var newwindow
+//var n
+function popdef(n){
+newwindow = window.open(n,"data1","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=600,height=450");
+if (window.focus) {newwindow.focus()}
+return true;
+}
+function popbib(n){
+newwindow = window.open(n,"data2","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=950,height=800");
+if (window.focus) {newwindow.focus()}
+return true;
+}
+function popded(n){
+//newwindow = window.open(n,"data3","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=640,height=250");
+newwindow = window.open(n,"data3","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=800,height=320");if (window.focus) {newwindow.focus()}
+return true;
+}
+function popdiag(n){
+newwindow = window.open(n,"data3","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=800,height=1000");if (window.focus) {newwindow.focus()}
+return true;
+}
+// -->
+</script>
+
+<p>
+<hr class="noshade" />
+
+
+<p>
+<span id="min_rel_int_warning"></span><span id="max_res_warning"></span>
+  <script type="text/javascript" src="https://physics.nist.gov/PhysRefData/ASD/LIBS/js/saha_lte.js"></script>
+  
+  <script type="text/javascript">
+    google.charts.load("current", {packages:['corechart']});
+    var chart;
+    var view;
+    var lineChart;
+    var columnChart;
+    var imgURI;
+    var options;
+    var dataDoppler;
+    var dataSticks;
+      var stickPlot=false;
+
+    var composition = 'Si:100';
+    var koeff = 6.043e21;
+    var cmeV = 8065.54393734921;
+    var resolution = 1000;
+    var temp = 1;
+    var eden = 1e17;
+    var hiddenCols = [];
+    var IscaleType = 2;
+    var lineOptions = {
+      fontName: 'Merriweather',
+      title:'Saha/LTE Spectrum for Si\nT = 1 eV, N = 1.0e+17 cm-3, Resolution = 1000. Total of 2 lines.',
+//titleTextStyle: { color: 'black', fontName: 'Merriweather', fontSize: '16' },
+titleTextStyle: { color: 'white', fontName: 'Merriweather', fontSize: '16' },
+      width:1000,
+      height:600,
+      vAxis:{title:'Line Intensity (arb. unit of photon flux)',
+        format:'0.0E+00',
+//      scaleType:'log'
+      },
+      hAxis:{title:'Wavelength (nm)'},
+      tooltip: {isHtml: true },
+      explorer:{
+        actions:['dragToZoom','rightClickToReset'],
+        axis:'horizontal',
+        keepInBounds:true,
+        maxZoomIn:100000.0,
+        zoomDelta:2.0
+      }
+    };
+    var stickOptions = {
+      fontName: 'Merriweather',
+      title:'Saha/LTE Spectrum for Si\nT = 1 eV, N = 1.0e+17 cm-3. Total of 2 lines.',
+titleTextStyle: { color: 'white', fontName: 'Merriweather', fontSize: '16' },
+      width:1000,
+      height:600,
+      vAxis:{title:'Line Intensity (arb. unit of photon flux)'},
+      hAxis:{title:'Ritz wavelength (nm)'},
+      bar:{groupWidth:5},
+      tooltip: {isHtml: true },
+      explorer:{
+        actions:['dragToZoom','rightClickToReset'],
+        axis:'horizontal',
+        keepInBounds:true,
+        maxZoomIn:100000.0,
+        zoomDelta:2.0
+      }
+    };
+    var lines = [[634.886,233600000,81251.32,14,2,65500.47],[637.313,136000000,81191.34,14,2,65500.47]];
+    var spectra = {};
+spectra[14] = {};
+spectra[14][1] = {};
+spectra[14][1]['name'] = '';
+spectra[14][1]['abundance'] = '';
+spectra[14][2] = {};
+spectra[14][2]['name'] = 'Si II';
+spectra[14][2]['abundance'] = '0.891025979812713';
+spectra[14][3] = {};
+spectra[14][3]['name'] = '';
+spectra[14][3]['abundance'] = '';
+spectra[14][4] = {};
+spectra[14][4]['name'] = '';
+spectra[14][4]['abundance'] = '';
+spectra[14][5] = {};
+spectra[14][5]['name'] = '';
+spectra[14][5]['abundance'] = '';
+spectra[14][6] = {};
+spectra[14][6]['name'] = '';
+spectra[14][6]['abundance'] = '';
+spectra[14][7] = {};
+spectra[14][7]['name'] = '';
+spectra[14][7]['abundance'] = '';
+spectra[14][8] = {};
+spectra[14][8]['name'] = '';
+spectra[14][8]['abundance'] = '';
+spectra[14][9] = {};
+spectra[14][9]['name'] = '';
+spectra[14][9]['abundance'] = '';
+spectra[14][10] = {};
+spectra[14][10]['name'] = '';
+spectra[14][10]['abundance'] = '';
+spectra[14][11] = {};
+spectra[14][11]['name'] = '';
+spectra[14][11]['abundance'] = '';
+spectra[14][12] = {};
+spectra[14][12]['name'] = '';
+spectra[14][12]['abundance'] = '';
+spectra[14][13] = {};
+spectra[14][13]['name'] = '';
+spectra[14][13]['abundance'] = '';
+spectra[14][14] = {};
+spectra[14][14]['name'] = '';
+spectra[14][14]['abundance'] = '';
+
+    var ips = {};
+ips[14] = {};
+ips[14][1] = [65747.76];
+ips[14][2] = [131838.14];
+ips[14][3] = [270139.3];
+ips[14][4] = [364093.1];
+ips[14][5] = [1345070];
+ips[14][6] = [1655690];
+ips[14][7] = [1988730];
+ips[14][8] = [2448640];
+ips[14][9] = [2833300];
+ips[14][10] = [3237350];
+ips[14][11] = [3841400];
+ips[14][12] = [4221630];
+ips[14][13] = [19661038.1];
+ips[14][14] = [21560634.27];
+
+    var gValues = {};
+gValues[14] = {};
+gValues[14][1] = [1,3,5,5,1,5,1,3,5,3,3,5,7,3,5,3,5,7,1,3,5,3,5,7,9,5,5,3,1,1,7,3,3,5,1,7,3,5,3,5,5,3,1,3,3,5,7,1,3,5,7,5,3,9,5,1,7,5,7,9,3,7,5,7,9,3,7,5,7,11,9,3,5,1,3,5,3,5,3,1,5,3,3,5,1,5,7,7,3,5,9,3,5,1,7,5,7,3,9,7,5,3,1,7,9,7,3,7,5,11,9,3,5,5,5,3,3,1,3,5,3,5,1,5,7,7,3,5,9,3,5,3,7,7,9,5,1,5,7,1,3,3,7,7,9,7,5,11,9,3,5,5,5,3,1,3,5,5,7,5,3,7,9,5,7,9,5,1,3,1,7,3,7,7,9,5,7,5,11,9,3,5,3,5,1,5,3,7,5,3,1,3,5,9,7,5,3,7,5,3,7,1,5,3,3,5,1,3,5,9,5,3,5,7,3,7,1,3,5,3,1,5,3,5,7,5,3,5,1,3,7,5,3,7,5,3,1,5,7,3,5,3,1,3,5,5,3,5,7,3,1,3,7,5,3,1,5,3,5,7,5,3,1,3,5,7,5,3,5,7,3,7,1,3,5,3,1,5,3,5,7,5,3,1,3,5,5,7,3,5,7,3,1,3,7,5,3,1,5,5,3,7,5,3,1,3,5,7,5,3,5,1,3,7,5,3,7,5,7,3,5,3,1,5,3,5,7,5,3,5,7,5,3,5,7,5,3,5,7,3,7,5,3,1,5,5,7,3,5,3,5,7,5,3,5,5,7,3,5,7,5,3,5,7,3,5,7,5,7,3,3,1,5,5,5,3,7,3,5,5,7,5,3,5,7,5,3,5,5,7,3,5,7,5,3,5,7,5,3,5,7,7,3,5,3,5,1,7,3,5,5,5,7,3,3,5,5,7,5,3,5,7,5,3,5,7,3,7,3,7,3,7,3,7,3,7,3,7,3,7,7,5,7,3,1,3,3,7,5,3,1,3,7,5,3,3,7,5,3,3,7,5,3,3,7,5,3,7,3,7,3,7,3,7,3,3,7,7,3,7,3,3,7,7,3,7,3,7,3,3,7,7,3,7,3,7,3,7,3,3,7,7,3,7,3,7,3,7,3,3,7,7,3,7,3,7,3,7,3,7,3,7,7,7,7,7,7,3,3,5,7,7,5,3,7,5,3];
+gValues[14][2] = [2,4,2,4,6,4,6,2,2,4,6,2,4,2,4,2,4,6,8,6,2,4,4,6,2,4,6,8,6,2,4,10,8,4,6,8,10,2,4,6,2,4,6,2,4,8,6,10,8,2,4,2,4,6,8,6,10,8,4,2,4,2,6,4,2,8,6,4,6,4,2,8,6,10,8,2,4,4,2,8,6,10,8,4,2,8,6,10,8,8,6,10,8,6,2,4,8,6,8,2,4,2,4,6,4,6,4,6,4,4,2,4,6,2,4,6,4,6,8,10,2,4,6,8,6,4,2,6,8,4,6,8,10,6,8,8,10,12,10,6,8,6,4,2,10,6,8,6];
+gValues[14][3] = [1,1,3,5,3,5,1,3,5,7,5,3,3,1,1,5,1,3,5,3,5,7,9,3,5,7,5,7,5,3,1,5,7,9,3,5,3,1,5,3,1,3,5,7,7,1,3,5,3,5,7,5,3,3,5,7,9,7,9,9,11,1,3,1,3,5,7,3,3,5,7,5,3,5,7,9,7,9,9,11,1,11,13,11,9,3,7,3,5,3,1,3,5,7,1,5,3,5,3,3,5,7,3,5,7,9,7,9,9,11,1,11,13,11,9,13,15,13,11,7,5,3,5,7,5,7,9,9,9,7,11,11,13,11,9,13,15,13,11,15,17,15,13,5,7,7,5,3,9,7,5,5,11,9,7,11,13,11,9,13,15,13,11,15,17,15,13,17,19,17,15,7,1,5,9,7,9,7,3,7,11,7,9,9];
+gValues[14][4] = [2,2,4];
+gValues[14][5] = [1];
+gValues[14][6] = [4,2];
+gValues[14][7] = [5,3,1,5,1];
+gValues[14][8] = [4,4,6];
+gValues[14][9] = [1,3,5,5];
+gValues[14][10] = [2,4];
+gValues[14][11] = [1];
+gValues[14][12] = [2];
+gValues[14][13] = [1];
+gValues[14][14] = [2];
+
+    var levels = {};
+levels[14] = {};
+levels[14][1] = [0.000,77.115,223.157,6298.850,15394.370,33326.053,39683.163,39760.285,39955.053,40991.884,45276.188,45293.629,45321.848,47284.061,47351.554,48020.074,48102.323,48264.292,49028.294,49060.601,49188.617,49399.670,49850.830,49933.775,50054.80,50189.389,50499.838,50566.397,50602.44,51612.012,53362.24,53387.334,54185.264,54205.090,54245.020,54257.582,54313.818,54528.220,54871.031,56503.346,56690.903,56700.25,56733.38,56780.427,56978.256,57017.496,57198.027,57295.881,57328.789,57372.297,57450.580,57468.239,57541.918,57583.657,57798.072,58311.659,58774.368,58775.451,58786.860,58788.880,58801.529,58893.40,59032.19,59034.988,59037.043,59056.508,59109.959,59110.892,59118.03,59128.40,59131.912,59190.46,59191.072,59221.11,59273.575,59506.359,59636.667,59917.336,60010.458,60042.50,60300.860,60381.278,60487.103,60496.358,60621.64,60645.441,60704.53,60705.464,60706.558,60815.925,60848.946,60856.630,60962.105,61198.036,61303.381,61304.283,61305.050,61305.67,61306.713,61423.23,61447.86,61511.77,61538.05,61562.477,61563.952,61574.814,61595.43,61597.404,61598.145,61614.37,61617.17,61647.36,61647.875,61823.550,61841.94,61881.60,61936.13,61960.26,62141.8,62156.816,62226.39,62231.99,62318.7,62349.93,62376.820,62421.03,62450.4,62519.66,62534.08,62545.10,62596.32,62666.25,62667.823,62669.164,62669.179,62669.727,62718.99,62774.99,62802.86,62806.65,62813.26,62925.80,62935.76,62936.14,62936.81,62954.46,62955.00,62966.61,62968.49,62985.96,62986.32,63020.42,63093.41,63097.36,63123.36,63130.49,63204.89,63225.5,63340.70,63356.24,63486.93,63488.01,63488.91,63489.44,63490.66,63514.533,63575.35,63576.85,63584.22,63618.6,63641.77,63750.39,63760.24,63762.20,63762.93,63770.28,63773.29,63773.58,63781.97,63783.31,63793.52,63794.31,63844.65,63860.44,63863.80,63863.84,63884.61,63945.10,63990.67,64020.42,64079.74,64085.87,64104.88,64133.93,64187.80,64243.30,64287.43,64295.26,64322.71,64337.81,64351.93,64358.52,64366.68,64376.18,64393.66,64398.19,64425.97,64432.03,64488.72,64550.37,64553.46,64635.82,64646.73,64647.46,64654.97,64662.04,64674.61,64678.93,64687.77,64699.46,64703.23,64713.05,64723.88,64758.61,64795.43,64795.56,64832.70,64855.48,64859.23,64861.02,64881.45,64916.64,64920.15,64923.97,64943.94,64946.12,64952.58,64961.67,64965.03,64967.34,64982.37,64982.42,65000.11,65002.16,65025.30,65055.82,65092.05,65099.38,65102.52,65108.74,65109.47,65116.72,65117.65,65125.26,65135.28,65138.22,65146.14,65151.67,65152.74,65170.67,65177.70,65184.24,65196.82,65197.98,65203.73,65226.60,65231.21,65255.31,65258.33,65258.83,65261.50,65264.91,65267.35,65268.80,65272.41,65278.23,65280.10,65287.04,65291.26,65295.03,65307.30,65311.78,65316.57,65324.68,65325.82,65330.38,65349.50,65349.72,65365.05,65368.23,65369.94,65372.80,65372.98,65378.02,65379.19,65382.18,65388.96,65390.89,65393.91,65396.73,65399.60,65402.24,65407.15,65407.72,65413.38,65414.0,65423.14,65433.14,65433.17,65441.93,65446.05,65447.45,65447.6,65453.23,65460.22,65468.0,65469.78,65470.7,65471.53,65472.0,65478.35,65478.35,65479.14,65483.96,65486.67,65488.40,65494.05,65496.59,65497.91,65506.81,65514.3,65514.3,65519.93,65522.63,65528.19,65532.0,65539.72,65539.81,65539.99,65541.20,65543.02,65545.28,65549.05,65550.33,65551.13,65554.50,65554.77,65555.69,65557.07,65557.35,65565.03,65568.83,65569.53,65571.35,65575.9,65580.7,65580.9,65584.8,65586.30,65590.06,65592.12,65596.21,65597.05,65597.73,65601.9,65601.9,65602.64,65605.56,65606.56,65608.44,65608.44,65608.63,65609.1,65612.24,65613.3,65613.95,65615.61,65616.3,65616.84,65621.6,65623.93,65624.28,65625.2,65628.3,65630.9,65630.9,65633.15,65634.5,65637.1,65637.9,65640.16,65640.7,65642.79,65644.03,65646.6,65646.99,65647.43,65649.95,65651.30,65652.19,65652.39,65652.39,65652.4,65654.15,65656.3,65656.33,65657.24,65657.50,65658.0,65658.6,65660.26,65660.9,65662.00,65662.00,65662.7,65662.80,65665.4,65666.8,65667.2,65667.26,65669.8,65670.71,65670.91,65671.4,65672.98,65674.4,65675.30,65678.0,65678.99,65681.1,65682.2,65683.7,65685.2,65686.5,65688.15,65688.72,65690.9,65691.07,65693.00,65693.2,65693.90,65695.2,65695.74,65697.47,65697.58,65701.56,65728.30,65728.86,65730.40,65732.27,65732.30,65736.06,65758.86,65760.50,65761.36,65764.03,65784.65,65786.0,65786.90,65789.56,65806.94,65807.9,65808.80,65811.24,65826.36,65827.3,65827.98,65843.45,65844.50,65858.50,65859.72,65871.88,65872.83,65883.80,65884.68,65894.14,65894.52,65904.12,65904.47,65912.60,65913.13,65920.18,65920.45,65927.37,65927.50,65933.95,65934.45,65939.75,65939.96,65945.16,65945.19,65950.17,65950.26,65954.76,65954.87,65958.80,65959.06,65962.63,65962.72,65966.17,65966.22,65969.54,65969.58,65972.57,65972.64,65975.36,65975.41,65978.19,65978.19,65980.66,65980.95,65982.98,65983.38,65985.09,65985.23,65987.29,65987.41,65989.29,65989.36,65990.87,65991.07,65992.59,65994.30,65995.81,65997.34,65998.59,66000.05,79664.0,81724.6,81826.2,81976.16,92330,92330,92330,94291.73,94365.59,94413.01];
+levels[14][2] = [0.00,287.24,42824.29,42932.62,43107.91,55309.35,55325.18,65500.47,76665.35,79338.50,79355.02,81191.34,81251.32,83801.95,84004.26,97972.09,101023.05,101024.35,103556.03,103556.16,103860.74,103885.25,108778.7,108820.6,111184.46,112394.56,112394.72,113760.15,113760.32,113962.08,113976.72,114177.1,114177.1,114265.64,114327.15,114414.58,114529.14,116862.38,116978.38,117178.06,117914.80,118522.86,118522.93,119245.22,119273.81,119311.19,119311.34,119578.23,119578.23,121444.12,121590.19,121814.38,122163.48,122163.54,122655.25,122655.37,122835.13,122835.13,123033.5,123097.63,123138.67,124276.7,124316.9,124325.3,124337.3,124449.5,124495.7,124495.7,124567.4,124615.6,124638.9,124822.08,124822.14,124948.40,124948.40,125024.9,125033.7,126236.4,126279.0,126304.82,126304.82,126396.47,126396.47,126525.8,126545.4,127363.50,127363.50,127432.02,127432.02,128145.35,128145.35,128197.9,128197.9,131677.1,131784.9,131861.93,131918.8,131988.05,132162.29,132592.1,132676.2,134016.90,134079.00,134213.63,134905.28,135297.3,135303.5,136800,136800,143982.6,144004.0,149871.2,149928.0,150321.8,150442.5,150657.5,151077.5,151142.1,151239.9,151377.8,152418.1,152431.6,152460.8,152535.5,153093.6,153184.3,153233.3,155571.7,155609.9,155623.1,155633.5,155665.9,155695.0,156676.1,156683.0,156811.0,156811.0,156955.5,156963.2,157191.5,157310.7,157411.2,157461.1,157483.8,163907.5,164110.9,164843.9,164965.9];
+levels[14][3] = [0.00,52724.69,52853.28,53115.01,82884.41,122214.52,129708.45,129841.97,130100.52,142943.74,142945.84,142948.25,153377.05,153444.23,159069.61,165765.00,175230.01,175263.10,175336.26,176487.19,198923.15,199026.49,199164.10,201597.73,201598.28,201599.48,204330.79,204828.06,205029.09,206176.08,207874.09,209531.40,209559.33,209599.70,214532.17,214989.27,214994.65,214995.46,216190.24,216288.69,216350.26,217385.77,217439.92,217489.49,225526.33,226400.00,226527.42,226820.28,227081.19,227084.21,227088.72,227665.09,228699.75,229623.19,230267.7,230268.62,230270.66,230301.22,230301.66,230302.01,230302.35,230364.46,234387.64,234415.07,234428.40,234442.18,235413.93,235951.09,240262.28,240284.28,240314.63,240549.77,242145.10,242410.88,242411.27,242411.70,242473.66,242473.86,242474.27,242474.81,242537.95,242639.38,242639.38,242639.38,242639.38,242885.30,243868.50,244736.93,244866.05,244871.47,244928.72,244933.36,244943.31,245086.58,247871.66,247935.39,247953.69,248168.04,248772.86,249093.5,249103.90,249121.14,249766.19,249774.48,249774.70,249774.98,249817.32,249817.85,249817.94,249818.93,249857.26,249937.29,249937.29,249937.29,249937.29,249966.49,249966.49,249966.49,249966.49,250366.22,250636.55,254002,254004,254007.48,254557.03,254557.26,254557.64,254584.6,254584.8,254584.8,254585.75,254674.4,254674.4,254674.4,254674.4,254694.99,254694.99,254694.99,254694.99,254702.29,254702.29,254702.29,254702.29,254766.75,254855.42,257415.6,257415.6,257415.6,257831.4,257831.4,257831.4,257848.5,257853.6,257853.6,257853.6,257922.0,257922.0,257922.0,257922.0,257936.99,257936.99,257936.99,257936.99,257942.30,257942.30,257942.30,257942.30,257944.45,257944.45,257944.45,257944.45,258013.37,258978.66,267483.87,267686.48,278920.68,278938.08,278938.08,282291.19,301484.51,301884.14,301887.94,301890.97,301892.26];
+levels[14][4] = [0.00,71287.54,71748.64];
+levels[14][5] = [0];
+levels[14][6] = [0,5090];
+levels[14][7] = [0.0,4030,5565,46569.8,99341];
+levels[14][8] = [0.0,69168.1,69420.5];
+levels[14][9] = [0,2545.0,6414,52925.9];
+levels[14][10] = [0.0,6990.6];
+levels[14][11] = [0];
+levels[14][12] = [0.0];
+levels[14][13] = [0.0];
+levels[14][14] = [0.00];
+
+
+    var dataDopplerArray=[[{label:'Wavelength (nm)',type:'number'},{label:'Si II (8.9e-01)',type:'number'}],
+[634.0,1.763e+02],
+[634.2,3.900e+02],
+[634.3,5.384e+02],
+[634.5,8.843e+02],
+[634.6,1.052e+03],
+[634.8,1.283e+03],
+[635.0,1.283e+03],
+[635.1,1.191e+03],
+[635.3,8.843e+02],
+[635.4,7.074e+02],
+[635.6,3.906e+02],
+[635.7,2.702e+02],
+[635.9,1.162e+02],
+[636.1,5.911e+01],
+[636.2,5.893e+01],
+[636.4,1.095e+02],
+[636.5,1.613e+02],
+[636.7,3.171e+02],
+[636.9,5.183e+02],
+[637.0,6.157e+02],
+[637.2,7.497e+02],
+[637.3,7.684e+02],
+[637.5,6.964e+02],
+[637.6,6.157e+02],
+[637.8,4.152e+02],
+[638.0,2.300e+02]];
+    var dataSticksArray=[[{label:'Ritz wavelength (nm)',type:'number'},{label:'Si II (8.9e-01)',type:'number'}],
+[634.886,1479.91614645242],
+[637.313,868.026213730457]];
+
+
+    function draw() {
+      var chk = document.getElementById("draw_sticks_box");
+      var data,options;
+      stickPlot = (chk == null) || chk.checked;
+      if (stickPlot) {
+        // pull the value from the span with id "titleoverlaySticks" to set Active title
+        document.getElementById("titleoverlayActive").innerHTML =
+            document.getElementById("titleoverlaySticks").innerHTML;
+        if ( dataSticks == null ) {
+          dataSticks = google.visualization.arrayToDataTable(dataSticksArray);
+        }
+        view = new google.visualization.DataView(dataSticks);
+        columnChart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        data = dataSticks;
+        options = stickOptions;
+        chart = columnChart;
+      } else {
+        // pull the value from the span with id "titleoverlayCurvedLine" to set Active title
+        document.getElementById("titleoverlayActive").innerHTML =
+            document.getElementById("titleoverlayCurvedLine").innerHTML;
+        if ( dataDoppler == null ) {
+          dataDoppler = google.visualization.arrayToDataTable(dataDopplerArray);
+        }
+        view = new google.visualization.DataView(dataDoppler);
+        lineChart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        data = dataDoppler;
+        options = lineOptions;
+        chart = lineChart;
+      }
+      setSelect(data,hiddenCols);
+      var sel=document.getElementById("select_columns");
+      var len = len = sel.options.length;
+      if (len > 6) {
+        sel.size = "6";  // hard code size to 4
+      }
+      var hideCols = [];
+      for (var i=0;i<len;i++) {
+        var opt = sel.options[i];
+        if ( !opt.selected ) {
+          hideCols.push(i+1);
+        }
+      }
+      view.hideColumns(hideCols);
+      chart.draw(view, options);
+    }
+
+    google.charts.setOnLoadCallback(draw);
+
+    function viewDataHTML() {
+      var arr = stickPlot ? dataSticksArray : dataDopplerArray;
+      var w = window.open("","libs_data");
+      w.document.write('<html><head><title>LIBS Data Source</title><link rel="stylesheet" type="text/css" href="https://standards.usa.gov/css/styleguide.css" media="screen" />');
+      w.document.write('<link rel="stylesheet" type="text/css" href="https://physics.nist.gov/PhysRefData/ASD/LIBS/css/libs_data_table.css" />\n</head><body>\n');
+      w.document.write(arrToHTML(arr));
+      w.document.write("\n</body></html>");
+      w.document.close();
+    }
+    function viewDataCSV() {
+      var arr = stickPlot ? dataSticksArray : dataDopplerArray;
+      var w = window.open("","libs_data");
+
+      w.document.write("<html><head><title>LIBS Data Source</title></head><body><pre>\n");
+      w.document.write(arrToRealCSV(arr));
+      w.document.write("\n</pre></body></html>");
+      w.document.close();
+    }
+    function viewData() {
+      var arr = stickPlot ? dataSticksArray : dataDopplerArray;
+      var w = window.open("","libs_data");
+      w.document.write("<html><head><title>LIBS Data Source</title></head><body><pre>\n");
+      w.document.write(arrToASCII(arr));
+      w.document.write("\n</pre></body></html>");
+      w.document.close();
+    }
+    var text = '';
+    var expSpectrum;
+    var openFile = function(event) {
+      var input = event.target;
+      var reader = new FileReader();
+      reader.onload = function(){
+        text = reader.result;
+        var file = input.files[0];
+        var node = document.getElementById('filename');
+        node.innerText = file.name;
+        var result = CSVtoArr(text);
+        if ( typeof(result) == "string" ) {
+          alert(result);
+        } else {
+          expSpectrum = result;
+          drawUserData();
+          reader = null;
+        }
+      };
+      reader.readAsText(input.files[0]);
+    };
+    function renderUserFile() {
+      var w = window.open("","libs_user_data");
+      w.document.write("<html><head><title>LIBS User Spectrum</title></head><body>\n");
+      w.document.write(arrToCSV(expSpectrum));
+      w.document.write("\n</body></html>");
+      w.document.close();
+    }
+    function drawUserData() {
+      var resultLTE = lte_spectrum_js(spectra,composition,lines,levels,ips,expSpectrum,temp,eden,resolution,cmeV,koeff,lineOptions.hAxis.title,dataDopplerArray);
+      dataDopplerArray = resultLTE[0];
+      dataSticksArray = resultLTE[1];
+      lineOptions.title = resultLTE[2];
+      stickOptions.title = resultLTE[3];
+      dataDoppler = google.visualization.arrayToDataTable(dataDopplerArray);
+      //alert("dataDoppler="+dataDoppler);
+      //alert("dataSticksArray="+dataSticksArray);
+      dataSticks = google.visualization.arrayToDataTable(dataSticksArray);
+      var data = stickPlot?dataSticks:dataDoppler;
+      setSelect(data,hiddenCols);
+      draw();
+    }
+    function showIMG(chart) {
+      var imgURI = chart.getImageURI();
+      var w = window.open("","libs_chart","channelmode=no,toolbar=no,location=no,directories=no,status=no,menubar=no,fullscreen=no,scrollbars=yes,resizable=yes,width=1200,height=700");
+      w.document.write("<html><head><title>LIBS Data Chart</title></head><body>\n");
+      w.document.write('<img src="' + imgURI + '">');
+      w.document.write("\n</body></html>");
+      w.document.close();
+    }
+    function setView() {
+      var sel=document.getElementById("select_columns");
+      var len = len = sel.options.length;
+      var data = stickPlot ? dataSticks : dataDoppler;
+      var options = stickPlot ? stickOptions : lineOptions;
+      view = new google.visualization.DataView(data);
+      var h = {};
+      for ( var i in hiddenCols ) {
+        h[hiddenCols[i]] = 1;
+      }
+      hiddenCols = [];
+      var hideCols = [];
+      for (var i=0;i<len;i++) {
+        var opt = sel.options[i];
+        if ( opt.selected ) {
+          h[opt.text] = 0;
+        } else {
+          hideCols.push(i+1);
+          h[opt.text] = 1;
+        }
+      }
+      for (var x in h) {
+        if (h[x] == 1) {
+          hiddenCols.push(x);
+        }
+      }
+      if (len>6) {
+        sel.size = "6";  // hard code select box size (ensures desired size after the user  has clicked selet box at least once
+      }
+      view.hideColumns(hideCols);
+      chart.draw(view, options);
+    }
+    </script>
+<div class="fbwrap">
+<div class="formswrap">
+<div class="FBform2">
+    <form name="actions" onsubmit="return checkSubmit()">
+
+<div class="field-groupO">
+      <label for="temp" class="label"><i>T</i><sub>e</sub>(eV):</label>
+  <div class="fieldO">
+      <input type="text" name="temp" id="temp" value="1"
+        pattern="(([0-9]*[.][0-9]+)|([0-9]+[.])|(([0-9]*[.])?[0-9]+))([0-9]*[eE][+-]?[0-9]+)?"
+        title="The temperature must be a positive number.">
+  </div>
+</div>
+
+<div class="field-groupO">
+      <label for="eden" class="label"><i>N</i><sub>e</sub>(cm<sup>-3</sup>):</label>
+  <div class="fieldO">
+      <input type="text" pattern="(([0-9]*[.][0-9]+)|([0-9]+[.])|(([0-9]*[.])?[0-9]+))([0-9]*[eE][+-]?[0-9]+)?" name="eden" id="eden"
+        value="1e17" title="A positive number. Example: 1e17">
+  </div>
+</div>
+  
+<div class="field-groupO">
+      <label for="resolution" class="label">Resolution:</label>
+  <div class="fieldO">
+      <input type="text" name="resolution" id="resolution" pattern="(([0-9]*[.][0-9]+)|([0-9]+[.])|(([0-9]*[.])?[0-9]+))([0-9]*[eE][+-]?[0-9]+)?"
+        value="1000" title="The resolution must be a non-negative number.">
+      <a href="/PhysRefData/ASD/Html/libshelp.html#LIBSOUTRES" class="help" target="_Help" title="Help on LIBS Resolution">&nbsp;?&nbsp;</a>
+  </div>
+</div>
+    
+      <input type="hidden" name="libserror" value="1">
+      <b>_____________________</b><br>
+      Element percentages
+      <a href="/PhysRefData/ASD/Html/libshelp.html#LIBSOUTFORM" class="help" target="_Help" title="Help on LIBS Recalculate Form">&nbsp;?&nbsp;</a>
+      <br />
+  
+        <label for="perc1"><span id="elem1">Si</span>:</label>&nbsp;<input type="text" name="perc" id="perc1" value="100" size="5" pattern="(([0-9]*[.][0-9]+)|([0-9]+[.])|(([0-9]*[.])?[0-9]+))([0-9]*[eE][+-]?[0-9]+)?"  disabled><br>
+    
+      <button type="submit" name="recalc" class="recalculate-btn">Recalculate</button>
+      <a href="/PhysRefData/ASD/Html/libshelp.html#LIBSOUTFORM" class="help" target="_Help" title="Help on LIBS Recalculate Form">&nbsp;?&nbsp;</a>
+      <span id="residual"></span>
+     </form>
+    </DIV>      <!-- end flex item FBform2 -->
+   
+    <div class="FBform1">
+    <form name="actions" onsubmit="return checkSubmit()">
+      <input type="checkbox" name="draw_sticks" id="draw_sticks_box" onchange="stickPlot=!stickPlot;draw();">&nbsp;Show stick plot
+      <a href="/PhysRefData/ASD/Html/libshelp.html#LIBSOUTSTICK" class="help" target="_Help" title="Help on LIBS Plot">&nbsp;?&nbsp;</a>
+      <br />
+      Select data to display:
+      <a href="/PhysRefData/ASD/Html/libshelp.html#LIBSOUTSELECT" class="help" target="_Help" title="Help on LIBS Plot">&nbsp;?&nbsp;</a>
+      <select size="4" name="select_columns" id="select_columns" multiple="multiple" onchange="setView()" >
+      </select>
+  
+      <br>
+<!--
+      <label for="files" class="file_btn">Select User Spectrum File
+       <a href="/PhysRefData/ASD/LIBS/sample_user_file.txt" class="help" target="_blank" title="View sample user file">?</a>
+      <input id="files" class="file_btn" type="file" accept='text/csv' onchange='openFile(event)'></label>&nbsp;<span id="filename"></span>
+-->
+    </form>
+    
+    </div>  <!-- end div for FBform1 -->
+
+    <div class="FBform3">
+      <label for="filesS" class="select_file_btn">Select User Spectrum File
+       <a href="/PhysRefData/ASD/LIBS/sample_user_file.txt" class="help" target="_new" title="View sample user file">&nbsp;?&nbsp;</a>
+      <input id="filesS" class="file_btn" type="file" accept='text/csv' onchange='openFile(event)'></label>&nbsp;<span id="filename"></span>
+      <a href="/PhysRefData/ASD/Html/libshelp.html#LIBSOUTUSERSP" class="help" target="_Help" title="Help on LIBS User File">&nbsp;?&nbsp;</a>
+    </div>  <!-- end div for FBform3 -->
+
+   </div> <!-- end div for formswrap flex container -->
+
+    <!-- Div that will hold the column chart -->
+   <div class="chartWithOverlay">
+       <style>div.google-visualization-tooltip {z-index: 5}</style>
+       <div class="libsgraph" id="chart_div"></div>
+
+
+      <span class="titleoverlayActive" id="titleoverlayActive">
+  Saha/LTE Spectrum for Si<br>T<sub>e</sub> = 1 eV, N<sub>e</sub> = 1.0e+17 cm<sup>-3</sup>, Resolution = 1000. Total of 2 lines.
+      </span>
+
+      <span class="titleoverlayCurvedLine" id="titleoverlayCurvedLine">
+  Saha/LTE Spectrum for Si<br>T<sub>e</sub> = 1 eV, N<sub>e</sub> = 1.0e+17 cm<sup>-3</sup>, Resolution = 1000. Total of 2 lines.
+      </span>
+      <span class="titleoverlaySticks" id="titleoverlaySticks">
+  Saha/LTE Spectrum for Si<br>T<sub>e</sub> = 1 eV, N<sub>e</sub> = 1.0e+17 cm<sup>-3</sup>. Total of 2 lines.
+      </span>
+
+       <div class="overlayzoom">
+           Click and drag to zoom, right-click to pan
+       </div>
+
+
+      <div class="libs-data-source">View Data Source:</div>
+      <button type="submit" name="ViewData" class="view-data-source-btn view-data-overlay" onclick="viewData()">ASCII</button>
+      <button type="submit" name="ViewDataCSV" class="view-data-source-btn view-data-overlay-csv" onclick="viewDataCSV()">CSV</button>
+      <button type="submit" name="ViewDataHTML" class="view-data-source-btn view-data-overlay-html" onclick="viewDataHTML()">HTML</button>
+      <div class="libs-data-source-help">
+        <a href="/PhysRefData/ASD/Html/libshelp.html#LIBSOUTSRC" target="_Help" class="help" title="Help on LIBS Data Source">&nbsp;?&nbsp;</a>
+      </div>
+      <button type="submit" name="getImage" onclick="showIMG(chart)" class="display-as-image-btn image-btn-overlay">Display PNG</button>
+      <span class="libs-image-help">
+        <a href="/PhysRefData/ASD/Html/libshelp.html#LIBSOUTPNG" target="_Help" class="help" title="Help on LIBS Image File">&nbsp;?&nbsp;</a>
+      </span>
+      <span class="retitle"></span>
+
+   </div>
+
+</div>  <!-- end flexbox code -->
+      <p>
+    <a href="https://physics.nist.gov/cgi-bin/ASD/lines1.pl?libs_req=1&spectra=Si%20I-III&low_w=634&upp_w=638&unit=1" class="access-asd" target="_blank">ASD Data Table Output</a>
+    </p>
+    <span class="titleX"></span>
+    <a class="feedback" href="/cdn-cgi/l/email-protection#d9b8b5bca1b8b7bdbcabf7b2abb8b4b0bdb899b7b0aaadf7beb6aff5a0acabb0f7abb8b5bab1bcb7b2b699b7b0aaadf7beb6afe6aaacbbb3bcbaade495909b8afcebe99fbcbcbdbbb8bab2">LIBS User Feedback</a>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4c5e24d3af8c487',t:'MTc5MjMwOTExMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    </html>

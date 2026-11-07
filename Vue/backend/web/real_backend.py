@@ -119,8 +119,8 @@ class RealBackend:
         except Exception:
             pass
         try:
-            data.update(source=Settings().source, line_database=Settings().line_database, python=sys.executable)
-            return Settings(**data).validated()
+            from simlibs_ui.library_settings import load_service_settings
+            return load_service_settings(data)
         except Exception:
             return Settings().validated()
 
@@ -135,22 +135,45 @@ class RealBackend:
             'dynamic_deadline': s.dynamic_deadline, 'tls_verify': s.tls_verify,
             'python': s.python, 'chrome': s.chrome, 'driver': s.driver,
             'output_dir': s.output, 'source': s.source,
+            'line_database_override': s.line_database_override,
+            'line_database': s.line_database,
+            'default_line_database': Settings().line_database,
         }
 
     def save_settings(self, settings: Dict[str, Any]) -> Dict[str, Any]:
-        current = self._settings.to_dict()
-        for key, value in (settings or {}).items():
-            their = self._SET_MAP.get(key, key)
-            if their in current and their not in ('source', 'line_database', 'python'):
-                current[their] = value
-        try:
-            candidate = Settings(**current).validated()
-        except (ValueError, TypeError) as exc:
-            raise ApiError(400, str(exc), 'validation')
-        from simlibs_ui.storage import write_json
-        write_json(self._settings_path, candidate.to_dict())
-        self._settings = candidate
-        return self.get_settings()
+        if not isinstance(settings, dict):
+            raise ApiError(400, '设置须为对象', 'validation')
+        with self._lock:
+            if 'settings_rollback' in settings:
+                undo = getattr(self, '_settings_undo', None)
+                if set(settings) != {'settings_rollback'} or not undo or settings['settings_rollback'] != undo[0] or self._settings is not undo[2]:
+                    raise ApiError(409, '设置已变化，不能恢复过期保存', 'conflict')
+                from simlibs_ui.storage import write_json
+                write_json(self._settings_path, undo[1].to_dict())
+                self._settings = undo[1]
+                self._settings_undo = None
+                return self.get_settings()
+            previous = self._settings
+            current = self._settings.to_dict()
+            for key, value in settings.items():
+                their = self._SET_MAP.get(key, key)
+                if their in current and their not in ('source', 'line_database', 'line_database_override', 'python'):
+                    current[their] = value
+            try:
+                candidate = Settings(**current).validated()
+                if 'line_database_override' in settings:
+                    from simlibs_ui.library_settings import with_library_override
+                    candidate = with_library_override(candidate, settings['line_database_override'])
+            except (ValueError, TypeError, OSError) as exc:
+                raise ApiError(400, str(exc), 'validation') from exc
+            from simlibs_ui.storage import write_json
+            write_json(self._settings_path, candidate.to_dict())
+            self._settings = candidate
+            # Restore exactly the server-owned prior snapshot, including unavailable
+            # custom media. A token cannot validate/bypass an arbitrary user path.
+            token = uuid.uuid4().hex
+            self._settings_undo = (token, previous, candidate)
+            return dict(self.get_settings(), settings_rollback=token)
 
     # ------------------------------------------------------------------
     # 引擎状态 / 默认参数 / 预览
@@ -241,24 +264,28 @@ class RealBackend:
         )
 
     def start_single(self, req: SingleRequest) -> str:
+        settings = self._settings
         p = self._to_parameters(req.params, req.composition)
-        self._validate_local(p)
+        self._validate_local(p, settings=settings)
         payload = {'parameters': p.to_dict()}
         summary = (f"{req.params.summary()} · "
                    + " / ".join(f"{it.el} {it.pct:g}%" for it in req.composition))
-        return self._launch('单次模拟', 'single', payload, summary)
+        return self._launch('单次模拟', 'single', payload, summary, settings=settings)
 
     def start_advanced(self, body):
         from simlibs_ui.advanced import effective
         req=SingleRequest.from_api(body)
         p=self._to_parameters(req.params, req.composition)
         try:
-            q,config,_=effective(p,body.get('advanced',{}))
-            self._validate_local(p);self._validate_local(q)
+            # The paper engine has its own Stark/I-II-III coverage contract;
+            # ordinary local-library preflight cannot validate these inputs.
+            _,config,_=effective(p,body.get('advanced',{}))
         except (ValueError,TypeError) as error:raise ApiError(400,str(error),'validation') from error
-        return self._launch('高级模拟','advanced',{'parameters':p.to_dict(),'advanced':config},'高级本地 LTE slab · 自吸收 / 参数化基体（未标定）')
+        label = '高级NIST逐线自吸收' if config.get('model') == 'nist' else '高级论文 Eq.7 · Stark逐线自吸收'
+        return self._launch('高级模拟','advanced',{'parameters':p.to_dict(),'advanced':config},label+' / 参数化基体（未标定）')
 
     def start_batch(self, req: BatchRequest) -> str:
+        settings = self._settings
         p = self._to_parameters(req.params, req.compositions[0].items)
         rows = []
         for comp in req.compositions:
@@ -275,9 +302,9 @@ class RealBackend:
         }
         payload = {'parameters': p.to_dict(), 'spec': spec, 'compositions': rows}
         if req.template_plan is not None:payload['template_plan']=req.template_plan
-        self.validate_batch(req)
+        self.validate_batch(req, settings=settings)
         summary = f'{req.n_samples} 样本 · seed={req.seed} · {req.params.summary()}'
-        return self._launch('批量模拟', 'batch', payload, summary)
+        return self._launch('批量模拟', 'batch', payload, summary, settings=settings)
 
     def resume(self,job_id):
         from simlibs_ui.batch_pipeline import load_checkpoint
@@ -288,12 +315,13 @@ class RealBackend:
             active=self.__dict__.setdefault('_resume_active',{})
             if job_id in active:raise ApiError(409,'该任务正在续跑','conflict')
             active[job_id]=None
-        path=Path(job.get('expected_result_path') or job.get('result_path') or str(Path(self._settings.output)/'.jobs'/job_id/'result'/'manifest.json')).parent/'checkpoint.json'
+        settings = self._settings
+        path=Path(job.get('expected_result_path') or job.get('result_path') or str(Path(settings.output)/'.jobs'/job_id/'result'/'manifest.json')).parent/'checkpoint.json'
         try:
             if not path.is_file():raise ApiError(409,'旧任务没有确定计划/checkpoint，不能伪造恢复','no_checkpoint')
-            plan,records=load_checkpoint(path,self._settings)
+            plan,records=load_checkpoint(path,settings)
             if json.loads(path.read_text(encoding='utf-8')).get('status')=='completed':raise ApiError(409,'完整任务已成功，无需续跑','conflict')
-            jid=self._launch('批量模拟','resume',{'checkpoint_path':str(path)},f'续跑 {job_id} · 已完成{len(records)}/{len(plan["entries"])}')
+            jid=self._launch('批量模拟','resume',{'checkpoint_path':str(path)},f'续跑 {job_id} · 已完成{len(records)}/{len(plan["entries"])}',settings=settings)
             with self._lock:
                 self._jobs[jid]['resume_from']=job_id
                 if self._jobs[jid]['status'] in TERMINAL_STATUSES:active.pop(job_id,None)
@@ -305,24 +333,26 @@ class RealBackend:
             if isinstance(error,(ValueError,OSError,KeyError)):raise ApiError(409,f'checkpoint校验失败：{error}','checkpoint') from error
             raise
 
-    def validate_batch(self,req):
+    def validate_batch(self,req,settings=None):
         if req.params.mode!='local':return
+        settings = settings or self._settings
         from simlibs_ui.offline_database import capabilities
-        report=capabilities(self._settings.line_database)
+        report=capabilities(settings.line_database)
         if req.template_plan:
-            for entry in req.template_plan['entries']:self._validate_local(Parameters.from_dict(entry['parameters']),report)
+            for entry in req.template_plan['entries']:self._validate_local(Parameters.from_dict(entry['parameters']),report,settings)
         else:
-            for comp in req.compositions:self._validate_local(self._to_parameters(req.params,comp.items),report)
+            for comp in req.compositions:self._validate_local(self._to_parameters(req.params,comp.items),report,settings)
 
-    def _validate_local(self,p,report=None):
+    def _validate_local(self,p,report=None,settings=None):
         if p.webscraping!='local':return
         from simlibs_ui.offline_database import preflight
-        try:preflight(p,self._settings.line_database,report)
+        try:preflight(p,(settings or self._settings).line_database,report)
         except (OSError,ValueError,KeyError,TypeError) as error:raise ApiError(400,str(error),'validation') from error
 
     def start_scan(self, req: ScanRequest) -> str:
+        settings = self._settings
         p = self._to_parameters(req.params, req.composition)
-        self._validate_local(p)
+        self._validate_local(p, settings=settings)
         axis = AXIS_MAP[req.axis]
         # Web 契约的 Ne 轴以 10^ 指数表达；真实扫描使用绝对 Ne。
         start = 10 ** req.start if req.axis == 'ne' else req.start
@@ -331,11 +361,11 @@ class RealBackend:
         comp_txt = " / ".join(f"{it.el} {it.pct:g}%" for it in req.composition)
         payload = {'parameters': p.to_dict(), 'spec': spec}
         summary = f'{axis} {req.start:g}→{req.end:g} · {req.frames} 帧 · {req.params.summary()} · {comp_txt}'
-        return self._launch('扫描动画', 'scan', payload, summary)
+        return self._launch('扫描动画', 'scan', payload, summary, settings=settings)
 
-    def _launch(self, kind_label: str, worker_kind: str, payload: Dict[str, Any], summary: str) -> str:
+    def _launch(self, kind_label: str, worker_kind: str, payload: Dict[str, Any], summary: str, *, settings=None) -> str:
         from simlibs_ui.jobs import JobController
-        controller = JobController(self._settings)
+        controller = JobController(settings or self._settings)
         try:
             job_id = controller.start(worker_kind, **payload)
         except ValueError as exc:
@@ -482,6 +512,33 @@ class RealBackend:
 
     def _job_view(self, job: Dict[str, Any]) -> Dict[str, Any]:
         view={k:job.get(k) for k in ('job_id','kind','status','summary','progress','duration','error','created','created_at','resume_from')}
+        if job.get('events'):
+            for ev in reversed(job['events']):
+                msg = ev.message if hasattr(ev, 'message') else ev.get('message', '') if isinstance(ev, dict) else ''
+                if msg and not msg.startswith('[worker]') and not msg.startswith('[ui]'):
+                    view['stage'] = msg
+                    break
+        if job.get('kind') == '高级模拟' and job.get('status') == 'failed':
+            error_file = self._advanced_file(job, 'stark-error.json') or self._advanced_file(job, 'error.json')
+            if error_file and error_file.stat().st_size <= 65536:
+                try:
+                    failure = json.loads(error_file.read_text(encoding='utf-8'))
+                    if isinstance(failure.get('code'), str):
+                        view['error_code'] = failure['code']
+                except (OSError, ValueError, AttributeError):
+                    pass
+        if job.get('kind') == '高级模拟' and job.get('status') in ('failed', 'completed'):
+            summary = self._advanced_file(job, 'missing-stark.json')
+            artifact = self._advanced_file(job, 'missing-stark.csv')
+            if summary and artifact and summary.stat().st_size <= 4_000_000 and view.get('error_code', 'missing_stark') == 'missing_stark':
+                try:
+                    data = json.loads(summary.read_text(encoding='utf-8'))
+                    if data.get('code') in ('missing_stark', 'stark_coverage') and isinstance(data.get('count'), int):
+                        view['stark_missing'] = {'count': data['count'], 'available': data['count'] > 0}
+                        if isinstance(data.get('matched_count'), int):
+                            view['stark_matched'] = {'count': data['matched_count'], 'available': self._advanced_file(job, 'matched-stark.csv') is not None}
+                except (OSError, ValueError, AttributeError):
+                    pass
         path=Path(job.get('expected_result_path') or job.get('result_path') or str(Path(self._settings.output)/'.jobs'/job['job_id']/'result'/'manifest.json')).parent/'checkpoint.json'
         if path.is_file():
             try:
@@ -490,6 +547,19 @@ class RealBackend:
             except (OSError,ValueError,KeyError):view.update(resumable=False,resume_reason='checkpoint/计划损坏，原结果保留')
         else:view.update(resumable=False,resume_reason='无确定计划的旧任务仅保留已有结果')
         return view
+
+    @staticmethod
+    def _advanced_file(job, name):
+        # Only fixed files belonging to this already-authorized job; never a client path.
+        if name not in ('missing-stark.json', 'missing-stark.csv', 'matched-stark.csv', 'matched-stark.json',
+                        'advanced-lines.csv', 'advanced-lines.json', 'stark-error.json', 'error.json'):
+            return None
+        manifest = job.get('expected_result_path') or job.get('result_path')
+        if not manifest:
+            return None
+        root = Path(manifest).resolve().parent.parent
+        file = root/name
+        return file if file.is_file() and file.resolve().parent == root else None
 
     def get_job(self, job_id: str) -> Dict[str, Any]:
         with self._lock:
@@ -578,9 +648,22 @@ class RealBackend:
         result = {'kind': 'single', 'xs': xs, 'ys': ys, 'yi': [], 'series': series, 'meta': meta, 'origin': origin, 'manifest': manifest}
         if origin.get('mode')=='advanced':
             import pandas as pd
-            reference=pd.read_csv(origin['thin_reference'],float_precision='round_trip')
-            result['comparison']={'xs':reference['wavelength'].tolist(),'thin':reference['intensity'].tolist(),'nominal':reference['nominal_intensity'].tolist()}
-            result['origin']=dict(origin,line_diagnostics=pd.read_csv(origin['line_table'],float_precision='round_trip').to_dict(orient='records'))
+            if origin.get('nist_line_table') and Path(origin['nist_line_table']).is_file():
+                sticks = pd.read_csv(origin['nist_line_table'], float_precision='round_trip')
+                result['origin'] = dict(result['origin'], nist_line_sticks=sticks.to_dict(orient='records'))
+            if origin.get('thin_reference') and Path(origin['thin_reference']).is_file():
+                reference=pd.read_csv(origin['thin_reference'],float_precision='round_trip')
+                if {'wavelength', 'intensity', 'nominal_intensity'} <= set(reference):
+                    result['comparison']={'xs':reference['wavelength'].tolist(),'thin':reference['intensity'].tolist(),'nominal':reference['nominal_intensity'].tolist()}
+            # Optional paper metadata (e.g. unreported Stark temperature) is
+            # exported as an empty CSV cell and must round-trip to JSON null.
+            typed_lines = self._advanced_file(job, 'advanced-lines.json')
+            if typed_lines:
+                result['origin'] = dict(result['origin'], line_diagnostics=json.loads(typed_lines.read_text(encoding='utf-8')))
+            elif origin.get('line_table') and Path(origin['line_table']).is_file():
+                diagnostics=pd.read_csv(origin['line_table'],float_precision='round_trip').astype(object)
+                diagnostics=diagnostics.where(pd.notna(diagnostics),None)
+                result['origin']=dict(result['origin'],line_diagnostics=diagnostics.to_dict(orient='records'))
         return result
 
     def _scan_result(self, job: Dict[str, Any], manifest: Dict[str, Any]) -> Dict[str, Any]:
@@ -653,24 +736,65 @@ class RealBackend:
             job = self._jobs.get(job_id)
         if not job:
             raise ApiError(404, f'任务不存在：{job_id}', 'not_found')
+        if kind in ('stark-missing', 'stark-matched'):
+            name = 'missing-stark.csv' if kind == 'stark-missing' else 'matched-stark.csv'
+            path = self._advanced_file(job, name) if job.get('kind') == '高级模拟' and job.get('status') in ('failed', 'completed') else None
+            if not path:
+                raise ApiError(409, '此任务没有对应Stark诊断清单', 'no_result')
+            return ExportPayload(path.read_bytes(), 'text/csv; charset=utf-8', f'{job_id}_{name.replace("-", "_")}')
+        if kind == 'stark-report':
+            report = self._advanced_file(job, 'stark-error.json') if job.get('kind') == '高级模拟' and job.get('status') == 'failed' else None
+            if not report:
+                raise ApiError(409, '此失败任务没有Stark报告', 'no_result')
+            payload = {'error': json.loads(report.read_text(encoding='utf-8'))}
+            for key, name in (('missing', 'missing-stark.json'), ('matched', 'matched-stark.json')):
+                file = self._advanced_file(job, name)
+                if file and payload['error'].get('code') == 'missing_stark':
+                    payload[key] = json.loads(file.read_text(encoding='utf-8'))
+            return ExportPayload(json.dumps(payload, ensure_ascii=False, allow_nan=False), 'application/json', f'{job_id}_stark_report.json')
         if job['status'] != 'completed' or not job.get('result_path'):
             raise ApiError(409, '只有成功完成的任务才能导出', 'no_result')
         manifest, result_path = job['manifest'], job['result_path']
+        if kind == 'diagnostics':
+            path = self._advanced_file(job, 'advanced-lines.csv') if manifest.get('origin', {}).get('mode') == 'advanced' else None
+            if not path:
+                raise ApiError(409, '此历史结果没有逐线诊断表', 'no_result')
+            return ExportPayload(path.read_bytes(), 'text/csv; charset=utf-8', f'{job_id}_line_diagnostics.csv')
         if manifest.get('origin',{}).get('mode')=='advanced' and kind in ('csv','json','png'):
             import pandas as pd
             import io
             result=self._single_result(job,manifest)
             if kind=='json':
-                result['opacity']=pd.read_csv(manifest['origin']['opacity_table'],float_precision='round_trip').to_dict(orient='list')
+                if manifest['origin'].get('opacity_table') and Path(manifest['origin']['opacity_table']).is_file():
+                    opacity = pd.read_csv(manifest['origin']['opacity_table'], float_precision='round_trip').astype(object)
+                    result['opacity'] = opacity.where(pd.notna(opacity), None).to_dict(orient='list')
                 return ExportPayload(json.dumps(result,ensure_ascii=False,allow_nan=False),'application/json',f'{job_id}_advanced.json')
+            if 'comparison' not in result:
+                # Earliest saved advanced results may have no three-spectrum files.
+                if kind == 'csv':
+                    return ExportPayload(pd.DataFrame({'wavelength': result['xs'], 'intensity': result['ys']}).to_csv(index=False), 'text/csv; charset=utf-8', f'{job_id}_advanced.csv')
+                from simlibs_ui.operations import export_result
+                from tempfile import TemporaryDirectory
+                with TemporaryDirectory() as temporary:
+                    target = Path(temporary)/'saved.png'
+                    export_result(result_path, target, 'png')
+                    return ExportPayload(target.read_bytes(), 'image/png', f'{job_id}_advanced.png')
             if kind=='csv':
                 data={'wavelength':result['xs'],'corrected':result['ys'],'matrix_thin':result['comparison']['thin'],'nominal_thin':result['comparison']['nominal']}
                 for curve in result['series']['elements']['interpolated']['curves']:data[curve['label']+'_corrected']=curve['ys']
                 return ExportPayload(pd.DataFrame(data).to_csv(index=False),'text/csv; charset=utf-8',f'{job_id}_advanced.csv')
             from matplotlib.figure import Figure
             fig=Figure(figsize=(10,5),dpi=140);ax=fig.subplots()
-            for ys,label,color in [(result['comparison']['nominal'],'Nominal thin','#777777'),(result['comparison']['thin'],'Matrix thin','#d078ad'),(result['ys'],'Corrected','#317aa3')]:ax.plot(result['xs'],ys,label=label,color=color)
-            ax.set(xlabel='Wavelength / nm',ylabel='Model photon radiance / (s m² sr nm) — uncalibrated',title='Finite-level LTE slab: shared absolute scale');ax.legend();fig.tight_layout()
+            sticks = manifest['origin'].get('spectrum_style') == 'sticks'
+            draw = lambda ys, label, color=None: ax.vlines(result['xs'], 0, ys, label=label, color=color) if sticks else ax.plot(result['xs'], ys, label=label, color=color)
+            draw(result['ys'], 'Total', '#317aa3')
+            for index, curve in enumerate(result['series']['elements']['interpolated']['curves']):
+                draw(curve['ys'], curve['label'], f'C{(index+1)%10}')
+            advanced_version=manifest['origin'].get('model_version')
+            title=('NIST: fixed element view / shared relative photon scale' if str(advanced_version).startswith('nist-lines-')
+                   else 'Paper Eq.7 / Stark per-line self-absorption: shared scale'
+                   if advanced_version=='paper-eq7-stark-sa-1' else 'Saved advanced model: shared scale')
+            ax.set(xlabel='Wavelength / nm',ylabel=manifest['origin'].get('intensity_units','Model photon intensity per nm; uncalibrated'),title=title);ax.legend();fig.tight_layout()
             stream=io.BytesIO();fig.savefig(stream,format='png');return ExportPayload(stream.getvalue(),'image/png',f'{job_id}_advanced.png')
         if kind in ('parameters','template'):
             key='actual_parameters' if kind=='parameters' else 'template_csv';path=manifest.get(key)

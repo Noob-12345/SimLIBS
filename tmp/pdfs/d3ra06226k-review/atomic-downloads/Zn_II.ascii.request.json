@@ -1,0 +1,7 @@
+{
+  "request_url": "https://physics.nist.gov/cgi-bin/ASD/energy1.pl?spectrum=Zn+II&units=1&format=1&output=0&page_size=10000&multiplet_ordered=1&conf_out=on&term_out=on&level_out=on&j_out=on&g_out=on&ids_out=1&unc_out=1&submit=Retrieve+Data",
+  "retrieved_utc": "2026-10-15T02:09:19.301808+00:00",
+  "response_sha256": "0748aa60487e6a5c6b4936f5c157806430bef798c08312989505c20928f121d7",
+  "http_status": 200,
+  "response_bytes": 32233
+}
