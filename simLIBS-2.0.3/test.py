@@ -1,15 +1,19 @@
-from simLIBS import SimulatedLIBS
-import numpy as np
+from simLIBS import SimulatedLIBS, MissingStarkDataError
+from pathlib import Path
+import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
-import os
 
 
-contents=pd.read_csv(r"D:\LIBS\simLIBS-2.0.3\simLIBS-2.0.3\saved\contents.csv")
-# elements_main=['Si', 'Al', 'Fe','Ca','K','Na','Mg','Cr','Cu','Mn','Zn','Ti','Ni','Mo','C','Li','Pb']
-# elements_rareearth=['Lu','La','Y','Pr','Sm','Eu','Tb','Ho','Er','Tm','Yb']
-# elements=elements_main + elements_rareearth
-for i in range(0, len(contents)):
+parser = argparse.ArgumentParser(description="Run the sample with Stark broadening only.")
+parser.add_argument("--no-show", action="store_true", help="Save the plot without opening a window.")
+args = parser.parse_args()
+project_dir = Path(__file__).resolve().parent
+save_dir = project_dir / "saved"
+save_dir.mkdir(parents=True, exist_ok=True)
+contents = pd.read_csv(save_dir / "contents.csv")
+
+for i in range(0,1):
     elements_main=['Si', 'Al', 'Fe','Ca','K','Na','Mg','Cr','Cu','Mn','Zn','Ti','Ni','Mo','C','Li','Pb']
     elements_rareearth=['Lu','La','Y','Pr','Sm','Eu','Tb','Ho','Er','Tm','Yb']
     elements=elements_main + elements_rareearth
@@ -26,58 +30,49 @@ for i in range(0, len(contents)):
     if len(percentages) > 0:
         percentages[-1] = 100.0 - sum(percentages[:-1])
 
-    libs = SimulatedLIBS(
-        Te=0.86,
-        Ne=10**17,
-        elements=elements,
-        percentages=percentages,
-        resolution=4000,
-        low_w=200,
-        upper_w=900,
-        max_ion_charge=2,
-        webscraping='dynamic',
-        headless=True,
-        keep_browser_open=False,
-        detach_browser=False
-    )
-    save_dir = r"D:\LIBS\simLIBS-2.0.3\simLIBS-2.0.3\saved"
-    libs.save_to_csv(os.path.join(save_dir, file_name + "_95.csv"))
-    print( f'{file_name}_95.csv',"saved successfully.")
+    print(f"Simulating {file_name}: Stark only, 200-900 nm, {len(elements)} elements.", flush=True)
+    try:
+        libs = SimulatedLIBS(
+            Te=0.86,
+            Ne=10**17,
+            elements=elements,
+            percentages=percentages,
+            resolution=4000,
+            low_w=200,
+            upper_w=900,
+            max_ion_charge=2,
+            webscraping='static',
+            headless=True,
+            keep_browser_open=False,
+            detach_browser=False,
+            stark_broadening=True,
+            instrument_broadening=False,
+            self_absorption_config={"missing_stark": "unbroadened"}
+        )
+    except MissingStarkDataError as error:
+        missing_path = save_dir / f"{file_name}_95_missing_stark.csv"
+        matched_path = save_dir / f"{file_name}_95_matched_stark.csv"
+        error.missing_lines.to_csv(missing_path, index=False)
+        error.matched_lines.to_csv(matched_path, index=False)
+        print(f"Stark coefficients: {len(error.matched_lines)} matched, {len(error.missing_lines)} missing.")
+        print(f"Missing coefficients and reasons: {missing_path}")
+        print(f"Matched coefficients and sources: {matched_path}")
+        raise
 
-# print(len(percentages))
+    # Export before the interactive plot blocks until its window is closed.
+    libs.save_to_csv(save_dir / f"{file_name}_95.csv")
+    print(f'{file_name}_95.csv', "saved successfully.")
+    missing_path = save_dir / f"{file_name}_95_missing_stark.csv"
+    libs.missing_stark_lines.to_csv(missing_path, index=False)
+    libs.matched_stark_lines.to_csv(save_dir / f"{file_name}_95_matched_stark.csv", index=False)
+    print(f"Stark coefficients: {len(libs.matched_stark_lines)} matched, {len(libs.missing_stark_lines)} missing.")
+    if not libs.missing_stark_lines.empty:
+        print("Missing-coefficient lines retain their NIST areas without Stark broadening.")
+        print(f"Missing lines and reasons: {missing_path}")
+    libs.plot()
+    plt.savefig(save_dir / f"{file_name}_95_stark.png", dpi=150)
+    if not args.no_show:
+        plt.show()
+    plt.close()
 
 
-
-# elements=['Si', 'Al', 'Fe','Ca','K','Na','Mg','Cr','Cu','Mn','Zn','Ti','Ni','Mo','C','Li','Pb',
-#               'Lu','La','Y','Pr','Sm','Eu','Tb','Ho','Er','Tm','Yb']
-# percentages=[54.00707155,5.7832941,7.1368921,18.57346235,0.7932652,1.6451036,6.0353367,0.00022705,0.00045315,0.9495364,0.03095955,0,0.00521645,0.0390108,0,0,0.00017005,
-# 0.4545,0.4545,0.4545,0.4545,0.4545,0.4545,0.4545,0.4545,0.4545,0.4545,0.4545]
-
-# # Remove elements with zero percentage
-# elements = [elem for elem, perc in zip(elements, percentages) if perc > 0]
-# percentages = [perc for perc in percentages if perc > 0]
-
-# # elements=['Al', 'Fe', 'Mo']
-# # percentages=[10, 80, 10]
-# if len(percentages) > 0:
-#     percentages[-1] = 100.0 - sum(percentages[:-1])
-
-# # print(np.sum(percentages))
-# libs = SimulatedLIBS(
-#     Te=0.86,
-#     Ne=10**17,
-#     elements=elements,
-#     percentages=percentages,
-#     resolution=5000,
-#     low_w=200,
-#     upper_w=900,
-#     max_ion_charge=2,
-#     webscraping='dynamic',
-#     headless=True,
-#     keep_browser_open=False,
-#     detach_browser=False
-# )
-# file_name='07141'
-# save_dir = r"D:\LIBS\simLIBS-2.0.3\simLIBS-2.0.3\saved"
-# libs.save_to_csv(os.path.join(save_dir, file_name + "_95.csv"))
-# print("File saved successfully.")

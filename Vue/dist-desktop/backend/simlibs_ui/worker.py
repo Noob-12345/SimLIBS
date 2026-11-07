@@ -89,8 +89,12 @@ def main():
         path = execute(request, emit, cancelled)
         emit('cancelled' if cancelled() else 'success', path=path)
     except Exception as exc:
-        write_json(directory / 'error.json', {'error': str(exc), 'traceback': traceback.format_exc()})
-        emit('error', message=str(exc), log=str(directory / 'error.json'))
+        if isinstance(exc, InterruptedError) and cancelled():
+            emit('cancelled')
+            return 0
+        code = getattr(exc, 'code', 'task_error')
+        write_json(directory / 'error.json', {'error': str(exc), 'code': code, 'traceback': traceback.format_exc()})
+        emit('error', message=str(exc), code=code, log=str(directory / 'error.json'))
         return 1
     return 0
 

@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>NIST: Atomic Spectra Database - Spectral Lines Help File</title>
+<link rel="stylesheet" href="/css/generic-nist-exit-script.css" type="text/css">
+<script src="/js/jquery.min.js"></script>
+<script src="/js/generic-nist-exit-script.js"></script>
+<!-- Google Analtyics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9SLN1VEEJ2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9SLN1VEEJ2');
+</script>
+<!-- End of Google Analytics 4 -->
+<SCRIPT async id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&subagency=NIST&pua=UA-37115410-46&yt=false&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c"></script>
+<script src="/js/clickjack.js"></script>
+</head>
+
+<body style="background-color:#ffffff; margin-top:0">
+<a href="#start" style="font-size:1px;margin-top:0"><img src="/Images/dot_t.gif" height="1" title="skip navigation" alt="[skip navigation]" style="{border: 0; border-width: thin}"></a>
+
+<table style="width: 100%; border:0; border-spacing:0px">
+<tr><td style="text-align: left; padding:0"><a href="../index.html"><img
+src="../Images/ASD-sm.gif" width="100" height="47" title="ASD Home" alt="[ASD Home]" style="{border: 0}"></a><a href="../lines_form.html"><img
+src="../Images/Lines.gif" width="70" height="47" title="Lines Query" alt="[Lines Query]" style="{border: 0}"></a><a href="../levels_form.html"><img
+src="../Images/Levels.gif" width="79" height="47" title="Levels Query" alt="[Levels Query]" style="{border: 0}"></a><a href="https://www.nist.gov/pml/atomic-spectra-database-contents"><img
+src="../Images/List.gif" width="77" height="47" title="List of Spectra" alt="[List of Spectra]" style="{border: 0}"></a><a href="/PhysRefData/ASD/ionEnergy.html"><img
+src="../Images/GS-IE.gif" width="124" height="47" title="Ground States and Ionization Energies" alt="[Ground States and Ionization Energies]"
+style="{border: 0}"></a><a href="/asbib"><img src="../Images/Bib.gif" width="98" height="47" title="Bibliography" alt="[Bibliography]" style="{border: 0}"></a><a href="help.html"><img
+src="../Images/Help.gif" width="55" height="47" title="Help" alt="[Help]" style="{border: 0}"></a></td>
+
+<td style="text-align: right">
+  <img src="../Images/nist-pl-black.gif" width="136" height="68" usemap="#NIST-PL" title="NIST Physical Measurement Laboratory" alt="NIST Physical Measurement Laboratory" style="{border: 0}">
+</td>
+</tr>
+</table>
+
+<map name="NIST-PL">
+  <area shape="rect" coords="1,1,135,48" href="http://www.nist.gov" alt="National Institute of Standards and Technology" title="National Institute of Standards and Technology">
+  <area shape="rect" coords="1,50,135,67" href="/" alt="NIST Physical Measurement Laboratory" title="NIST Physical Measurement Laboratory">
+</map>
+
+<a id="start"><!-- filler --></a>
+<a id="Top"><!-- filler --></a>
+
+<a id="LINE"><!-- filler --></a>
+<h2><a href="/PhysRefData/ASD/Html/help.html"><img src="/Images/top.gif" title="Go to top of ASD Help" alt="Go to top of ASD Help" style="{border: 0;}"></a>
+&nbsp; Spectral Lines</h2>
+
+The ASD database provides access to transition data for atoms and atomic ions.
+For more information on the Lines data accessible by the database consult the
+<a href="https://www.nist.gov/pml/atomic-spectra-database-contents">Introduction to and Contents of the ASD Database</a>.
+<p>
+This section starts with the description of the input parameters of the Lines Search Form. For the description of the
+output, either in tabular or graphical form, see the <a href="#LINES_OUT">Lines Output</a> section.
+</p>
+
+<hr style="height: 1px; border-style: solid">
+<p></p>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+<a id="LINES_FORM">&nbsp;Lines Search Form</a></h2>
+
+The ASD Lines Search Form, referred to as the &quot;Lines Form,&quot; provides
+access to transition data for atoms and ions, either in tabular or graphical form.
+Tabular output is available for wavelengths (or wavenumbers, or photon energies, or frequencies), relative intensities, radiative
+transition probabilities and related quantities, as well as energy level classifications
+and bibliographic references. Graphical output is available in the forms of Grotrian
+diagrams, line identification plots, and Saha-LTE spectrum plots. For some spectra, there
+is also graphical information on dependences of certain line intensity ratios on
+electron density and/or temperature in the emitting plasma. This information can be
+useful for plasma diagnostics.
+<p>
+When loaded in the browser, the Lines Search Form displays only the <a href="#LINES_INP_MAIN">Main search parameters</a> block
+and the <a href="#LINES_ADVANCED_OPTS">Advanced Settings</a> block below it.
+At the bottom of the Main search parameters block, there are buttons &quot;<b>Reset Input</b>,&quot; &quot;<b>Retrieve Data</b>,&quot;
+&quot;<b>Show <a href="#LINES_GRAPH_OPTS">Graphical Options</a></b>,&quot; and
+&quot;<b>Hide <a href="#LINES_ADVANCED_OPTS">Advanced Settings</a></b>.&quot;
+When a &quot;Show ...&quot; button is clicked, the corresponding block of input options
+appears on the screen, and the button changes its name to &quot;Hide ...&quot;
+Conversely, clicking a &quot;Hide ...&quot; button causes the corresponding block of input options disappear,
+and the button changes its name to &quot;Show ...&quot;
+</p>
+<p></p>
+The Lines Form prompts the user for the following pieces of information:
+<ul>
+  <li><a href="#LINES_INP_MAIN">Main search parameters</a>
+    <ul>
+      <li><a href="#LINES_SPECTRA">Spectra</a> of interest (e.g.,
+        <span style="font-family:monospace">Na&nbsp;I, Na&nbsp;II, Mg&nbsp;I-III, Mn-Co Ar-like</span>).
+      </li>
+      <li>Primary quantity of interest: wavelength (default), wavenumber, photon energy, or frequency; selected from a pulldown menu in the Lines Form.</li>
+      <li><a href="#LINES_INP_WL_LIM">Lower and upper limits of the range of the primary quantity</a></li>
+      <li>Units for the quantity of interest: angstroms (&Aring;), nanometers (nm; default for wavelengths), micrometers (&mu;m);
+      cm<sup>&minus;1</sup> (the only choice for wavenumbers); eV (default for photon energies), Ry, Hartree; GHz (the only choice for frequencies).
+      The units are selected from a pulldown menu in the Lines Form. The same units apply both to the output quantity
+      and to the lower/upper limits of the quantity range.
+      </li>
+    </ul>
+  </li>
+  <li><a href="#LINES_GRAPH_OPTS">Graphical Output Options</a>
+    <ul>
+      <li><a href="#LINES_INP_DYN">Dynamic Plot options</a>
+        <ul>
+          <li>No plots (used to reset the plotting options)</li>
+          <li><a href="#LINES_INP_ID_PLOT">Line Identification Plot</a></li>
+          <li><a href="#LINES_INP_SP_IMG_PLOT">Spectrum Image Plot</a></li>
+          <li><a href="#LINES_INP_SAHA_PLOT">Saha-LTE Spectrum Plot</a></li>
+        </ul>
+      </li>
+      <li><a href="#LINES_INP_GROTRIAN">Grotrian Diagram options</a>
+    </ul>
+  </li>
+  <li><a href="#LINES_ADVANCED_OPTS">Advanced Settings</a>
+    <ul>
+      <li><a href="#LINE_OUTPUT_OPTS">Output options</a></li>
+      <li><a href="#LINE_OPTIONAL">Optional search criteria</a></li>
+      <li><a href="#LINE_CRITERIA">Additional search criteria</a></li>
+    </ul>
+  </li>
+</ul>
+For the description of the output, see the <a href="#LINES_OUT">Lines Output</a> section.
+<p></p>
+<hr style="height: 1px; border-style: solid">
+<a id="LINES_INP_MAIN"><!-- filler --></a>
+<h3><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<u>Main Search Parameters</u></h3>
+
+At a minimum, the user must enter <a href="#LINES_SPECTRA">spectra</a> of interest
+(e.g., <span style="font-family:monospace">H&nbsp;I</span>) and then press the [Enter]
+key or click &quot;Retrieve Data&quot;. This will result in a tabular output page with
+transition data. Alternatively, the user can click on the &quot;Make Grotrian Diagram&quot;
+button to produce an interactive graphical diagram. The <a href="#LINES_INP_DYN">Dynamic Plots</a>
+require some additional settings, such as <a href="#LINES_INP_WL_LIM">wavelength limits</a> and
+units.
+
+<a id="LINES_SPECTRA"><!-- filler --></a>
+<h3><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+  &nbsp; Selecting Spectra for Line Searches
+</h3>
+
+On the Lines Form, to specify an element, simply enter the element symbol (e.g.,
+<span style="font-family:monospace">Fe</span>). Element symbols and Roman numerals need not be capitalized.
+Multiple elements are separated by a semicolon. To indicate the spectrum of a given
+element, enter either a Roman numeral or an Arabic numeral after the element
+name. The Roman numerals must be separated from the element symbol by a space.
+(<B>Note</B>: <span style="font-family:monospace">Fe&nbsp;I</span>&nbsp;=&nbsp;<span style="font-family:monospace">Fe0+</span>,
+<span style="font-family:monospace">Fe&nbsp;II</span>&nbsp;=&nbsp;<span style="font-family:monospace">Fe1+</span>, etc.). Alternatively, the
+spectrum may be specified by the name of its isoelectronic sequence (e.g.,
+<span style="font-family:monospace">Si&nbsp;Li-like&nbsp;=&nbsp;Si&nbsp;XII</span>, <span style="font-family:monospace">Si&nbsp;Na-like&nbsp;=&nbsp;Si&nbsp;IV</span>).
+The absence of a Roman or Arabic numeral
+or an isoelectronic sequence name after an element symbol indicates all stages of
+ionization. Spectra of the same element are separated by a comma, while
+spectra of different elements are separated by a semicolon. A range of spectra is indicated
+by using a hyphen between stages of ionization or between names of isoelectronic sequences.
+
+<p>
+If the user has not provided enough information to specify spectra, an error
+message will be displayed.
+</p>
+
+<a id="SPECTRAL_EX"><!-- filler --></a>
+<h3>Examples of Spectral Notation <span style="font-size: smaller">(Case Insensitive)</span></h3>
+
+<div style="text-align: left">
+<table style="border-spacing:0; border:0">
+<tr style="vertical-align:top">
+<td>Na&nbsp;I</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>Neutral sodium</td>
+</tr>
+
+<tr style="vertical-align:top">
+<td>na&nbsp;0</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>Neutral sodium</td>
+</tr>
+
+<tr style="vertical-align:top">
+<td>Na&nbsp;I; Fe&nbsp;I</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>Neutral sodium and neutral iron</td>
+</tr>
+
+<tr style="vertical-align:top">
+<td>Fe&nbsp;I-III</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>Fe, ionization stages one, two, and three</td>
+</tr>
+
+<tr style="vertical-align:top">
+<td>Fe&nbsp;I-III,V</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>Fe, ionization stages one, two, three, and five</td>
+</tr>
+
+<tr style="vertical-align:top">
+<td>Fe</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>All ionization stages of iron</td>
+</tr>
+
+<tr style="vertical-align:top">
+<td>198Hg I</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>Neutral isotope 198 of mercury</td>
+</tr>
+
+<tr style="vertical-align:top">
+<td>C&nbsp;I; N&nbsp;II; O&nbsp;III</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>List of spectra specifying neutral carbon, nitrogen&nbsp;II, and
+oxygen&nbsp;III.</td>
+</tr>
+
+<tr style="vertical-align:top">
+<td>C-O&nbsp;C-like</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>List of carbon-like spectra of all elements between carbon and oxygen (produces the same results as the previous example).</td>
+</tr>
+
+<tr style="vertical-align:top">
+<td>C-O&nbsp;I-III</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>List of spectra of neutral, singly-ionized, and doubly-ionized elements between carbon and oxygen.</td>
+</tr>
+
+<tr style="vertical-align:top">
+<td>C-N&nbsp;I-II; Ne&nbsp;IV-V</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>List of spectra specifying C&nbsp;I, C&nbsp;II, N&nbsp;I, N&nbsp;II, Ne&nbsp;IV, and Ne&nbsp;V.</td>
+</tr>
+
+<tr style="vertical-align:top">
+<td>Mg&nbsp;He-like-Li-like; Al&nbsp;Li-like</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>List of spectra specifying Mg&nbsp;X, Mg&nbsp;XI, and Al&nbsp;XI.</td>
+</tr>
+
+</table></div>
+
+<hr style="height: 1px; border-style: solid">
+
+<a id="LINES_INP_WL_LIM"><!-- filler --></a>
+<h3><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+  &nbsp; Lower and upper limits of the wavelength/wavenumber/photon energy/frequency range
+</h3>
+
+By default, the Search Form prompts the user to enter the lower and upper limits of line wavelengths in the units
+selected in the &quot;<b>Wavelength Units</b>&quot; menu. The user can change the primary quantity of interest from the default
+&quot;<b>Wavelength</b>&quot; to &quot;<b>Wavenumber</b>&quot; or &quot;<b>Photon Energy</b>&quot; or &quot;<b>Frequency</b>&quot; 
+by selecting a corresponding option in the &quot;<b>Search for</b>&quot; pull-down menu. Change of the choice in this menu results in 
+corresponding changes in the name and contents of the &quot;<b>Units</b>&quot; menu and in available options in the 
+<a href="#LINES_ADVANCED_OPTS">Advanced Settings</a> section of the Search Form.
+The optional input in the &quot;<b>Lower</b>&quot; and &quot;<b>Upper</b>&quot; input boxes is expected to be 
+in units chosen in the &quot;<b>Units</b>&quot; menu. Both the lower and upper limits can be left blank if the <a href="#LINES_SPECTRA">
+Spectra</a> box is non-blank and no <a href="#LINES_GRAPH_OPTS">Graphical Output Options</a> are set. Otherwise, either one or both of them can be blank.
+<p>
+Note that the units set in the drop-down menu in the Main Parameters section apply not only to the
+limits of the promary quantity search range, but also to the output. By default, the wavelengths are included in the output. The user
+can change the choice of the columns displayed in the output and set a number of other options (e.g., whether the
+wavelengths are in standard air or in vacuum) in the <a href="#LINES_ADVANCED_OPTS">Advanced Settings</a> section of the Search Form. These settings
+will be displayed if the user clicks on the &quot;<b>Show Advanced Settings</b>&quot; button.
+</p>
+For the description of the tabular output of the Lines Form, see the <a href="#OUTPUT_LINE">Output Line Tables</a> section.
+
+<a id="LINES_GRAPH_OPTS"><!-- filler --></a>
+<h3><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+  &nbsp; <u>Graphical Output Options</u>
+</h3>
+There are two sets of graphical output options in the Lines Search:
+<ul>
+  <li>Dynamic Plots: <a href="#LINES_INP_ID_PLOT">Line Identification</a>, <a href="#LINES_INP_SP_IMG_PLOT">Spectrum Image</a>, 
+    and <a href="#LINES_INP_SAHA_PLOT">Saha/LTE spectrum</a> plots;</li>
+  <li><a href="#LINES_INP_GROTRIAN">Grotrian Diagrams</a></li>
+</ul>
+To show these graphical options, the user must click on the &quot;Show Graphical Options&quot; button in the Main Parameters section.
+The contents and use of the graphical output are explained in the <a href="#LINES_OUT_GRAPH">Graphical Output</a> section.
+
+<a id="LINES_INP_DYN"><!-- filler --></a>
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+  &nbsp;Dynamic Plot Options
+</h4>
+
+These options allow graphical display of three types of
+dynamically created plots, i.e., line identification plots, spectrum image plots, and Saha-LTE
+(local thermodynamic equilibrium) plasma emission plots. The first two types of plots are
+created as PDF files that may require appropriate software (e.g., Adobe
+Acrobat Reader or xpdf) for graph display. See the <a href="#LINES_OUT_GRAPH">Graphical Output</a>
+section for the details on the output.<br>
+
+<ul>
+  <li><i><a id="LINES_INP_ID_PLOT">Line Identification Plot</a></i><br>
+    <br>
+    Selecting this option would produce a PDF file showing positions of all spectral lines of the chosen
+    <a href="#LINES_SPECTRA">Spectra</a> within the chosen <a href="#LINES_INP_WL_LIM">wavelength/wavenumber/photon energy/frequency range</a>.<br><br>
+    The contents and use of the Line Identification Plots are explained in the corresponding <a href="#LINES_OUT_ID">Output</a> section.
+    <br><br>
+  </li>
+  <li><i><a id="LINES_INP_SP_IMG_PLOT">Spectrum Image Plot</a></i><br><br>
+    This is an experimental feature introduced in ASD v.5.11 in 2023, and its operation has a limited flexibility.
+    For example, it presently works only if the search is restricted to a single atom or ion, and only if the 
+    search is made for wavelengths in the units of nm, within the range between 380&nbsp;nm and 780&nbsp;nm. The purpose of the plot is to simulate an 
+    appearance of the spectrum produced by a slit spectrograph in a visible range, so that the color of each spectral line roughly corresponds 
+    to human percention of light at the line's wavelength, and its intensity roughly corresponds to intensities listed in the tabular output of ASD.
+    The lines listed in ASD without numerical intensity values are assigned small non-zero intensities to make them visible in the image.
+    The plot is displayed as an image at the bottom of the lines tabular output.
+    <br><br>
+  </li>
+  <li><i><a id="LINES_INP_SAHA_PLOT">Saha-LTE Spectrum</a></i><br><br>
+    Selecting this option would produce a PDF file with a plot showing line emission
+    from an optically thin plasma having the chosen values of electron
+    temperature and electron density. For this plot, both the lower and upper limits of the wavelength/wavenumber/photon energy/frequency range 
+    are mandatory parameters.
+    <br><br>
+    The plasma emission intensities are calculated in
+    arbitrary units. These units can be chosen from one of the two options: 
+    1) energy flux units (the default choice) or 
+    2) photon count units. 
+    If only one ion/atom is chosen for plot generation, then
+    the populations of the energy levels are calculated according to the
+    Boltzmann formula <b><i>N<sub>k</sub></i> =
+<i>N</i><sub>0</sub>/<i>g</i><sub>0</sub>&middot;<i>g<sub>k</sub></i>&middot;exp(&minus;<i>E<sub>k</sub></i>/<i>T</i><sub>e</sub>)</b>
+where <i>N<sub>k</sub></i> is the level population, <i>N</i><sub>0</sub> is
+the population of the ground state level, <i>g<sub>k</sub></i> and
+<i>g</i><sub>0</sub> are the statistical weights of the levels,
+<i>E<sub>k</sub></i> is the energy of the level with respect to the ground
+state in eV, and <i>T</i><sub>e</sub> is the electron temperature in eV to be
+entered in the text field. In this case the electron density
+<i>N</i><sub>e</sub> is not required to be entered.<br>
+<br>
+If several ions/atoms are chosen for plot generation (e.g., &quot;C&nbsp;I-V&quot; is entered in
+the <a href="#LINES_SPECTRA">Spectra</a> input box), then first the ionization distribution between
+different ions is calculated according to the Saha formula (see, e.g.,
+H.R.&nbsp;Griem, Principles of Plasma Spectroscopy, 1997), and then within
+each ion, the populations are calculated using the Boltzmann distribution
+formula. In this case both the electron temperature and electron density are
+mandatory parameters.<br>
+<br>
+The total number of photons emitted per second per unit volume of plasma in each radiative transition 
+is calculated by multiplying the population density of the upper level, <b><i>N<sub>k</sub></i></b>,
+by the rate of spontaneous radiative decay, <b><i>A<sub>ki</sub></i></b> (a.k.a. transition probability 
+or Einstein <i>A</i>-coefficient), from the upper level <i>k</i> to the lower level <i>i</i> of the transition.
+If the user requested the intensity scale to be in terms of energy flux, the photon emission rate 
+is multiplied by the photon energy, <b><i>E<sub>k</sub></i>&nbsp;&minus;&nbsp;<i>E<sub>i</sub></i></b> (in units 
+of cm<sup>&minus;1</sup> to calculate the emitted energy flux per unit plasma volume.<br>
+<br>
+<a id="LINES_INP_IONTEMP"><!-- filler --></a>
+The spectrum may be convoluted with the Doppler (Gaussian) line profile for
+each of the spectral lines. To do that, the user must check the <b>Doppler-broadened spectrum</b> box
+in the Lines Search Form and (optionally) specify the <b>Ion Temperature</b> (in eV) corresponding to the desired broadening.
+In practice, experimental spectra are broadened by many different mechanisms, e.g., instrumental broadening.
+To produce a synthetic spectrum resembling experimental ones, the user may need to specify an unphysically large
+Ion Temperature. The only meaning of this parameter is the broadening it produces.<br>
+<br>
+By default (if no Ion Temperature was specified), the entered electron temperature
+<i><b>T<sub>e</sub></b></i> is used for calculation of the line width parameter. An
+ion temperature <i><b>T<sub>i</sub></b></i> may be entered if
+<i><b>T<sub>i</sub></b></i> &ne; <i><b>T<sub>e</sub></b></i>.<br>
+<br>
+If a Doppler-broadened spectrum is requested by the user, the spectrum will be calculated on a grid with the step
+size defined by the total number of spectral lines of the selected spectra in the requested range and by the
+broadening of each spectral line (i.e., Ion Temperature). The greater the number of lines, the greater is the
+number of grid points required. The greater is the Ion Temperature, the lesser grid points are required. To reduce
+the load on our database servers, we are limiting the total number of data points in the spectrum grid. If the
+user's selection requires too many grid points, the ASD codes will choose a greater Ion Temperature corresponding
+to the maximum allowed grid points, and a warning about it will be displayed in the output.<br>
+<br>
+If several chemical elements are involved in the string entered in the <a href="#LINES_SPECTRA">Spectra</a> input box,
+an additional form will appear, requesting the user to enter the percentage abundances of each element in the mixture.<br>
+<br>
+Such an additional form will also appear if the requested Spectra contain hydrogen or deuterium. For these spectra,
+the user must specify whether the resolved fine structure or configuration-average wavelengths should be used for their
+lines. This is due to the special character of hydrogen and deuterium spectra. In these spectra, the widths of the fine 
+structure of energy levels are exceptionally small and thus, the fine structure is usually unresolved in experimental 
+spectra recorded with low or moderate resolution. However, due to the fundamental importance of these spectra in physics, 
+many studies of them are made with exceptionaly high resolution. To accommodate the needs of both low- and high-resolution 
+spectroscopy, ASD contains two overlapping subsets of energy level and spectral line data for both H and D in the same 
+data sets. For calculation of simulated spectra of H and D, only one subset of these data, either low- or high-resolution, 
+must be selected (otherwise, the <a href="levelshelp.html#LOUTLEPARTFUNCT">partition functions</a> would be doubled, and 
+the calculated intensities would be too large). For other elements, ASD does not have both these types of energy levels and 
+wavelengths mixed in the tables, so a prompt for this choice will not appear.<br>
+<br>
+The contents of the output Saha-LTE plots and tables accompanying them are explained in the corresponding
+<a href="#SAHAPLOT">Output</a> section.
+</li>
+</ul>
+
+<a id="LINES_INP_GROTRIAN"><!-- filler --></a>
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+  &nbsp;Java Grotrian Diagrams
+</h4>
+The output content and features of interactive Grotrian diagrams are explained in the <a href="#OUTPUT_JAVA">Plotting Grotrian diagrams</a>
+section. The Grotrian Diagram can be displayed only for a spectrum of single atom or ion. Any restrictions applied to the selected data set, e.g., 
+the wavelength/wavenumber/photon energy/frequency range, will be applied to selection of the data displayed in the diagram.
+<br>
+
+<a id="LINES_ADVANCED_OPTS"><!-- filler --></a>
+<h3><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+  &nbsp; <u>Advanced Settings</u>
+</h3>
+The options shown in this block of the Lines Form are divided into three groups:
+<ul>
+  <li><a href="#LINE_OUTPUT_OPTS">Output Options</a> controlling the general layout of the output,</li>
+  <li><a href="#LINE_OPTIONAL">Optional Search Criteria</a> controlling the range of selected data, and</li>
+  <li><a href="#LINE_CRITERIA">Additional Search Criteria</a> controlling the scope and type of the selected and displayed data.</li>
+</ul>
+
+<h4><a id="LINE_OUTPUT_OPTS"><u>Output Options</u></a></h4>
+
+<p>The following options apply to all lines and levels searches
+and are collectively referred to as output options.
+</p>
+
+<ul>
+  <li>Choice of display using an HTML table, an ASCII fixed-column-width table, a <a href="#CSV">CSV or tab-delimted data file</a>.</li>
+  <li>Choice of removing Javascript tags in the output (convenient for an ASCII table when saving the output into a file)</li>
+  <li>Energy level units. The user may choose between cm<sup>&minus;1</sup> (default), eV, Rydberg, Hartree (=2&times;Rydberg), or GHz.</li>
+
+  <li>Choice of viewing the (scrollable) data all at once, or one page at a time.</li>
+  <li>Choice of page size.  The number of lines displayed on each page
+    of the output may be modified so that they would fit the user's screen size.</li>
+  <li>Output ordering. The output can be sorted according to either <a href="#WAVELENGTH_ORD">wavelength</a>
+    or <a href="#MULTIPLET_ORD">multiplet</a> order. The multiplet order is available if only <i><b>one</b></i>
+    ion or atom is specified in the <a href="#LINES_SPECTRA">Spectra</a> box.<br>
+
+    <p>
+    <a id="WAVELENGTH_ORD"><i><b>Wavelength ordering</b></i></a>
+    </p>
+
+    All spectra are intermingled according to wavelength ordering. A spectrum must
+    be provided if no wavelength range is indicated.<br>
+
+    <p>
+    <a id="MULTIPLET_ORD"><i><b>Multiplet ordering</b></i></a>
+    </p><p>
+    Multiplets are transitions that share the same term and configuration.
+    Multiplets have been ordered in the transition probability compilations
+    according to energies and <i>g</i>&nbsp;values of the lower and upper levels,
+    and have been assigned arbitrary multiplet numbers that reflect this order.
+    </p><p>
+    To view multiplet-ordered data, the user must select the &quot;<b>Multiplet ordering</b>&quot;
+    radio box.
+    </p><p>
+    In some cases, a multiplet is missing from the numbered list. In general, this
+    is because some property of a compiled wavelength or level involved is
+    consistent with other more recent compilations, such as the NIST energy level
+    data.
+    </p><p>
+    Only the lines with energy level classification are displayed in the
+    multiplet-ordered output, and therefore the total number of lines shown at the
+    top of the page may be different for wavelength and multiplet orderings.
+    </p>
+  </li>
+</ul>
+<p>
+The default is to display output in its entirety as an HTML formatted table.
+By default, the levels are displayed in cm<sup>&minus;1</sup>.
+</p><p>
+For instructions on how to modify options associated with viewing data, refer
+to the section <a href="help.html#VIEWDATA">options for viewing data</a>.
+<br>
+
+<a id="LINE_OPTIONAL"><!-- filler --></a>
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+  &nbsp; <u>Optional Search Criteria</u>
+</h4>
+
+<p>
+The following search criteria may be specified:
+</p>
+<ul>
+  <li>Maximum lower level energy.</li>
+  <li>Maximum upper level energy.</li>
+  <li>Preference of whether the transition strength bounds will apply to
+    <i>A<sub>ki</sub></i> (default), <i>f<sub>ik</sub></i>, <i>S</i>, or
+    log(<i>gf</i>) values.</li>
+  <li>Minimum and/or maximum transition strength.</li>
+  <li>Accuracy minimum for <i>A<sub>ki</sub></i>, <i>f<sub>ik</sub></i>, <i>S</i>, or log(<i>gf</i>).</li>
+  <li>Relative intensity minimum.</li>
+</ul>
+
+<a id="LINE_CRITERIA"><!-- filler --></a>
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+  &nbsp; <u>Additional Search Criteria</u>
+</h4>
+<p>
+The following options apply to all line searches and are
+collectively referred to as additional search criteria options.
+</p>
+
+<ul>
+  <li>Line selection options:
+    <ul>
+      <li> All lines of data meeting the search criteria,</li>
+      <li> Only lines with transition probability data,</li>
+      <li> Only lines with energy level classifications,</li>
+      <li> Only lines with observed wavelengths, or</li>
+      <li> Only lines with <a href="#LINES_OUT_DIAGNOSTICS">plasma-diagnostics data</a>;</li>
+      <li> <a href="#LINES_INCLUDE_RITZ">Include Ritz wavelengths<a> for all possible E1 transitions.</li>
+    </ul>
+    <p>
+    The default is to display all stored lines of data meeting the search criteria,
+    regardless of whether the lines contain transition probability data,
+    energy level classifications, or plasma-diagnostics data, 
+    and to not display any additionally available possible Ritz transitions.</p>
+  </li>
+  <li>Choice of display of the plasma-diagnostics data:<p>
+    Plasma diagnostics data were added to ASD when version 5.3 was released. For the list of spectra that
+    include these data, refer to the <a href="verhist.shtml">Version History</a> (search for the word &quot;diagnostics&quot;).
+    To include the diagnostics data in the Lines output, check the corresponding checkbox.
+    </p></li>
+  <li>Choice of bibliographic information output:<p>
+    If the corresponding checkbox is checked, the bibliographic
+    references for transition probabilities (TP) and spectral lines will be
+    shown in two separate columns.</p>
+  </li>
+  <li>Choice of display of wavelength data:
+    <ul>
+      <li>Observed wavelength</li>
+      <li><a href="#RITZ">Ritz</a> wavelength</li>
+      <li>The default is to suppress the display of the &quot;observed-Ritz&quot;
+        column of data. Checking the &quot;<b>observed-Ritz</b>&quot; option will cause
+        that column of data to be generated in the output.<br><br></li>
+    </ul>
+  </li>
+  <li>Choice of wavelength type:
+    <p>
+    The default is to display wavelengths in:<br>
+    &nbsp;&nbsp;&nbsp;Vacuum&nbsp;(&lt;&nbsp;200&nbsp;nm), Air&nbsp;(200&nbsp;nm to 2,000&nbsp;nm), Vacuum (&gt;&nbsp;2,000&nbsp;nm).
+    </p><p>
+    For wavelength ordered output, the table headings for the wavelength
+    columns change as needed to reflect the change in wavelength type.
+    </p><p>
+    For multiplet ordered output, the type of the output value (wavelength in air or vacuum or wavenumber,
+    which is always in vacuum) and the measurement units are specified in a separate column next to the
+    values.
+    </p>
+    Alternative choices are:
+    <ul>
+      <li> Vacuum (&lt;&nbsp;200&nbsp;nm), Air&nbsp;(200&nbsp;nm to 1,000&nbsp;nm), Wavenumber&nbsp;(&gt;&nbsp;1,000&nbsp;nm)</li>
+      <li> Vacuum (&lt;&nbsp;1,000&nbsp;nm), Wavenumber&nbsp;(&gt;&nbsp;1,000&nbsp;nm)</li>
+      <li> Vacuum (&lt;&nbsp;200&nbsp;nm), Air&nbsp;(200&nbsp;nm to 2,000&nbsp;nm), Vacuum&nbsp;(&gt;&nbsp;2,000&nbsp;nm)</li>
+      <li> Vacuum (all wavelengths)</li>
+      <li> Vacuum (&lt;&nbsp;185&nbsp;nm), Air (&nbsp;(&gt;&nbsp;185&nbsp;nm))</li>
+      <li> Wavenumber (all wavelengths)</li>
+    </ul>
+    <p>
+  Note that the formula we use for the <a href="#AIR">refractive index of air</a> was experimentally verified in the wavelength
+  range between 185&nbsp;nm and 1690&nbsp;nm. The refractive index of air is not known for wavelengths outside of this range, where
+    air strongly absorbs all radiation. For this reason, wavelengths shorter than 185&nbsp;nm and 1690&nbsp;nm cannot be displayed
+  in air. For wavelengths &gt;1690&nbsp;nm, output of wavelengths in air is allowed, because the formula for the refractive index
+    of air behaves smoothly in this range. However, the users should be cautious when using such wavelengths, as their validity is
+    uncertain.
+    </p>
+  </li>
+</ul>
+
+<p>
+To change the default, the user simply needs to click on one of the
+radio buttons. The user will also need to check appropriate checkboxes
+if individual columns of wavelength information are desired:</p>
+<ul>
+  <li>Choice of display of transition strength information.  The default is to
+    display the following columns of data:
+    <ul>
+      <li><i>A<sub>ki</sub></i>,</li>
+      <li>Accuracy,</li>
+      <li>Relative intensity.</li>
+    </ul>
+    <p>
+    By default, the <i>A<sub>ki</sub></i> (or <i>g<sub>k</sub>A<sub>ki</sub></i>)
+    are displayed in units of s<sup>&minus;1</sup>. They can be displayed in units
+    of 10<sup>8</sup>&nbsp;s<sup>&minus;1</sup> if a proper checkbox is checked.<br>
+    <br>
+    To suppress display of the Relative&nbsp;Intensity data column, the
+    corresponding checkbox can be unchecked.
+    </p><p>
+    Although the <i>f<sub>ik</sub></i>, <i>S</i>, and log(<i>gf</i>) values are not
+    displayed by default, if the corresponding checkboxes are clicked, then those data values will be displayed.
+    </p>
+  </li>
+  <li>Choice of transition type:<br>
+    <br>
+    By default, both electric dipole-allowed (E1) and forbidden (M1, E2, M2,...) transitions are displayed in the output.
+    To display only allowed or only forbidden transitions, a user must uncheck the checkbox corresponding to
+    the unwanted type of transitions.<br>
+    <br>
+  </li>
+  <li>Choice of level information: For lines output, the default is to display:
+    <ul>
+      <li>Configurations,</li>
+      <li>Terms,</li>
+      <li>Energies, and</li>
+      <li><i>J</i> values.</li>
+    </ul>
+    <p>
+    To suppress display of the information listed above, the corresponding
+    checkbox can be unchecked.</p></li>
+</ul>
+
+<p></p>
+<hr style="height: 1px; border-style: solid">
+<p></p>
+
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<a id="LINES_INCLUDE_RITZ">Displaying Ritz Wavelengths of All Possible Electric Dipole Transitions</a></h2>
+In addition to displaying the lines stored in the database, the user can choose to display <a href="#RITZ">Ritz</a> wavelengths of all possible electric dipole (E1)
+transitions between the energy levels available in the database. The set of these transitions is defined by strict selection 
+rules: the levels must be of opposite parities, and the total angular momentum (<i>J</i>) must change by no more than &pm;1; 
+transitions between the levels that both have <i>J</i>&nbsp;=&nbsp;0 are also forbidden and are not included in the list.
+In addition to these strict rules, the following two categories of transitions are also omitted from the ASD output:
+<ul>
+  <li>Thansitions involving levels corresponding to unresolved terms consisting of several closely lying fine-structure levels with different <i>J</i> values. 
+  These levels may have a blank <i>J</i> value in the database or a comma-separated list of several <i>J</i> values.</li>
+  <li>Transitions between levels differing by less than 2000&nbsp;cm<sup>&minus;1</sup>.
+</ul>
+Even with these limitations, the total number of E1 transitions that can potentially be displayed amounts to a few million. For this reason, this option
+can be used only for a single spectrum specified in the <a href="#LINES_SPECTRA">Spectra</a> input box. 
+The Ritz transitions do not have any data on observed wavelength, intensity, or transition probability. For this reason, selecting this option is ignored when the user 
+chooses to display only the observed lines, or only lines with transition probabilites, or selects the <a href="#MULTIPLET_ORD">Multiplet ordering option</a> for the output,
+or sets limits on the displayed observed intensity or transition-probability parameters.
+<p>
+The user should also be apprehensive about the precision of the displayed Ritz wavelengths, which is very approximate. It is determined by estimated uncertainty of the 
+wave number, which is calculated as a combination in quadrature of the level uncertainties. If the latter are unknown, they are estimated as 10 units of the last 
+significant digit of the level value. Even if they are known, presence of correlations or unknown systematic errors in level values may cause the number of significant 
+digits in the displayed Ritz wavelength to be wrong by up to &plusmn;2. Particularly, for intersystem transitions having different unknown additive constants in the 
+lower and upper energy levels (e.g., &quot;+x&quot; in one level and &quot;+y&quot; or no additive costant in another level), the wavenumber uncertainty calculated in 
+this simplistic way may be severely underestimated.
+</p>
+<p>
+The Ritz wavelengths that have not been evaluated for their precision and stored in ASD are appended with a letter &quot;R&quot;. Their presence in the output list of ASD
+does not necessarily mean that these transitions can possibly be observed. Many of them are strongly forbidden by additional selection rules that are generally not strict.
+E.g., when coupling of electrons is very pure (that is, there is little or no mixing in the eigenvector compositions of the levels), E1 transitions involving a 
+simultaneous change in more than one electronic subshell cannot occur. An example is a 1s2p-3s<sup>2</sup> transition in light He-like ions. Also, when <i>LS</i> 
+coupling is very pure (such as in light atoms and ions), intercombination transitions (that is, transitions between the levels of different multiplicity) are strongly
+forbidden and may not be observable.
+<p>
+
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<a id="LINES_OUT">Lines Output</a></h2>
+This section describes the output for different types of requests from the <a href="#LINES_FORM">Lines Search Form</a>:
+<ul>
+  <li><a href="#OUTPUT_LINE">Tabular Output</a></li>
+  <li><a href="#LINES_OUT_GRAPH">Graphical Output</a>
+    <ul>
+      <li>Dynamic Plots:
+        <ul>
+          <li><a href="#LINES_OUT_ID">Line Identification Plots</a></li>
+          <li><a href="#SAHAPLOT">Saha-LTE Spectrum Plots</a></li>
+        </ul>
+      </li>
+      <li><a href="#OUTPUT_JAVA">Grotrian Diagrams</a></li>
+    </ul>
+</ul>
+
+<hr style="height: 1px; border-style: solid">
+
+<h3><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<a id="OUTPUT_LINE"><u>Output Line Tables</u></a></h3>
+
+<p>
+The output on the screen is HTML-formatted by default, but a significantly
+faster ASCII format may also be selected. The output will be even faster and more suitable
+for saving and viewing in other software, such as Excel or other spreadsheet viewers,
+if the <b>No Javascript</b> box is checked in the <a href="#LINE_OPTIONAL">Optional Search Criteria</a> section
+in the <a href="#LINES_ADVANCED_OPTS">Advanced Settings</a> block of the Lines Input Form.
+This box is automatically checked when the user selects the ASCII format. However, it can be unchecked
+if the output is intended solely for browsing purposes. The links to the online content of the
+bibliographic references are included in the output only if the <b>No Javascript</b> box is not checked.
+<br>
+</p>
+
+<p><i><b>Help popup windows</b></i><br>
+</p>
+
+<p>The output may contain some symbols or combinations thereof colored
+in red. This means that moving a mouse over such symbols would result
+in appearance of a small popup window showing some explanatory text
+provided the Javascript language is enabled in the browser options or
+preferences. Moving the mouse out would remove the popup window unless a user
+clicked on the red symbols. In that case, the popup window remains
+visible until the next mouse click on the same symbols. For the <a href="#RITZ">Ritz</a>
+wavelengths, such popup windows appear also for the brown asterisk and pink
+plus symbols after the <a href="#RITZ">Ritz</a> wavelengths (see <a href="#FIGURES">below</a>).<br>
+</p>
+
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+&nbsp;Explanation of the Lines Tables</h4>
+
+(By Column Heading)
+
+<ul>
+
+<li> <a href="#OUTELEMENT">Ion</a></li>
+<li> <a href="#OUTWAVELENGTH">Observed Wavelength, Ritz Wavelength, and Obs.-Ritz Wavelength</a></li>
+<li> <a href="#OUTUNC">Wavelength Uncertainties</a></li>
+<li> <a href="#OUTWN">Wavenumbers</a></li>
+<li> <a href="#OUTRELINT">Rel. Int</a>: Relative Intensity</li>
+<li> <a href="#OUTAKI">Transition Strengths</a>, <a href="#OUTACC">Accuracy</a></li>
+<li> <a href="#OUTENERGIES"><i>E<sub>i</sub></i><span style="font-size: larger">-</span><i>E<sub>k</sub></i></a>:
+  Lower level and upper level energies</li>
+<li> <a href="#OUTCONFIGS">Configurations</a>: Configurations of the lower and upper levels</li>
+<li> <a href="#OUTTERMS">Terms</a><sub>&nbsp;</sub>: Terms of the lower and upper levels</li>
+<li> <a href="#OUTJ"><i>J</i>-values</a>:
+  the total electronic angular momenta of the lower and upper levels</li>
+<li> <a href="#OUTG"><i>g<sub>i</sub></i><span style="font-size: larger">-</span><i>g<sub>k</sub></i></a>:
+  Lower level statistical weight (<i>g<sub>i</sub></i>=2<i>J<sub>i</sub></i>+1) -
+  upper level statistical weight (<i>g<sub>k</sub></i>=2<i>J<sub>k</sub></i>+1)</li>
+<li> <a href="#OUTTYPE">Type</a>: Transition type and multipolarity: electric dipole, magnetic quadrupole, etc.</li>
+<li> <a href="/PhysRefData/ASD/Html/lineshelp.html#RTP">TP Ref.</a></li>
+<li><a href="/PhysRefData/ASD/Html/lineshelp.html#RTP">Line Ref.</a></li>
+<li><a href="#LINES_OUT_DIAGNOSTICS">Plasma diagnostics data</a>
+<li><a href="#LINES_OUT_ID">Line Identification Plots</a></li>
+<li><a href="#SAHAPLOT">Saha-LTE plots</a></li>
+
+</ul>
+
+
+<!--  Begin detailed description of columns of lines output -->
+
+<hr style="height: 1px; border-style: solid">
+
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+<a id="OUTELEMENT">&nbsp;<u>Ion</u></a></h4>
+
+This column contains the spectrum name containing an element symbol and a
+Roman numeral denoting the spectrum number (I for neutral atom, II for singly
+ionized, etc.). This column appears only if multiple spectra have been
+specified in the Lines Form input.
+
+<br>
+
+<h4><a id="OUTWAVELENGTH"><u>Observed Wavelength, Ritz Wavelength, and Obs.-Ritz Wavelength</u></a><br></h4>
+
+The <a href="#RITZ">Ritz</a> wavelengths are the wavelengths derived from the lower and upper
+levels of the transitions. They are available only if both levels of the
+transition are known. If they are available, they usually are more accurate
+than the observed wavelengths, especially in the vacuum ultraviolet spectral
+region. The accuracy of the Ritz wavelengths depends on the quality of the
+energy level values. In some cases, the observed wavelength may be more
+accurate than the Ritz one, which is indicated by the number of given
+<a href="#FIGURE">significant figures</a> or by the <a href="#OUTUNC">uncertainties</a>.
+
+<p>
+The user may choose to display both <a href="#RITZ">Ritz</a> and observed wavelengths.
+The Obs-Ritz value may also be displayed. By default,
+wavelengths are given for vacuum wavelengths below 200&nbsp;nm and above
+2000&nbsp;nm, with standard-air wavelengths in between. Conversion between the air and vacuum wavelengths
+used in ASD is explained <a href="#AIR">here</a>.
+</p>
+
+<!--
+Some wavelengths are enclosed in parentheses "( )".  This occurs
+primarily in spectra of highly-ionized atoms and indicates that the
+wavelength should be treated with caution for one of two possible
+reasons.  i)&nbsp;The wavelength was bracketed in the original transition
+probability publication (usually indicating a wavelength derived from
+energy levels of undetermined accuracy), and either or both of the energy
+levels were not found in the NIST energy level compilations
+from which a reliable wavelength could be calculated.
+ii)&nbsp;One but not both of the NIST-compiled energy levels is labeled
+by a "<i>+x</i>", or "<i>+y</i>", etc.  Such labels indicate that the
+absolute energy scale is not known with respect to unlabeled levels or
+levels with different labels, at least not to the accuracy with which the
+energy level is given.  A question mark "?" follows a wavelength if either
+the lower or upper energy is followed by a question mark, indicating an
+uncertainty in assignment.
+-->
+
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+&nbsp;<a id="OUTUNC"><u>Uncertainties of Observed and Ritz Wavelengths</u></a><br></h4>
+
+Uncertainties of the data can be displayed, if they are available in ASD,
+when the corresponding box is checked in the input form (it is checked by default).
+If such information is not available, the implied uncertainty is defined by the
+number of <a href="#FIGURE">significant figures</a> given: it is generally between 2.5 and 25 units of the
+least significant figure. However, there are exceptions to this rule. In many cases,
+uncertainties of the relative positions of spectral lines can be measured more accurately than the
+wavelengths or wavenumbers. This may require additional significant figures in the
+wavelength values to avoid loss of accuracy. The quality of the <a href="#RITZ">Ritz</a> wavelengths can also be assessed
+by estimating the average deviation &quot;Obs.-Ritz&quot; for the given
+spectral region. Sometimes, the uncertainties of both observed and Ritz
+wavelengths can be retrieved from the bibliographic references provided for
+each line or from the Primary Data Source references at the top of the output page.
+The user can always choose the best available wavelength
+from the ASD output.
+<p>
+All uncertainties given in ASD are meant to be on the level of one standard deviation.
+</p>
+
+<h4><a id="OUTWN"><u>Wavenumbers</u></a><br></h4>
+There are two options for displaying wavenumbers in the output page:
+<ul>
+  <li>The &quot;<b>Wavenumber (all wavelengths)</b>&quot; radio button can be selected in the <a href="#LINE_CRITERIA">Additional Criteria</a> section of the
+    <a href="#LINES_ADVANCED_OPTS">Advanced Settings</a> block of the Lines Search Form.<br>
+    <br>
+    In this case, instead of the observed and <a href="#RITZ">Ritz</a> wavelengths and their uncertainties, the wavenumbers and their
+    uncertainties will be displayed, and the &quot;Obs-Ritz&quot; column will contain the differences between the observed
+    and Ritz wavenumbers.<br>
+    <br>
+  </li>
+  <li>The &quot;<b>Wavenumber</b>&quot; box can be checked in the <a href="#LINE_CRITERIA">Additional Criteria</a> section of the
+    <a href="#LINES_ADVANCED_OPTS">Advanced Settings</a> block of the Lines Search Form.<br>
+    <br>
+    This option will have an effect only if the &quot;<b>Wavenumber (all wavelengths)</b>&quot; was not selected (see above).
+    An additional column containing the wavenumbers will be included in the output table to provide a quick reference to
+    the wavenumber scale corresponding to the observed and <a href="#RITZ">Ritz</a> wavelengths. For lines that have an observed wavelength,
+    the value given in this column is the observed wavenumber as it is stored in ASD. In some spectra, these values are
+    directly quoted from the literature sources for the corresponding lines, and their precision may be greater than that
+    of the observed wavelengths. However, in most cases they were calculated from the observed wavelengths (using the
+    standard <a href="#AIR">air to vacuum</a> conversion where appropriate) and rounded according to the &quot;rule of 25.&quot;<br>
+    <br>
+    For lines that do not have an observed wavelength, the value given is the <a href="#RITZ">Ritz</a> wavenumber, and it is shown in italics.
+  </li>
+</ul>
+The <a href="#RITZ">Ritz</a> wavenumbers in the ASD output are always calculated from the energy levels stored in ASD.
+
+<hr style="height: 1px; border-style: solid">
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<a id="FIGURE">Significant Figures</a></h4>
+
+The number of significant figures in the ASD output values is determined by two considerations:
+<ul>
+  <li>Uncertainty of the value should be no less than 2.5 units of the least significant figure of the value. This is
+    dictated by statistical properties of rounded decimal numbers. All uncertainties given in ASD are meant to be on the
+    level of one standard deviation.
+  </li>
+  <li>The given energy levels and wavelengths should be internally consistent.</li>
+</ul>
+About 90&nbsp;% of data stored in ASD conforms to the <a href="#RULE25">rule of 25</a>: the uncertainty is between 2.5 and 25 units
+of the least significant figure. Most of the exceptions are of the three origins:
+<ul>
+  <li>Legacy data.<br>
+    <br>
+    Some early researchers rounded their measured data too harshly with the intention of giving the data thought to be
+    valid to the last given figure. Besides the fact that it is impossible in principle (there is always a finite probability
+    that the rounded value contains an incorrect last digit), such rounding precludes the use of the results in rigorous
+    statistical analyses.<br>
+    <br>
+  </li>
+  <li>Systematic errors in measurements.<br>
+    <br>
+    In some cases, absolute positions of measured wavelengths contain poorly known systematic shifts and thus are of poor
+    accuracy, but separations between them could be measured much more accurately. This requires giving additional figures in the
+    wavelength values to avoid loss of accuracy.<br>
+    <br>
+  </li>
+  <li>Theoretical data.<br>
+    <br>
+    It is especially difficult to estimate uncertainties of purely theoretical data. Systematic errors caused by approximations
+    used in the calculation may lead to poor absolute accuracy, but the intervals between the calculated energy levels
+    may be much more accurate. In such cases, we may give more significant figures than justified by the total uncertainty.
+    This concerns the <a href="#RITZ">Ritz</a> wavelengths derived from purely theoretical levels.
+  </li>
+</ul>
+More details are given below for the number of significant figures given for observed and <a href="#RITZ">Ritz</a> wavelength and wavenumbers
+and their uncertainties.
+
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+&nbsp;<i>Wavelengths</i></h4>
+
+Precision of the given wavelengths is governed by their uncertainties, so we start with the determination of the uncertainty.
+If the uncertainty has been critically evaluated and is stored in ASD, we use this stored uncertainty value. Otherwise, we estimate
+the uncertainty of an observed wavelength as ten units of the least significant figure of the wavelength. For <a href="#RITZ">Ritz</a> wavelengths with
+no critically evaluated uncertainty, we start with determining the uncertainties of the energy levels. If their critically evaluated
+values are available in ASD, we use them; otherwise, we estimate them as ten units of the least significant figure of the energy.
+Then we combine the level uncertainties in quadrature to obtain an estimated uncertainty of the Ritz wavenumber. This is used to
+derive the estimated uncertainty of the Ritz wavelength.
+
+<p>When there is no stored <a href="#RITZ">Ritz</a> wavelength value in ASD, it is calculated online from the available
+energies of the lower and upper levels, and either an asterisk &quot;*&quot; or a plus &quot;+&quot;
+is appended to the Ritz wavelength value. The former simply indicates that
+this value was calculated online, while the latter points out that there are no critically evaluated values of the level uncertainties
+in ASD, and their estimation involves a number of trailing zeros in the stored energies, which were presumed insignificant. Therefore,
+the actual accuracy of the Ritz wavelengths followed by &quot;+&quot; may be higher. This involves only the energy values that
+do not contain a decimal point, usually in highly ionized atoms.
+</p>
+<p>
+The subsequent procedure depends on the type of wavelength to be displayed:
+in vacuum or air.
+</p>
+
+<ul>
+  <li>If the wavelength is to be displayed in vacuum,
+    <ul>
+      <li>Observed wavelengths are displayed with the same relative precision as they are stored, regardless of the uncertainty.
+        The latter is given with the same precision as the wavelength.
+      </li>
+      <li><a href="#RITZ">Ritz</a> wavelengths are always calculated from the energy levels. If we have a stored critically evaluated value of the
+        Ritz wavelength, its precision is preserved in the output. Otherwise, it is rounded according to the <a href="#RULE25">rule of 25</a>
+        using the stored or estimated uncertainty value. Estimated uncertainties are not displayed in ASD, as they are not
+        critically evaluated. Critically evaluated uncertainties are displayed with the same precision as the Ritz wavelengths.<br>
+        <br>
+        Precision of the stored <a href="#RITZ">Ritz</a> wavelengths overrides the <a href="#RULE25">rule of 25</a> for the following reason:<br>
+        <br>
+        There are many cases when the energy levels derived from observed wavelengths are strongly correlated, i.e., the intervals
+        between them are known more accurately than the energy levels themselves (which are defined as separations from the ground
+        level). In such cases, more significant figures may be required to adequately represent the data precision.
+      </li>
+    </ul>
+  <li>If the wavelength is to be displayed in air,
+    <ul>
+      <li>If the uncertainty of the <a href="#AIR">air refractive index</a> &delta;<i>n</i>/<i>n</i> is less than 10&nbsp;% of
+        the relative uncertainty of the wavelength, the wavelength uncertainty is not modified, and the precision of the output
+        values is determined by the same rule as for vacuum wavelengths (see above).
+      </li>
+      <li>Otherwise, the relative uncertainty of the wavelength &delta;<i>&lambda;</i>/<i>&lambda;</i> is combined in quadrature
+        with &delta;<i>n</i>/<i>n</i>. If the latter is smaller than half of the wavelength uncertainty stored in ASD, the number
+        of significant figures in both the wavelength and its increased uncertainty will be preserved as stored in ASD.
+        Otherwise, both are rounded according to <a href="#RULE25">rule of 25</a>. ASD displays critically evaluated uncertainties only.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<!--
+<p>Starting with ASD v. 5.5 (October 2017), the number of significant figures in the
+Ritz wavelengths is calculated using the information on uncertainties, either stored in
+ASD or implied by the number of significant figures in the stored Ritz wavelength (if available)
+or in the energy level values. If the uncertainties of the energy levels are not available in ASD,
+they are estimated as ten units of the least significant figure of the value
+Approximately 90&nbsp;% of data in ASD conform to this estimate. Stored or estimated
+uncertainties of the lower and upper level of the transition are combined in
+quadrature to calculate the uncertainty <i>&delta;&sigma;</i> of the Ritz
+wavenumber <i>&sigma;</i>. Then the uncertainty &delta;&lambda; of the Ritz
+wavelength <i>&lambda;</i> is calculated as
+
+<p>
+<i>&delta;&lambda;</i> =
+<i>&delta;&sigma;</i>/<i>&sigma;</i>&times;<i>&lambda.</i>
+
+<p>
+If the wavelength is to be displayed in air, its uncertainty is combined
+in quadrature with the uncertainty of the air refraction index.</p>
+
+<p>The calculated values of the Ritz wavelengths are generally rounded
+according to the <a href="#RULE25">rule of 25</a>: the uncertainty in the units of the least
+significant figure of the displayed value must be between 2.5 and 25. If there
+is a value of the Ritz wavelength stored in ASD, its precision overrides this
+rule. There are many cases when the energy levels derived from observed
+wavelengths are strongly correlated, i.e., the intervals between them are
+known more accurately than the energy levels themselves (which are defined as
+separations from the ground level). In such cases, more significan figures
+may be required to adequately represent the data precision.</p>
+-->
+
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+&nbsp;<i>Wavenumbers</i></h4>
+
+Observed wavenumbers stored in ASD are always shown as is, in units of cm<sup>&minus;1</sup>.
+They may differ from the values derived from the observed wavelengths by a few units of the least significant
+figure due to rounding errors. If there is no stored value in ASD, but there is an observed wavelength, the observed
+wavenumber is calculated from the wavelength, and its value is rounded according to the <a href="#RULE25">rule of 25</a> using
+the stored or estimated uncertainty of the observed wavelength.
+<p>
+The <a href="#RITZ">Ritz</a> wavenumbers are calculated from the energy levels stored in ASD. Their precision is entirely
+determined by their uncertainties, either stored in ASD (if they were critically evaluated) or estimated from
+the uncertainties of the energy levels by combining in quadrature the uncertainties of the lower and upper level
+of the transition. If there are no stored critically evaluated uncertainties of the levels, they are estimated
+as ten units of the least significant figure of the level value. Then the wavenumber value is rounded according
+to the <a href="#RULE25">rule of 25</a>.
+</p>
+
+<h4><a id="RITZ">Definition of Ritz wavelength and wavenumber</a></h4>
+
+&quot;Ritz&quot; wavenumbers are derived from level energies
+via the Ritz principle: the wavenumber <i>&sigma;</i> of the emitted or absorbed photon is equal to the difference between the
+upper and lower energies <i>E<sub>k</sub></i> and <i>E<sub>i</sub></i>,
+<p style="text-align: center">
+<i>&sigma;</i> = <i>E<sub>k</sub></i> &minus; <i>E<sub>i</sub></i>.
+</p><p>
+The Ritz wavelength <i>&lambda;</i> in vacuum is equal to the inverse of <i>&sigma;</i>. If <i>&sigma;</i> is in units of
+cm<sup>&minus;1</sup>, and <i>&lambda;</i> is in nanometers,
+</p><p style="text-align: center">
+<i>&lambda;</i><sub>vac</sub>&nbsp;[nm] = 10<sup>7</sup>/(<i>&sigma;</i>&nbsp;[cm<sup>&minus;1</sup>]).
+</p><p>
+Wavelengths in air are decreased by the <a href="#AIR">refractive index of air</a>.
+
+<h4><a id="RULE25">Rounding Rule of 25</a></h4>
+A numerical value given in decimal representation is considered to be properly rounded if its
+uncertainty in the unit of the least significant figure is between 2.5 and 25.
+<p>
+If the rounding is too harsh, i.e., the uncertainty is smaller than 2.5 units of
+the least significant figure, the value of the uncertainty is statistical meaningless and the rounded value cannot be used in rigorous
+statistical analyses. See more about it in
+A. E. Kramida, <a href="http://dx.doi.org/10.1016/j.cpc.2010.09.019">Comput. Phys. Commun. <b>182</b>, 419–434 (2011)</a>.
+</p>
+<p>
+If the rounding is too mild, i.e., the uncertainty is greater than 2.5 units of
+the least significant figure, the precision of the value cannot be used to estimate the uncertainty. In cases when there are strong
+correlations between the given values, mild rounding may be needed to adequately represent the <i>relative</i> uncertainties of
+the presented data.
+</p>
+
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<a id="AIR">Conversion between air and vacuum wavelengths</a></h4>
+
+In vacuum, the wavelength <i>&lambda;</i><sub>vac</sub> is directly determined by the wavenumber <i>&sigma;</i>
+(see <a href="#RITZ">above</a>). In air, it is decreased by the refractive index <i>n</i>:
+<div style="margin-left: 100px">
+<p>
+<i>&lambda;</i><sub>air</sub>&nbsp; = <i>&lambda;</i><sub>vac</sub>/<i>n</i>.
+</p></div>
+<p>
+In ASD, the index of refraction of air is derived from the five-parameter formula given by
+E.R.&nbsp;Peck and K.&nbsp;Reeder, <a href="http://dx.doi.org/10.1364/JOSA.62.000958">J. Opt. Soc. Am. <B>62</B>, 958 (1972)</a>.
+These authors fitted data between 185&nbsp;nm and 1700&nbsp;nm.
+The conversion between air and vacuum wavelength entails an ambiguity near the
+boundary of the air region. For example, a wavelength of 200.0648&nbsp;nm in vacuum
+corresponds to 200.0000&nbsp;nm in &quot;standard air&quot; (i.e., 15&nbsp;&deg;C,
+101&nbsp;325&nbsp;Pa pressure, with 0.033&nbsp;% CO<sub>2</sub>).
+Conversely, an air wavelength of 199.9352&nbsp;&nm corresponds to
+200.0000&nbsp;nm in vacuum. In this database, as the default, the
+following convention is adopted in terms of the energy difference or
+wavenumber, <i>&sigma;</i>=<i>E<sub>k</sub></i>-<i>E<sub>i</sub></i>:
+
+<div style="margin-left: 100px">
+<table style="border: 0; text-align: left">
+<tr style="vertical-align: bottom">
+  <td>For <i>&sigma;</i> &ge; 50,000&nbsp;cm<sup>&minus;1</sup> </td>
+  <td>&rarr; vacuum wavelengths,</td>
+</tr>
+<tr style="vertical-align: bottom">
+  <td>For 5000&nbsp;cm<sup>&minus;1</sup> &lt; <i>&sigma;</i> &lt; 50,000&nbsp;cm<sup>&minus;1</sup> </td>
+  <td>&rarr; air wavelengths,</td>
+</tr>
+<tr style="vertical-align: bottom">
+  <td>For <i>&sigma;</i> &le; 5000&nbsp;cm<sup>&minus;1</sup>  </td>
+  <td>&rarr; vacuum wavelengths.</td>
+</tr>
+</table>
+</div>
+
+<br style="clear:both">
+<p>
+Thus, if the tabulated wavelength lies within
+200&nbsp;&plusmn;&nbsp;0.0648&nbsp;nm, one must
+check the energy difference to ascertain whether it is for vacuum or air.
+</p>
+<p>The relative uncertainty &delta;<i>&lambda;</i>/<i>&lambda;</i> of the formula of Peck &amp; Reeder is 5&times;10<sup>&minus;9</sup> for
+wavelengths <i>&lambda;</i> &gt; 400&nbsp;nm and increases according to the approximate formula
+</p>
+<div style="margin-left: 100px">
+<p>
+&delta;<i>&lambda;</i>/<i>&lambda;</i> &asymp; (0.35734 + 38.24/(<i>&lambda;</i> &minus; 180.29) + 0.000023<i>&lambda;</i>)&times;10<sup>&minus;8</sup>
+</p></div>
+<p>
+for shorter wavelengths (<i>&lambda;</i> is in nm). The maximum uncertainty is about 9&times;10<sup>&minus;8</sup> at 185&nbsp;nm.
+</p>
+<p>It should be noted that a number of other formulas for the refractive index of air exist in the literature.
+In particular, the formulas given by K. P. Birch and M. J. Downs,
+<a href="http://dx.doi.org/10.1088/0026-1394/31/4/006">Metrologia <b>31</b>, 315–316 (1994)</a> have a five times lower
+uncertainty than the formula of Peck &amp; Reeder, but only in a restricted wavelength range from 350&nbsp;nm to
+650&nbsp;nm. Their validity in the extended wavelength region covered by the Peck &amp; Reeder formula has never been verified.
+</p>
+<p>Similarly, the &quot;corrected&quot; formulas given by P. E. Ciddor,
+<a href="http://dx.doi.org/10.1364/AO.35.001566">Appl. Opt. <b>35</b>, 1566–1573 (1996)</a> are valid only in the
+wavelength range from 350&nbsp;nm to 1200&nbsp;nm and give increasingly large errors for shorter wavelengths: about
+&minus;1.0&times;10<sup>&minus;8</sup> at 228&nbsp;nm and &minus;1.6&times;10<sup>&minus;6</sup> at 185&nbsp;nm.
+</p>
+
+<a id="OUTRELINT"><!-- filler --></a>
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<u>Relative Intensity</u></h4>
+
+Relative intensities are source dependent and typically are useful
+only as guidelines for low density sources.
+<p>
+These are values intended to represent the strengths of the lines of a spectrum as
+they would appear in emission. The values in the Database are taken from the cited publications.
+Usually, they are not normalized in any way. In some cases, the intensity values were derived from observed
+photometric signals. This would be true for spectra measured by Fourier transform spectroscopy or
+in special cases where spectra were recorded photometrically. However, in most cases the values
+represent blackening of photographic emulsions used to record an observed spectrum.
+These values can be semi-quantitative in that the transmission of the blackened emulsion was
+quantitatively measured and used to determine the intensity values.
+In other cases, the blackening was estimated visually and the estimates were used for the intensity values.
+Thus, the values can range from being approximately quantitative to only qualitative.
+<i>Since the Database does not contain information on the origin of the relative intensities,
+the relative intensities should be considered as qualitative values that
+describe the appearance of a particular spectrum in emission</i>.
+</p>
+<p></p>
+The following points should be kept in mind when using the relative intensities:
+<ol>
+<li>There is no common scale for relative intensities. The values in the database are taken from
+the values given by the authors of the cited publications. Since different authors use different
+scales, the relative intensities have meaning only within a given spectrum; that is, within the
+spectrum of a given element in a given stage of ionization.
+<li>The relative intensities are most useful in comparing strengths of spectral lines that are not
+separated widely. This results from the fact that most relative intensities are not corrected for
+spectral sensitivity of the measuring instruments (spectrometers, photomultipliers,
+photographic emulsions).
+<li>The relative intensities for a spectrum depend on the light source used for the excitation.
+These values can change from source to source, and this is another reason to regard the values as
+ being only <i>qualitative</i>.
+</ol>
+<p>
+Descriptors to the relative intensities have the following meaning:
+</p>
+
+<pre>
+     *    Intensity is shared by several lines (typically, for multiply classified lines).
+     :    Observed value given is actually the rounded <a href="#RITZ">Ritz</a> value, e.g., Ar&nbsp;IV, <i>&lambda;</i> = 443.40&nbsp;&Aring;.
+     -    Somewhat lower intensity than the value given.
+     a    Observed in absorption.
+     b    Band head.
+     bl   Blended with another line that may affect the wavelength and intensity.
+     B    Line or feature having large width due to autoionization broadening.
+     c    Complex line.
+     d    Diffuse line.
+     D    Double line.
+     E    Broad due to overexposure in the quoted reference
+     f    Forbidden line.
+     g    Transition involving a level of the ground term.
+     G    Line position roughly estimated.
+     H    Very hazy line.
+     h    Hazy line (same as &quot;diffuse&quot;).
+     hfs  Line has hyperfine structure.
+     i    Identification uncertain.
+     j    Wavelength smoothed along isoelectronic sequence.
+     l    Shaded to longer wavelengths; NB: This may look like a "one" at the end
+          of the number!
+     m    Masked by another line (no wavelength measurement).
+     p    Perturbed by a close line. Both wavelength and intensity may be affected.
+     q    Asymmetric line.
+     r    Easily reversed line.
+     s    Shaded to shorter wavelengths.
+     t    Tentatively classified line.
+     u    Unresolved from a close line.
+     w    Wide line.
+     x    Extrapolated wavelength
+</pre>
+
+Other characters occasionally appearing in the intensity column are explained in the quoted literature.
+
+<p>
+The difficulty of obtaining reliable relative intensities can be understood from the fact that in optically thin
+plasmas the intensity of a spectral line is proportional to:
+</p>
+
+<p style="text-align: center">
+<i>I<sub>ik</sub> <span style="line-height:1;"><img src="/Images/propto.gif" alt="Proportional to"></span>
+N<sub>k</sub>A<sub>ki</sub>h<i>&nu;</i><sub>ik</sub></i>,
+</p>
+
+where <i>N<sub>k</sub></i> is the number of atoms in the upper level <i>k</i>
+(population of the upper level), <i>A<sub>ki</sub></i> is the transition
+probability for transitions from upper level <i>k</i> to lower level <i>i</i>,
+and <i>h<i>&nu;</i><sub>ik</sub></i> is the photon
+energy (or the energy difference between the upper level and lower level).
+Although both <i>A<sub>ki</sub></i> and <i><i>&nu;</i><sub>ik</sub></i> are well defined quantities for each line of a given
+atom, the population values <i>N<sub>k</sub></i> depend on plasma conditions in
+a given light source, and they are thus different for different sources.
+
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+&nbsp;<a id="OUTAKI"><u>Transition Strengths</u></a></h4>
+
+<p>
+Either transition probability &quot;<i>A<sub>ki</sub></i>&quot;
+weighted transition probability &quot;<i>g<sub>k</sub>A<sub>ki</sub></i>&quot;
+(s<sup>&minus;1</sup> or 10<sup>8</sup>&nbsp;s<sup>&minus;1</sup>), absorption oscillator strength or
+f&nbsp;value (&quot;<i>f<sub>ik</sub></i>&quot;), line strength &quot;<i>S</i>&quot;, or &quot;log(<i>gf</i>)&quot; can be
+displayed.
+        Note that <i>f<sub>ik</sub></i>, <i>S</i>, and
+        log(<i>gf</i>) are not displayed by default.  Also note that
+        log(<i>gf</i>) is shorthand for
+        log<sub>10</sub>(<i>g<sub>i</sub> f<sub>ik</sub></i>).
+</p>
+
+<blockquote>
+<dl>
+  <dt><i>A<sub>ki</sub></i> represents the emission transition probability. In the following formulas, it is assumed to be in units of
+           10<sup>8</sup> sec<sup>&minus;1</sup>.</dt><dd><br></dd>
+
+  <dt><i>f<sub>ik</sub></i> is the absorption oscillator strength or <i>f</i>-value.</dt>
+  <dd> <i>f<sub>ik</sub></i>&nbsp;=&nbsp;<i>A<sub>ki</sub></i> <b>&middot;</b>1.49919<b>&middot;</b>10<sup>&minus;16</sup>
+      <i>g<sub>k</sub></i>/<i>g<sub>i</sub></i> <i>&lambda;</i><sup>2</sup>, for all multipole types,<br>
+    where <i>&lambda;</i>  is the wavelength in &aring;ngstr&ouml;ms<br><br></dd>
+
+  <dt>log(<i>gf</i>) is the log<sub>10</sub>(<i>g<sub>i&nbsp;</sub>f<sub>ik</sub></i>),
+      where <i>g<sub>i</sub></i>&nbsp;=&nbsp;2<i>J<sub>i</sub></i>&nbsp;+&nbsp;1.</dt><dd><br></dd>
+
+  <dt><i>S</i> is the line strength. It is the electric dipole matrix element squared and
+  is independent of the transition wavelength.</dt><dd><br></dd>
+
+  <dt>More details on these quantities can be found in
+    <a href="https://physics.nist.gov/Pubs/AtSpec/index.html" target="new">this review</a>.
+  </dt><dd></dd>
+</dl>
+</blockquote>
+
+<span style="text-align:center">**************************</span>
+
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<a id="OUTACC">Accuracy</a></h4>
+
+An estimated accuracy is listed for each transition strength, indicated by a code letter
+as given in the table below:
+<br><br>
+<div style="margin-left: 100px;">
+
+<table>
+
+<tr>
+<td><b>AAA</b></td>
+<td>&le;</td>
+<td>0.3%</td>
+</tr>
+
+<tr>
+<td><b>AA</b></td>
+<td>&le;</td>
+<td>1%</td>
+</tr>
+
+<tr>
+<td><b>A+</b></td>
+<td>&le;</td>
+<td>2%</td>
+</tr>
+
+<tr>
+<td><b>A</b></td>
+<td>&le;</td>
+<td>3%</td>
+</tr>
+
+<tr>
+<td><b>B+</b></td>
+<td>&le;</td>
+<td>7%</td>
+</tr>
+
+<tr>
+<td><b>B</b></td>
+<td>&le;</td>
+<td>10%</td>
+</tr>
+
+<tr>
+<td><b>C+</b></td>
+<td>&le;</td>
+<td>18%</td>
+</tr>
+
+<tr>
+<td><b>C</b></td>
+<td>&le;</td>
+<td>25%</td>
+</tr>
+
+<tr>
+<td><b>D+</b></td>
+<td>&le;</td>
+<td>40%</td>
+</tr>
+
+<tr>
+<td><b>D</b></td>
+<td>&le;</td>
+<td>50%</td>
+</tr>
+
+<tr>
+<td><b>E</b></td>
+<td>&gt;</td>
+<td>50%.</td>
+</tr>
+
+</table>
+
+</div>
+<p>
+The uncertainties are obtained from critical assessments, and
+in general, reflect estimates of predominantly systematic
+effects discussed in the NIST critical compilations, cited in the
+<a href="/PhysRefData/datarefs/datarefs_search_form.html">Bibliography</a>.
+Accuracies are not available for values listed in the CRC handbook.
+</p><p>
+
+If the accuracy is followed by a prime
+(&prime;), then a multiplet in the original
+compilation has been separated into its component lines and the transition
+probability was derived from the compiled value assuming pure <i>LS</i> coupling.
+This may decrease the listed accuracy, especially for weaker transitions.
+</p>
+
+<span style="text-align:center">**************************</span>
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="border:0"></a>
+&nbsp;<a id="MULTIPOLE"><i>Conversion between transition probabilities and line strengths</i></a></h4>
+
+Transition multipole:             Multiply <i>A<sub>ki</sub></i> by listed factor to get <i>S</i>:
+<br>
+<div style="text-align:center"><code>
+E1&nbsp;&nbsp;&nbsp;Electric&nbsp;dipole&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.935525&middot;10<sup>&minus;19</sup>&nbsp;<i>g<sub>k</sub></i>&nbsp;<i>&lambda;</i><sup>3</sup><br>
+M1&nbsp;&nbsp;&nbsp;Magnetic&nbsp;dipole&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.707342&middot;10<sup>&minus;14</sup>&nbsp;<i>g<sub>k</sub></i>&nbsp;<i>&lambda;</i><sup>3</sup><br>
+E2&nbsp;&nbsp;&nbsp;Electric&nbsp;quadrupole&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.928970&middot;10<sup>&minus;19</sup>&nbsp;<i>g<sub>k</sub></i>&nbsp;<i>&lambda;</i><sup>5</sup><br>
+M2&nbsp;&nbsp;&nbsp;Magnetic&nbsp;quadrupole&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.707037&middot;10<sup>&minus;14</sup>&nbsp;<i>g<sub>k</sub></i>&nbsp;<i>&lambda;</i><sup>5</sup><br>
+E3&nbsp;&nbsp;&nbsp;Electric&nbsp;octupole&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.180240&middot;10<sup>&minus;18</sup>&nbsp;<i>g<sub>k</sub></i>&nbsp;<i>&lambda;</i><sup>7</sup><br>
+M3&nbsp;&nbsp;&nbsp;Magnetic&nbsp;octupole&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.388852&middot;10<sup>&minus;13</sup>&nbsp;<i>g<sub>k</sub></i>&nbsp;<i>&lambda;</i><sup>7</sup><br>
+<br>
+</code></div>
+
+<p>
+where <i>&lambda;</i> is the <a href="#OUTWAVELENGTH">wavelength</a> in angstroms and <i>g<sub>k</sub></i> is
+the statistical weight of the upper level.  The numerical
+factor for the electric quadrupole conversion from <i>A<sub>ki</sub></i>  to <i>S</i> follows
+a more modern convention than that used in the original publications, which
+will be used in future NIST publications.
+</p>
+
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<a id="OUTENERGIES"><i>E<sub>i</sub></i><span style="font-size: larger">-</span><i>E<sub>k</sub></i></a></h4>
+
+Lower level and upper level energies of the transition are displayed in the
+units specified. Note that, if the units other than cm<sup>&minus;1</sup> are requested in the
+<a href="#LINES_ADVANCED_OPTS">Lines Search Form</a>, uncertainties of the <a href="levelshelp.html#LOUTUNC">conversion factors</a>
+are combined in quadrature with the uncertainties of the energy levels, which may result in loss of precision. However,
+the <a href="#RITZ">Ritz</a> wavelengths and wavenumbers are always calculated from the stored energy levels in units of
+cm<sup>&minus;1</sup>, so their precision is not affected.
+<p>
+If the "No Javascript" checkbox is not checked, the level energies appear in the output as active links, even if the ASCII format is
+chosen. Clicking on such an active level-value link will open a new tab containing a list of all lines originating from or terminating
+on this level.
+</p>
+
+
+<h4><a id="OUTCONFIGS">Configurations</a></h4>
+
+Configurations of the lower and upper levels are displayed.
+For ASCII output, periods are inserted in the configuration labels whenever
+necessary to avoid ambiguity due to the lack of superscripts, and angular
+brackets enclose <i>J</i>&nbsp;values of the parent term.
+
+
+<a id="OUTTERMS"><!-- filler --></a>
+<h4><a href="/PhysRefData/ASD/Html/levelshelp.html#LOUTTERM">Terms</a><sub>&nbsp;</sub></h4>
+
+Terms of the lower and upper levels are displayed.
+A superscript "&deg;" in the HTML output or an asterisk in the ASCII output indicates odd parity.
+
+
+<h4><a id="OUTJ"><i>J</i>-values</a></h4>
+
+The <b><i>J</i></b>-values represent
+the total electronic angular momentum of the lower and upper levels.
+
+
+<h4><a id="OUTG"><i>g<sub>i</sub></i><span style="font-size: larger">-</span><i>g<sub>k</sub></i> </a></h4>
+
+ <i>g<sub>i</sub></i><span style="font-size: larger">-</span><i>g<sub>k</sub></i>
+represents statistical weight of the lower level (<i>g<sub>i</sub></i>=2<i>J<sub>i</sub></i>+1) and
+statistical weight of the upper level (<i>g<sub>k</sub></i>=2<i>J<sub>k</sub></i>+1).<br>
+
+<h4><a id="OUTTYPE">Type</a></h4>
+
+This filed is blank for allowed (electric-dipole, or E1) transitions, including the
+spin-changing (intercombination) transitions. Types of forbidden transitions
+are denoted as follows:
+<p>
+<code>
+<b>M1</b>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Magnetic&nbsp;dipole.<br>
+<b>E2</b>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Electric&nbsp;quadrupole.<br>
+<b>M2</b>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Magnetic&nbsp;quadrupole.<br>
+<b>E3</b>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Electric&nbsp;octupole.<br>
+<b>M3</b>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Magnetic&nbsp;octupole.<br>
+<b>M1+E2</b>&nbsp;-&nbsp;Mixed&nbsp;magnetic&nbsp;dipole&nbsp;and&nbsp;electric&nbsp;quadrupole&nbsp;transition.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;selection&nbsp;rules&nbsp;for&nbsp;these&nbsp;two&nbsp;types&nbsp;of&nbsp;transitions&nbsp;are&nbsp;the&nbsp;same,&nbsp;so<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;both&nbsp;types&nbsp;of&nbsp;transitions&nbsp;can&nbsp;contribute&nbsp;to&nbsp;the&nbsp;observed&nbsp;intensity&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;radiative&nbsp;rate&nbsp;<i>A<sub>ki</sub></i>.&nbsp;The&nbsp;line&nbsp;strength&nbsp;is&nbsp;undefined&nbsp;for&nbsp;such&nbsp;mixed&nbsp;transitions.<br>
+<b>2P</b>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Two-photon&nbsp;transition.<br>
+<b>HF</b>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Hyperfine-induced&nbsp;transition&nbsp;(may&nbsp;occur&nbsp;only&nbsp;in&nbsp;isotopes&nbsp;with&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;non-zero&nbsp;nuclear&nbsp;magnetic&nbsp;moment).<br>
+<b>UT</b>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Forbidden&nbsp;transition&nbsp;of&nbsp;an&nbsp;unspecified&nbsp;type.<br>
+</code>
+</p>
+<p>
+Transitions that are strongly forbidden in isolated atoms may be enabled by
+environmental effects such as external electric or magnetic fields. Such
+forbidden transitions would be denoted as type = UT in ASD.
+</p>
+The conversion formulas between transition probabilities and line strengths for different types of allowed and forbidden
+transitions are given <a href="#MULTIPOLE">here</a>.
+
+<h4><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<a id="RTP">TP Ref. and Line Ref.</a></h4>
+There may be several reference codes separated by comma in each of these columns.
+If the &quot;<b>No Javascript</b>&quot; box was not checked in the <a href="#LINES_ADVANCED_OPTS">Lines Search Form</a>, each
+bibliographic code links to a popup window showing a bibliographic reference for transition probability or for the observed spectral
+line.<br>
+<br>
+
+<h4><a id="LINES_OUT_DIAGNOSTICS">Plasma diagnostics data</a></h4>
+For those lines that have diagnostic data in ASD, an additional column of the <a href="#OUTPUT_LINE">Lines Tabular Output</a>
+contains links to detailed information about the line pairs whose relative intensities can be used
+to determine the plasma temperature and/or density. The diagnostic data include
+plots of intensity ratios versus electron temperature or density and specifications of
+the validity range of these plots.<br>
+<br>
+
+<h3><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<a id="LINES_OUT_GRAPH"><u>Graphical Output</u></a></h3>
+
+<h3>
+&nbsp;<a id="LINES_OUT_DYN">Dynamic Plots</a></h3>
+
+<h4><a id="LINES_OUT_ID"></a>Line Identification Plot</h4>
+If the &quot;Line Identification Plot&quot; option has been selected on the <a href="#LINES_FORM">Lines Form</a>,
+two links will appear at the very bottom of the <a href="#OUTPUT_LINE">tabular output</a> page,
+i.e., a link to a PDF file containing an image of the plot and a link to a new popup window displaying the wavelengths of
+the spectral lines shown on the PDF plot.
+<p>
+The Line Identification Plot is a stick plot showing the line positions for all chosen
+ions in the given wavelength range. It can be used to diagnose which ions produce spectral lines is an observed spectrum. For that,
+the image should be magnified or reduced to approximately the same wavelength scale as in the experimental spectrum. Then the
+patterns of intervals between the observed spectral lines could be matched with those in one or more of the ion spectra in the
+Line Identification Plot, which can help the user to identify the observed lines.
+</p>
+<p>
+If there are too many lines in the chosen spectra, the user can use the &quot;<b>Relative intensity minimum</b>&quot; or other
+options in the <a href="#LINE_OPTIONAL">Optional Search Criteria</a> section in the <a href="#LINES_ADVANCED_OPTS">Advanced Settings</a>
+block of the Lines Input Form to reduce the number of shown lines.
+</p>
+
+<h4>Spectrum Image Plots</h4>
+These plots are colored visualizations of simulated spectra. They are displayed as an image at the bottom of the lines tabular output. 
+See their description <a href="#LINES_INP_SP_IMG_PLOT">here</a>.
+<p>
+</p>
+
+<h4><a id="SAHAPLOT"></a>Saha-LTE Spectrum Plots</h4>
+The Saha-LTE plot shows the distribution of calculated intensities in the plasma emission spectrum for the chosen ions within
+the selected wavelength range.
+<p>
+If the &quot;Saha-LTE Plot&quot; option has been selected on the Lines Form, two or more links will appear at the very bottom of the
+<a href="#OUTPUT_LINE">tabular output</a> page. One of them is a link to a PDF file containing an image of the plot. One of the
+other links with text &quot;<b>Relative Line Intensities</b>&quot; is to a new popup window displaying the wavelengths
+of the spectral lines shown on the PDF plot and their relative intensities. If the user requested a <b>Doppler-broadened spectrum</b>
+(by checking the corresponding box in the Lines Form), there will be two additional links, one to table of calculated intensities of each ion
+in the Doppler-broadened spectrum, and one to a table showing the distribution of intensities in the total spectrum (sum of contributions
+from each ion). Both these tables are two-column plane fixed-column-width ASCII files with the first column having the wavelength
+grid points and the second column having relative intensities in arbitrary units. These tables can be used to plot the spectra
+with other software.</p>
+<p>
+The header of the plot shown in the PDF file shows the user-defined parameters: composition of the element mixture in the plasma,
+electron temperature and density, as well as the total number of lines in the synthetic spectrum. If a <b>Doppler-broadened
+spectrum</b> was requested, the header also shows the ion temperature used to calculate the Doppler broadening. It may be greater
+than the <a href="#LINES_INP_IONTEMP">Ion Temperature</a> specified by the user in the Lines Input Form, if the number of required
+points in the grid was too large for the given selection of spectral lines. In such cases, to display narrower lines (corresponding to
+a lower ion temperature), the user needs to reduce the selected <a href="#LINES_INP_WL_LIM">wavelength range</a>, reduce the number
+of requested <a href="#LINES_SPECTRA">spectra</a>, or use some line-filtering options in the
+<a href="#LINE_OPTIONAL">Optional Search Criteria</a> section in the <a href="#LINES_ADVANCED_OPTS">Advanced Settings</a>
+block of the Lines Input Form.
+</p>
+<p>
+If higher resolution (narrower lines) is needed, and only neutral, singly-ionized, or doubly-ionized atoms are involved,
+consider using the <a href="../LIBS/libs-form.html">LIBS Interface</a> of ASD. Although this interface does not allow drawing spectra
+for a particular ionization stage, its plots can be calculated on the user's computer with much higher resolution, and they have
+flexible interactive features.
+</p>
+<h3><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page"></a>
+&nbsp;<a id="OUTPUT_JAVA">Plotting Grotrian diagrams</a></h3>
+<p><i><b>Working with the Grotrian diagram plot</b></i><br>
+</p>
+
+<p>Basically, only a computer mouse and a space bar are used for interaction with this plot. <br>
+</p>
+
+<ul>
+  <li><i>Default view</i><br><br>
+Initially all levels and transitions are shown on the Grotrian Diagram (GD)
+plot. Each energy level is shown by a horizontal bar. The colors
+(black and blue) have no meaning and are used simply to help with
+visualization of the plot. The X-axis corresponds to different level
+series, and the Y-axis shows the level energy in cm<sup>&minus;1</sup>. The
+radiative transitions between the levels are shown as slanted gray lines.
+The ionization limits are shown as magenta horizontal lines. At the
+top of the plot, the total number of levels, lines and ionization
+limits is displayed. These parameters are automatically updated when
+zooming in or out. In the bottom right part of the plot, the maximum
+and minimum values of the transition probability for the displayed
+lines are given in the input text fields. The &quot;Submit&quot; and &quot;Reset&quot;
+buttons are used for setting the limits for transition probabilities,
+while the &quot;Isolate&quot; button is used to single out one level and all
+relevant transitions. The green field (&quot;zoom field&quot; below) next to the Y-axis is used for
+zooming in and out. Below, the top right part of the plot will be
+referred to as the &quot;info field.&quot;<br>
+<br>
+  </li>
+  <li><i>Controls block</i><br><br>
+  The appearance of the GD plot can be changed in many ways by using the various control elements (action buttons, 
+  radio buttons, and input boxes) located in the control block above the GD plot. These control elements are explained below.
+  </li>
+</ul>
+
+<ul>
+<li><i>Plot size</i><br>
+A user change the size of the GD plot by clicking on the &quot;Enlarge&quot; or &quot;Shrink&quot; buttons.<br><br></li>
+
+<li><i>Grouping by configuration, subconfiguration, or J values</i><br>
+
+By default, the levels are grouped into series according to their electronic-shell configuration. 
+For instance, in O&nbsp;I the levels belonging to configurations 2s<sup>2</sup>2p<sup>3</sup><i>nl</i>
+(<i>l</i>&nbsp;=&nbsp;s, p, d, f, g) or 2s2p<sup>4</sup><i>n</i>p are assigned to different series, 
+each displayed in a separate vertical column in the plot. However, there are different core configurations in all these series, 
+and stronger transitions tend to occur between the series having the same core. To better see the connections between the series based on different cores,
+the user can choose grooping of levels by subconfigurations. In this case, the 
+2s<sup>2</sup>2p<sup>3</sup>(<sup>4</sup>S&deg;)<i>nl</i> and 2s<sup>2</sup>2p<sup>3</sup>(<sup>2</sup>D&deg;)<i>nl</i> levels
+would be assigned to different series. For the purpose of seeing connections between the levels having different total orbital momentum <i>J</i>, 
+the levels can be grouped by <i>J</i>. The choice of level grouping is made in the &quot;Group by&quot; set of radio buttons in the left part 
+of the control block<br><br></li>
+
+<li><i>Filtering by J-values, multiplicities, configurations, and subconfigurations</i><br>
+
+The menus with the corresponding names contain the sets of values available for the chosen spectrum. By default, all these values are included in the 
+selection of levels displayed in the plot. The user can restrict the number of levels and transitions displayed by selecting a subset of the available 
+values and then clicking the &quot;Filter lines/levels&quot; button. 
+For example, selecting only &quot;3&quot; in the &quot;Multiplicities&quot; menu for O&nbsp;I would result in display of only triplet levels and transitions
+between them, while selecting only &quot;0&quot; and &quot;1&quot; in the &quot;<i>J</i> values&quot; menu would produce a GD only for levels
+having <i>J</i>&nbsp;=&nbsp;0 and 1 and corresponding transitions. Clicking the button &quot;Reset filters&quot; will restore the default 
+setting (no filtering).<br><br></li>
+
+<li><i>Show only radiatively linked levels</i><br>
+
+By default, all levels belonging to the chosen ion are displayed in the
+GD. Selecting the &quot;Radiatively linked&quot; option would result in display of only those levels
+that are connected by radiative transitions.<br><br></li>
+
+<li><i>Filtering A-values</i><br>
+
+The range of <i>A</i>-values for transitions displayed in the GD can be specified by entering the limiting values in the &quot;min <i>A</i>&quot; 
+and &quot;max <i>A</i>&quot; input boxes and then clicking the &quot;Filter lines/levels&quot; button. By default, the values in these boxes are 0 and the maximum 
+available <i>A</i>-value for this spectrum. The zero minimum value implies that transitions with unknown <i>A</i>-values are included in the GD.<br>
+<br>
+Other filtering options, such as displaying only the observed lines, only the allowed or forbidden lines, as well as different units for levels and wavelengths
+can be implemented by returning to the Lines Input form and sellecting appropriate options in the <a href="#LINES_ADVANCED_OPTS">Advanced Settings</a> section.<br><br>
+</li>
+</ul>
+<ul>
+  <li><i>Selecting, deselecting and cycling over objects</i><br>
+<br>
+<u>Mouse</u>: <br>
+    <ul>
+      <li>Clicking on any <b>level</b> colors it and all relevant
+transitions in red. In addition, the basic data on this level, e.g.,
+energy, configuration, etc., are displayed in the info field.</li>
+      <li>Clicking on any <b>line</b>
+colors the line and the lower and upper level in red. In addition, the
+basic data on the levels and line (wavelength, transition probability,
+etc.) are shown in the info field.</li>
+      <li>Consecutive clicking on <b>two levels</b> is equivalent to clicking
+on the corresponding spectral line. If there is no line connecting the
+levels, no Line information is shown in the info field although the
+data on both levels are displayed.</li>
+      <li>Clicking anywhere in the white background of the GD subwindow
+        <b>deselects</b> the already selected object(s).<br><br></li>
+    </ul>
+
+    <u>Space bar</u>:<br>
+    <ul>
+      <li>If no objects have been selected, pressing a space bar
+selects a first spectral line in the following order: the levels are
+assumed to be arranged first according to the X-axis label (from left
+to right) and then according to the level energy. Since the ground
+state always has a zero energy, pressing the bar would normally
+highlight a line originating from the ground state.</li>
+
+      <li>If a line has been selected, pressing a space bar cycles over
+all spectral lines on the plot in the order described above, that is,
+(i)&nbsp;for the same lower level, the upper level is updated, and
+(ii)&nbsp;after all lines for a particular lower level have been cycled through, the lower
+level is updated, and so on.</li>
+
+      <li>If a level has been selected, pressing a space bar cycles over all energy levels within the levels series.</li>
+      <li>The data shown in the info field is the same as for the mouse selection.<br><br></li>
+    </ul>
+  </li>
+
+  <li><i>Zooming in and out</i><br>
+    <br>
+The green field to the right of the Y-axis is used for zooming in. The
+upper and lower limits for the energy levels are set up by clicking the
+mouse in the zoom field. The upper and lower limits are shown by
+horizontal blue lines. When both limits are selected, the &quot;Zoom&quot; button
+above the Y-axis becomes highlighted and clicking on it with the mouse
+results in updating the subwindow. This procedure can be repeated infinitely.
+After zooming in, the &quot;Reset&quot; button on the above the Y-axis becomes
+highlighted, and clicking on it restores the <i>original</i> plot.<br><br></li>
+
+  <li><i>Isolating a level</i><br>
+    <br>
+In order to isolate one energy level with all radiatively connected
+levels, one has first to select a level by a mouse click. Then, the
+&quot;Isolate&quot; button in the bottom right part of the plot becomes
+highlighted, and pressing it would result in displaying the red group
+of levels and lines only. If necessary, a user can then perform zoom or
+transition probability limiting procedures on this subset of levels.
+After isolating a level, the &quot;Isolate&quot; button changes its label to
+&quot;Show All,&quot; and pressing this new button would show all available
+levels and transitions.</li>
+
+</ul>
+
+<a id="CSV"><!-- filler --></a>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+&nbsp;Creating an output for importing into a spreadsheet</h2>
+
+Two options are available from the <b>Format Output</b> pull-down menu for creating an output in a format suitable for
+importing into a spreadsheet: CSV (comma-separated ASCII file) or tab-delimited ASCII file. Both options produce output in the user's
+browser window, which needs to be saved on the local computer by using the browser's interface options and opened with a spreadsheet software.
+For importing data into Excel, the most convenient format is CSV. If the output is saved in a file with a .csv extension, some browsers
+(e.g., Chrome) even allow the user to open it directly from the browser. Users of the OpenOffice software may prefer the tab-delimited format,
+as it conveniently allows setting the format of all columns enclosed in double quotes as "text." This is required, for example, for
+the <i>J</i>-values, which can be half-integers stored as strings, e.g., "1/2." If such columns are not set as text, the spreadsheet software
+will most likely automatically convert them to dates. Even for columns containing only numbers, text format is needed to preserve the number of
+decimal places, which indicates an implicit uncertainty of value. For this reason, the CSV-format output contains formulas instead of plain values.
+After importing such a file into a spreadsheet, the user should "select all cells" (in Excel, this can be done by clicking on the small triangle
+in the upper left corner of the spreadsheet), copy the selection, and paste it back as values.
+<p></p>
+<hr style="height: 1px; border-style: solid">
+
+<table style="width: 100%; border:0; border-spacing:0px">
+<tr><td style="text-align: left; padding:0"><a href="../index.html"><img
+src="../Images/ASD-sm.gif" width="100" height="47" title="ASD Home" alt="[ASD Home]" style="{border: 0}"></a><a href="../lines_form.html"><img
+src="../Images/Lines.gif" width="70" height="47" title="Lines Query" alt="[Lines Query]" style="{border: 0}"></a><a href="../levels_form.html"><img
+src="../Images/Levels.gif" width="79" height="47" title="Levels Query" alt="[Levels Query]" style="{border: 0}"></a><a href="https://www.nist.gov/pml/atomic-spectra-database-contents"><img
+src="../Images/List.gif" width="77" height="47" title="List of Spectra" alt="[List of Spectra]" style="{border: 0}"></a><a href="/PhysRefData/ASD/ionEnergy.html"><img
+src="../Images/GS-IE.gif" width="124" height="47" title="Ground States and Ionization Energies" alt="[Ground States and Ionization Energies]"
+style="{border: 0}"></a><a href="/asbib"><img src="../Images/Bib.gif" width="98" height="47" title="Bibliography" alt="[Bibliography]" style="{border: 0}"></a><a href="help.html"><img
+src="../Images/Help.gif" width="55" height="47" title="Help" alt="[Help]" style="{border: 0}"></a></td>
+
+<td style="text-align: right">
+  <img src="../Images/nist-pl-black.gif" width="136" height="68"
+  usemap="#NIST-PL" title="NIST Physical Measurement Laboratory" alt="NIST Physical Measurement Laboratory" style="{border: 0; border-width: thin}">
+</td>
+</tr></table>
+
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4c5e0db0cf3d7ac',t:'MTc5MjMwOTA1Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

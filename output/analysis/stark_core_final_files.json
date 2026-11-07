@@ -1,0 +1,16 @@
+{
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\stark_data_collect.py": "c6b51d00509c3aa79d3a230387a9b3d0eb15b2122136229fb3dc905da8d8de3a",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\stark_html_collect.py": "db285a051e0ab3047f0eecfa42e9308d6091aba8b93e911954eded8944821710",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\simLIBS\\stark_resolver.py": "5e556ee1091bc79717225f37c8f22c3b79576af268eb8d2f2336139d54fa8a01",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\simLIBS\\nist_stark.py": "59b0953b5f591907bba047144a8b2c23538f5c3cf625dab6c9bb87cec6d7e410",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\simLIBS\\stark_atomic_data.py": "037087b11fc40b5cd527a27a44cd0eaa2d568382209850c137e5a718d0c41b1d",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\simLIBS\\stark_semiempirical.py": "60ade6917180a3dcb6916592f7e6de4e1736b5918cfe3a0fbfef44ae0675330b",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\simLIBS\\stark_vamdc.py": "0e763205ff8bedf5d90b7a6e468391c5b71f14e2eae7205e781aace179b56df1",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\simLIBS\\nist_self_absorption.py": "015a77405b07e91758b81d00f9d12d5e2fa606963868c79f72fdddc0ffd79311",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\docs\\STARK_DATABASE.md": "452026aa556783d0ddf5cc2e12a467ed51fdafa3bbfca2fba8d317af885560b1",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\tests\\test_stark_data_collect.py": "dd7a45d8309e06211403df0bc0aa43c1e549a70cba615f3e1fadf0708569bb66",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\tests\\test_stark_vamdc.py": "32bfbd9751767d185f6137c4790445f177069f9bad17868b8139b7d967730ed3",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\tests\\test_stark_html_collect.py": "a84c85a5d5d714bb9a3c9cdb31a93265fb85208c9ae1c3b6f6f759eb411d2517",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\tests\\test_stark_export_runtime.py": "7fd1c38ebec2a79e95ed3f8d9d6305c7b56282112695a06dc5faf24d2a6cf128",
+  "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\tests\\test_stark_resolver.py": "345e5f8b37fde412a0761959bea46fa47cd95a5ee1d5b12ee9aea3c3900d22b0"
+}

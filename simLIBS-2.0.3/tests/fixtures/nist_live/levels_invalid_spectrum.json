@@ -1,0 +1,22 @@
+{
+  "text": "<!DOCTYPE html\n\tPUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n\t \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\" xml:lang=\"en-US\">\n<head>\n<title>NIST ASD : Input Error</title>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\" />\n</head>\n<body bgcolor=\"white\">\n<table style=\"width:100%; border:0; margin-top:0\">\n<tr><td style=\"text-align:left\"><a href=\"https://physics.nist.gov/PhysRefData/ASD/index.html\"><img\nsrc=\"https://physics.nist.gov/PhysRefData/ASD/Images/ASD-sm.gif\" style=\"border:0\" width=\"100\" height=\"47\"\nalt=\"[ASD Home]\" title=\"ASD Home\"></a><a href=\"https://physics.nist.gov/PhysRefData/ASD/lines_form.html\"><img\nsrc=\"https://physics.nist.gov/PhysRefData/ASD/Images/Lines.gif\" style=\"border:0\" width=\"70\" height=\"47\"\nalt=\"[Lines Query]\" title=\"Lines Query\"></a><a href=\"https://physics.nist.gov/PhysRefData/ASD/levels_form.html\"><img\nsrc=\"https://physics.nist.gov/PhysRefData/ASD/Images/Levels.gif\" style=\"border:0\" width=\"79\" height=\"47\"\nalt=\"[Levels Query]\" title=\"Levels Query\"></a><a href=\"https://www.nist.gov/pml/atomic-spectra-database-contents\"><img\nsrc=\"https://physics.nist.gov/PhysRefData/ASD/Images/List.gif\" style=\"border:0\" width=\"77\" height=\"47\"\nalt=\"[List of Spectra]\" title=\"List of Spectra\"></a><a href=\"https://physics.nist.gov/PhysRefData/ASD/ionEnergy.html\"><img\nsrc=\"https://physics.nist.gov/PhysRefData/ASD/Images/GS-IE.gif\" style=\"border:0\" width=\"124\" height=\"47\"\nalt=\"[Ground States and Ionization Energies]\" title=\"Ground States and Ionization Energies\"></a><a\nhref=\"https://physics.nist.gov/PhysRefData/ASBib1/index.html\"><img src=\"https://physics.nist.gov/PhysRefData/ASD/Images/Bib.gif\" style=\"border:0\"\nwidth=\"98\" height=\"47\" alt=\"[Bibliography]\" title=\"Bibliography\"></a><a\nhref=\"https://physics.nist.gov/PhysRefData/ASD/Html/help.html\"><img src=\"https://physics.nist.gov/PhysRefData/ASD/Images/Help.gif\" style=\"border:0\"\nwidth=\"55\" height=\"47\" alt=\"[Help]\" title=\"Help\"/></a></td>\n<td style=\"text-align:right\"><img src=\"https://physics.nist.gov/PhysRefData/ASD/Images/nist-pl-black.gif\" style=\"border:0\" width=\"136\" height=\"68\"\nusemap=\"#NIST-PL\" alt=\"NIST Physical Measurement Laboratory\"/></td>\n</tr></table>\n\n<h2>Error Message:</h2><hr>\n<FONT COLOR=red>Unrecognized token (elem).</FONT>\n<hr>\n<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML=\"window.__CF$cv$params={r:'a5519edf9b61ebc4',t:'MTc5Mzc3NDM1Ng=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5519edf9b61ebc4',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);\";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>\n</html>",
+  "url": "https://physics.nist.gov/cgi-bin/ASD/energy1.pl?spectrum=Si+INVALID&units=0&format=3&output=0&page_size=1000&conf_out=on&term_out=on&j_out=on&level_out=on&unc_out=on&biblio=on&multiplet_ordered=0&submit=Retrieve+Data",
+  "endpoint": "https://physics.nist.gov/cgi-bin/ASD/energy1.pl",
+  "request_params": {
+    "spectrum": "Si INVALID",
+    "units": 0,
+    "format": 3,
+    "output": 0,
+    "page_size": 1000,
+    "conf_out": "on",
+    "term_out": "on",
+    "j_out": "on",
+    "level_out": "on",
+    "unc_out": "on",
+    "biblio": "on",
+    "multiplet_ordered": 0,
+    "submit": "Retrieve Data"
+  },
+  "sha256": "c54e29b7e5308dc66c969af9a9cf4742ddc59414125696b49ea2c9ebc70b9fa9",
+  "retrieved_utc": "2026-11-04T06:39:19.188127+00:00"
+}

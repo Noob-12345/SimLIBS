@@ -1,4 +1,7 @@
-# SimLIBS Vue 项目协作约定
+﻿# SimLIBS Vue 项目协作约定
+
+> 2026-10-15 现行角色规则：固定 plan / code / review 三角色，plan 只规划与统筹，最终审查仅由 review 完成。此规则覆盖本文件及历史材料所有“两角色”“plan 最终验收”“不新增 review”表述。下方带日期的任务段落只记录当时事实，不代表当前任务或当前产品状态；业务现状以最新任务证据与实际代码为准。2026-10-15 用户已重新提交五模块视觉优化清单，现任务为 `.ai-workflow/20261015-visual-refinement/plan.md`，授权 code 按小步实现，review 独立验收；工作流初始化时的待规划状态已被本次新授权替代。
+
 
 2026-10-14 当前任务 `.ai-workflow/20261014-advanced-batch-scan/`：用户已授权在真实后端基础上优化批量/扫描竞态并实现高级单次。高级页已替换历史占位，采用有限能级 LTE slab 自吸收与明确未标定的参数化元素响应/等离子体条件，独立任务、三谱共同尺度和完整导出；功能原理见根目录 PROJECT_FUNCTIONS_AND_PRINCIPLES.md。code 完成实现、自测与根目录正式交付后以本轮 code-ready/files 冻结交 plan；最终验收仅由原 plan 写 review。每步最多3业务文件、源 UI/源库/线库只读、自然长页面和根目录交付约定不变。以下历史“占位/未接引擎/冻结”仅表示对应旧任务当时状态，不能覆盖本轮授权和当前事实。
 
@@ -14,15 +17,14 @@
 
 项目根目录：`D:\LIBS\SimLIBS\Vue`。技术栈：Tauri 2、Vue 3、TypeScript、Vite、npm。
 
-## 两角色工作流
+## 三角色工作流（2026-10-15 起生效）
 
-- plan 负责需求、方案、验收标准、协调和最终验收，不替代 code 编写业务代码。
-- code 负责实现和自测，完成后提交 `implementation.md`，由 plan 核对实际代码、执行必要验收并写 `review.md`。
-- 顺序为用户需求 → plan 方案 → code 实现与自测 → plan 验收。返工交回同一 code，再由 plan 复验；不新增独立 review 角色。
-- 官方模板首次生成属于本次已授权的初始化操作。后续每个业务实现小步最多修改 3 个业务文件，验证与改动风险相称。
-
-初始化材料位于 `.ai-workflow/20261009-tauri-vue-init/`，详细角色和交接规则见其中 `workflow.md`。历史材料仅供参考，不自动恢复旧任务。
-
+- plan 仅负责需求、方案、验收标准、统筹、状态与汇报，不写业务代码或最终 review.md。
+- code 负责实现、自测、构建和 implementation.md；每个业务小步最多3业务文件。
+- review 为独立第三角色，负责审查、必要验证及 review.md；不修改业务实现。
+- 顺序：用户 → plan → code → review → plan 汇报；返工由 plan 交同一 code，再由 review 复验。
+- 唯一现行规范为 `.ai-workflow/herdr-three-role/workflow.md`，交接模板为同目录 prompts.md。重复初始化复用窗口，只补缺失角色，实时发现 ID，保留模型和焦点。
+- 当前初始化证据在 `.ai-workflow/20261015-herdr-three-role-init/`。所有旧任务记录只作历史，不自动恢复。
 最新前端与角色状态见 `.ai-workflow/20261009-vue-frontend/state.json`、`review.md`；此前续接见 `.ai-workflow/20261009-herdr-resume/`，工具链验收见 `.ai-workflow/20261009-tauri-prerequisites/review.md`。已经通过的安装和构建不重复执行，后续操作前核对实时 Herdr 角色和任务范围。
 
 当前 Windows 桌面前端交付见 `.ai-workflow/20261010-desktop-delivery/state.json`、`review.md`。产品入口为 `dist-desktop/SimLIBS.exe` 与中文 NSIS 安装包；Vue 嵌入 Tauri 窗口，网页仅作开发辅助。独立 release 验收通过；完整原生文件对话框点击及安装过程的验证边界按 review.md 如实保留。
@@ -59,4 +61,6 @@
 
 
 2026-10-12最新11项统一控件/原生主题任务已完成，见 .ai-workflow/20261012-controls-unify/state.json、review.md。原生标题栏随日夜/系统模式，main只加allow-set-theme，串行模式同步避免媒体回路；通用ChoiceSelect/ElementCandidate/WorkbenchLayout已接三页。精确输入不再含Te/Ne/R滑条，开关600字重并使用其它预设色，红详情、选择后收起和五页文案精简已完成。三页成功100%收起，96px短柄/手动/取消/时间轴保持。正式根目录EXE/中文NSIS已更新，plan24项真实程序检查及夜间完整原生窗口截图通过，数据/I/O/依赖/Rust保护。心跳1-2同需求重放时先核对完成状态/产物，不重复实现；旧I/O任务不自动恢复。
+
+
 

@@ -1,0 +1,7 @@
+{
+  "request_url": "https://physics.nist.gov/cgi-bin/ASD/energy1.pl?de=0&spectrum=Ca+I&units=1&format=2&output=0&page_size=10000&multiplet_ordered=1&conf_out=on&term_out=on&level_out=on&j_out=on&g_out=on&ids_out=1&unc_out=1&submit=Retrieve+Data",
+  "retrieved_utc": "2026-10-15T02:07:47.144339+00:00",
+  "response_sha256": "01aea82aad5f5ec63af2981a7687c5f36f6383f5aac3b6dfd48963d87f0ee3f0",
+  "http_status": 200,
+  "response_bytes": 80509
+}

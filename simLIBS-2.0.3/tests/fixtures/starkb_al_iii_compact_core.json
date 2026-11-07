@@ -1,0 +1,74 @@
+{
+  "kind": "verbatim normalized STARK-B row from verified collector snapshot",
+  "species_path": "species/Al_q2.json",
+  "species_sha256": "3aec8455f6b9f5313dbdbc8f1f9ee3b0fdf32172c558e544862a83cebb086cbc",
+  "table": {
+    "c_angstrom_cm3": null,
+    "calculated_wavelength_angstrom": 1857.4,
+    "charge": 2,
+    "dataset_id": "vamdc:Pstarkb-R4268",
+    "element": "Al",
+    "fit": null,
+    "lower_label": "2p6.3s 2S",
+    "lower_state_id": "Sstarkb-2169",
+    "metadata": {
+      "limitations": "STARK-B tabulated FWHM, not HWHM; linear temperature interpolation only inside the table. C, published fits and calculation method are not exported; absence of a warning does not establish validity.",
+      "reference_ne_cm3": 1e+17
+    },
+    "method": "unreported",
+    "samples": [
+      {
+        "collider_ref": "Xstarkb-P1",
+        "environment_id": "Estarkb-186409",
+        "flag": "",
+        "fwhm_angstrom": 0.0303,
+        "ne": 1e+17,
+        "temperature_k": 10000.0
+      },
+      {
+        "collider_ref": "Xstarkb-P1",
+        "environment_id": "Estarkb-186410",
+        "flag": "",
+        "fwhm_angstrom": 0.0214,
+        "ne": 1e+17,
+        "temperature_k": 20000.0
+      },
+      {
+        "collider_ref": "Xstarkb-P1",
+        "environment_id": "Estarkb-186411",
+        "flag": "",
+        "fwhm_angstrom": 0.0151,
+        "ne": 1e+17,
+        "temperature_k": 40000.0
+      },
+      {
+        "collider_ref": "Xstarkb-P1",
+        "environment_id": "Estarkb-186412",
+        "flag": "",
+        "fwhm_angstrom": 0.0107,
+        "ne": 1e+17,
+        "temperature_k": 80000.0
+      },
+      {
+        "collider_ref": "Xstarkb-P1",
+        "environment_id": "Estarkb-186413",
+        "flag": "",
+        "fwhm_angstrom": 0.00801,
+        "ne": 1e+17,
+        "temperature_k": 160000.0
+      }
+    ],
+    "source": "Dimitrijević M. S. Electron-impact widths of doubly and triply charged ion lines of astrophysical importance journal 1988 A&AS 76 http://cdsads.u-strasbg.fr/abs/1988A%26AS...76...53D | Dimitrijević M. S. Konjević N. Stark widths of doubly- and triply-ionized atom lines journal 1980 JQSRT 24 http://cdsads.u-strasbg.fr/abs/1980JQSRT..24..451D | Dimitrijević M. S. Konjević N. Modified Semiempirical Formula for the Electron-Impact Width of Ionized Atom Lines: Theory and Applications journal 1981 5th ICSLS Conf. Proc. http://cdsads.u-strasbg.fr/abs/1981sls..conf..211D",
+    "source_format": "vamdc-xsams",
+    "source_ids": [
+      "Bstarkb-168",
+      "Bstarkb-184",
+      "Bstarkb-185"
+    ],
+    "source_url": "https://stark-b.obspm.fr/12.07/vamdc/tap/sync?REQUEST=doQuery&LANG=VSS2&FORMAT=XSAMS&QUERY=SELECT+ALL+WHERE+AtomSymbol+%3D+%27Al%27+AND+IonCharge+%3D+2+AND+EnvironmentTotalNumberDensity+%3E%3D+1e-300",
+    "temperature_interpolation": "linear",
+    "transition_id": "Pstarkb-R4268",
+    "upper_label": "2p6.3p 2Po",
+    "upper_state_id": "Sstarkb-2170"
+  }
+}

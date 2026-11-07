@@ -1,0 +1,7 @@
+{
+  "request_url": "https://physics.nist.gov/PhysRefData/ASD/levels_form.html",
+  "retrieved_utc": "2026-10-15T02:10:10.381619+00:00",
+  "response_sha256": "6f4db9e7ffc3bbaa7454127f386ab48ee69ea2d11ea7eea262ddd999b8e7d834",
+  "http_status": 200,
+  "response_bytes": 11851
+}

@@ -1,0 +1,33 @@
+{
+  "model_version": "nist-lines-stark-1",
+  "line_count": 1,
+  "strength_source": "NIST dataSticksArray (int_scale=2, photon weights)",
+  "wavelength_convention": "vacuum (NIST show_av=3)",
+  "self_absorption": false,
+  "stark_broadening": true,
+  "assumptions": [
+    "NIST line areas preserved; no self-absorption population/opacity calculation",
+    "Local coefficients retain their reference convention; STARK-B uses published temperature data/fits"
+  ],
+  "instrument_broadening": true,
+  "parameters": {
+    "Te_eV": 1.0,
+    "Ne_cm3": 1e+17,
+    "path_length_m": 0.001
+  },
+  "output_points": 21,
+  "output_step_nm": 0.0009999999999763531,
+  "stark_data": {
+    "source_mode": "auto",
+    "methods": [
+      "SCP",
+      "MSE"
+    ],
+    "local_line_count": 0,
+    "stark_b_line_count": 1,
+    "isolated_limit_unknown_count": 1,
+    "sources": [
+      "STARK-B: Lanz T., Dimitrijević M. S., Artru M.-C. Stark broadening of visible SI II lines in stellar atmospheres , A&A, Vol.192, p.249-254, 1988 ADS link : http://cdsads.u-strasbg.fr/abs/1988A%26A...192..249L Lesage A., Sahal-Bréchot S., Miller M. H. Stark broadening of singly ionized silicon , Phys.Rev. A, Vol.16, p.1617-1624, 1977 ADS link : http://cdsads.u-strasbg.fr/abs/1977PhRvA..16.1617L DOI : 10.1103/PhysRevA.16.1617 http://cdsads.u-strasbg.fr/abs/1988A%26A...192..249L http://cdsads.u-strasbg.fr/abs/1977PhRvA..16.1617L https://dx.doi.org/10.1103/PhysRevA.16.1617"
+    ]
+  }
+}

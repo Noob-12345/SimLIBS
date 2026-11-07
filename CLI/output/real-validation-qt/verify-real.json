@@ -1,0 +1,62 @@
+{
+  "command": [
+    "E:\\Anaconda\\envs\\simLIBS\\python.exe",
+    "verify_real.py"
+  ],
+  "engine": "real-qt",
+  "steps": [
+    {
+      "step": "params",
+      "label": "Fe 100% 200–700nm · local 离线"
+    },
+    {
+      "step": "run",
+      "ok": true,
+      "elapsed": 3.8,
+      "checks": {
+        "kind_single": true,
+        "points_finite": true,
+        "chart_rendered": true,
+        "meta_source": true,
+        "sha256": true,
+        "mode_local": true,
+        "photon_only": true,
+        "broadening_local": true
+      },
+      "meta_source": "离线本地有限能级 LTE + I/II Saha · 相对photon",
+      "points": "50001/interpolated：显示 50,001/50,001 实际CSV节点（完整）"
+    },
+    {
+      "step": "export",
+      "ok": true,
+      "files": [
+        "53cae4fe9d744fb0a478bb3d3c9e7c26_interpolated.csv",
+        "53cae4fe9d744fb0a478bb3d3c9e7c26_manifest.json",
+        "53cae4fe9d744fb0a478bb3d3c9e7c26_spectrum.png",
+        "5581e1f09101458abb49bfd3982bc6f4_interpolated.csv",
+        "5581e1f09101458abb49bfd3982bc6f4_manifest.json",
+        "5581e1f09101458abb49bfd3982bc6f4_spectrum.png",
+        "678cbc9027a243f49f1ff3f7ad926750_interpolated.csv",
+        "678cbc9027a243f49f1ff3f7ad926750_manifest.json",
+        "678cbc9027a243f49f1ff3f7ad926750_spectrum.png",
+        "f5f5c126e2ca434c9916c5efdc57d90c_interpolated.csv",
+        "f5f5c126e2ca434c9916c5efdc57d90c_manifest.json",
+        "f5f5c126e2ca434c9916c5efdc57d90c_spectrum.png"
+      ]
+    },
+    {
+      "step": "snapshots",
+      "ok": true,
+      "files": [
+        "batch-dark.png",
+        "jobs-dark.png",
+        "scan-dark.png",
+        "settings-dark.png",
+        "single-result-dark.png",
+        "single-result-light.png"
+      ]
+    }
+  ],
+  "independent_acceptance": false,
+  "ok": true
+}

@@ -1,0 +1,40 @@
+{
+  "path": "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3\\stark-b\\stark_broadening.json",
+  "bytes": 30604896,
+  "sha256": "0b52574f83a99104be78afd12ec823c28991a10d37fd601ee4b9d37b4af42540",
+  "complete": true,
+  "scope": "all",
+  "counts": {
+    "elements": 60,
+    "lines": 5329,
+    "samples": 66851,
+    "species": 172,
+    "tables": 11819
+  },
+  "raw_payloads_verified": 172,
+  "nonpositive_source_samples": 21,
+  "reference_formats": {
+    "vamdc-xsams": 171,
+    "starkb-html": 1
+  },
+  "atomic_inputs": {
+    "candidate_lines": 5329,
+    "ready": 162,
+    "missing": 5167,
+    "complete": false,
+    "source_failures": [
+      {
+        "element": "Co",
+        "charge": 2,
+        "status": "failed",
+        "reason": "No usable resolved LS levels in NIST response"
+      },
+      {
+        "element": "Mn",
+        "charge": 2,
+        "status": "failed",
+        "reason": "No usable resolved LS levels in NIST response"
+      }
+    ]
+  }
+}

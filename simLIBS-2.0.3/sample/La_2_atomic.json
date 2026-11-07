@@ -1,0 +1,740 @@
+{
+  "levels": [
+    {
+      "configuration": "5p6.5d",
+      "term": "2D",
+      "j": "3/2",
+      "energy_ev": 0.0,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.5d",
+        "term": "2D",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "0.00",
+        "suffix": "",
+        "uncertaintycm1": "0",
+        "reference": "L3974"
+      }
+    },
+    {
+      "configuration": "5p6.5d",
+      "term": "2D",
+      "j": "5/2",
+      "energy_ev": 0.1987751864540597,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.5d",
+        "term": "2D",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "1603.23",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.4f",
+      "term": "2F*",
+      "j": "5/2",
+      "energy_ev": 0.8920836655146568,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.4f",
+        "term": "2F*",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "7195.14",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.4f",
+      "term": "2F*",
+      "j": "7/2",
+      "energy_ev": 1.078093438898034,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.4f",
+        "term": "2F*",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "8695.41",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.6s",
+      "term": "2S",
+      "j": "1/2",
+      "energy_ev": 1.6850865986934056,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.6s",
+        "term": "2S",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "13591.14",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.6p",
+      "term": "2P*",
+      "j": "1/2",
+      "energy_ev": 5.209201056538848,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.6p",
+        "term": "2P*",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "42015.04",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.6p",
+      "term": "2P*",
+      "j": "3/2",
+      "energy_ev": 5.593043736468193,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.6p",
+        "term": "2P*",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "45110.94",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.7s",
+      "term": "2S",
+      "j": "1/2",
+      "energy_ev": 10.209761503954306,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.7s",
+        "term": "2S",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "82347.28",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.6d",
+      "term": "2D",
+      "j": "3/2",
+      "energy_ev": 10.213912494917848,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.6d",
+        "term": "2D",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "82380.76",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.6d",
+      "term": "2D",
+      "j": "5/2",
+      "energy_ev": 10.267660884780627,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.6d",
+        "term": "2D",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "82814.27",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.5f",
+      "term": "2F*",
+      "j": "5/2",
+      "energy_ev": 11.462902033410252,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.5f",
+        "term": "2F*",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "92454.54",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.5f",
+      "term": "2F*",
+      "j": "7/2",
+      "energy_ev": 11.472844326282612,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.5f",
+        "term": "2F*",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "92534.73",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.7p",
+      "term": "2P*",
+      "j": "1/2",
+      "energy_ev": 11.559343142161518,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.7p",
+        "term": "2P*",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "93232.39",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.7p",
+      "term": "2P*",
+      "j": "3/2",
+      "energy_ev": 11.711725921245844,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.7p",
+        "term": "2P*",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "94461.44",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.8s",
+      "term": "2S",
+      "j": "1/2",
+      "energy_ev": 13.664245196117678,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.8s",
+        "term": "2S",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "110209.57",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.7d",
+      "term": "2D",
+      "j": "3/2",
+      "energy_ev": 13.704494186455047,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.7d",
+        "term": "2D",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "110534.20",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.7d",
+      "term": "2D",
+      "j": "5/2",
+      "energy_ev": 13.729800601197248,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.7d",
+        "term": "2D",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "110738.31",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.5g",
+      "term": "2G",
+      "j": "7/2",
+      "energy_ev": 14.227794292782056,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.5g",
+        "term": "2G",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "114754.90",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.5g",
+      "term": "2G",
+      "j": "9/2",
+      "energy_ev": 14.227848845829365,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.5g",
+        "term": "2G",
+        "j": "9/2",
+        "prefix": "",
+        "levelcm1": "114755.34",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.6f",
+      "term": "2F*",
+      "j": "5/2",
+      "energy_ev": 14.244519761150695,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.6f",
+        "term": "2F*",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "114889.80",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.6f",
+      "term": "2F*",
+      "j": "7/2",
+      "energy_ev": 14.250607385293764,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.6f",
+        "term": "2F*",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "114938.90",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.8p",
+      "term": "2P*",
+      "j": "1/2",
+      "energy_ev": 14.332853543166411,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.8p",
+        "term": "2P*",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "115602.26",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.8p",
+      "term": "2P*",
+      "j": "3/2",
+      "energy_ev": 14.410177528361261,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.8p",
+        "term": "2P*",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "116225.92",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.9s",
+      "term": "2S",
+      "j": "1/2",
+      "energy_ev": 15.436541040147013,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.9s",
+        "term": "2S",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "124504.10",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.8d",
+      "term": "2D",
+      "j": "3/2",
+      "energy_ev": 15.466066637161894,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.8d",
+        "term": "2D",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "124742.24",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.8d",
+      "term": "2D",
+      "j": "5/2",
+      "energy_ev": 15.48018099831153,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.8d",
+        "term": "2D",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "124856.08",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.6g",
+      "term": "2G",
+      "j": "7/2",
+      "energy_ev": 15.740100232064906,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.6g",
+        "term": "2G",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "126952.47",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.6g",
+      "term": "2G",
+      "j": "9/2",
+      "energy_ev": 15.740185781161825,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.6g",
+        "term": "2G",
+        "j": "9/2",
+        "prefix": "",
+        "levelcm1": "126953.16",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.7f",
+      "term": "2F*",
+      "j": "5/2",
+      "energy_ev": 15.751272448185723,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.7f",
+        "term": "2F*",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "127042.58",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.7f",
+      "term": "2F*",
+      "j": "7/2",
+      "energy_ev": 15.755366406417988,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.7f",
+        "term": "2F*",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "127075.60",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.9p",
+      "term": "2P*",
+      "j": "1/2",
+      "energy_ev": 15.814051847062373,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.9p",
+        "term": "2P*",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "127548.93",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.9p",
+      "term": "2P*",
+      "j": "3/2",
+      "energy_ev": 15.861923385919415,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.9p",
+        "term": "2P*",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "127935.04",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.10s",
+      "term": "2S",
+      "j": "1/2",
+      "energy_ev": 16.470111753387684,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.10s",
+        "term": "2S",
+        "j": "1/2",
+        "prefix": "",
+        "levelcm1": "132840.41",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.9d",
+      "term": "2D",
+      "j": "3/2",
+      "energy_ev": 16.490722886535217,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.9d",
+        "term": "2D",
+        "j": "3/2",
+        "prefix": "",
+        "levelcm1": "133006.65",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.9d",
+      "term": "2D",
+      "j": "5/2",
+      "energy_ev": 16.49943277647515,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.9d",
+        "term": "2D",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "133076.90",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.7g",
+      "term": "2G",
+      "j": "7/2",
+      "energy_ev": 16.653312044834564,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.7g",
+        "term": "2G",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "134318.02",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.7g",
+      "term": "2G",
+      "j": "9/2",
+      "energy_ev": 16.65348190318642,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.7g",
+        "term": "2G",
+        "j": "9/2",
+        "prefix": "",
+        "levelcm1": "134319.39",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.8f",
+      "term": "2F*",
+      "j": "5/2",
+      "energy_ev": 16.66023160294912,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.8f",
+        "term": "2F*",
+        "j": "5/2",
+        "prefix": "",
+        "levelcm1": "134373.83",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.8f",
+      "term": "2F*",
+      "j": "7/2",
+      "energy_ev": 16.663430395268698,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.8f",
+        "term": "2F*",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "134399.63",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.8g",
+      "term": "2G",
+      "j": "7/2",
+      "energy_ev": 17.24626151447341,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.8g",
+        "term": "2G",
+        "j": "7/2",
+        "prefix": "",
+        "levelcm1": "139100.48",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    },
+    {
+      "configuration": "5p6.8g",
+      "term": "2G",
+      "j": "9/2",
+      "energy_ev": 17.2464127751955,
+      "level_id": "",
+      "raw": {
+        "configuration": "5p6.8g",
+        "term": "2G",
+        "j": "9/2",
+        "prefix": "",
+        "levelcm1": "139101.70",
+        "suffix": "",
+        "uncertaintycm1": "",
+        "reference": ""
+      }
+    }
+  ],
+  "lines": [],
+  "limits": [
+    {
+      "energy_ev": 19.177255892655253,
+      "label": "La IV (5s2.5p6 1S<0>) Limit",
+      "raw": {
+        "configuration": "La IV (5s2.5p6 1S<0>)",
+        "term": "Limit",
+        "j": "---",
+        "prefix": "",
+        "levelcm1": "154675",
+        "suffix": "",
+        "uncertaintycm1": "5",
+        "reference": "L3974,L3420"
+      }
+    }
+  ],
+  "ionization_energy_ev": 19.1773,
+  "atomic_source": {
+    "levels_url": "https://physics.nist.gov/cgi-bin/ASD/energy1.pl?spectrum=La+III&units=0&format=3&output=0&page_size=1000&conf_out=on&term_out=on&j_out=on&level_out=on&unc_out=on&biblio=on&multiplet_ordered=0&submit=Retrieve+Data",
+    "lines_url": "https://physics.nist.gov/cgi-bin/ASD/lines1.pl?spectra=La+III&output_type=0&low_w=&upp_w=&unit=1&de=0&plot_out=0&format=3&line_out=0&remove_js=on&no_spaces=on&en_unit=0&output=0&bibrefs=1&page_size=100&show_obs_wl=1&show_calc_wl=1&unc_out=1&order_out=0&ids_out=1&show_av=3&A_out=0&allowed_out=1&conf_out=on&term_out=on&enrg_out=on&J_out=on&g_out=on",
+    "ionization_url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?spectra=La+III&units=1&format=3&order=0&ion_charge_out=on&sp_name_out=on&e_out=0&biblio=on",
+    "levels_sha256": "83d071a46ea293d03a0becc17fe5923bac5da2e3ef27cc50aabfc8a4928af351",
+    "lines_sha256": "2d23cefeb3206a95d97382099e4fedc06a94f9940d20ee126dd446814acb0965",
+    "ionization_sha256": "ff4812cd7bf3005b0b6d031c94ace6e0a775be84e18d6ad2a89bcdd8ad1ddc36"
+  },
+  "line_data": {
+    "status": "missing",
+    "exported_lines": 122,
+    "observed_lines": 122,
+    "e1_lines": 0,
+    "missing_fields": [
+      "Aki",
+      "Ritz wavelength",
+      "level energies",
+      "level classifications"
+    ],
+    "reason": "NIST ASD contains observed wavelengths only; no Aki, Ritz wavelength, level energies or level classifications; cannot construct E1 Aki arrays"
+  }
+}

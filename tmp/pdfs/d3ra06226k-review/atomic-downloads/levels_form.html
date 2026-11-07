@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<TITLE>NIST: Atomic Spectra Database - Energy Levels Form</title>
+<script>
+<!--
+function setFocus() {
+  var de = document.getElementById("de");
+  var idsSp = document.getElementById("ids_sp");
+  var dom = document.domain;
+  var href = document.location.href;
+  if ( href.match(/^http:\/\/ekron\.nist\.gov\/ASD\/DataEntry\/.*/i) ) {
+    de.value = 1;
+  }
+  if ( dom.match(/^ekron\.nist\.gov/i) ) {
+    idsSp.style.display="inline";
+  //  var tabOpt = document.getElementById("tab");
+  //  tabOpt.style.display="inline";
+  //  tabOpt.disabled = false;
+  //  var csvOpt = document.getElementById("csv");
+  //  csvOpt.style.display="inline";
+  //  csvOpt.disabled = false;
+  }
+  document.levels.spectrum.focus();
+}
+function submit_update() {
+  return true;
+}
+// -->
+</script>
+<link rel="stylesheet" type="text/css" href="Scripts/1.css" />
+
+<!-- Google Analtyics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9SLN1VEEJ2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9SLN1VEEJ2');
+</script>
+<!-- End of Google Analytics 4 -->
+<SCRIPT async id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&subagency=NIST&pua=UA-37115410-46&yt=false&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c"></script>
+<script src="/js/clickjack.js"></script>
+</HEAD>
+
+<BODY style="background-color: white;" onLoad="setFocus()">
+<A HREF="#start"><IMG SRC="/Images/dot_t.gif" BORDER="0" width="1" height="1" AL
+T="[skip navigation]"></A>
+
+<TABLE width="100%">
+<TR><TD align="left"><A href="index.html"><img
+src="Images/ASD-sm.gif" BORDER="0" width="100" height="47"
+alt="[ASD Home]"></A><A href="lines_form.html"><img
+src="Images/Lines.gif" BORDER="0" width="70" height="47"
+alt="[Lines Query]"></A><A href="levels_form.html"><img
+src="Images/Levels.gif" BORDER="0" width="79" height="47"
+alt="[Levels Query]"></A><A href="https://www.nist.gov/pml/atomic-spectra-database-contents"><img
+src="Images/List.gif" BORDER="0" width="77" height="47"
+alt="[List of Spectra]"></A><A href="ionEnergy.html"><img
+src="Images/GS-IE.gif" BORDER="0" width="124" height="47"
+alt="[Ground States and Ionization Energies]"></A><A href="/asbib"><img
+src="Images/Bib.gif" BORDER="0" width="98" height="47"
+alt="[Bibliography]"></A><A href="Html/help.html"><img
+src="Images/Help.gif" BORDER="0" width="55" height="47"
+alt="[Help]"></A></TD>
+<TD align="right">
+<img src="Images/nist-pl-black.gif" BORDER="0" width="136" height="68"
+usemap="#NIST-PL" alt="NIST Physical Measurement Laboratory" BORDER="0"></TD>
+</TR>
+</TABLE>
+
+<map name="NIST-PL">
+    <Area shape="rect" coords="1,1,135,48" href="http://www.nist.gov" alt="National Institute of Standards and Technology">
+    <Area shape="rect" coords="1,50,135,67" href="/" alt="NIST Physical Measurement Laboratory">
+</map>
+
+<!--main part-->
+
+<H2>NIST Atomic Spectra Database Levels Form</H2>
+
+<DIV ALIGN="center">
+<FONT size="-1" face="Arial, Helvetica, sans-serif">Best viewed with the latest
+versions of Web browsers and JavaScript enabled</FONT></DIV>
+
+<P>
+<form action="/cgi-bin/ASD/energy1.pl" method="get" name="levels" onsubmit="submit_update()">
+ <input type="hidden" name="de" id="de" value="0">
+  <TABLE BORDER="0" cellspacing="0" cellpadding="2" width="85%">
+    <tbody>
+<TR>
+<TD COLSPAN="5">This form provides access to NIST critically evaluated data on
+atomic energy levels.<br />
+        <br /></TD>
+</TR>
+
+<TR>
+<TD COLSPAN="5"> </TD>
+</TR>
+
+<TR bgcolor="LightSteelBlue" valign="baseline">
+<TD align="right"><br /><b>Spectrum:</b></TD>
+<TD align="left" COLSPAN="4"><br />
+<input type="text" size="10" name="spectrum" id="spectrum">
+<span class="ex1">e.g., </span><span class="ex2">Fe&nbsp;I</span>
+<span class="ex1"> or </span><span class="ex2">Mg&nbsp;Li-like</span>
+<span class="ex1"> or </span><span class="ex2">Z=59 II</span>
+<span class="ex1"> or </span><span class="ex2">198Hg I</span><br />
+<!-- Or, select spectra from the
+<A HREF="javascript:void(0)" ONCLICK="popdef('/cgi-bin/ASD/levels_pt.pl');return false" ONMOUSEOVER="self.status='List of Holdings';return true;" ONMOUSEOUT="self.status='';return true;" TARGET="_top">
+List of Holdings</A>.
+-->
+</TD>
+</TR>
+
+<TR bgcolor="LightSteelBlue">
+<TD COLSPAN="5"> </TD>
+</TR>
+
+<TR>
+<TD COLSPAN="5"> </TD>
+</TR>
+<TR>
+<TD COLSPAN="5" bgcolor="steelblue"> </TD>
+</TR>
+<TR>
+<TD COLSPAN="5"> </TD>
+</TR>
+
+<TR bgcolor="Lightsteelblue">
+<TD valign="top" align="right">
+  <input type="reset" value="Default Values">
+</TD>
+<TD>&nbsp;</TD>
+<TD>&nbsp;</TD>
+<TD>&nbsp;</TD>
+<TD valign="top">
+  <input type="submit" value="Retrieve Data" name="submit" id="submit_retrieve">
+</TD>
+</TR>
+<TR>
+<TD COLSPAN="5"> </TD>
+</TR>
+<TR>
+<TD COLSPAN="5" bgcolor="steelblue"> </TD>
+</TR>
+
+<TR>
+<TD COLSPAN="5">&nbsp;</TD>
+</TR>
+
+<TR bgcolor="#99cccc">
+<TD valign="middle" nowrap="nowrap" align="right" width="10%">
+  <FONT size="-1" color="#993300">Level Units:</FONT></TD>
+<TD width="15%">
+        <select name="units">
+          <option value="0">cm-1 </option>
+          <option value="1">eV </option>
+          <option value="2">Rydberg </option>
+          <option value="3">Hartree </option>
+          <option value="4">GHz </option>
+        </select></TD>
+<TD rowspan="10" bgcolor="steelblue">&nbsp;</TD>
+<!-- start additional -->
+<TD valign="middle" bgcolor="#b0d0c5" align="center"><small><b>Extended Search:</b></small></TD>
+<TD valign="top" bgcolor="#b0d0c5"><small>
+<input type="submit" value="Set Additional Criteria" name="submit">
+for all levels searches of <b>this</b> spectrum</small></TD>
+<!-- end additional -->
+</TR>
+
+<TR bgcolor="#99cccc">
+<TD align="right" bgcolor="#bbeeee">
+  <FONT size="-1" color="#993300">Format output:</FONT></TD>
+
+<TD valign="top" bgcolor="#bbeeee">
+          <select name="format">
+            <option value="0">HTML (formatted)</option>
+            <option value="1">ASCII (text)</option>
+      			<option value="2">CSV (text)</option>
+      			<option value="3">Tab-delimited</option>
+          </select></TD>
+
+<TD rowspan="9" COLSPAN="2" bgcolor="#d0efdf"></TD>
+</TR>
+
+<TR>
+<TD align="right" bgcolor="#aadddd">
+  <FONT size="-1" color="#993300">Display output:</FONT></TD>
+<TD valign="top" bgcolor="#aadddd">
+        <select name="output">
+          <option value="0">in its entirety</option>
+          <option value="1">in pages</option>
+        </select></TD>
+</TR>
+
+<TR bgcolor="#99cccc">
+<TD align=right bgcolor="#aadddd"><FONT color="#993300"><small>Page size:</small></FONT>
+</TD>
+<TD bgcolor="#aadddd">
+  <input size="3" name="page_size" value="15"></TD>
+</TR>
+
+<TR>
+<TD align="right" bgcolor="#bbeeee"><FONT color="#993300"><small>Term ordered</small></FONT></TD>
+<TD valign="top" bgcolor="#bbeeee" NOWRAP>
+  <input type="radio" name="multiplet_ordered" checked="checked" value="0">
+<FONT color="#993300"><small>term energy <input type="checkbox" name="average_out" value="1">
+</small></FONT>
+</TD>
+</TR>
+
+<TR>
+<TD align="right" bgcolor="#bbeeee">
+  <FONT color="#993300"><small>Energy ordered</small></FONT></TD>
+<TD bgcolor="#bbeeee">
+  <input type="radio" name="multiplet_ordered" value="1"></TD>
+</TR>
+
+<TR bgcolor="#aadddd">
+<TD align="right" valign="top"><FONT size="-1" color="#993300">Level information:</FONT></TD>
+<TD valign="top"><small>
+    <input type="checkbox" name="conf_out" checked="checked"> Principal configuration<br />
+    <input type="checkbox" name="term_out" checked="checked"> Principal term<br />
+    <input type="checkbox" name="level_out" checked="checked"> Level
+    <input type="checkbox" name="unc_out" value="1"  checked="checked"> Uncertainty<br />
+    <input type="checkbox" name="j_out" checked="checked"> <i>J</i>
+    <input type="checkbox" name="g_out" id="g_out"> <i>g</i><br />
+    <span id="ids_sp" style="display:none">
+      <input type="checkbox" name="ids_out" id="ids_out" value="1"> Level IDs<br />
+    </span>
+    <input type="checkbox" name="lande_out" checked="checked"> Land&eacute;-<i>g</i><br />
+    <input type="checkbox" name="perc_out" checked="checked"> Leading percentages
+  </small><br /></TD>
+</TR>
+
+<TR>
+<TD align="right" bgcolor="#bbeeee"><FONT SIZE="-1" color="#993300">Bibliographic
+references:</FONT><br /></TD>
+<TD valign="top" bgcolor="#bbeeee"><input type="checkbox" checked="checked" name="biblio"></TD>
+</TR>
+
+<TR bgcolor="#aadddd">
+<TD align="right"><FONT SIZE="-1" color="#993300">Level splitting:</FONT></TD>
+<TD><input value="1" type="checkbox" name="splitting"></TD>
+</TR>
+
+<TR>
+<TD align="right" bgcolor="#bbeeee"><FONT SIZE="-1" color="#993300"><i>T</i><sub>e</sub>&nbsp;(eV)<br />for partition function:</FONT></TD>
+<TD valign="middle" bgcolor="#bbeeee"><input name="temp" size="5"></TD>
+</TR>
+
+<TR>
+<TD COLSPAN="5">&nbsp;</TD>
+</TR>
+
+<TR>
+<TD COLSPAN="5" bgcolor="steelblue"> </TD>
+</TR>
+
+<TR>
+<TD COLSPAN="5"> </TD>
+</TR>
+
+<TR bgcolor="LightSteelBlue">
+<TD valign="top" align="right"><input type="reset" value="Default Values"></TD>
+<TD>&nbsp;</TD>
+<TD>&nbsp;</TD>
+<TD>&nbsp;</TD>
+<TD valign="top"><input type="submit" value="Retrieve Data" name="submit"></TD>
+</TR>
+
+<TR>
+<TD COLSPAN="5"> </TD>
+</TR>
+
+<TR>
+<TD COLSPAN="5" bgcolor="steelblue"> </TD>
+</TR>
+    </tbody>
+  </TABLE>
+</form>
+
+<P>
+<table style="border-spacing:3; border: 1px solid black; width:1050px;">
+<tr>
+  <td  colspan="2" style="color: navy; font-family: helvetica; font-size: medium; text-align: center; padding: 0px; background-color: #faeac1">Can you please provide some 
+<a href="/cdn-cgi/l/email-protection#12767366733c7c7b61663c757d64"><FONT color="#3142bd">Feedback</FONT></A>
+to improve our database?</td>
+</tr>
+</table>
+<P>
+
+
+<TABLE width="100%">
+<TR><TD align="left"><A href="index.html"><img
+src="Images/ASD-sm.gif" BORDER="0" width="100" height="47"
+alt="[ASD Home]"></A><A href="lines_form.html"><img
+src="Images/Lines.gif" BORDER="0" width="70" height="47"
+alt="[Lines Query]"></A><A href="levels_form.html"><img
+src="Images/Levels.gif" BORDER="0" width="79" height="47"
+alt="[Levels Query]"></A><A href="https://www.nist.gov/pml/atomic-spectra-database-contents"><img
+src="Images/List.gif" BORDER="0" width="77" height="47"
+alt="[List of Spectra]"></A><A href="ionEnergy.html"><img
+src="Images/GS-IE.gif" BORDER="0" width="124" height="47"
+alt="[Ground States and Ionization Energies]"></A><A href="/asbib"><img
+src="Images/Bib.gif" BORDER="0" width="98" height="47"
+alt="[Bibliography]"></A><A href="Html/help.html"><img
+src="Images/Help.gif" BORDER="0" width="55" height="47" alt="[Help]"></A></TD>
+<TD align="right">
+<img src="/Images/nist-pl-black.gif" BORDER="0" width="136" height="68"
+usemap="#NIST-PL" alt="NIST Physical Measurement Laboratory"></TD>
+</TR></TABLE>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4ab4922ecc57584',t:'MTc5MjAzMDIwOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></BODY>
+</HTML>

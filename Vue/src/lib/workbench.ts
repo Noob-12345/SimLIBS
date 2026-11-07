@@ -14,7 +14,7 @@ export const scan = reactive({ params: defaults(), composition: [elementDraft()]
 export const tasks = reactive<DemoTask[]>([])
 export const activeTask = (kind: TaskKind) => computed(() => tasks.find(t => t.kind === kind && t.status === 'running'))
 const timers = new Map<string, ReturnType<typeof setTimeout>>()
-const starting = new Set<TaskKind>()
+export const starting = reactive(new Set<TaskKind>())
 const polling = new Map<string,Promise<void>>()
 const failures = new Map<string,number>()
 const resultRevision: Record<TaskKind,number> = {single:0,batch:0,scan:0,advanced:0}
@@ -22,12 +22,16 @@ let disposed=false
 export async function runReal(kind: TaskKind, summary: string, payload: unknown) {
   if (starting.has(kind) || tasks.some(t => t.kind === kind && t.status === 'running')) return
   const snapshot = JSON.parse(JSON.stringify(payload)); starting.add(kind);resultRevision[kind]++
-  try { const data = await request(`/simulate/${kind}`, snapshot); const task: DemoTask = reactive({ id: data.job_id, kind, status: 'running', progress: 0, startedAt: Date.now(), summary, detail: '已提交真实后端' }); tasks.unshift(task); void poll(task) }
+  try { const data = await request(`/simulate/${kind}`, snapshot); const task: DemoTask = reactive({ id: data.job_id, kind, status: 'running', progress: 0, startedAt: Date.now(), summary, detail: '已提交计算引擎' }); tasks.unshift(task); void poll(task) }
   finally { starting.delete(kind) }
 }
 function update(task: DemoTask, data: any) {
   task.status = data.status === 'queued' ? 'running' : data.status; task.progress = data.progress ?? 0; task.summary = data.summary; task.resumable = data.resumable; task.duration = data.duration; if (data.created_at) task.startedAt = new Date(data.created_at).getTime()
+  task.starkMissing = task.kind === 'advanced' ? data.stark_missing : undefined
   task.events = (data.events ?? []).map((e: any) => `${e.ts} ${e.message}`); task.detail = data.error || task.events?.[task.events.length - 1] || ''
+  const rawStage = data.stage || (data.events ?? [])[(data.events ?? []).length - 1]?.message || (task.events?.[task.events.length - 1] ? task.events[task.events.length - 1].replace(/^\d{2}:\d{2}:\d{2}\s*/, '') : '')
+  if (task.kind === 'advanced' && task.status === 'running') task.detail = data.error || rawStage || ''
+  task.stage = rawStage ? (rawStage.length > 20 ? rawStage.slice(0, 18) + '…' : rawStage) : ''
   if (task.status !== 'running') task.endedAt ??= Date.now()
 }
 function schedule(task:DemoTask,delay:number) {
@@ -68,7 +72,7 @@ async function loadResult(task: DemoTask) {
 }
 export async function cancelTask(task?: DemoTask) {
   if (!task || task.status !== 'running') return
-  try { await request(`/jobs/${task.id}/cancel`, {}); task.detail = '正在取消真实任务；保留上一成功图谱'; if (!timers.has(task.id)) void poll(task) }
+  try { await request(`/jobs/${task.id}/cancel`, {}); task.detail = '正在取消任务；保留上一成功图谱'; if (!timers.has(task.id)) void poll(task) }
   catch (e) { task.detail = String(e) }
 }
 export async function resumeTask(task: DemoTask) { const data = await request(`/jobs/${task.id}/resume`, {}); await refreshTasks(); if(tasks.some(t=>t.id===data.job_id))page.value='batch' }

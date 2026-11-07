@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>NIST: Atomic Spectra Database - Energy Levels Help File</title>
+<!-- Google Analtyics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9SLN1VEEJ2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9SLN1VEEJ2');
+</script>
+<!-- End of Google Analytics 4 -->
+<SCRIPT async id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&subagency=NIST&pua=UA-37115410-46&yt=false&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c"></script>
+<script src="/js/clickjack.js"></script>
+</head>
+
+<body style="background-color:#ffffff">
+<a href="#start"><img src="/Images/dot_t.gif" height="1" title="skip navigation" alt="[skip navigation]" style="{border: 0; border-width: thin}"></a>
+
+<table style="width: 100%; border:0; border-spacing:0px">
+<tr><td style="text-align: left; padding:0"><a href="../index.html"><img
+src="../Images/ASD-sm.gif" width="100" height="47" title="ASD Home" alt="[ASD Home]" style="{border: 0}"></a><a href="../lines_form.html"><img
+src="../Images/Lines.gif" width="70" height="47" title="Lines Query" alt="[Lines Query]" style="{border: 0}"></a><a href="../levels_form.html"><img
+src="../Images/Levels.gif" width="79" height="47" title="Levels Query" alt="[Levels Query]" style="{border: 0}"></a><a href="https://www.nist.gov/pml/atomic-spectra-database-contents"><img
+src="../Images/List.gif" width="77" height="47" title="List of Spectra" alt="[List of Spectra]" style="{border: 0}"></a><a href="/PhysRefData/ASD/ionEnergy.html"><img
+src="../Images/GS-IE.gif" width="124" height="47" title="Ground States and Ionization Energies" alt="[Ground States and Ionization Energies]" style="{border: 0}"></a>
+<a href="/asbib"><img src="../Images/Bib.gif" width="98" height="47" title="Bibliography" alt="[Bibliography]" style="{border: 0}"></a><a href="help.html"><img
+src="../Images/Help.gif" width="55" height="47" title="Help" alt="[Help]" style="{border: 0}"></a></td>
+
+<td style="text-align: right">
+  <img src="../Images/nist-pl-black.gif" width="136" height="68" usemap="#NIST-PL" title="NIST Physical Measurement Laboratory" alt="NIST Physical Measurement Laboratory" style="{border: 0; border-width: thin}">
+</td>
+</tr>
+</table>
+
+<map name="NIST-PL">
+  <area shape="rect" coords="1,1,135,48" href="http://www.nist.gov" alt="National Institute of Standards and Technology" title="National Institute of Standards and Technology">
+  <area shape="rect" coords="1,50,135,67" href="/" alt="NIST Physical Measurement Laboratory" title="NIST Physical Measurement Laboratory">
+</map>
+
+<a id="start"><!-- filler --></a>
+<a id="Top"><!-- filler --></a>
+
+<p>
+<a href="/PhysRefData/ASD/Html/help.html"><img src="/Images/top.gif" title="Go to top of ASD Help" alt="Go to top of ASD Help" style="{border: 0;}"></a>&nbsp;
+The ASD database provides energy level data for atoms and ions. For more
+information consult <a href="/PhysRefData/ASD/Html/contents.html">Introduction to and Contents of the ASD</a>.
+
+</p>
+<hr style="height: 1px; border-style: solid">
+
+<a id="LEVELS_FORM"><!-- filler --></a>
+<h2>
+  &nbsp; Energy Levels Search Form
+</h2>
+
+The ASD Levels Search Form, referred to as the Levels Form, provides access to
+the energy level data. Submitting the Levels with information specified by the user
+generates a level list for a specified spectrum.
+<p>
+At a minimum, the user must enter a
+<a href="#LEVELS_SPECTRUM">spectrum</a> of interest (e.g., <span style="font-family:monospace">Fe&nbsp;I</span>)
+and then click &quot;Retrieve Data&quot;.
+
+<p>
+The Levels Form prompts the user for the following information:
+<ul>
+<li><a href="#LEVELS_SPECTRUM">Spectrum</a> of interest (e.g., <span style="font-family:monospace">Fe&nbsp;I</span>).<br><br></li>
+<li> Energy level units (selected from the pulldown menu).
+  <br>Energy levels may be displayed in one of the following units:
+  <ul>
+    <li>cm<sup>&minus;1</sup> (reciprocal centimeter or wavenumber), the default unit</li>
+    <li>eV (electron Volt)</li>
+    <li>Rydberg</li>
+    <li>Hartree (=2&times;Rydberg)</li>
+    <li>GHz</li>
+  </ul>
+<br></li>
+
+<li>Choice of viewing the output as an HTML table, ASCII table, a <a href="#CSV">CSV or tab-delimited data file</a>
+(selected from the pulldown menu).<br><br>
+</li>
+
+<li>Choice of viewing (scrollable) data all at once, or one page at a time (selected from the pulldown menu).<br><br>
+</li>
+
+<li>Page size.<br><br></li>
+
+<li>Choice of energy ordering of the output, i.e., term ordered or energy ordered.<br><br></li>
+
+<li>Choice of the output information for levels.<br><br></li>
+
+<li>Choice of the output of the relevant available bibliographic references.<br>
+
+For most ions, bibliographic references are available and can be
+retrieved by selecting the &quot;Bibliographic references&quot; checkbox.<br><br></li>
+
+<li>Choice of the output of the level splitting, i.e., the difference between
+two adjacent energy levels (different levels may be &quot;adjacent&quot; with different ordering of output).<br><br></li>
+
+<li>Electron temperature <i><b>T<sub>e</sub></b></i> for calculation of partition function.<br><br></li>
+
+</ul>
+
+<p>
+For levels output, the default is to display the following data:
+</p>
+  <ul>
+  <li>Principal Configuration</li>
+  <li>Principal Term</li>
+  <li>Level</li>
+  <li>Uncertainty</li>
+  <li><i>J</i></li>
+  <li>Land&eacute; <i>g-factor</i></li>
+  <li>Leading Percentages</li>
+  <li>Bibliographic References</li>
+  </ul>
+<p>
+To suppress display of any of the information listed above, the corresponding
+checkbox can be unclicked.<br>
+</p>
+<a href="#LEVEL_CRITERIA">Additional search criteria</a> are available for all
+ions and can be reached by pressing the &quot;Set Additional Criteria&quot; button.<br>
+
+<p>
+<hr style="height: 1px; border-style: solid">
+
+<a id="LEVELS_SPECTRUM"><!-- filler --></a>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+  &nbsp; Selecting a Spectrum for Levels Searches
+</h2>
+
+To specify an element on the Levels Form, simply enter the chemical symbol for
+the element (e.g., <span style="font-family:monospace">Fe</span> or <span style="font-family:monospace">fe</span>). To indicate a particular
+spectrum (ionization stage), enter (after a space) either a Roman numeral or an Arabic numeral
+after the element symbol (NOTE: <span style="font-family:monospace">Fe&nbsp;I</span>&nbsp;=&nbsp;<span style="font-family:monospace">Fe0+</span>,
+<span style="font-family:monospace">Fe&nbsp;II</span>&nbsp;=&nbsp;<span style="font-family:monospace">Fe1+</span>, etc.). Alternatively, a
+spectrum may be specified by the name of its isoelectronic sequence (e.g.,
+<span style="font-family:monospace">Si&nbsp;Li-like</span>&nbsp;=&nbsp;<span style="font-family:monospace">Si&nbsp;XII</span>,
+<span style="font-family:monospace">Si&nbsp;Na-like</span>&nbsp;=&nbsp;<span style="font-family:monospace">Si&nbsp;IV</span>).
+The user can also specify a particular isotope by
+including an atomic mass number before the element symbol, e.g., <span style="font-family:monospace">198Hg&nbsp;I</span>.
+Isotopes of hydrogen can also be specified by using their alternate element symbols,
+<span style="font-family:monospace">D&nbsp;I</span> or <span style="font-family:monospace">T&nbsp;I</span>. The symbol <span style="font-family:monospace">H&nbsp;I</span> will produce
+the same results as <span style="font-family:monospace">1H&nbsp;I</span>.
+For levels searches, output can only
+be generated for one spectrum at a time.
+
+<h4><i>Examples of Spectrum Notation</i></h4>
+
+<table style="border: 1px solid black; border-collapse: collapse">
+<tr><td style="border: 1px solid black; padding: 8px"><b>To specify</b></td>             <td style="border: 1px solid black; padding: 8px"><span style="font-family:monospace"></span><b>Enter</b></td></tr>
+<tr><td style="border: 1px solid black; padding: 8px">Neutral sodium</td>                <td style="border: 1px solid black; padding: 8px"><span style="font-family:monospace">Na&nbsp;I</span></td></tr>
+<tr><td style="border: 1px solid black; padding: 8px">Neutral sodium</td>                <td style="border: 1px solid black; padding: 8px"><span style="font-family:monospace">Na&nbsp;0</span></td></tr>
+<tr><td style="border: 1px solid black; padding: 8px">Neutral iron</td>                  <td style="border: 1px solid black; padding: 8px"><span style="font-family:monospace">fe&nbsp;i</span></td></tr>
+<tr><td style="border: 1px solid black; padding: 8px">Lithium-like magnesium</td>        <td style="border: 1px solid black; padding: 8px"><span style="font-family:monospace">Mg&nbsp;x</span></td></tr>
+<tr><td style="border: 1px solid black; padding: 8px">Lithium-like magnesium</td>        <td style="border: 1px solid black; padding: 8px"><span style="font-family:monospace">mg&nbsp;Li-like</span></td></tr>
+<tr><td style="border: 1px solid black; padding: 8px">Singly-ionized <sup>11</sup>B</td> <td style="border: 1px solid black; padding: 8px"><span style="font-family:monospace">11B&nbsp;II</span></td></tr>
+</table>
+
+
+<p>
+<hr style="height: 1px; border-style: solid">
+
+<a id="LEVEL_CRITERIA"><!-- filler --></a>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+  &nbsp; Setting Additional Criteria <span style="font-size: smaller">(from the Levels Form)</span>
+</h2>
+
+Clicking the &quot;Set Additional Criteria&quot; button on the Levels Form
+causes a list of additional search criteria to be displayed. These options are
+set to default values. Therefore, it is not mandatory that the options be set
+before using the database.
+
+<p>
+Before selecting the button &quot;Set Additional Criteria,&quot; the user must
+specify a spectrum on the Levels Form.
+
+</p><p>
+The following search criteria may be specified:
+</p><ul>
+<li>Upper bound of energy (in the energy units selected on the Levels Form).</li>
+<li>Parity. The default is to retrieve levels of both parities. The user may specify either odd or even parity.</li>
+<li>Configuration. The search criteria are used to create a list of
+  possible configurations for the chosen. The default is that no configuration
+  bound is specified. The pulldown menu can be used to select a configuration bound of
+  interest. Alternatively, the text box can be used to type in the initial or ending
+  portion of a configuration of interest.<br></li>
+<li>term. The search criteria are used to create a list of possible
+  configurations for the chosen ion. The default is that no term bound is
+  specified. The pulldown menu can be used to select a term bound of interest.
+  Alternatively, the text box can be used to type the initial or ending
+  portion of a term of interest.&nbsp;</li>
+<li><i>J</i> value</li>
+</ul>
+
+<p>If the spectrum on the Levels Form is changed, then clicking on the
+&quot;Update Criteria&quot; button on the Levels Form will update the list of
+additional search criteria.
+</p>
+
+<p>&nbsp;</p>
+<hr style="height: 1px; border-style: solid">
+
+<a id="LEVELS_OUTPUT"><!-- filler --></a>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+  &nbsp; Output for Levels
+  <span style="font-size: smaller; font-weight: normal"><br />(by table column heading)</span>
+</h2>
+
+<ul>
+<li><a href="#LOUTCONFIG"><b>Configuration</b></a>
+  <ul>
+  <li><a href="#LOUTCWLP"><b>Levels Tabulated With Leading Percentages</b></a></li>
+  <li><a href="#LOUTCWOLP"><b>Levels Tabulated Without Leading Percentages</b></a></li>
+  <li><a href="#LOUTLIMITS"><b>Limits</b></a></li>
+  </ul>
+</li>
+<li><a href="#LOUTTERM"><b>Term</b></a>
+  <ul>
+  <li><a href="#LOUTTWLP"><b>Naming of Levels</b></a></li>
+  </ul>
+</li>
+<li><a href="#LOUTJ"><b><i>J</i>:</b></a>&nbsp;Total Electronic Angular-Momentum
+  Quantum Number</li>
+<li><a href="#LOUTLEVEL"><b>Level</b></a></li>
+<li><a href="#LOUTUNC"><b>Uncertainty</b></a></li>
+<li><a href="#LOUTLANG"><b>Land&eacute; <i>g</i>:</b></a>&nbsp;Experimental Magnetic
+    Land&eacute; <i>g</i> Factor</li>
+<li><a href="#LOUTLEADP"><b>Leading Percentages</b></a>
+  <ul>
+  <li><a href="#LOUTLEADPFIRST"><b>First Percentage</b></a></li>
+  <li><a href="#LOUTLEADPSECOND1"><b>Second Percentage from Same Eigenvector as
+    First Percentage</b></a>
+  <li><a href="#LOUTLEADPSECOND2"><b>Second Percentage for Leading Component of
+    Eigenvector in Alternate Coupling Scheme</b></a></li>
+  </ul>
+</li>
+<li><a href="#LOUTBIBREF"><b>Bibliographic References</b></a></li>
+<li><a href="#LOUTLEPARTFUNCT"><b>Partition Function</b></a></li>
+</ul>
+
+<hr style="height: 1px; border-style: solid">
+
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+<a id="LOUTCONFIG">&nbsp;Configuration</a></h2>
+
+For most of the headings, we discuss separately the cases of levels tabulated
+with and without leading percentages.<br><br>
+
+<a id="LOUTCWLP"><!-- filler --></a>
+<h4><i>Levels Tabulated With Leading Percentages</i></h4>
+
+<p>
+The electronic configuration for the largest component in the calculated
+eigenvector for the level is normally given in this column. (The configuration
+is for the largest component to within the estimated uncertainty of the
+calculation; see &quot;<a href="#LOUTTERM">Term</a>.&quot;) Any ancestor terms
+or <i>J</i> values appropriate to this component are normally included with the
+configuration, as in the examples in the
+<a href="https://www.nist.gov/pml/atomic-spectroscopy-different-coupling-schemes">Introduction to Atomic Spectroscopy</a>.</p>
+
+<p>
+A question mark &quot;?&quot; after the configuration indicates that the
+assignment of the observed level to the calculated eigenvector is uncertain.
+This particular notation for an uncertain assignment usually implies that at
+least one other plausible assignment of the level would give a different
+configuration or set of parent terms for the leading component.</p>
+
+<p>
+The configuration is listed only once for a set of levels grouped into a term.
+All notations given with the configuration, including any question marks, apply
+to each level of such a term.</p>
+
+<p>
+In cases of strong configuration interaction, more than half the percentage
+composition of a level may be due to components from a configuration different
+from that for the leading component; such an example makes it clear that the
+configuration given in the first column does not necessarily represent a
+configuration assignment of the level. A particular configuration may appear in
+the first column for more levels than the pure configuration is allowed.
+In such cases of strong configuration interaction, the label used in the
+Configuration column may correspond not to the largest,
+but to a minor component of the eigenvector composition. For such heavily
+mixed levels, the configuration label has little or no physical meaning and is
+used in the database for bookkeeping purposes only. The configuration labels
+of such mixed levels are usually assigned so as to
+satisfy the requirement of uniqueness of the combination of the combination
+of the configuration, term, and <i>J</i> values for each level.
+</p>
+
+<a id="LOUTCWOLP"><!-- filler --></a>
+<h4><i>Levels Tabulated Without Leading Percentages</i></h4>
+
+The reliability and indeed the meaning of configuration assignments made
+without supporting calculations vary greatly. Even in the most complex spectra,
+there may be some levels or groups of levels belonging largely to a single
+configuration. The observed structure, magnetic <i>g</i> values, intensities,
+isotope shifts, and other data can in such cases lead to unambiguous assignments representing
+high purity. (Examples are the lower levels of most
+<span style="white-space:nowrap;">4<i>f <sup>N</sup></i>6<i>s</i><sup>2</sup></span>,
+<span style="white-space:nowrap;">4<i>f <sup>N</sup></i>6<i>s</i></span>,
+and <span style="white-space:nowrap;">4<i>f <sup>N</sup></i></span> configurations in the rare earths.)
+Quite often, however, the levels to be interpreted comprise a dense structure
+to which several configurations are known or expected to contribute. Some
+preliminary configuration assignments may be possible and useful in such cases,
+but such assignments for the bulk of the levels are often best regarded as
+tentative until confirmed by calculations. In many cases, meaningful
+single-configuration assignments do not exist.
+
+<p>
+We have tried to indicate doubtful features of the interpretations in the
+discussions of particular spectra in our compilations and, to some extent, in
+the tables. A question mark following the configuration indicates explicitly
+that the assignment is doubtful. A doubtful ancestor term is indicated by a
+question mark after the term symbol within parentheses.</p>
+
+<p>
+In some cases, the configuration for a level may be known, although the
+appropriate ancestor terms (or even the preferred order of coupling of the
+electrons) cannot be determined without calculations. Such a configuration
+assignment (together with the final term and <i>J</i> value) without full
+ancestry does not in general serve as a unique name for the level.</p>
+
+<a id="LOUTLIMITS"><!-- filler --></a>
+<h4><i>Limits</i></h4>
+
+The wavenumber corresponding to the principal ionization energy is entered
+in proper sequence under &quot;Level.&quot; The corresponding entry in the
+first column is the symbol for the next higher spectrum of the element,
+followed by the configuration and term designations and the <i>J</i> value for the ground level of
+this next ion. The word &quot;Limit&quot; appears in the &quot;Term&quot; column (the levels of the
+higher ion being limits for series in the lower spectrum). If the known levels
+of the lower ion (or atom) extend above the principal limit, one or more of the
+higher limits are also given at appropriate positions.
+
+<a id="LOUTTERM"><!-- filler --></a>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+&nbsp;Term</h2>
+
+<a id="LOUTTWLP"><!-- filler --></a>
+<h4><i>Naming of Levels, Grouping of Levels into Terms, Other Conventions</i></h4>
+
+A term symbol in the second column belongs to the eigenvector component whose
+configuration and ancestry appear in the first column. The assignment of a set
+of levels to a term is indicated by grouping the levels and by listing the
+configuration and term symbol for only the first (lowest) level of the group.
+The presence of both a configuration with all necessary ancestor terms in the
+first column and a term symbol in the second column guarantees that each of the
+levels grouped with the term is uniquely designated by the symbols in the first
+two columns, together with the <i>J</i> value; i.e., such levels have names.
+This naming convention also applies to isolated levels not grouped into terms.
+The use of the (<i>J</i><sub>l</sub>, <i>J</i><sub>2</sub>) <a
+href="https://www.nist.gov/pml/atomic-spectroscopy-different-coupling-schemes">term symbols</a> in this connection
+should be noticed; a <i>J</i><sub>1</sub>,<i>J</i><sub>2</sub> configuration
+notation in the first column is indicated as a name for the associated level(s)
+only if a (<i>J</i><sub>1</sub>, <i>J</i><sub>2</sub>) symbol appears in the
+second column.
+
+<p>
+In our various NIST compilations we have not followed a single set of
+guidelines in retaining or forming terms (by grouping levels). Probably the
+strictest criteria were applied to the rare-earth spectra, where we usually
+retained or formed a term if half or more of the candidate levels for the term
+were known and had leading components approximately 45&nbsp;% or larger. The 45&nbsp;%
+requirement was sometimes lowered significantly for levels having leading
+components sufficiently larger than the corresponding second components.
+Additional levels of lower purity (~30&nbsp;% to 45&nbsp;%) were retained (or assigned) to
+help complete a multilevel term provided certain conditions were met. Thus the
+component for an assigned term name is normally the leading component in the
+eigenvector, and is also as large a percentage of the particular name as occurs
+in the eigenvector of any other level (known or not) with the same <i>J</i>
+value. We also tried to avoid a name for which the configuration contributes
+less to the total composition of the level than some other configuration. These
+are minimal requirements for avoiding completely inappropriate names.</p>
+
+<p>
+One can assure more generally satisfactory names by disallowing any name
+representing significantly less than 50&nbsp;% eigenvector purity; and in the case of
+a leading percentage near 50&nbsp;%, by requiring that the second percentage be
+significantly smaller (alternate designation clearly less appropriate), and
+that no other eigenvector should have a comparable leading percentage (~50&nbsp;%)
+for the same designation. The weaker criteria for the grouping and naming of
+levels outlined above were adopted to allow practically any significant term
+structure within a single configuration to be exhibited in the tables. </p>
+
+<p>
+In cases of strong configuration interaction, it sometimes happens that
+assignment to a particular term type remains appropriate for a level or level
+group for which no meaningful configuration assignment is possible. Such term
+names may usually be deduced by examination of the two leading eigenvector
+percentages. In some cases of this type, we have entered the appropriate term
+name under &quot;Term,&quot; along with a letter indicating the situation (see,
+for example, the &quot;<i>y</i> <sup>2</sup>D&quot; term of
+Al&nbsp;<span style="font-size:smaller">I</span>).</p>
+
+<p>
+Most of the calculated leading percentages for levels in question as to naming
+are probably uncertain by several percent. In order to facilitate term
+assignments, we have allowed a relatively few small deviations (by up to ~4&nbsp;%)
+from the above requirements on naming. These deviations are probably within the
+uncertainties of the calculations.</p>
+
+<p>
+Many of the resulting terms are incomplete, in the sense that no observed level
+is listed for one or more of the possible <i>J</i> values of the term. A level
+&quot;missing&quot; from such a term may not have been found in the analysis;
+alternatively, it may be that no theoretical eigenvector is appropriate for the
+corresponding designation, even under the relaxed criteria described above. The
+first case is distinguished in the tables by printing the <i>J</i> value of the
+level, and leaving a blank space in the &quot;Level&quot; column. The leading
+percentages for such a missing level are given if available. In the second
+case, the best candidate levels for the missing designation are usually known
+and lie in the same region as the levels assigned to the term.</p>
+
+<p>
+Levels belonging to a term most of whose levels have not been found may
+nevertheless be grouped if the term appears to be an important one or lies in a
+region where most terms are more complete. The printed <i>J</i> values of the
+missing levels explicitly indicate possible extensions of the analysis. No
+predicted term is shown. However, unless at least one level is known, and we
+emphasize that missing predicted levels are generally <i>not</i> indicated in
+these tables: no term symbols or <i>J</i> values are listed for missing levels
+having low eigenvector purities or belonging to terms the levels of which are
+not grouped (for whatever reason). The user is urged to consult the references
+to published calculations for additional predicted levels.</p>
+
+<p>
+A level with the leading percentage &gt;45&nbsp;% from a single-level term
+(singlet, <i>S</i> term, etc.) is usually so named (shown as a term) if the
+second percentage is significantly smaller, and if the other conditions
+outlined above are met. Isolated levels (those remaining after the formation of
+all terms) are named according to similar conditions.</p>
+
+<p>
+Some levels of <span style="white-space:nowrap;"><i>f <sup>N</sup></i></span> and
+<span style="white-space:nowrap;"><i>d<sup>N</sup></i></span> configurations have large eigenvector
+components from two or more terms of the same <i>LS</i> type. Since the
+resultant lowering of the purities has no physical significance, we have
+retained the names of such levels having adequate total purity of a particular
+<i>LS</i> type and labeled them with the Nielson-Koster index number for the
+term of the leading component. (Of course, the corresponding group-theoretical
+numbers have little meaning for such a low-purity term.) Similar considerations
+have been applied in designating parent (or grandparent) terms arising from
+<span style="white-space:nowrap;"><i>f <sup>N</sup></i></span> configurations.</p>
+
+<p>
+A question mark (?) after a term designation indicates that the assignment
+of the observed level(s) to the calculated eigenvector(s) is uncertain.</p>
+
+<a id="LOUTJ"><!-- filler --></a>
+<h2><i>J</i>: Total Electronic Angular-Momentum Quantum Number</h2>
+
+The total angular momentum, <i>J</i>, is known for the vast preponderance of
+energy levels. An uncertain <i>J</i> value for a level is usually known to
+within two or three possible values; in such cases all the possible <i>J</i>
+values, separated by <i>'or'</i>, are listed. Two or more comma-separated <i>J</i> values may be listed at a single
+energy position to denote unresolved levels.
+
+<a id="LOUTLEVEL"><!-- filler --></a>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+&nbsp;Level</h2>
+
+The levels are normally given as they are stored in the database, in units of
+cm<sup>&minus;1</sup>, with respect to the ground level at zero cm<sup>&minus;1</sup>.
+In HTML output, odd-parity levels are shown in italics. The odd parity is also
+indicated in the HTML output by a small circle symbol (&deg;), or in the ASCII
+output by an asterisk (*) at the end of the term label.
+
+<p>
+Levels within terms are listed in order of position. Terms are listed in order
+of lowest (known) levels, with ungrouped levels being treated as separate terms. The
+<i>J</i> value and blank space indicating a missing level of a term are given
+in the order of the corresponding calculated level if such a value is
+available.</p>
+
+<p>
+A question mark (?) following a level always indicates that the level may not
+be real.
+</p>
+
+<p>For levels having a configuration label, the question mark after the energy also implies that the correlation
+of the calculated eigenvector to the experimental level is questionable. Sometimes,
+instead of the question mark, we use the dagger symbol '&dagger;' after the level value. This notation is used mainly
+for questionably assigned levels included in terms. An uncertain assignment of
+an isolated level may be indicated by '&dagger;', but only if the configuration in the
+first column would be unchanged by any possible reassignment of the level
+(no question mark in the first column).
+
+</p>
+
+<p>
+The values of certain levels in some spectra are followed by
+&quot;+<i>x</i>,&quot; and such notations may be extended to
+&quot;+<i>y</i>,&quot; &quot;+<i>z</i>,&quot; etc., for additional sets of
+levels of a particular spectrum. The relative positions of the levels within
+such a system are accurate within experimental uncertainties, but no
+experimental connection between this system and the other levels of the
+spectrum has been made; the error of the assumed connection (estimated or
+calculated) is represented by &quot;+<i>x</i>.&quot;</p>
+
+<p>
+The letter &quot;<i>a</i>&quot; following a level value indicates substantial
+autoionization broadening. The decision whether to add this notation after a
+particular level was more qualitative than quantitative, and no consistent
+criteria were used for different spectra. Levels given with an
+&quot;<i>a</i>&quot; for a particular spectrum may have autoionization rates
+varying by several orders of magnitude. No indication of observed
+autoionization broadening was given for many spectra. In no case should a level
+lying above the principal ionization energy but given without an
+&quot;<i>a</i>&quot; be assumed to have a small autoionization rate.</p>
+
+<p>
+Some level energies are in square brackets &quot;[&nbsp;]&quot; and some are
+in parentheses &quot;(&nbsp;)&quot;. Square brackets indicate the energies
+determined by interpolation, extrapolation, or other semi-empirical procedure
+relying on some known experimental values. Parentheses indicate the energies
+determined from <i>ab-initio</i> calculation or by other means not involving
+evaluated experimental data. In ASD, they mostly occur for level data taken
+from transition probability tables, for which experimental values could not
+be found in NIST energy level compilations. Theoretical data may also be
+given for hydrogen-like and helium-like spectra where the accuracy of
+quantum-electrodynamic calculations often exceeds that of experimental
+observations.</p>
+
+<a id="LOUTUNC"><!-- filler --></a>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+&nbsp;Uncertainty</h2>
+
+Uncertainty of the level value is given a column next to level values, if it is available in ASD,
+provided that the corresponding checkbox is checked in the input form. If no explicit information
+about the uncertainty is available, it will be blank in the output. In such cases, the number of significant
+figures in the level value gives an approximate estimate of the uncertainty. The <i><b>uncertainty of
+the level positions</b></i> in units of the last decimal place is
+not constant; it may vary by an order of magnitude even within a single analysis. If
+no uncertainty value is available in ASD, it is usually safe to assume that the
+probable error is between&nbsp;2.5 and ~25 units in the last place. About 90&nbsp;% of data in ASD
+satisfies this assumption. A better estimate of the uncertainty in a particular case
+may sometimes be obtained by consulting the original paper(s) or the line list.
+<p>
+The most accurate representation of the energy levels is in the default units of cm<sup>&minus;1</sup>, as they are stored in ASD.
+Conversion to other units (eV or Rydberg) involves an additional uncertainty of the conversion factor.
+These factors, as well as their uncertainties, are taken from the latest <a href="https://physics.nist.gov/cuu/Constants/energy.html">CODATA
+recommended conversion factors</a>. Before ASD version 5.5 of October 2017, uncertainties of these
+conversion factors were not taken into account in the displayed data. Starting with v.5.5,
+these uncertainties are combined in quadrature with the uncertainties of the stored data,
+and the output quantities are rounded off according to the combined uncertainties. Thus, the
+accuracy of the output energies is somewhat degraded when the units of eV or Rydberg are used.
+</p><p>
+All uncertainties given in ASD are meant to be on the level of one standard deviation.
+</p>
+
+<a id="LOUTLANG"><!-- filler --></a>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+&nbsp;Land&eacute; <i>g</i>: Experimental Magnetic Land&eacute; <i>g</i>
+Factor</h2>
+
+These (dimensionless) magnetic splitting factors are usually obtained from
+measurements of weak-field Zeeman patterns. The relation between the
+uncertainty and the number of decimal places given differs according to the
+observer and the particular value; the range covered by this relation is
+similar to that for the level values (see above). More specific comments are
+made on the <i>g</i> values for some spectra.
+
+<p>
+A colon following a <i>g</i> value indicates that it may be
+significantly less accurate than values given to the same number of
+decimal places but not so marked. Values followed by a question mark are
+tentative, usually being based on assumptions made to allow reduction of
+the Zeeman patterns.</p>
+
+<a id="LOUTLEADP"><!-- filler --></a>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+&nbsp;Leading Percentages</h2>
+
+This column normally gives one or two percentages from the calculated
+eigenvector of the level. The space for the second percentage (on the right) is
+used in either of two ways, as explained below. All percentages are rounded off
+to the nearest percent, and the &quot;%&quot; symbol is omitted.
+
+<p>
+Any use of this column in a manner not outlined below is explained in
+the tables for particular spectra as given in our compilations.</p>
+
+<a id="LOUTLEADPFIRST"><!-- filler --></a>
+<h4><i>First Percentages</i></h4>
+
+If the level has an assigned name, the first percentage is for this
+&quot;name&quot; component. A first percentage followed by a term symbol
+represents the largest component in the eigenvector of a level having no
+assigned term name or named differently for bookkeeping purposes.
+The configuration and ancestry for this component are shown
+under &quot;Configuration.&quot;
+
+<a id="LOUTLEADPSECOND1"><!-- filler --></a>
+<h4><i>Second Percentage from Same Eigenvector as First Percentage</i></h4>
+
+If two percentages are listed without the word &quot;or &quot; between them,
+the second percentage is the largest of the remaining percentages from the same
+eigenvector as the first percentage. If the second component belongs to the
+same configuration as the first, we have in some cases omitted the
+configuration after the second percentage and given only the parent terms (or
+parent levels where appropriate) and final term for the second component. For
+some spectra, a second component having both configuration and all parent terms
+unchanged from the first component is given with only the final term. Electron
+subshells common to different configurations for the first and second
+percentages may be omitted from the second configuration. Term notations common
+to all second percentages listed for the levels of a term may be given only
+once.
+
+<p>
+The coupling scheme for a second eigenvector component belonging to a different
+configuration may be different from the scheme for the first component; this
+should not be confused with case (see below), where the second listed
+percentage is the <i>leading </i>percentage in a different coupling scheme.</p>
+
+<p>
+Since many authors list only the largest percentage for at least some levels,
+the absence of a second percentage in this compilation does not necessarily
+mean that it is less than the smallest percentage used here (0.5&nbsp;%, given
+as 1&nbsp;%).</p>
+
+<p>
+The relative signs of the two eigenvector components are not given. These are
+often not given in the original publications. Furthermore, these signs depend
+on certain conventions, no one set of which has been accepted by all authors.
+The original articles can be consulted for (possibly) more complete
+eigenvectors with signs.</p>
+
+<a id="LOUTLEADPSECOND2"><!-- filler --></a>
+<h4><i>Second Percentage for Leading Component of Eigenvector in Alternate
+Coupling Scheme</i></h4>
+
+Where the eigenvectors from a calculation are available in more than one
+coupling scheme, we often give in the second percentage space the leading
+percentage from the eigenvector calculated in an alternate scheme. This use of
+the second percentage space is indicated by the word &quot;or&quot; between the
+two percentages, since each is a leading percentage. Competitively high
+coupling purities for a configuration in different coupling schemes were, of
+course, regarded as an argument for giving leading percentages in alternate
+schemes, as was the case in which a second scheme for the configuration in
+question is the preferred scheme for a related configuration (two
+configurations connected by a strong transition array, etc.). We have favored
+<i>LS</i> coupling as a second scheme in cases where another scheme was used
+for naming the levels.
+
+<p>
+It should be noted that the leading component in a second scheme is not
+necessarily a <i>name </i>for the level in that scheme; in cases of low
+purity, the eigenvectors of two (or more) levels of the same <i>J</i>
+value may have the same leading component.</p>
+
+<p>
+For some configurations, the alternate coupling schemes are both <i>LS</i>
+coupling, but with the electrons coupled differently in the two cases. In this
+case it is usually possible to set up terms in either scheme (see
+<span style="white-space:nowrap;">Eu <span style="font-size:smaller">I</span></span>
+<span style="white-space:nowrap;">4<i>f</i> <sup>7</sup>5<i>d</i>6<i>p</i></span>, for example).</p>
+
+<a id="LOUTBIBREF"><!-- filler --></a>
+<h2>Bibliographic References</h2>
+
+For information on viewing references, see the
+<a href="/PhysRefData/ASD/Html/help.html#VIEWREFS">Locating references in the
+ASD Bibliography</a> section of the &quot;Help&quot; file.
+
+<a id="LOUTLEPARTFUNCT"><!-- filler --></a>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+&nbsp;Partition Function</h2>
+
+If the electron temperature <i><b>T<sub>e</sub></b></i> is entered in the entry page, a partition function <i><b>Z</b></i>
+defined as:<br>
+<p style="text-align:center">
+<span style="border-width: 1; border: solid; border-color:brown; font-size: 125%; background-color: #eeeeff;
+text-align: center; padding: 10px; font-weight: bold">
+<i>Z</i> = &Sigma;<i><sub>i</sub>(g<sub>i</sub></i>&middot;exp(-<i>E<sub>i</sub>/T<sub>e</sub></i>))
+</span>
+<p>
+is printed at the bottom of the output page. Here <i><b>i</b></i> is the level number, <i><b>g<sub>i</sub></b></i> is the
+statistical weight of the atomic level, and <i><b>E<sub>i</sub></b></i> is the energy.
+</p>
+
+<a id="CSV"><!-- filler --></a>
+<h2><a href="#Top"><img src="/Images/top.gif" title="Go to top of page" alt="Go to top of page" style="{border: 0;}"></a>
+&nbsp;Creating an output for importing into a spreadsheet</h2>
+
+Two options are available from the <b>Format Output</b> pull-down menu for creating an output in a format suitable for
+importing into a spreadsheet: CSV (comma-separated ASCII file) or tab-delimited ASCII file. Both options produce output in the user's
+browser window, which needs to be saved on the local computer by using the browser's interface options and opened with a spreadsheet software.
+For importing data into Excel, the most convenient format is CSV. If the output is saved in a file with a .csv extension, some browsers
+(e.g., Chrome) even allow the user to open it directly from the browser. Users of the OpenOffice software may prefer the tab-delimited format,
+as it conveniently allows setting the format of all columns enclosed in double quotes as "text." This is required, for example, for
+the <i>J</i>-values, which can be half-integers stored as strings, e.g., "1/2." If such columns are not set as text, the spreadsheet software
+will most likely automatically convert them to dates. Even for columns containing only numbers, text format is needed to preserve the number of
+decimal places, which indicates an implicit uncertainty of value. For this reason, the CSV-format output contains formulas instead of plain values.
+After importing such a file into a spreadsheet, the user should "select all cells" (in Excel, this can be done by clicking on the small triangle
+in the upper left corner of the spreadsheet), copy the selection, and paste it back as values.
+</p>
+<a href="/PhysRefData/ASD/Html/help.html"><img src="/Images/top.gif" title="Go to top of ASD Help" alt="Go to top of ASD Help" style="{border: 0;}"></a>
+<hr style="height: 1px; border-style: solid">
+
+<table style="width: 100%; border:0; border-spacing:0px">
+<tr><td style="text-align: left; padding:0"><a href="../index.html"><img
+src="../Images/ASD-sm.gif" width="100" height="47" title="ASD Home" alt="[ASD Home]" style="{border: 0}"></a><a href="../lines_form.html"><img
+src="../Images/Lines.gif" width="70" height="47" title="Lines Query" alt="[Lines Query]" style="{border: 0}"></a><a href="../levels_form.html"><img
+src="../Images/Levels.gif" width="79" height="47" title="Levels Query" alt="[Levels Query]" style="{border: 0}"></a><a href="https://www.nist.gov/pml/atomic-spectra-database-contents"><img
+src="../Images/List.gif" width="77" height="47" title="List of Spectra" alt="[List of Spectra]" style="{border: 0}"></a><a href="/PhysRefData/ASD/ionEnergy.html"><img
+src="../Images/GS-IE.gif" width="124" height="47" title="Ground States and Ionization Energies" alt="[Ground States and Ionization Energies]" style="{border: 0}"></a>
+<a href="/asbib"><img src="../Images/Bib.gif" width="98" height="47" title="Bibliography" alt="[Bibliography]" style="{border: 0}"></a><a href="help.html"><img
+src="../Images/Help.gif" width="55" height="47" title="Help" alt="[Help]" style="{border: 0}"></a></td>
+
+<td style="text-align: right">
+  <img src="../Images/nist-pl-black.gif" width="136" height="68"
+  usemap="#NIST-PL" title="NIST Physical Measurement Laboratory" alt="NIST Physical Measurement Laboratory" style="{border: 0; border-width: thin}">
+</td>
+</tr></table>
+
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4c5e78b0ce2a63b',t:'MTc5MjMwOTMyNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

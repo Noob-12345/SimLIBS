@@ -1,45 +1,60 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
-import { tasks } from '../lib/workbench'
+import SpectrumStage from './SpectrumStage.vue'
+import { starting, tasks } from '../lib/workbench'
 import type { TaskKind } from '../lib/model'
+import { installAutoHideScrollbar, useSynchronizedScroll } from '../lib/useSynchronizedScroll'
 const props = defineProps<{ kind: TaskKind }>()
-const latest = computed(() => tasks.find(task => task.kind === props.kind))
 const running = computed(() => tasks.some(task => task.kind === props.kind && task.status === 'running'))
-const collapsed = ref(latest.value?.status === 'completed' && latest.value.progress === 100)
+const collapsed = ref(false)
 const controls = ref<HTMLElement>(), reveal = ref<HTMLButtonElement>()
-const workbench = ref<HTMLElement>(), wrap = ref<HTMLElement>(), edgeHover = ref(false)
-const edgePosition = ref({ left: 0, top: 0, height: 96, stripTop: 0, stripHeight: 0, visible: false })
-let observer: ResizeObserver | undefined, frame = 0
+const workbench = ref<HTMLElement>(), wrap = ref<HTMLElement>(), pointerActive = ref(false), edgeHovered = ref(false)
+const leftViewport = ref<HTMLElement>(), rightViewport = ref<HTMLElement>(), results = ref<HTMLElement>()
+const synchronized = useSynchronizedScroll(workbench, leftViewport, rightViewport, controls, results, collapsed)
+const edgePosition = ref({ left: 0, top: 0, height: 220, visible: false })
+let observer: ResizeObserver | undefined, frame = 0, activityTimer: ReturnType<typeof setTimeout> | undefined
+let disposeScrollbar: (() => void) | undefined, disposeLeftScrollbar: (() => void) | undefined
+function showEdge() {
+  pointerActive.value = true; clearTimeout(activityTimer)
+  activityTimer = setTimeout(() => { pointerActive.value = false }, 600)
+}
+function touchActivity(event: PointerEvent) { if (event.pointerType === 'touch') showEdge() }
+function enterEdge(event: PointerEvent) { edgeHovered.value = event.pointerType !== 'touch'; showEdge() }
+function leaveEdge() { edgeHovered.value = false; showEdge() }
 function positionEdge() {
   const area = workbench.value?.getBoundingClientRect(), panel = wrap.value?.getBoundingClientRect()
   if (!area || !panel) return
   const top = Math.max(8, area.top), bottom = Math.min(window.innerHeight - 8, area.bottom)
-  const height = Math.min(96, bottom - top)
+  const height = Math.min(220, bottom - top)
   if (height < 32) { edgePosition.value.visible = false; return }
   const center = Math.max(top + height / 2, Math.min(window.innerHeight / 2, bottom - height / 2))
-  const gap = parseFloat(getComputedStyle(workbench.value!).columnGap) || 40
-  const left = panel.right + Math.max(0, (gap - 22) / 2)
-  edgePosition.value = { left: Math.max(0, Math.min(window.innerWidth - 22, left)), top: center - height / 2, height, stripTop: top, stripHeight: bottom - top, visible: true }
+  const gap = parseFloat(getComputedStyle(workbench.value!).columnGap) || 0
+  const left = collapsed.value ? area.left - 22 : panel.right + Math.max(0, (gap - 22) / 2)
+  const workspaceLeft = workbench.value?.closest('.workspace')?.getBoundingClientRect().left ?? 0
+  edgePosition.value = { left: Math.max(4, workspaceLeft, Math.min(document.documentElement.clientWidth - 26, left)), top: center - height / 2, height, visible: true }
 }
 function schedulePosition() { if (!frame) frame = requestAnimationFrame(() => { frame = 0; positionEdge() }) }
 watch(collapsed, async () => { await nextTick(); schedulePosition() })
 onMounted(() => {
+  if (leftViewport.value) disposeLeftScrollbar = installAutoHideScrollbar(leftViewport.value)
+  if (rightViewport.value) disposeScrollbar = installAutoHideScrollbar(rightViewport.value)
   observer = new ResizeObserver(positionEdge)
   if (workbench.value) observer.observe(workbench.value)
   if (wrap.value) observer.observe(wrap.value)
-  window.addEventListener('scroll', schedulePosition, true); window.addEventListener('resize', schedulePosition); schedulePosition()
+  window.addEventListener('scroll', schedulePosition, true); window.addEventListener('resize', schedulePosition)
+  window.addEventListener('pointermove', showEdge, { passive: true, capture: true }); window.addEventListener('pointerdown', touchActivity, { passive: true, capture: true }); schedulePosition()
 })
-onUnmounted(() => { observer?.disconnect(); window.removeEventListener('scroll', schedulePosition, true); window.removeEventListener('resize', schedulePosition); if (frame) cancelAnimationFrame(frame) })
+onUnmounted(() => { disposeLeftScrollbar?.(); disposeScrollbar?.(); observer?.disconnect(); window.removeEventListener('scroll', schedulePosition, true); window.removeEventListener('resize', schedulePosition); window.removeEventListener('pointermove', showEdge, true); window.removeEventListener('pointerdown', touchActivity, true); clearTimeout(activityTimer); if (frame) cancelAnimationFrame(frame) })
 const label = computed(() => ({ single: '单次', batch: '批量', scan: '扫描', advanced:'高级' })[props.kind])
-const disabled = computed(() => collapsed.value || running.value)
+const disabled = computed(() => collapsed.value || starting.has(props.kind) || running.value)
 async function collapseControls(restoreFocus = false) {
   collapsed.value = true
   await nextTick(); if (restoreFocus) reveal.value?.focus({ preventScroll: true })
 }
-watch(() => latest.value?.status === 'completed' && latest.value.progress === 100 ? latest.value.id : null, id => {
-  if (id) void collapseControls(!!controls.value?.contains(document.activeElement))
-})
+watch(() => starting.has(props.kind), submitting => {
+  if (submitting) void collapseControls(!!controls.value?.contains(document.activeElement))
+}, { flush: 'sync' })
 async function expandControls() {
   collapsed.value = false; await nextTick()
   const fields = Array.from(controls.value?.querySelectorAll<HTMLElement>('input[type=text]:not(:disabled)') ?? [])
@@ -48,16 +63,17 @@ async function expandControls() {
 }
 </script>
 <template>
-  <div ref="workbench" :class="['workbench-grid', 'single-workbench', { 'controls-collapsed': collapsed }]" :data-workbench="kind">
+  <div ref="workbench" :class="['workbench-grid', 'single-workbench', { 'controls-collapsed': collapsed, 'synchronized-scroll': synchronized }]" :data-workbench="kind">
     <div ref="wrap" class="single-controls-wrap">
+      <div ref="leftViewport" class="workbench-controls-viewport">
       <section :id="`${kind}-controls`" ref="controls" class="panel parameter-panel single-parameter-panel" :inert="collapsed" :aria-hidden="collapsed">
         <fieldset class="control-fieldset workbench-controls-fields" :disabled="disabled"><slot name="controls" :disabled="disabled" /></fieldset>
       </section>
+      </div>
     </div>
-    <div class="result-column"><slot /></div>
+    <div ref="rightViewport" class="workbench-results-viewport"><SpectrumStage><div ref="results" class="result-column"><slot name="spectrum" /><slot /></div></SpectrumStage></div>
     <Teleport to="body">
-      <div v-show="edgePosition.visible" class="workbench-edge-zone" :style="{ left: edgePosition.left + 'px', top: edgePosition.stripTop + 'px', height: edgePosition.stripHeight + 'px' }" aria-hidden="true" @pointerenter="edgeHover = true" @pointerleave="edgeHover = false" />
-      <button v-show="edgePosition.visible" ref="reveal" type="button" :class="['workbench-edge', { 'edge-hover': edgeHover }, collapsed ? 'single-reveal' : 'single-collapse']" :style="{ left: edgePosition.left + 'px', top: edgePosition.top + 'px', height: edgePosition.height + 'px' }" :aria-label="`${collapsed ? '展开' : '收起'}${label}参数`" :title="`${collapsed ? '展开' : '收起'}参数`" :aria-controls="`${kind}-controls`" :aria-expanded="!collapsed" @click="collapsed ? expandControls() : collapseControls(true)"><AppIcon name="chevron" :size="14" /></button>
+      <button v-show="edgePosition.visible" ref="reveal" type="button" :class="['workbench-edge', { 'edge-active': pointerActive, 'edge-hover': edgeHovered }, collapsed ? 'single-reveal' : 'single-collapse']" :style="{ left: edgePosition.left + 'px', top: edgePosition.top + 'px', height: edgePosition.height + 'px' }" :aria-label="`${collapsed ? '展开' : '收起'}${label}参数`" :title="`${collapsed ? '展开' : '收起'}参数`" :aria-controls="`${kind}-controls`" :aria-expanded="!collapsed" @pointerenter="enterEdge" @pointerleave="leaveEdge" @click="collapsed ? expandControls() : collapseControls(true)"><AppIcon name="chevron" :size="18" /></button>
     </Teleport>
   </div>
 </template>

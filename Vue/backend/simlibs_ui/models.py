@@ -121,7 +121,7 @@ class Parameters:
         values = {k: finite(getattr(self, k), k, True) for k in ('Te', 'Ne', 'low_w', 'upper_w', 'step')}
         values['resolution'] = integer(self.resolution, '分辨率 R', 1)
         values['max_ion_charge'] = integer(self.max_ion_charge, '最大离子电荷')
-        if values['max_ion_charge']>2:raise ValueError('新模拟最大离子电荷须为0–2；历史结果保持原记录')
+        if values['max_ion_charge']>3:raise ValueError('新模拟最大离子电荷须为0–3；历史结果保持原记录')
         if values['upper_w'] <= values['low_w']:
             raise ValueError('波长上界必须大于下界')
         if self.webscraping not in ('static', 'dynamic', 'server', 'client','local'):

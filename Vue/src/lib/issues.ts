@@ -13,7 +13,7 @@ export function parameterIssues(p: ParameterDraft, overrides: Partial<Record<'te
   const low = numberIssue(out, 'low', p.low, '波长下界', 1, 100000), high = numberIssue(out, 'high', p.high, '波长上界', 1, 100000)
   if (low !== undefined && high !== undefined && high <= low) out.high = '波长上界须大于下界'
   numberIssue(out, 'step', p.step, '采样步长', .000001, low !== undefined && high !== undefined && high > low ? high - low : Number.MAX_VALUE)
-  numberIssue(out, 'charge', p.charge, '离子上限', 0, 2, true)
+  numberIssue(out, 'charge', p.charge, '离子上限', 0, 3, true)
   if (p.mode === 'local' && p.broaden) {
     numberIssue(out, 'gaussian', p.gaussian, '高斯 FWHM', 0, 100); numberIssue(out, 'lorentz', p.lorentz, '洛伦兹 FWHM', 0, 100)
     if (p.temperatureMode === 'manual') numberIssue(out, 'temperature', p.temperature, '重粒子温度', 0, 1e8)
@@ -26,7 +26,7 @@ export function compositionIssues(rows: ElementDraft[], random = false): Issues 
   const out: Issues = {}, seen = new Set<string>(), concentrations: { row: ElementDraft; min: number; max: number }[] = []
   rows.forEach((row, index) => {
     const key = `${row.id}.`, symbol = canonical(row.symbol)
-    if (!symbol || seen.has(symbol)) out.composition = '元素无效或重复'; seen.add(symbol)
+    if (!symbol || seen.has(symbol)) out.composition = '请使用有效元素，并移除重复项。'; seen.add(symbol)
     if (random) {
       const min = numberIssue(out, key + (row.random ? 'min' : 'pct'), row.random ? row.min : row.pct, `${symbol} 浓度下界 / 固定值`, 0, 100)
       const max = row.random ? numberIssue(out, key + 'max', row.max, `${symbol} 浓度上界`, 0, 100) : min
@@ -35,11 +35,11 @@ export function compositionIssues(rows: ElementDraft[], random = false): Issues 
   })
   if (!random) {
     const preceding = rows.slice(0, -1), total = preceding.reduce((sum, row) => sum + Number(row.pct), 0)
-    if (!Object.keys(out).length && total > 100 + 1e-6) preceding.filter(row => Number(row.pct) > 0).forEach(row => { out[`${row.id}.pct`] = '前置元素占比合计超过 100%' })
-    if (!Object.keys(out).length && rows.length) numberIssue(out, `${rows[rows.length - 1]!.id}.pct`, rows[rows.length - 1]!.pct, '余额比例', 0, 100)
+    if (!Object.keys(out).length && total > 100 + 1e-6) preceding.filter(row => Number(row.pct) > 0).forEach(row => { out[`${row.id}.pct`] = '前序元素比例合计已超过 100%，请调小前序元素比例，为最后一个元素释放余额。' })
+    if (!Object.keys(out).length && rows.length) numberIssue(out, `${rows[rows.length - 1]!.id}.pct`, rows[rows.length - 1]!.pct, '最后一个元素比例', 0, 100)
   } else if (!Object.keys(out).length && concentrations.length === rows.length) {
     const min = concentrations.reduce((sum, c) => sum + c.min, 0), max = concentrations.reduce((sum, c) => sum + c.max, 0)
-    if (min > 100 + 1e-7 || max < 100 - 1e-7) concentrations.forEach(c => { out[`${c.row.id}.${c.row.random ? min > 100 ? 'min' : 'max' : 'pct'}`] = '浓度范围无法容纳 100%' })
+    if (min > 100 + 1e-7 || max < 100 - 1e-7) concentrations.forEach(c => { out[`${c.row.id}.${c.row.random ? min > 100 ? 'min' : 'max' : 'pct'}`] = '请调整元素浓度范围，使总比例能够达到 100%。' })
   }
   return out
 }

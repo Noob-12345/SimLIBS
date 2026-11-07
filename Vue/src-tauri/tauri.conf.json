@@ -37,6 +37,7 @@
       "../backend/web/real_backend.py": "backend/web/real_backend.py",
       "../backend/web/sampling.py": "backend/web/sampling.py",
       "../backend/source/simLIBS/*.py": "backend/source/simLIBS/",
+      "../backend/source/simLIBS/data/*.json": "backend/source/simLIBS/data/",
       "../backend/source/simLIBS/py.typed": "backend/source/simLIBS/py.typed",
       "../backend/source/LICENSE*": "backend/source/",
       "../backend/Linedatabase/*.csv": "backend/Linedatabase/",

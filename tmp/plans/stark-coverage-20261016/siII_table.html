@@ -1,0 +1,128 @@
+<!DOCTYPE HTML>
+<html lang="en-EN">
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+<title>Stark-b</title>
+<link type="text/css" href="/assets/css/style.css" rel="stylesheet" />
+
+<link type="text/css" href="/assets/css/pure-min.css" rel="stylesheet" />
+
+<script type="text/javascript" src="/javascript/common.js" ></script>
+<script type="text/javascript" src="/javascript/jquery.js" ></script>
+<script type="text/javascript" src="/javascript/data.js" ></script>
+</head><body >
+<div id="main">
+  <div id="header">
+    <div class="pure-menu pure-menu-horizontal">
+        <ul class="pure-menu-list">
+          <li class="pure-menu-item "><a class="pure-menu-link" href="/index.php/home" accesskey="1" title="Home">Home</a></li>
+          <li class="pure-menu-item " id="menu_introduction"><a class="pure-menu-link" href="/index.php/introduction" accesskey="2" title="Introduction">Introduction</a></li>      
+          <li class="pure-menu-item " id="menu_description"><a class="pure-menu-link" href="/index.php/description" accesskey="3" title="Data description">Data description</a></li>
+          <li class="pure-menu-item pure-menu-selected" id="menu_data"><a class="pure-menu-link" href="/index.php/table" accesskey="4" title="Access to the data">Access to the data</a></li>
+          <li class="pure-menu-item pure-menu-has-children pure-menu-allow-hover ">
+            <a class="pure-menu-link">Data history</a>
+            <ul class="pure-menu-children">
+              <li class="pure-menu-item" id="menu_news"><a class="pure-menu-link" href="/index.php/newDatasets" accesskey="5" title="New datasets">New datasets</a></li>
+              <li class="pure-menu-item" id="menu_updates"><a class="pure-menu-link" href="/index.php/updatedDatasets" accesskey="6" title="Updated datasets">Updated datasets</a></li>
+            </ul>
+          </li>		
+          <li class="pure-menu-item " id="menu_contact"><a class="pure-menu-link" href="/index.php/contact" accesskey="7" title="Contact">Contact</a></li>
+        </ul>
+    </div>
+  </div>
+
+  <div id="content">
+  <div>
+	<h1 class="title center"></h1>
+	<div class="entry"> 	
+    <form id="formulaire" action="" class="pure-form">
+      <fieldset>
+        <div id="datasets">
+          <select name="dataset"  id="dataset">
+	<option value="-1">Select your dataset</option>
+			<option value="223" >Si II, 
+			
+				electron
+			
+				Hydrogen II
+			            , method : SCP
+                        
+		</option>
+			<option value="227" >Si II, 
+			
+				electron
+			            , method : MSE
+                        
+		</option>
+	</select>
+
+        </div>
+        
+        <div id="wavelengths">
+          
+        </div>
+
+        <div id="densities" class="columns">
+          
+        </div>
+        
+        <div id="transitions" class="columns">
+          
+        </div>
+
+        <div id="temperatures">
+          
+
+        </div>
+      </fieldset>
+    </form>
+
+    <div id="results">
+      
+    </div>	
+  </div>
+
+</div>
+
+  </div>
+  <div id="footer">
+    <p id="footer-images">
+      <a href="http://vamdc.eu" >
+        <img src="/assets/images/logo_vamdc.png" height="80px" alt="VAMDC" />
+      </a>
+
+      <a href="http://www.obspm.fr" >
+        <img src="/assets/images/logo_obspm.png" height="80px" alt="Obspm" />
+      </a>
+      
+      <a href="http://padc.obspm.fr" >
+        <img src="/assets/images/logo_padc.png" height="80px" alt="PADC" />
+      </a>
+
+      <a href="http://www.aob.rs">
+        <img  src="/assets/images/ObsBelgrade2.jpg" height="80px" alt="ObsBelgrade" />
+      </a>
+    </p>
+    <p class="legal">&copy;2007 All Rights Reserved. Designed by <a href="http://www.freecsstemplates.org/">Free CSS Templates</a>.</p>
+  </div>
+</div>
+
+<!-- Piwik -->
+<script type="text/javascript">
+
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//analytics.obspm.fr/";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', 10]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+
+
+</script>
+<noscript><p><img src="//analytics.obspm.fr/piwik.php?idsite=10" style="border:0;" alt="" /></p></noscript>
+<!-- End Piwik Code -->
+</body></html>

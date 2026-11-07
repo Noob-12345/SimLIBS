@@ -1,0 +1,7 @@
+{
+  "request_url": "https://physics.nist.gov/cgi-bin/ASD/energy1.pl?spectrum=Zn+III&units=1&format=1&output=0&page_size=10000&multiplet_ordered=1&conf_out=on&term_out=on&level_out=on&j_out=on&g_out=on&ids_out=1&unc_out=1&submit=Retrieve+Data",
+  "retrieved_utc": "2026-10-15T02:09:19.982995+00:00",
+  "response_sha256": "b68a7118620e6714e322817599938503babb4e42996b3db306baf1b1bcdf6b51",
+  "http_status": 200,
+  "response_bytes": 74587
+}

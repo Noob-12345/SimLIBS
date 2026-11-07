@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XSAMSData xmlns="http://vamdc.org/xml/xsams/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cml="http://www.xml-cml.org/schema" xsi:schemaLocation="http://vamdc.org/xml/xsams/1.0 http://vamdc.org/xml/xsams/1.0"><Sources><Source sourceID="Bstarkb-2026-10-16-7-52-58">
+    <Comments>
+    This Source is a self-reference.
+    It represents the database and the query that produced the xml document.
+    The sourceID contains a timestamp.
+    The full URL is given in the tag UniformResourceIdentifier but you need
+    to unescape ampersands and angle brackets to re-use it.
+    Query was: SELECT ALL WHERE AtomSymbol = 'Si' AND IonCharge = 1 AND RadTransWavelength &gt; 6340 AND RadTransWavelength &lt; 6380
+    Query Store Link: https://querystore.vamdc.eu/GetUUIDByToken?queryToken=starkb:753e9b86-48be-4f85-8761-46215a33f24f:get
+    </Comments><Year>2026</Year><Category>database</Category><UniformResourceIdentifier>http://stark-b.obspm.fr/12.07/vamdc/tap/sync?REQUEST=doQuery&amp;LANG=VSS2&amp;FORMAT=XSAMS&amp;QUERY=SELECT%20ALL%20WHERE%20AtomSymbol%20%3D%20'Si'%20AND%20IonCharge%20%3D%201%20AND%20RadTransWavelength%20%3E%206340%20AND%20RadTransWavelength%20%3C%206380</UniformResourceIdentifier><ProductionDate>2026-10-16</ProductionDate><Authors><Author><Name>N.N.</Name></Author></Authors></Source><Source sourceID="Bstarkb-148"><Authors>
+<Author><Name>Lanz T.</Name></Author>
+<Author><Name> Dimitrijević M. S.</Name></Author>
+<Author><Name> Artru M.-C.</Name></Author>
+</Authors>
+<Title>Stark broadening of visible SI II lines in stellar atmospheres</Title>
+<Category>journal</Category>
+<Year>1988</Year><SourceName>A&amp;A</SourceName><Volume>192</Volume><UniformResourceIdentifier>http://cdsads.u-strasbg.fr/abs/1988A%26A...192..249L</UniformResourceIdentifier></Source>
+<Source sourceID="Bstarkb-149"><Authors>
+<Author><Name>Lesage A.</Name></Author>
+<Author><Name> Sahal-Bréchot S.</Name></Author>
+<Author><Name> Miller M. H.</Name></Author>
+</Authors>
+<Title>Stark broadening of singly ionized silicon</Title>
+<Category>journal</Category>
+<Year>1977</Year><SourceName>Phys.Rev. A</SourceName><Volume>16</Volume><UniformResourceIdentifier>http://cdsads.u-strasbg.fr/abs/1977PhRvA..16.1617L</UniformResourceIdentifier></Source>
+</Sources>
+<Environments><Environment envID="Estarkb-200176"><Comments></Comments><Temperature><Value units="K">5000</Value></Temperature><TotalNumberDensity><Value units="1/cm3">1e+17</Value></TotalNumberDensity><Composition><Species name="electron" speciesRef="Xstarkb-P1"></Species></Composition></Environment>
+<Environment envID="Estarkb-200177"><Comments></Comments><Temperature><Value units="K">5000</Value></Temperature><TotalNumberDensity><Value units="1/cm3">1e+17</Value></TotalNumberDensity><Composition><Species name="Hydrogen" speciesRef="Xstarkb-1"></Species></Composition></Environment>
+<Environment envID="Estarkb-200178"><Comments></Comments><Temperature><Value units="K">10000</Value></Temperature><TotalNumberDensity><Value units="1/cm3">1e+17</Value></TotalNumberDensity><Composition><Species name="electron" speciesRef="Xstarkb-P1"></Species></Composition></Environment>
+<Environment envID="Estarkb-200179"><Comments></Comments><Temperature><Value units="K">10000</Value></Temperature><TotalNumberDensity><Value units="1/cm3">1e+17</Value></TotalNumberDensity><Composition><Species name="Hydrogen" speciesRef="Xstarkb-1"></Species></Composition></Environment>
+<Environment envID="Estarkb-200180"><Comments></Comments><Temperature><Value units="K">20000</Value></Temperature><TotalNumberDensity><Value units="1/cm3">1e+17</Value></TotalNumberDensity><Composition><Species name="electron" speciesRef="Xstarkb-P1"></Species></Composition></Environment>
+<Environment envID="Estarkb-200181"><Comments></Comments><Temperature><Value units="K">20000</Value></Temperature><TotalNumberDensity><Value units="1/cm3">1e+17</Value></TotalNumberDensity><Composition><Species name="Hydrogen" speciesRef="Xstarkb-1"></Species></Composition></Environment>
+<Environment envID="Estarkb-200182"><Comments></Comments><Temperature><Value units="K">40000</Value></Temperature><TotalNumberDensity><Value units="1/cm3">1e+17</Value></TotalNumberDensity><Composition><Species name="electron" speciesRef="Xstarkb-P1"></Species></Composition></Environment>
+<Environment envID="Estarkb-200183"><Comments></Comments><Temperature><Value units="K">40000</Value></Temperature><TotalNumberDensity><Value units="1/cm3">1e+17</Value></TotalNumberDensity><Composition><Species name="Hydrogen" speciesRef="Xstarkb-1"></Species></Composition></Environment>
+</Environments>
+<Species>
+<Atoms><Atom>
+<ChemicalElement>
+<NuclearCharge>1</NuclearCharge>
+<ElementSymbol>H</ElementSymbol>
+</ChemicalElement><Isotope><IsotopeParameters><MassNumber>1</MassNumber></IsotopeParameters><Ion speciesID="Xstarkb-1"><IonCharge>1</IonCharge><InChI>InChI=1S/p+1</InChI><InChIKey>GPRLSGONYQIRFK-UHFFFAOYSA-N</InChIKey></Ion>
+</Isotope>
+</Atom><Atom>
+<ChemicalElement>
+<NuclearCharge>14</NuclearCharge>
+<ElementSymbol>Si</ElementSymbol>
+</ChemicalElement><Isotope><IsotopeParameters><MassNumber>28</MassNumber></IsotopeParameters><Ion speciesID="Xstarkb-34"><IonCharge>1</IonCharge><AtomicState stateID="Sstarkb-2765"><SourceRef>Bstarkb-148</SourceRef><SourceRef>Bstarkb-149</SourceRef><AtomicNumericalData></AtomicNumericalData><AtomicQuantumNumbers><Parity>odd</Parity><TotalAngularMomentum>1.5</TotalAngularMomentum></AtomicQuantumNumbers><AtomicComposition><Component><Configuration><AtomicCore><Term></Term></AtomicCore><ConfigurationLabel>3s2.4p</ConfigurationLabel></Configuration><Term><LS><L><Value>1</Value></L><S>0.5</S><Multiplicity>2</Multiplicity></LS><TermLabel>2Po</TermLabel></Term></Component></AtomicComposition></AtomicState><AtomicState stateID="Sstarkb-2792"><SourceRef>Bstarkb-148</SourceRef><SourceRef>Bstarkb-149</SourceRef><AtomicNumericalData></AtomicNumericalData><AtomicQuantumNumbers><Parity>even</Parity><TotalAngularMomentum>0.5</TotalAngularMomentum></AtomicQuantumNumbers><AtomicComposition><Component><Configuration><AtomicCore><Term></Term></AtomicCore><ConfigurationLabel>3s2.4s</ConfigurationLabel></Configuration><Term><LS><L><Value>0</Value></L><S>0.5</S><Multiplicity>2</Multiplicity></LS><TermLabel>2S</TermLabel></Term></Component></AtomicComposition></AtomicState><InChI>InChI=1S/Si/q+1</InChI><InChIKey>FSLGCYNKXXIWGJ-UHFFFAOYSA-N</InChIKey></Ion>
+</Isotope>
+</Atom></Atoms><Particles><Particle speciesID="Xstarkb-P1" name="electron"><ParticleProperties></ParticleProperties></Particle></Particles></Species>
+<Processes>
+<Radiative>
+<RadiativeTransition id="Pstarkb-R5252"><SourceRef>Bstarkb-148</SourceRef><SourceRef>Bstarkb-149</SourceRef><EnergyWavelength><Wavelength><Value units="A">6347.0</Value></Wavelength></EnergyWavelength><UpperStateRef>Sstarkb-2765</UpperStateRef>
+<LowerStateRef>Sstarkb-2792</LowerStateRef>
+<SpeciesRef>Xstarkb-34</SpeciesRef>
+<Probability></Probability>
+<ProcessClass></ProcessClass><Broadening name="pressure" envRef="Estarkb-200176"><Lineshape name="Lorentzian"><LineshapeParameter name="gammaL"><Value units="A">2.74</Value></LineshapeParameter></Lineshape></Broadening><Broadening name="pressure" envRef="Estarkb-200177"><Lineshape name="Lorentzian"><LineshapeParameter name="gammaL"><Value units="A">0.16</Value></LineshapeParameter></Lineshape></Broadening><Broadening name="pressure" envRef="Estarkb-200178"><Lineshape name="Lorentzian"><LineshapeParameter name="gammaL"><Value units="A">1.93</Value></LineshapeParameter></Lineshape></Broadening><Broadening name="pressure" envRef="Estarkb-200179"><Lineshape name="Lorentzian"><LineshapeParameter name="gammaL"><Value units="A">0.16</Value></LineshapeParameter></Lineshape></Broadening><Broadening name="pressure" envRef="Estarkb-200180"><Lineshape name="Lorentzian"><LineshapeParameter name="gammaL"><Value units="A">1.44</Value></LineshapeParameter></Lineshape></Broadening><Broadening name="pressure" envRef="Estarkb-200181"><Lineshape name="Lorentzian"><LineshapeParameter name="gammaL"><Value units="A">0.16</Value></LineshapeParameter></Lineshape></Broadening><Broadening name="pressure" envRef="Estarkb-200182"><Lineshape name="Lorentzian"><LineshapeParameter name="gammaL"><Value units="A">1.19</Value></LineshapeParameter></Lineshape></Broadening><Shifting envRef="Estarkb-200178"><ShiftingParameter name="delta"><Value units='A'>-0.43</Value></ShiftingParameter></Shifting></RadiativeTransition>
+</Radiative>
+</Processes>
+</XSAMSData>

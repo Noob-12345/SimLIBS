@@ -1,0 +1,17 @@
+{
+  "text": "Sp. Name\tIon Charge\tPrefix\tIonization Energy (eV)\tSuffix\tReferences\t\n\"Na III\"\t\"+2\"\t\"[\"\t\"71.6200\"\t\"]\"\t\"L5793,L2720\"\t\nNotes:\n(a) Uncertainty of the listed value is unknown. \n\n",
+  "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?spectra=Na+III&units=1&format=3&order=0&ion_charge_out=on&sp_name_out=on&e_out=0&biblio=on",
+  "endpoint": "https://physics.nist.gov/cgi-bin/ASD/ie.pl",
+  "request_params": {
+    "spectra": "Na III",
+    "units": 1,
+    "format": 3,
+    "order": 0,
+    "ion_charge_out": "on",
+    "sp_name_out": "on",
+    "e_out": 0,
+    "biblio": "on"
+  },
+  "sha256": "8f13bce363b62969edec4f0b38216942bc59fd33a0187d13136f7a303219a385",
+  "retrieved_utc": "2026-11-04T06:38:34.436724+00:00"
+}

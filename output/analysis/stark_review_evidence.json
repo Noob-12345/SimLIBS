@@ -1,0 +1,193 @@
+{
+  "export_load": {
+    "rows_sha256": "6b8ea3a0e3e758e982f47c28625d35d565412d948cbc1bff9ba426ecd393a6a5",
+    "complete": true,
+    "compressed_payload": {
+      "sha256_matches": true,
+      "exact_payload_json_bytes_match": true,
+      "decoded_payload_matches": true
+    },
+    "load": "StarkDataAccessError: Invalid STARK-B database C:\\Users\\32957\\AppData\\Local\\Temp\\tmpqnh_s3lh\\stark-b\\stark_broadening.json: rows_sha256 checksum mismatch"
+  },
+  "nonpositive": {
+    "Cl_q6_probe.xml": {
+      "rows": 47,
+      "samples": 270,
+      "nonpositive": [
+        {
+          "width": -5.11,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        }
+      ]
+    },
+    "Mg_q10_probe.xml": {
+      "rows": 156,
+      "samples": 930,
+      "nonpositive": [
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        }
+      ]
+    },
+    "ca_probe.xml": {
+      "rows": 18,
+      "samples": 102,
+      "nonpositive": [
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        },
+        {
+          "width": 0.0,
+          "flag": "nonpositive source electron width",
+          "status": "rejected"
+        }
+      ]
+    }
+  },
+  "html": {
+    "pages": 6,
+    "tables": 133,
+    "samples": 798,
+    "dataset_densities": [
+      [
+        "118",
+        1e+17
+      ],
+      [
+        "118",
+        1e+18
+      ],
+      [
+        "118",
+        1e+19
+      ],
+      [
+        "118",
+        1e+20
+      ],
+      [
+        "129",
+        1e+17
+      ],
+      [
+        "130",
+        1e+17
+      ]
+    ],
+    "empty_dataset_accepted": {
+      "tables": 122,
+      "status": "ok",
+      "dataset_ids": [
+        "118",
+        "130"
+      ]
+    },
+    "empty_dataset_collection": {
+      "complete": true,
+      "counts": {
+        "species_count": 1,
+        "ok_count": 1,
+        "no_data_count": 0,
+        "failed_count": 0,
+        "pending_count": 0,
+        "table_count": 122,
+        "sample_count": 732,
+        "page_count": 6
+      },
+      "exported_complete": true
+    }
+  },
+  "malformed": {
+    "zero_temperature": {
+      "accepted": true,
+      "samples": 4
+    },
+    "negative_temperature": {
+      "accepted": true,
+      "samples": 4
+    },
+    "zero_wavelength": {
+      "accepted": true,
+      "samples": 4
+    },
+    "duplicate_temperature": {
+      "accepted": true,
+      "samples": 5,
+      "conflicting_widths": [
+        2.74,
+        1000.0
+      ],
+      "selected_renderer_hwhm_nm": 0.137
+    }
+  },
+  "source_sha256": {
+    "stark_data_collect.py": "69afdcee994d70e0410c6c0ee7189f3a5077d3cd85cf0209b5da5b46ded0457e",
+    "stark_html_collect.py": "b2e9628c6be00c273828a823ccd2206edb02698b62f13d1f63784b41889a33c5",
+    "simLIBS/stark_vamdc.py": "0e763205ff8bedf5d90b7a6e468391c5b71f14e2eae7205e781aace179b56df1",
+    "simLIBS/stark_resolver.py": "9dbe7b14b05795525b11ce6b670d01750ecadf567cd68fa76c77e2147a06741b",
+    "tests/test_stark_data_collect.py": "4169327cc8a62c23020298667d8b4c63b9c58c2ec9f1cd03f03a731805a27f56",
+    "tests/test_stark_vamdc.py": "32bfbd9751767d185f6137c4790445f177069f9bad17868b8139b7d967730ed3",
+    "tests/test_stark_html_collect.py": "63c43bf2bf05f7c76bfa9bc925f26804d1f4b8814cf745cad4ef03db6ce50a6d",
+    ".gitignore": "afb7c4bb0c13c100bbfdd680ce22b973bb051ab5aaa142adadff55e50f1c5286"
+  }
+}

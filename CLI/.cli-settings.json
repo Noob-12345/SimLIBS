@@ -1,0 +1,15 @@
+{
+  "python": "E:\\Anaconda\\envs\\simLIBS\\python.exe",
+  "source": "D:\\LIBS\\SimLIBS\\simLIBS-2.0.3",
+  "line_database": "D:\\LIBS\\SimLIBS\\Linedatabase",
+  "driver": "",
+  "chrome": "",
+  "output": "D:\\LIBS\\SimLIBS\\UI\\output",
+  "connect_timeout": 10.0,
+  "read_timeout": 30.0,
+  "page_timeout": 45.0,
+  "script_timeout": 15.0,
+  "static_deadline": 60.0,
+  "dynamic_deadline": 180.0,
+  "tls_verify": true
+}

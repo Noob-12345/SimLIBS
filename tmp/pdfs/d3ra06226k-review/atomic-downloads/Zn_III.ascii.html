@@ -1,0 +1,722 @@
+<!DOCTYPE html
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+<title>NIST ASD Levels Output</title>
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="start" title="ASD 5.0" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="ASD 4" title="ASD 4.0" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="ASD 3" title="ASD 3.0" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="ASD 2" title="ASD 2.0" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="ASD 1" title="ASD 1.3" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="Author" title="Yuri Ralchenko" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="Author" title="Alexander Kramida" />
+<link href="https://physics.nist.gov/PhysRefData/ASD" rel="Author" title="Joseph Reader" />
+<link href="https://physics.nist.gov/PhysRefData/ASD/Html/verhist.shtml" rel="Version" title="Version History" />
+<link href="https://www.nist.gov/" rel="bookmark" title="NIST Main Page" />
+<link href="https://physics.nist.gov/" rel="bookmark" title="NIST Physical Measurement Lab" />
+<link href="https://pml.nist.gov/data " rel="bookmark" title="Physical Reference Data" />
+<meta content="text/javascript" http-equiv="Content-Script-Type" />
+<link rel="stylesheet" type="text/css" href="https://physics.nist.gov/PhysRefData/ASD/Scripts/1.css" />
+<!-- Google Analtyics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9SLN1VEEJ2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9SLN1VEEJ2');
+</script>
+<!-- End of Google Analytics 4 -->
+<SCRIPT async id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&amp;subagency=NIST&amp;pua=UA-37115410-46&amp;yt=false&amp;exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c" type="text/javascript"></script>
+<script type="text/javascript">//<![CDATA[
+
+function setFocus() {
+  var de = document.getElementById("de");
+  var idsSp = document.getElementById("ids_sp");
+  var dom = document.domain;
+  var href = document.location.href;
+  if ( href.match(/^http:\/\/ekron\.nist\.gov\/ASD\/DataEntry\/.*/i) ) {
+    de.value = 1;
+  }
+  if ( dom.match(/^ekron\.nist\.gov$/i) ) {
+    idsSp.style.display="inline";
+  }
+  document.levels.spectrum.disabled = true;
+}
+function submit_update() {
+  var submitRetrieve = document.getElementById("submit_retrieve");
+  var spCrit = document.getElementById("spectrum_crit");
+  if ( (spCrit != null) && (submitRetrieve != null) ) {
+    var spPrev = spCrit.innerHTML;
+    spPrev = spPrev.toLowerCase().replace(/  /gm,"");
+    spPrev = spPrev.replace(/<b>/gm,"");
+    spPrev = spPrev.replace(/<\/b>/gm,"");
+    var sp = document.getElementById("spectrum").value;
+    sp = sp.toLowerCase().replace(/  /gm,"");
+    if ( sp != spPrev ) {
+      submitRetrieve.value = "Update Criteria";
+    } else {
+        document.levels.spectrum.disabled = false;
+      submitRetrieve.value = "Retrieve Data";
+    }
+  }
+  return true;
+}
+
+//]]></script>
+<script src="/js/clickjack.js" type="text/javascript"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+</head>
+<body bgcolor="white" onload="setFocus()">
+<script type="text/javascript" src="https://physics.nist.gov/PhysRefData/ASD/Scripts/balloon.js"></script>
+<script type="text/javascript" src="https://physics.nist.gov/PhysRefData/ASD/Scripts/setup.js"></script>
+<script type="text/javascript" src="https://physics.nist.gov/PhysRefData/ASD/Scripts/go.js"></script>
+<span>
+<a href="#start"><img src="/Images/dot_t.gif" width="1" height="1" style="border:0;margin-top:0;margin-bottom:0" alt="[skip navigation]" /></a>
+</span>
+<table style="width:100%; border:0; margin-top:0">
+<tr><td style="text-align:left"><a href="https://physics.nist.gov/PhysRefData/ASD/index.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/ASD-sm.gif" style="border:0" width="100" height="47"
+alt="[ASD Home]" title="ASD Home"></a><a href="https://physics.nist.gov/PhysRefData/ASD/lines_form.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/Lines.gif" style="border:0" width="70" height="47"
+alt="[Lines Query]" title="Lines Query"></a><a href="https://physics.nist.gov/PhysRefData/ASD/levels_form.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/Levels.gif" style="border:0" width="79" height="47"
+alt="[Levels Query]" title="Levels Query"></a><a href="https://www.nist.gov/pml/atomic-spectra-database-contents"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/List.gif" style="border:0" width="77" height="47"
+alt="[List of Spectra]" title="List of Spectra"></a><a href="https://physics.nist.gov/PhysRefData/ASD/ionEnergy.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/GS-IE.gif" style="border:0" width="124" height="47"
+alt="[Ground States and Ionization Energies]" title="Ground States and Ionization Energies"></a><a
+href="https://physics.nist.gov/PhysRefData/ASBib1/index.html"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/Bib.gif" style="border:0"
+width="98" height="47" alt="[Bibliography]" title="Bibliography"></a><a
+href="https://physics.nist.gov/PhysRefData/ASD/Html/help.html"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/Help.gif" style="border:0"
+width="55" height="47" alt="[Help]" title="Help"/></a></td>
+<td style="text-align:right"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/nist-pl-black.gif" style="border:0" width="136" height="68"
+usemap="#NIST-PL" alt="NIST Physical Measurement Laboratory"/></td>
+</tr></table>
+
+<map name="NIST-PL" id="NIST-PL">
+  <area shape="rect" coords="1,1,135,48" href="https://www.nist.gov" alt="National Institute of Standards and Technology" title="National Institute of Standards and Technology"/>
+  <area shape="rect" coords="1,50,135,67" href="https://www.nist.gov/pml" alt="NIST Physical Measurement Laboratory" title="NIST Physical Measurement Laboratory"/>
+</map>
+<a id="start"><!-- filler --></a>
+<script type="text/javascript">
+<!-- //
+var newwindow
+//var n
+function popdef(n){
+newwindow = window.open(n,"data1","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=600,height=450");
+if (window.focus) {newwindow.focus()}
+return true;
+}
+function popbib(n){
+newwindow = window.open(n,"data2","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=950,height=800");
+if (window.focus) {newwindow.focus()}
+return true;
+}
+function popded(n){
+//newwindow = window.open(n,"data3","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=640,height=250");
+newwindow = window.open(n,"data3","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=800,height=320");if (window.focus) {newwindow.focus()}
+return true;
+}
+function popdiag(n){
+newwindow = window.open(n,"data3","toolbar=no,location=no,alwaysRaised=yes,directories=no,status=no,menubar=yes,scrollbars=yes,resizable=yes,copyhistory=no,width=800,height=1000");if (window.focus) {newwindow.focus()}
+return true;
+}
+// -->
+</script>
+
+<table style="width:100%">
+  <tr>
+    <td style="color:#223388; font-size:150%; vertical-align:middle"><span style="color:black; font-weight:600">NIST Atomic Spectra Database Levels Data</span><p>
+      <sup></sup>Zn  III &nbsp;&nbsp;316 Levels Found<br />
+<b><font size="+1"><i>Z</i> = 30, Ni isoelectronic sequence</font></b><span style="font-size=300%">&nbsp;</span></p>
+    </td>
+    <td style="text-align:right; vertical-align:middle">
+<div class='ref'>
+<b>Example of how to reference these results:</b><br />
+
+Kramida,&nbsp;A., Ralchenko,&nbsp;Yu., Reader,&nbsp;J., and NIST ASD Team (2024).
+  <i>NIST Atomic Spectra Database</i> (ver.&nbsp;5.12),
+  [Online]. Available: <span style="color:#0000cc;">https://physics.nist.gov/asd</span>
+  [2026, October 14].
+  National Institute of Standards and Technology, Gaithersburg, MD.
+    DOI: <span style="color:#0000cc;">https://doi.org/10.18434/T4W30F</span>
+<br />
+<div style="text-align: right; font-size: x-small">
+<a href="javascript:void(0)" onclick="popdef('/cgi-bin/ASD/bibtex.pl?y=2026&amp;m=October&amp;d=14');return true" target="_top">BibTex Citation</a> (new window)
+</div>
+</div>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="2" style="color:#655665; font-family: helvetica,arial; font-size:80%"><b></b></td>
+  </tr>
+</table>
+<br>
+<PRE>
+-------------------------------------------------------------------------------------------------------------------
+Configuration       | Term       |   J |    g |             Level (eV)  |   Uncertainty (eV) |     Level ID       |
+--------------------|------------|-----|------|-------------------------|--------------------|--------------------|
+                    |            |     |      |                         |                    |                    |
+3d10                | 1S         |   0 |    1 |         0.0000          |           0        |      030003.000001 |
+                    |            |     |      |                         |                    |                    |
+3d9.4s              | 3D         |   3 |    7 |         9.68271         |                    |      030003.000002 |
+                    |            |   2 |    5 |         9.82867         |                    |      030003.000003 |
+                    |            |   1 |    3 |        10.02415         |                    |      030003.000004 |
+                    |            |     |      |                         |                    |                    |
+3d9.4s              | 1D         |   2 |    5 |        10.35272         |                    |      030003.000005 |
+                    |            |     |      |                         |                    |                    |
+3d9.4p              | 3P*        |   2 |    5 |        17.09326         |                    |      030003.000006 |
+                    |            |   1 |    3 |        17.36659         |                    |      030003.000007 |
+                    |            |     |      |                         |                    |                    |
+3d9.4p              | 3F*        |   3 |    7 |        17.43897         |                    |      030003.000008 |
+                    |            |   4 |    9 |        17.52231         |                    |      030003.000009 |
+                    |            |     |      |                         |                    |                    |
+3d9.4p              | 3P*        |   0 |    1 |        17.53044         |                    |      030003.000010 |
+                    |            |     |      |                         |                    |                    |
+3d9.4p              | 3F*        |   2 |    5 |        17.66568         |                    |      030003.000011 |
+                    |            |     |      |                         |                    |                    |
+3d9.4p              | 1F*        |   3 |    7 |        17.91587         |                    |      030003.000012 |
+                    |            |     |      |                         |                    |                    |
+3d9.4p              | 1D*        |   2 |    5 |        18.00795         |                    |      030003.000013 |
+                    |            |     |      |                         |                    |                    |
+3d9.4p              | 3D*        |   3 |    7 |        18.09755         |                    |      030003.000014 |
+                    |            |     |      |                         |                    |                    |
+3d9.4p              | 1P*        |   1 |    3 |        18.28750         |                    |      030003.000015 |
+                    |            |     |      |                         |                    |                    |
+3d9.4p              | 3D*        |   1 |    3 |        18.29650         |                    |      030003.000016 |
+                    |            |   2 |    5 |        18.33993         |                    |      030003.000017 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s2             | 3F         |   4 |    9 |        23.59931         |                    |      030003.000018 |
+                    |            |   3 |    7 |        23.89965         |                    |      030003.000019 |
+                    |            |   2 |    5 |        24.09054         |                    |      030003.000020 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s2             | 1D         |   2 |    5 |        25.79383         |                    |      030003.000021 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s2             | 3P         |   2 |    5 |        26.25062         |                    |      030003.000022 |
+                    |            |   1 |    3 |        26.27482         |                    |      030003.000023 |
+                    |            |   0 |    1 |        26.32684         |                    |      030003.000024 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 3S         |   1 |    3 |        26.57688         |                    |      030003.000025 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5s    | (5/2,1/2)  |   3 |    7 |        26.64148         |                    |      030003.000026 |
+                    |            |   2 |    5 |        26.69882         |                    |      030003.000027 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 3G         |   4 |    9 |        26.83818         |                    |      030003.000028 |
+                    |            |   5 |   11 |        26.85589         |                    |      030003.000029 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 3P         |   1 |    3 |        26.89159         |                    |      030003.000030 |
+                    |            |   2 |    5 |        26.91372         |                    |      030003.000031 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 3D         |   3 |    7 |        26.98588         |                    |      030003.000032 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).5s    | (3/2,1/2)  |   1 |    3 |        26.98686         |                    |      030003.000033 |
+                    |            |   2 |    5 |        27.00956         |                    |      030003.000034 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 3F         |   3 |    7 |        27.03358         |                    |      030003.000035 |
+                    |            |   4 |    9 |        27.03370         |                    |      030003.000036 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 3P         |   0 |    1 |        27.08162         |                    |      030003.000037 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 3D         |   2 |    5 |        27.09554         |                    |      030003.000038 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 1P         |   1 |    3 |        27.14131         |                    |      030003.000039 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 1G         |   4 |    9 |        27.19717         |                    |      030003.000040 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 3G         |   3 |    7 |        27.23746         |                    |      030003.000041 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 3D         |   1 |    3 |        27.27734         |                    |      030003.000042 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 1D         |   2 |    5 |        27.35938         |                    |      030003.000043 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s2             | 1G         |   4 |    9 |        27.40698         |                    |      030003.000044 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 1F         |   3 |    7 |        27.41832         |                    |      030003.000045 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 3F         |   2 |    5 |        27.44311         |                    |      030003.000046 |
+                    |            |     |      |                         |                    |                    |
+3d9.4d              | 1S         |   0 |    1 |        28.59150         |                    |      030003.000047 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s2             | 1S         |   0 |    1 |        28.91366         |                    |      030003.000048 |
+                    |            |     |      |                         |                    |                    |
+3d9.5p              | 3P*        |   2 |    5 |        28.96400         |                    |      030003.000049 |
+                    |            |     |      |                         |                    |                    |
+3d9.5p              | 3F*        |   3 |    7 |        29.05991         |                    |      030003.000050 |
+                    |            |   4 |    9 |        29.08372         |                    |      030003.000051 |
+                    |            |     |      |                         |                    |                    |
+3d9.5p              | 3P*        |   1 |    3 |        29.11978         |                    |      030003.000052 |
+                    |            |     |      |                         |                    |                    |
+3d9.5p              | 3D*        |   2 |    5 |        29.19239         |                    |      030003.000053 |
+                    |            |   3 |    7 |        29.21364         |                    |      030003.000054 |
+                    |            |     |      |                         |                    |                    |
+3d9.5p              | 3P*        |   0 |    1 |        29.32970         |                    |      030003.000055 |
+                    |            |     |      |                         |                    |                    |
+3d9.5p              | 3F*        |   2 |    5 |        29.39018         |                    |      030003.000056 |
+                    |            |     |      |                         |                    |                    |
+3d9.5p              | 1P*        |   1 |    3 |        29.44709         |                    |      030003.000057 |
+                    |            |     |      |                         |                    |                    |
+3d9.5p              | 1F*        |   3 |    7 |        29.46394         |                    |      030003.000058 |
+                    |            |     |      |                         |                    |                    |
+3d9.5p              | 3D*        |   1 |    3 |        29.53372         |                    |      030003.000059 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 5D*        |   4 |    9 |        29.8692          |                    |      030003.000060 |
+                    |            |   3 |    7 |        30.0960          |                    |      030003.000061 |
+                    |            |   2 |    5 |        30.2829          |                    |      030003.000062 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 5G*        |   4 |    9 |        30.3930          |                    |      030003.000063 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 5D*        |   1 |    3 |        30.4137          |                    |      030003.000064 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 5G*        |   3 |    7 |        30.4990          |                    |      030003.000065 |
+                    |            |   2 |    5 |        30.5865          |                    |      030003.000066 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 5F*        |   4 |    9 |        30.7666          |                    |      030003.000067 |
+                    |            |   3 |    7 |        30.8733          |                    |      030003.000068 |
+                    |            |   2 |    5 |        30.9435          |                    |      030003.000069 |
+                    |            |   1 |    3 |        30.9786          |                    |      030003.000070 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2F).4p      | 3G*        |   4 |    9 |        31.0355          |                    |      030003.000071 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2F).4p      | 3D*        |   3 |    7 |        31.1691          |                    |      030003.000072 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2F).4p      | 3G*        |   3 |    7 |        31.2461          |                    |      030003.000073 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2F).4p      | 3D*        |   2 |    5 |        31.2942          |                    |      030003.000074 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2F).4p      | 3F*        |   4 |    9 |        31.4346          |                    |      030003.000075 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2F).4p      | 3D*        |   1 |    3 |        31.4536          |                    |      030003.000076 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2F).4p      | 3F*        |   3 |    7 |        31.5070          |                    |      030003.000077 |
+                    |            |   2 |    5 |        31.6530          |                    |      030003.000078 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 3P*        |   0 |    1 |        31.92483         |                    |      030003.000079 |
+                    |            |   1 |    3 |        31.93413         |                    |      030003.000080 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | *          |   2 |    5 |        31.94809         |                    |      030003.000081 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2F).4p      | 1F*        |   3 |    7 |        31.9513          |                    |      030003.000082 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 1H*        |   5 |   11 |        31.96263         |                    |      030003.000083 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 3H*        |   6 |   13 |        31.96300         |                    |      030003.000084 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 3D*        |   1 |    3 |        31.97654         |                    |      030003.000085 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | *          |   2 |    5 |        31.98327         |                    |      030003.000086 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 3F*        |   3 |    7 |        31.99731         |                    |      030003.000087 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2F).4p      | 1D*        |   2 |    5 |        31.9986          |                    |      030003.000088 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 3G*        |   5 |   11 |        32.00915         |                    |      030003.000089 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 3F*        |   4 |    9 |        32.01003         |                    |      030003.000090 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 1G*        |   4 |    9 |        32.01763         |                    |      030003.000091 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 1F*        |   3 |    7 |        32.02235         |                    |      030003.000092 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 3P*        |   2 |    5 |        32.28773         |                    |      030003.000093 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 1P*        |   1 |    3 |        32.30831         |                    |      030003.000094 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 3H*        |   5 |   11 |        32.31191         |                    |      030003.000095 |
+                    |            |   4 |    9 |        32.31315         |                    |      030003.000096 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4P).4p      | 5P*        |   2 |    5 |        32.3239          |                    |      030003.000097 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | *          |   3 |    7 |        32.3330          |                    |      030003.000098 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6s    | (5/2,1/2)  |   3 |    7 |        32.33466         |                    |      030003.000099 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 3F*        |   2 |    5 |        32.33581         |                    |      030003.000100 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4P).4p      | 5P*        |   3 |    7 |        32.3449          |                    |      030003.000101 |
+                    |            |     |      |                         |                    |                    |
+3d9.4f              | 3G*        |   3 |    7 |        32.35763         |                    |      030003.000102 |
+                    |            |   4 |    9 |        32.35844         |                    |      030003.000103 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6s    | (5/2,1/2)  |   2 |    5 |        32.36078         |                    |      030003.000104 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4P).4p      | 5P*        |   1 |    3 |        32.3710          |                    |      030003.000105 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5d    | 2[1/2]     |   1 |    3 |        32.39543         |                    |      030003.000106 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5d    | 2[9/2]     |   5 |   11 |        32.46276         |                    |      030003.000107 |
+                    |            |   4 |    9 |        32.47266         |                    |      030003.000108 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5d    | 2[3/2]     |   2 |    5 |        32.47414         |                    |      030003.000109 |
+                    |            |   1 |    3 |        32.47597         |                    |      030003.000110 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5d    | 2[5/2]     |   3 |    7 |        32.51310         |                    |      030003.000111 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5d    | 2[7/2]     |   3 |    7 |        32.53917         |                    |      030003.000112 |
+                    |            |   4 |    9 |        32.54534         |                    |      030003.000113 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5d    | 2[5/2]     |   2 |    5 |        32.54836         |                    |      030003.000114 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).5d    | 2[1/2]     |   0 |    1 |        32.62169         |                    |      030003.000115 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).6s    | (3/2,1/2)  |   1 |    3 |        32.67721         |                    |      030003.000116 |
+                    |            |   2 |    5 |        32.69985         |                    |      030003.000117 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).5d    | 2[1/2]     |   1 |    3 |        32.76126         |                    |      030003.000118 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2D).4p      | 3F*        |   2 |    5 |        32.8070          |                    |      030003.000119 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).5d    | 2[7/2]     |   3 |    7 |        32.81024         |                    |      030003.000120 |
+                    |            |   4 |    9 |        32.82902         |                    |      030003.000121 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).5d    | 2[3/2]     |   1 |    3 |        32.83428         |                    |      030003.000122 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2D).4p      | 3F*        |   3 |    7 |        32.8556          |                    |      030003.000123 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).5d    | 2[3/2]     |   2 |    5 |        32.85647         |                    |      030003.000124 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2D).4p      | 3D*        |   1 |    3 |        32.8667          |                    |      030003.000125 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).5d    | 2[5/2]     |   3 |    7 |        32.88756         |                    |      030003.000126 |
+                    |            |   2 |    5 |        32.89467         |                    |      030003.000127 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2D).4p      | 3D*        |   2 |    5 |        32.9159          |                    |      030003.000128 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2D).4p      | 3F*        |   4 |    9 |        32.9216          |                    |      030003.000129 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2D).4p      | 3D*        |   3 |    7 |        32.9742          |                    |      030003.000130 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2D).4p      | 3P*        |   1 |    3 |        33.0712          |                    |      030003.000131 |
+                    |            |   2 |    5 |        33.1675          |                    |      030003.000132 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4P).4p      | 5D*        |   1 |    3 |        33.2461          |                    |      030003.000133 |
+                    |            |   2 |    5 |        33.2539          |                    |      030003.000134 |
+                    |            |   3 |    7 |        33.2801          |                    |      030003.000135 |
+                    |            |   4 |    9 |        33.3293          |                    |      030003.000136 |
+                    |            |     |      |                         |                    |                    |
+3d9.6p              | 3P*        |   2 |    5 |        33.3551          |                    |      030003.000137 |
+                    |            |     |      |                         |                    |                    |
+3d9.6p              | 3F*        |   3 |    7 |        33.4035          |                    |      030003.000138 |
+                    |            |   4 |    9 |        33.4136          |                    |      030003.000139 |
+                    |            |     |      |                         |                    |                    |
+3d9.6p              | 3P*        |   1 |    3 |        33.4383          |                    |      030003.000140 |
+                    |            |     |      |                         |                    |                    |
+3d9.6p              | 3D*        |   3 |    7 |        33.4402          |                    |      030003.000141 |
+                    |            |     |      |                         |                    |                    |
+3d9.6p              | 1D*        |   2 |    5 |        33.4587          |                    |      030003.000142 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2P).4p      | 3P*        |   2 |    5 |        33.6715          |                    |      030003.000143 |
+                    |            |     |      |                         |                    |                    |
+3d9.6p              | 3P*        |   0 |    1 |        33.7026          |                    |      030003.000144 |
+                    |            |     |      |                         |                    |                    |
+3d9.6p              | 3F*        |   2 |    5 |        33.7352          |                    |      030003.000145 |
+                    |            |     |      |                         |                    |                    |
+3d9.6p              | *          |   1 |    3 |        33.7352          |                    |      030003.000146 |
+                    |            |     |      |                         |                    |                    |
+3d9.6p              | *          |   1 |    3 |        33.7593          |                    |      030003.000147 |
+                    |            |     |      |                         |                    |                    |
+3d9.6p              | *          |   3 |    7 |        33.7630          |                    |      030003.000148 |
+                    |            |     |      |                         |                    |                    |
+3d9.6p              | 3D*        |   2 |    5 |        33.7740          |                    |      030003.000149 |
+                    |            |   1 |    3 |        33.7902          |                    |      030003.000150 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2P).4p      | 3D*        |   3 |    7 |        33.8251          |                    |      030003.000151 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2P).4p      | *          |   2 |    5 |        33.8596          |                    |      030003.000152 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2P).4p      | *          |   1 |    3 |        33.8911          |                    |      030003.000153 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2P).4p      | 3P*        |   0 |    1 |        33.9346          |                    |      030003.000154 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2G).4p      | 3F*        |   4 |    9 |        33.9901          |                    |      030003.000155 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4P).4p      | 5S*        |   2 |    5 |        34.0648          |                    |      030003.000156 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2G).4p      | 3F*        |   3 |    7 |        34.1274          |                    |      030003.000157 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2P).4p      | 1P*        |   1 |    3 |        34.1912          |                    |      030003.000158 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2G).4p      | 3F*        |   2 |    5 |        34.2074          |                    |      030003.000159 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 3D*        |   3 |    7 |        34.2340          |                    |      030003.000160 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 3G*        |   4 |    9 |        34.2367          |                    |      030003.000161 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2P).4p      | 1D*        |   2 |    5 |        34.2663          |                    |      030003.000162 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 3F*        |   4 |    9 |        34.4165          |                    |      030003.000163 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 3G*        |   3 |    7 |        34.4173          |                    |      030003.000164 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 3D*        |   2 |    5 |        34.4955          |                    |      030003.000165 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 3F*        |   3 |    7 |        34.6297          |                    |      030003.000166 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 3D*        |   1 |    3 |        34.6530          |                    |      030003.000167 |
+                    |            |     |      |                         |                    |                    |
+3d9.5f              | 1P*        |   1 |    3 |        34.7777          |                    |      030003.000168 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4F).4p      | 3F*        |   2 |    5 |        34.8040          |                    |      030003.000169 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5g    | 2[3/2]     |   1 |    3 |        34.80570         |                    |      030003.000170 |
+                    |            |   2 |    5 |        34.80570         |                    |      030003.000171 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5g    | 2[13/2]    |   6 |   13 |        34.81132         |                    |      030003.000172 |
+                    |            |   7 |   15 |        34.81132         |                    |      030003.000173 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5g    | 2[5/2]     |   2 |    5 |        34.81263         |                    |      030003.000174 |
+                    |            |   3 |    7 |        34.81263         |                    |      030003.000175 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5g    | 2[7/2]     |   3 |    7 |        34.81938         |                    |      030003.000176 |
+                    |            |   4 |    9 |        34.81938         |                    |      030003.000177 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5g    | 2[11/2]    |   5 |   11 |        34.82234         |                    |      030003.000178 |
+                    |            |   6 |   13 |        34.82234         |                    |      030003.000179 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).5g    | 2[9/2]     |   4 |    9 |        34.82350         |                    |      030003.000180 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7s    | (5/2,1/2)  |   3 |    7 |        34.97069         |                    |      030003.000181 |
+                    |            |   2 |    5 |        34.98450         |                    |      030003.000182 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6d    | 2[1/2]     |   1 |    3 |        34.99515         |                    |      030003.000183 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6d    | 2[3/2]     |   2 |    5 |        35.04148         |                    |      030003.000184 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6d    | 2[9/2]     |   5 |   11 |        35.04292         |                    |      030003.000185 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6d    | 2[3/2]     |   1 |    3 |        35.04436         |                    |      030003.000186 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6d    | 2[9/2]     |   4 |    9 |        35.04790         |                    |      030003.000187 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6d    | 2[5/2]     |   3 |    7 |        35.06763         |                    |      030003.000188 |
+                    |            |   2 |    5 |        35.08142         |                    |      030003.000189 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6d    | 2[7/2]     |   3 |    7 |        35.08388         |                    |      030003.000190 |
+                    |            |   4 |    9 |        35.08475         |                    |      030003.000191 |
+                    |            |     |      |                         |                    |                    |
+3d9.5f              | *          |   1 |    3 |        35.1105          |                    |      030003.000192 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).5g    | 2[5/2]     |   2 |    5 |        35.15140         |                    |      030003.000193 |
+                    |            |   3 |    7 |        35.15140         |                    |      030003.000194 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).5g    | 2[11/2]    |   5 |   11 |        35.15517         |                    |      030003.000195 |
+                    |            |   6 |   13 |        35.15517         |                    |      030003.000196 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).5g    | 2[7/2]     |   3 |    7 |        35.16214         |                    |      030003.000197 |
+                    |            |   4 |    9 |        35.16214         |                    |      030003.000198 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).5g    | 2[9/2]     |   4 |    9 |        35.16591         |                    |      030003.000199 |
+                    |            |   5 |   11 |        35.16591         |                    |      030003.000200 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).6d    | 2[1/2]     |   0 |    1 |        35.20764         |                    |      030003.000201 |
+                    |            |   1 |    3 |        35.29694         |                    |      030003.000202 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).7s    | (3/2,1/2)  |   1 |    3 |        35.31278         |                    |      030003.000203 |
+                    |            |   2 |    5 |        35.32328         |                    |      030003.000204 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).6d    | 2[7/2]     |   3 |    7 |        35.38654         |                    |      030003.000205 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).6d    | 2[3/2]     |   1 |    3 |        35.39795         |                    |      030003.000206 |
+                    |            |   2 |    5 |        35.40891         |                    |      030003.000207 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).6d    | 2[5/2]     |   3 |    7 |        35.42520         |                    |      030003.000208 |
+                    |            |   2 |    5 |        35.42892         |                    |      030003.000209 |
+                    |            |     |      |                         |                    |                    |
+3d9.7p              | 1F*        |   3 |    7 |        35.5414          |                    |      030003.000210 |
+                    |            |     |      |                         |                    |                    |
+3d9.7p              | 3F*        |   4 |    9 |        35.5522          |                    |      030003.000211 |
+                    |            |     |      |                         |                    |                    |
+3d9.7p              | 1P*        |   1 |    3 |        35.5600          |                    |      030003.000212 |
+                    |            |     |      |                         |                    |                    |
+3d9.7p              | 3P*        |   1 |    3 |        35.8733          |                    |      030003.000213 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2D).4p      | 1D*        |   2 |    5 |        36.1966          |                    |      030003.000214 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6g    | 2[3/2]     |   1 |    3 |        36.31022         |                    |      030003.000215 |
+                    |            |   2 |    5 |        36.31022         |                    |      030003.000216 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6g    | 2[13/2]    |   6 |   13 |        36.31325         |                    |      030003.000217 |
+                    |            |   7 |   15 |        36.31325         |                    |      030003.000218 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6g    | 2[5/2]     |   2 |    5 |        36.31404         |                    |      030003.000219 |
+                    |            |   3 |    7 |        36.31404         |                    |      030003.000220 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6g    | 2[7/2]     |   3 |    7 |        36.31787         |                    |      030003.000221 |
+                    |            |   4 |    9 |        36.31787         |                    |      030003.000222 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6g    | 2[11/2]    |   5 |   11 |        36.31961         |                    |      030003.000223 |
+                    |            |   6 |   13 |        36.31961         |                    |      030003.000224 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).6g    | 2[9/2]     |   4 |    9 |        36.32025         |                    |      030003.000225 |
+                    |            |   5 |   11 |        36.32025         |                    |      030003.000226 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).8s    | (5/2,1/2)  |   3 |    7 |        36.40900         |                    |      030003.000227 |
+                    |            |   2 |    5 |        36.41717         |                    |      030003.000228 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4P).4p      | 3P*        |   1 |    3 |        36.4200          |                    |      030003.000229 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7d    | 2[11/2]    |   1 |    3 |        36.42266         |                    |      030003.000230 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7d    | 2[9/2]     |   5 |   11 |        36.45207         |                    |      030003.000231 |
+                    |            |   4 |    9 |        36.45561         |                    |      030003.000232 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7d    | 2[3/2]     |   2 |    5 |        36.45571         |                    |      030003.000233 |
+                    |            |   1 |    3 |        36.45687         |                    |      030003.000234 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7d    | 2[5/2]     |   3 |    7 |        36.46669         |                    |      030003.000235 |
+                    |            |   2 |    5 |        36.47470         |                    |      030003.000236 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7d    | 2[7/2]     |   3 |    7 |        36.48545         |                    |      030003.000237 |
+                    |            |   4 |    9 |        36.48890         |                    |      030003.000238 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(4P).4p      | 3P*        |   2 |    5 |        36.5642          |                    |      030003.000239 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).6g    | 2[5/2]     |   2 |    5 |        36.65417         |                    |      030003.000240 |
+                    |            |   3 |    7 |        36.65417         |                    |      030003.000241 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).6g    | 2[11/2]    |   5 |   11 |        36.65634         |                    |      030003.000242 |
+                    |            |   6 |   13 |        36.65634         |                    |      030003.000243 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).6g    | 2[7/2]     |   3 |    7 |        36.66034         |                    |      030003.000244 |
+                    |            |   4 |    9 |        36.66034         |                    |      030003.000245 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).6g    | 2[9/2]     |   4 |    9 |        36.66245         |                    |      030003.000246 |
+                    |            |   5 |   11 |        36.66245         |                    |      030003.000247 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2D).4p      | 1P*        |   1 |    3 |        36.7441          |                    |      030003.000248 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).8s    | (3/2,1/2)  |   1 |    3 |        36.75114         |                    |      030003.000249 |
+                    |            |   2 |    5 |        36.75689         |                    |      030003.000250 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).7d    | 2[7/2]     |   3 |    7 |        36.78870         |                    |      030003.000251 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).7d    | 2[3/2]     |   1 |    3 |        36.80504         |                    |      030003.000252 |
+                    |            |   2 |    5 |        36.80788         |                    |      030003.000253 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).7d    | 2[5/2]     |   3 |    7 |        36.81355         |                    |      030003.000254 |
+                    |            |   2 |    5 |        36.81748         |                    |      030003.000255 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7f    | 2[1/2]*    |   1 |    3 |        37.19634         |                    |      030003.000256 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7f    | 2[11/2]*   |   6 |   13 |        37.20109         |                    |      030003.000257 |
+                    |            |   5 |   11 |        37.20131         |                    |      030003.000258 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7f    | 2[3/2]*    |   2 |    5 |        37.20186         |                    |      030003.000259 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7f    | 2[5/2]*    |   2 |    5 |        37.20469         |                    |      030003.000260 |
+                    |            |   3 |    7 |        37.20555         |                    |      030003.000261 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7f    | 2[7/2]*    |   4 |    9 |        37.20742         |                    |      030003.000262 |
+                    |            |   3 |    7 |        37.20866         |                    |      030003.000263 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7f    | 2[9/2]*    |   5 |   11 |        37.21056         |                    |      030003.000264 |
+                    |            |   4 |    9 |        37.21088         |                    |      030003.000265 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7g    | 2[3/2]     |   1 |    3 |        37.21676         |                    |      030003.000266 |
+                    |            |   2 |    5 |        37.21676         |                    |      030003.000267 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7g    | 2[13/2]    |   6 |   13 |        37.21862         |                    |      030003.000268 |
+                    |            |   7 |   15 |        37.21862         |                    |      030003.000269 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7g    | 2[5/2]     |   2 |    5 |        37.21920         |                    |      030003.000270 |
+                    |            |   3 |    7 |        37.21920         |                    |      030003.000271 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7g    | 2[7/2]     |   3 |    7 |        37.22158         |                    |      030003.000272 |
+                    |            |   4 |    9 |        37.22158         |                    |      030003.000273 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7g    | 2[11/2]    |   5 |   11 |        37.22267         |                    |      030003.000274 |
+                    |            |   6 |   13 |        37.22267         |                    |      030003.000275 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).7g    | 2[9/2]     |   4 |    9 |        37.22306         |                    |      030003.000276 |
+                    |            |   5 |   11 |        37.22306         |                    |      030003.000277 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).9s    | (5/2,1/2)  |   3 |    7 |        37.28033         |                    |      030003.000278 |
+                    |            |   2 |    5 |        37.28222         |                    |      030003.000279 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).8s    | (3/2,1/2)  |   1 |    3 |        37.28674         |                    |      030003.000280 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).7f    | 2[9/2]*    |   5 |   11 |        37.54295         |                    |      030003.000281 |
+                    |            |   4 |    9 |        37.54346         |                    |      030003.000282 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).7f    | 2[5/2]*    |   2 |    5 |        37.54576         |                    |      030003.000283 |
+                    |            |   3 |    7 |        37.54947         |                    |      030003.000284 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).7f    | 2[7/2]*    |   3 |    7 |        37.55107         |                    |      030003.000285 |
+                    |            |   4 |    9 |        37.55587         |                    |      030003.000286 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).7g    | 2[5/2]     |   2 |    5 |        37.56001         |                    |      030003.000287 |
+                    |            |   3 |    7 |        37.56001         |                    |      030003.000288 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).7g    | 2[11/2]    |   5 |   11 |        37.56136         |                    |      030003.000289 |
+                    |            |   6 |   13 |        37.56136         |                    |      030003.000290 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).7g    | 2[7/2]     |   3 |    7 |        37.56383         |                    |      030003.000291 |
+                    |            |   4 |    9 |        37.56383         |                    |      030003.000292 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).7g    | 2[9/2]     |   4 |    9 |        37.56522         |                    |      030003.000293 |
+                    |            |   5 |   11 |        37.56522         |                    |      030003.000294 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D2).9s        | 1D         |   2 |    5 |        37.62937         |                    |      030003.000295 |
+                    |            |     |      |                         |                    |                    |
+3d8.4s.(2G).4p      | 1F*        |   3 |    7 |        37.6706          |                    |      030003.000296 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).8g    | 2[13/2]    |   6 |   13 |        37.80620         |                    |      030003.000297 |
+                    |            |   7 |   15 |        37.80620         |                    |      030003.000298 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).8g    | 2[5/2]     |   2 |    5 |        37.80659         |                    |      030003.000299 |
+                    |            |   3 |    7 |        37.80659         |                    |      030003.000300 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).8g    | 2[7/2]     |   3 |    7 |        37.80808         |                    |      030003.000301 |
+                    |            |   4 |    9 |        37.80808         |                    |      030003.000302 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).8g    | 2[11/2]    |   5 |   11 |        37.80881         |                    |      030003.000303 |
+                    |            |   6 |   13 |        37.80881         |                    |      030003.000304 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).8g    | 2[9/2]     |   4 |    9 |        37.80899         |                    |      030003.000305 |
+                    |            |   5 |   11 |        37.80899         |                    |      030003.000306 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).10s   | (5/2,1/2)  |   3 |    7 |        37.84625         |                    |      030003.000307 |
+                    |            |   2 |    5 |        37.84785         |                    |      030003.000308 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).8g    | 2[11/2]    |   5 |   11 |        38.14859         |                    |      030003.000309 |
+                    |            |   6 |   13 |        38.14859         |                    |      030003.000310 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).10s   | (3/2,1/2)  |   2 |    5 |        38.18974         |                    |      030003.000311 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<5/2>).11s   | (5/2,1/2)  |   3 |    7 |        38.23629         |                    |      030003.000312 |
+                    |            |   2 |    5 |        38.23732         |                    |      030003.000313 |
+                    |            |     |      |                         |                    |                    |
+3d9.(2D<3/2>).11s   | (3/2,1/2)  |   1 |    3 |        38.57766         |                    |      030003.000314 |
+                    |            |   2 |    5 |        38.57886         |                    |      030003.000315 |
+--------------------|------------|-----|------|-------------------------|--------------------|--------------------|
+--------------------|------------|-----|------|-------------------------|--------------------|--------------------|
+Zn IV (3d9 2D<5/2>) | Limit      | --- |      |        39.72330         |           0.00012  |      030003.Lim001 |
+-------------------------------------------------------------------------------------------------------------------
+</PRE>
+
+<p style="color:black; font-family: helvetica,arial; font-weight:bold">If you did not find the data you need, please <a href="/cdn-cgi/l/email-protection#452429203d242b2120376b2e3724282c2124052b2c36316b222a337a3630272f20263178082c36362c2b22607775212431246077752c2b607775041601632428357e272a213c781f2b6077750c0c0c607775292033202936">inform the ASD Team</a>.</p><table style="width:100%; border:0; margin-top:0">
+<tr><td style="text-align:left"><a href="https://physics.nist.gov/PhysRefData/ASD/index.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/ASD-sm.gif" style="border:0" width="100" height="47"
+alt="[ASD Home]" title="ASD Home"></a><a href="https://physics.nist.gov/PhysRefData/ASD/lines_form.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/Lines.gif" style="border:0" width="70" height="47"
+alt="[Lines Query]" title="Lines Query"></a><a href="https://physics.nist.gov/PhysRefData/ASD/levels_form.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/Levels.gif" style="border:0" width="79" height="47"
+alt="[Levels Query]" title="Levels Query"></a><a href="https://www.nist.gov/pml/atomic-spectra-database-contents"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/List.gif" style="border:0" width="77" height="47"
+alt="[List of Spectra]" title="List of Spectra"></a><a href="https://physics.nist.gov/PhysRefData/ASD/ionEnergy.html"><img
+src="https://physics.nist.gov/PhysRefData/ASD/Images/GS-IE.gif" style="border:0" width="124" height="47"
+alt="[Ground States and Ionization Energies]" title="Ground States and Ionization Energies"></a><a
+href="https://physics.nist.gov/PhysRefData/ASBib1/index.html"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/Bib.gif" style="border:0"
+width="98" height="47" alt="[Bibliography]" title="Bibliography"></a><a
+href="https://physics.nist.gov/PhysRefData/ASD/Html/help.html"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/Help.gif" style="border:0"
+width="55" height="47" alt="[Help]" title="Help"/></a></td>
+<td style="text-align:right"><img src="https://physics.nist.gov/PhysRefData/ASD/Images/nist-pl-black.gif" style="border:0" width="136" height="68"
+usemap="#NIST-PL" alt="NIST Physical Measurement Laboratory"/></td>
+</tr></table>
+
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4ab47e67cd3ba28',t:'MTc5MjAzMDE1Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
