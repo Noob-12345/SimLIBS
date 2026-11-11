@@ -20,8 +20,10 @@ PAPER_ELEMENTS = frozenset(('Mg', 'Ca', 'Zn'))
 def options(raw):
     if not isinstance(raw, dict):
         raise ValueError('高级参数须为对象')
-    if raw.get('model', 'paper') not in ('paper', 'nist'):
-        raise ValueError('高级模型须为paper或nist')
+    if raw.get('model', 'paper') not in ('paper', 'local', 'nist'):
+        raise ValueError('高级模型须为paper、local或nist')
+    if raw.get('model') == 'local':
+        return {'model': 'local'}
     if raw.get('model') == 'nist':
         from .advanced_nist import options as nist_options
         return nist_options(raw)
@@ -69,6 +71,10 @@ def options(raw):
 
 def effective(p, raw):
     o = options(raw)
+    if o.get('model') == 'local':
+        if p.webscraping != 'local':
+            raise ValueError('高级本地模拟要求 webscraping=local')
+        return p, o, 1
     if o.get('model') == 'nist':
         from .advanced_nist import effective as nist_effective
         return nist_effective(p, o)
@@ -98,6 +104,9 @@ def effective(p, raw):
 
 
 def simulate(p, s, raw, cancelled=lambda: False, emit=None):
+    if isinstance(raw, dict) and raw.get('model') == 'local':
+        from .adapter import simulate as local_simulate
+        return local_simulate(p, s, cancelled=cancelled, emit=emit)
     if isinstance(raw, dict) and raw.get('model') == 'nist':
         from .advanced_nist import simulate as nist_simulate
         return nist_simulate(p, s, raw, cancelled, emit)

@@ -7,11 +7,11 @@ export function applyAdvancedStark(result: OpenResult): string {
   return result.status === 'failed' ? result.message + '；原系数文件已保留' : ''
 }
 export function clearAdvancedStark() { advanced.starkText = ''; advanced.starkName = '' }
-export const advancedModels = [{ value: 'nist', label: '客户端模拟' }] as const
+export const advancedModels = [{ value: 'local', label: '本地模拟' }, { value: 'nist', label: '客户端模拟' }] as const
 export const densityChoices = [{ value: 'charge_balance', label: '由 Ne 与全阶段布居按电荷守恒反推' }, { value: 'specified', label: '指定总原子/离子数密度' }] as const
 export function changeAdvancedModel(_value: string) {
-  advanced.model = 'nist'
-  if (advanced.selfAbsorption) advanced.starkBroadening = true
+  if (_value === 'local' || _value === 'nist') advanced.model = _value
+  if (advanced.model === 'nist' && advanced.selfAbsorption) advanced.starkBroadening = true
 }
 export function setAdvancedAbsorption(value: boolean) {
   advanced.selfAbsorption = value
@@ -23,8 +23,9 @@ export function setAdvancedStark(value: boolean) {
 }
 export function prepareAdvanced(compositionError = '') {
   if (compositionError) throw Error(compositionError)
-  const p = validateParams({ ...advanced.params, mode: 'local', flux: 'photon', broaden: true, temperatureMode: 'manual', temperature: '0', gaussian: '0', lorentz: '0', resample: false })
+  const p = validateParams(advanced.model === 'local' ? { ...advanced.params, mode: 'local', flux: 'photon', convention: 'physics', resample: false } : { ...advanced.params, mode: 'local', flux: 'photon', broaden: true, temperatureMode: 'manual', temperature: '0', gaussian: '0', lorentz: '0', resample: false })
   const comp = validateComposition(advanced.composition)
+  if (advanced.model === 'local') return { params: apiParams(p), composition: apiComposition(comp), advanced: { model: 'local' } }
   if (advanced.selfAbsorption && !advanced.starkBroadening) throw Error('开启自吸收必须启用 Stark 展宽')
   const responses = Object.fromEntries(comp.map(e => [e.symbol, advanced.matrix ? numeric(advanced.responses[e.symbol] ?? '1', `${e.symbol} 响应`, 0, 1e6) : 1]))
   if (advanced.matrix && !comp.some(e => e.pct > 0 && responses[e.symbol]! > 0)) throw Error('有效元素响应不能全为零')
@@ -43,6 +44,8 @@ export function advancedFlags(origin?: Record<string, unknown>) {
   return { known, absorption: flag('self_absorption', true), stark: flag('stark_broadening', true), instrument: flag('instrument_broadening', true) }
 }
 export function advancedResultLabel(version: unknown, origin?: Record<string, unknown>) {
+  const parameters = origin?.parameters as Record<string, unknown> | undefined
+  if (parameters?.webscraping === 'local' || typeof version === 'string' && version.startsWith('local-')) return '高级本地模拟'
   if (isNistAdvanced(version)) {
     const flags = advancedFlags(origin)
     if (version === 'nist-lines-sticks-1') return '客户端模拟 · 未展宽网格投影'

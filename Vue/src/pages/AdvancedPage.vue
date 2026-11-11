@@ -17,10 +17,11 @@ const running = activeTask('advanced'), submitError = ref(''), compositionError 
 const { pending: saving, feedback, failed: saveFailed, run: saveOutput } = useFileSave()
 const cards = [{ key: 'te', label: 'Te', unit: 'eV' }, { key: 'ne', label: 'Ne', unit: 'cm⁻³' }, { key: 'resolution', label: 'R', unit: '(λ/Δλ)' }] as const
 const chargeChoices = [0, 1, 2, 3].map(value => ({ value: String(value), label: `${value}+` }))
-const issues = computed(() => parameterIssues({ ...advanced.params, mode: 'local', broaden: false, resample: false }))
+const issues = computed(() => parameterIssues({ ...advanced.params, mode: 'local', broaden: advanced.model === 'local' && advanced.params.broaden, resample: false }))
 const attrs = (key: string) => issueAttrs(issues.value[key], 'advanced-draft-error')
 const starkSwitch = computed({ get: () => advanced.starkBroadening, set: setAdvancedStark })
 const absorptionSwitch = computed({ get: () => advanced.selfAbsorption, set: setAdvancedAbsorption })
+const temperatureChoices = [{ value: 'linked', label: '热平衡换算（Te：eV → K）' }, { value: 'manual', label: '独立设置' }] as const
 function densityBlur() { const value = Number(advanced.params.ne); if (Number.isFinite(value) && value > 0) advanced.params.ne = value.toExponential() }
 const inputError = computed(() => errorOf(() => prepareAdvanced(compositionError.value)))
 const latest = computed(() => tasks.find(task => task.kind === 'advanced'))
@@ -33,7 +34,7 @@ const partialResult = computed(() => {
 })
 watch(inputError, value => { if (!value) submitError.value = '' })
 async function run() {
-  try { submitError.value = ''; await runReal('advanced', '高级客户端模拟', prepareAdvanced(compositionError.value)) }
+  try { submitError.value = ''; await runReal('advanced', advanced.model === 'local' ? '高级本地模拟' : '高级客户端模拟', prepareAdvanced(compositionError.value)) }
   catch (error) { submitError.value = error instanceof Error ? error.message : String(error) }
 }
 function saveStark(job: string, kind: 'missing' | 'matched') { void saveOutput(`SimLIBS-${job}-${kind}-stark.csv`, () => download(job, `stark-${kind}`)) }
@@ -55,7 +56,7 @@ function saveStark(job: string, kind: 'missing' | 'matched') { void saveOutput(`
         <section class="parameter-section">
           <div class="panel-heading"><h2>模型与展宽</h2><span class="section-number">02</span></div>
           <ChoiceSelect :model-value="advanced.model" label="模拟方式" :options="advancedModels" :disabled="disabled" @update:model-value="changeAdvancedModel" />
-          <div class="advanced-switches" role="group" aria-label="展宽机制">
+          <template v-if="advanced.model === 'nist'"><div class="advanced-switches" role="group" aria-label="展宽机制">
             <SwitchHint v-model="starkSwitch" label="Stark 展宽" description="逐线内禀 Lorentz 展宽；缺失系数时自动继续并保留清单。关闭时同时关闭自吸收；开启时不改变自吸收或仪器展宽。" :disabled="disabled" />
             <SwitchHint v-model="absorptionSwitch" label="逐线自吸收" description="按布居与光程计算逐线吸收及展宽。客户端模拟开启自吸收会自动开启 Stark；关闭自吸收保留 Stark 与仪器展宽。" :disabled="disabled" />
             <SwitchHint v-model="advanced.instrumentBroadening" label="仪器展宽（Gaussian）" description="仪器响应独立开关，不改变 Stark 或自吸收。启用后由 R 控制高斯线宽；先计算内禀谱，再应用仪器响应。" :disabled="disabled" />
@@ -82,6 +83,8 @@ function saveStark(job: string, kind: 'missing' | 'matched') { void saveOutput(`
               <p class="hint">未标定：NIST 名义与有效条件分别取数，产额倍率作用于有效线强与吸收粒子密度。</p>
             </div></Transition>
           </div>
+          </template>
+          <template v-else><div class="advanced-switches" role="group" aria-label="本地展宽"><SwitchHint v-model="advanced.params.broaden" label="启用本地展宽" description="复用单次模拟的本地谱线库；开启后设置 Gaussian、Lorentz 与重粒子温度。" :disabled="disabled" /></div><Transition name="expand"><div v-if="advanced.params.broaden" class="advanced-subpanel" data-advanced-section="local-broadening"><div class="row2"><label class="field compact">高斯 FWHM / nm<input id="advanced-local-gaussian" v-model="advanced.params.gaussian" type="text" inputmode="decimal" v-bind="attrs('gaussian')" /></label><label class="field compact">洛伦兹 FWHM / nm<input id="advanced-local-lorentz" v-model="advanced.params.lorentz" type="text" inputmode="decimal" v-bind="attrs('lorentz')" /></label></div><ChoiceSelect v-model="advanced.params.temperatureMode" label="重粒子温度" :options="temperatureChoices" :disabled="disabled" /><label v-if="advanced.params.temperatureMode === 'manual'" class="field">重粒子温度 / K<input id="advanced-local-temperature" v-model="advanced.params.temperature" type="text" inputmode="decimal" v-bind="attrs('temperature')" /></label><p v-else class="hint mono">{{ Number(advanced.params.te) * 11604.518 }} K · T[K] = Te[eV] × 11604.518</p></div></Transition></template>
         </section>
         <section class="parameter-section">
           <CompositionEditor v-model="advanced.composition" scope="advanced" section-number="03" mode-override="client" :candidate-symbols="symbols" :disabled="disabled" @issue="compositionError = $event" />
