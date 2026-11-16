@@ -6,7 +6,7 @@ import { elementColor, format, type Spectrum } from '../lib/model'
 import { realSpectrumCsv } from '../lib/backend'
 import { useFileSave } from '../lib/fileAccess'
 import { localPeakIndices, nearestNode, selectHoverNode } from '../lib/spectrumInteraction'
-import { advancedFlags, isNistAdvanced } from '../lib/advanced'
+import { advancedFlags, isLocalAdvanced, isNistAdvanced } from '../lib/advanced'
 const props = defineProps<{ spectrum: Spectrum; label?: string; viewMode?: 'elements' | 'comparison' }>()
 const spec = computed(() => props.spectrum)
 const showComparison = computed(() => props.viewMode !== 'elements' && !!spec.value.comparison)
@@ -29,8 +29,9 @@ const drag = ref<{ start: number; now: number; pan: boolean; initial: [number, n
 let resize: ResizeObserver | undefined, themeObserver: MutationObserver | undefined
 const max = computed(() => [spec.value.total, ...(showElements.value ? spec.value.elements.map(e => e.ys) : []), ...(showComparison.value ? [spec.value.comparison!.thin,spec.value.comparison!.nominal] : [])].reduce((peak, values) => values.reduce((m, v) => Math.max(m,v),peak), 1e-30))
 const nistAdvanced = computed(() => isNistAdvanced(spec.value.source.origin?.model_version))
-const unit = computed(() => normalized.value ? '共同归一化强度' : nistAdvanced.value ? 'NIST 相对光子强度 / a.u.' : spec.value.comparison ? '模型光子辐亮度（未标定）/ photons·s⁻¹·m⁻²·sr⁻¹·nm⁻¹' : '实际强度 / a.u.')
-const valueUnit = computed(()=>nistAdvanced.value ? 'a.u. · NIST 相对光子强度' : spec.value.comparison ? '(s·m²·sr·nm)⁻¹ · 未标定' : 'a.u.')
+const localAdvanced = computed(() => isLocalAdvanced(spec.value.source.origin?.model_version))
+const unit = computed(() => normalized.value ? '共同归一化强度' : nistAdvanced.value ? 'NIST 相对光子强度 / a.u.' : localAdvanced.value ? '本地 LTE 相对光子强度 / a.u.' : spec.value.comparison ? '模型光子辐亮度（未标定）/ photons·s⁻¹·m⁻²·sr⁻¹·nm⁻¹' : '实际强度 / a.u.')
+const valueUnit = computed(()=>nistAdvanced.value ? 'a.u. · NIST 相对光子强度' : localAdvanced.value ? 'a.u. · 本地 LTE 相对光子强度' : spec.value.comparison ? '(s·m²·sr·nm)⁻¹ · 未标定' : 'a.u.')
 const zoomed = computed(() => Math.abs(view.value[0] - spec.value.params.low) > .00001 || Math.abs(view.value[1] - spec.value.params.high) > .00001)
 const visibleCurves = computed(() => [
   ...(!hidden.value.includes('total') ? [{ id: 'total', label: '总谱', ys: spec.value.total, color: '' }] : []),

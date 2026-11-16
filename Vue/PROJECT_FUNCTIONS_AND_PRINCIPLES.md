@@ -1,5 +1,15 @@
 # SimLIBS 功能与计算原理
 
+## 当前高级本地与客户端入口（2026-11-11）
+
+本地高级保留 CSV 原波长口径、真实 Aki 和统计权重，线面积复用原 offline_engine 的有限本地能级分区与 I/II Saha 算法，不引入 NIST 线强或论文线表。逐线记录保留 CSV 文件 SHA256、原行号/量子原文，gA=Aki×g_upper、能级 cm⁻¹ 按原常数转 eV；无法解释的组态/项/J不伪造，不用最近波长配系数。本地只有已有 I/II 发射线，不制造 III/IV。
+
+两模式共用 Stark、仪器、自吸收和基体四项开关，初始均关闭。上方仅 Stark/仪器，自吸收与光程/密度放在下方基体区且不依赖 matrix 开关。开自吸收自动开 Stark，关 Stark 同时关自吸收；其它开关、倍率、响应与已有结果保留草稿。本地关闭基体时倍率与响应为1；开启时名义/有效 Te、Ne、组成及产额分别计算，属于未标定响应模型。
+
+本地 Stark 使用既有 resolve_widths/resolve_stark 与受控 StarkTransport：JSON → 在线 STARK-B → 完整 NIST 原子输入＋DK1980 → missing，后层只处理未决线；q0/1不会套用q2/3半经验模型。全关/仅仪器不取系数或量子身份。开启自吸收时 Ns 与 log_partition 来自同一有限本地 I/II 布居；默认总密度按该模型平均电荷与 Ne 反推，或指定总密度。共享逐线 renderer 计算 Stark/τ/SA 后最后施加仪器高斯，w=λ/R 是1/e半宽，R不进入τ。缺失宽度的线保留本地面积、跳过Stark/SA，真实获取故障不伪装成缺失。
+
+输出 local-lines-* 结果版本、相对本地 photon 单位、线位/线强来源及独立的系数请求/缓存证据。shared renderer 中 nist_strength 仅作为面积兼容字段使用，不代表 NIST 强度；本地 CSV 不重新标成 NIST 真空波长。名义薄谱、有效薄谱和修正谱同轴，诊断/缺失清单/CSV/JSON绑定原任务。旧paper/nist版本优先识别，不因 parameters.webscraping=local 误标为新本地模型。以下带日期的旧高级实现及论文推导按历史保留。
+
 2026-11-05 高级 Stark 当前链路：JSON → 在线 STARK-B → NIST＋DK1980 → missing，仅处理各层尚未解决的谱线。生产默认读取本包 data/stark_broadening.json，不向父目录发现源库/sample。固定导出 f40995bbb87ffeedb069d29e8e42c7fa6e64d939ceaceeb19fe902b7185f5a54 的 rows、内嵌 manifest 与172个 gzip 原始 payload 均校验；原始非正/空系数保留标记且不可用于展宽。下文历史 CSV 补数/重导入已被自动链替代。
 
 实际 charge=q：0/I中性，1/II一次电离，2/III二次电离，3/IV三次电离。DK1980 只允许 q2/3，要求严格数值＋组态/term/J身份、可信闭芯单价电子 LS 阵列和完整 E1 Aki/统计权重/电离阈值；无数据不代零或phi=1。STARK-B电子FWHM Å先除10再除2为renderer W；DK1980直接取hwhm_nm，仅换算一次，均满足FWHM=2W·Ne/Ne_ref。Te eV按e/k换K，名义/有效条件分别计算。DOI 10.1016/0022-4073(80)90014-X及原子输入出处逐线保存，不冒充数据库实测。
