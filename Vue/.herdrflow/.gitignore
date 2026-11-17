@@ -1,0 +1,6 @@
+runtime/
+state.json
+operation.lock
+*.tmp
+tasks/*/chrome-profile*/
+tasks/*/reviewer/chrome-profile*/

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "workflowVersion": "0.1.0",
+  "projectRoot": "D:\\LIBS\\SimLIBS\\Vue",
+  "roles": {
+    "coordinator": {
+      "mode": "current"
+    },
+    "implementer": {
+      "kind": "codex",
+      "args": []
+    },
+    "reviewer": {
+      "kind": "codex",
+      "args": []
+    }
+  },
+  "startupTimeoutMs": 30000,
+  "checks": [],
+  "maxFixRounds": 3
+}

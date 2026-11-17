@@ -1,0 +1,75 @@
+﻿{
+    "taskId":  "T001",
+    "dispatchId":  "8e243d04-0640-4f35-841b-efb28c7198b6",
+    "revision":  1,
+    "head":  "43e2818b700f505de49de25d2c07d3912b5ce6f4",
+    "trackedChangedPaths":  [
+                                "dist-desktop/SHA256SUMS.txt",
+                                "dist-desktop/SimLIBS-Setup.exe",
+                                "dist-desktop/SimLIBS.exe",
+                                "dist-desktop/artifact-manifest.json",
+                                "src/components/BrowserSidebar.vue",
+                                "src/components/BrowserSpectrumChart.vue"
+                            ],
+    "unexpectedTrackedPaths":  [
+
+                               ],
+    "diffCheckExitCode":  0,
+    "files":  [
+                  {
+                      "file":  "src/components/BrowserSidebar.vue",
+                      "bytes":  878,
+                      "sha256":  "0ca376466c59150ab113d80e9eda298e37e05115c368f3d1614ad3ec314c670f"
+                  },
+                  {
+                      "file":  "src/components/BrowserSpectrumChart.vue",
+                      "bytes":  23259,
+                      "sha256":  "8a0e12cddb32b3beca5b5b2417d653458cf8ae260d667618d15bff85f5b0d284"
+                  },
+                  {
+                      "file":  "dist-desktop/SimLIBS.exe",
+                      "bytes":  5142016,
+                      "sha256":  "824a7480ab5792a094a8829f818365c750238fcc06407c74f56672cd0ce461f6"
+                  },
+                  {
+                      "file":  "dist-desktop/SimLIBS-Setup.exe",
+                      "bytes":  6007411,
+                      "sha256":  "252107dbf3c336ad8c34ec0939aeb41d68f190bc7030899c7c4903069af66df1"
+                  },
+                  {
+                      "file":  "dist-desktop/SHA256SUMS.txt",
+                      "bytes":  11783,
+                      "sha256":  "4e6df5e2a2ea69635c987ac6aa7bd93b5b1c524c2e083b860997784655eca369"
+                  },
+                  {
+                      "file":  "dist-desktop/artifact-manifest.json",
+                      "bytes":  25110,
+                      "sha256":  "352452335d1ca630b0a67b06ae088a59004f7911f396e3ecd48a59a08b3e5998"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T001/final-source.diff",
+                      "bytes":  26565,
+                      "sha256":  "dee45c44bf185a9793b15611d33361a3579a5c467c4629bdf616666dc253811b"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T001/implementation.md",
+                      "bytes":  8295,
+                      "sha256":  "f063b7b75e549403d1d68c3507724bf45f883569050013e89b50f88be7310457"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T001/behavior-check.json",
+                      "bytes":  8559,
+                      "sha256":  "753720f36b5fcfc6920131ac19077c7060f3e867bf3c937a4f86fe5a6e97af6c"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T001/build.log",
+                      "bytes":  836,
+                      "sha256":  "754b96bcaacaca2ebb8b8f286dc5656d619809ff2b9a8b5fb79b4d13c77f73d5"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T001/desktop-build.log",
+                      "bytes":  54386,
+                      "sha256":  "35158ad5cb51fdb330ab961513dc854ec2e8b7cc291d4db0d61d73e3951bb5d9"
+                  }
+              ]
+}

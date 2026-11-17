@@ -1,0 +1,37 @@
+{
+  "taskId": "T001",
+  "dispatchId": "8e243d04-0640-4f35-841b-efb28c7198b6",
+  "revision": 1,
+  "status": "completed",
+  "owner": "implementer",
+  "goal": "光谱浏览：保持左侧效果控件展开；横向放大缩小时保持强度轴区间；增加显示全局与自适应强度按钮。",
+  "acceptance": [
+    "左侧光谱浏览效果控件始终展开，移除收起入口，桌面和窄屏布局可用",
+    "默认按完整波长范围的可见曲线固定强度轴，横向缩放／平移／概览联动不自动改变强度轴",
+    "提供显示全局与自适应强度两个一次性操作按钮并有可读说明",
+    "显示全局恢复全谱和全局强度范围，既有 Home／Escape／右键恢复全谱语义保持",
+    "自适应强度仅点击时按当前选区重算并锁定，后续缩放平移不变，概览始终全局；空数据不产生 NaN",
+    "真实数据和既有导入、参考线、处理、隐藏曲线、拖拽交互不变"
+  ],
+  "allowedPaths": [
+    "src/components/BrowserSidebar.vue",
+    "src/components/BrowserSpectrumChart.vue"
+  ],
+  "forbiddenPaths": [
+    "src/lib/spectrumBrowser.ts",
+    "src/pages/SpectrumBrowserPage.vue",
+    "src-tauri",
+    "backend",
+    "package.json",
+    "package-lock.json"
+  ],
+  "evidence": [
+    "implementation.md",
+    "npm run build",
+    "../../runtime/implementer.ready.json",
+    "../../runtime/reviewer.ready.json",
+    "review.md"
+  ],
+  "fixRounds": 0,
+  "reviewVerdict": "pass"
+}

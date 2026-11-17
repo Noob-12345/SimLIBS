@@ -1,0 +1,373 @@
+{
+  "at": "2026-11-17T04:12:03.358Z",
+  "taskId": "T001",
+  "dispatchId": "8e243d04-0640-4f35-841b-efb28c7198b6",
+  "revision": 1,
+  "scope": "Actual App and Canvas with isolated UI test data through real file/reference/processing APIs; no scientific simulation",
+  "checks": [
+    {
+      "name": "actual file import and sidebar always expanded at desktop/440/360 widths",
+      "result": "PASS",
+      "detail": [
+        {
+          "width": 1360,
+          "overflow": false,
+          "toggle": false,
+          "inert": false,
+          "controls": {
+            "x": 244,
+            "y": 240.390625,
+            "width": 292,
+            "height": 875.5,
+            "top": 240.390625,
+            "right": 536,
+            "bottom": 1115.890625,
+            "left": 244
+          },
+          "chart": {
+            "x": 601,
+            "y": 305.390625,
+            "width": 692,
+            "height": 380,
+            "top": 305.390625,
+            "right": 1293,
+            "bottom": 685.390625,
+            "left": 601
+          },
+          "actions": [
+            {
+              "x": 1114,
+              "y": 261.390625,
+              "width": 80,
+              "height": 36,
+              "top": 261.390625,
+              "right": 1194,
+              "bottom": 297.390625,
+              "left": 1114
+            },
+            {
+              "x": 1200,
+              "y": 261.390625,
+              "width": 93,
+              "height": 36,
+              "top": 261.390625,
+              "right": 1293,
+              "bottom": 297.390625,
+              "left": 1200
+            }
+          ]
+        },
+        {
+          "width": 440,
+          "overflow": false,
+          "toggle": false,
+          "inert": false,
+          "controls": {
+            "x": 76,
+            "y": 909.890625,
+            "width": 342,
+            "height": 867.5,
+            "top": 909.890625,
+            "right": 418,
+            "bottom": 1777.390625,
+            "left": 76
+          },
+          "chart": {
+            "x": 89,
+            "y": 393.890625,
+            "width": 316,
+            "height": 300,
+            "top": 393.890625,
+            "right": 405,
+            "bottom": 693.890625,
+            "left": 89
+          },
+          "actions": [
+            {
+              "x": 89,
+              "y": 349.890625,
+              "width": 155,
+              "height": 36,
+              "top": 349.890625,
+              "right": 244,
+              "bottom": 385.890625,
+              "left": 89
+            },
+            {
+              "x": 250,
+              "y": 349.890625,
+              "width": 155,
+              "height": 36,
+              "top": 349.890625,
+              "right": 405,
+              "bottom": 385.890625,
+              "left": 250
+            }
+          ]
+        },
+        {
+          "width": 360,
+          "overflow": false,
+          "toggle": false,
+          "inert": false,
+          "controls": {
+            "x": 76,
+            "y": 927.890625,
+            "width": 262,
+            "height": 867.5,
+            "top": 927.890625,
+            "right": 338,
+            "bottom": 1795.390625,
+            "left": 76
+          },
+          "chart": {
+            "x": 89,
+            "y": 411.890625,
+            "width": 236,
+            "height": 300,
+            "top": 411.890625,
+            "right": 325,
+            "bottom": 711.890625,
+            "left": 89
+          },
+          "actions": [
+            {
+              "x": 89,
+              "y": 367.890625,
+              "width": 115,
+              "height": 36,
+              "top": 367.890625,
+              "right": 204,
+              "bottom": 403.890625,
+              "left": 89
+            },
+            {
+              "x": 210,
+              "y": 367.890625,
+              "width": 115,
+              "height": 36,
+              "top": 367.890625,
+              "right": 325,
+              "bottom": 403.890625,
+              "left": 210
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "global Y stable for wheel/box/shift-pan/middle-pan/overview and one-shot adaptive lock",
+      "result": "PASS",
+      "detail": {
+        "global": [
+          -730,
+          1590,
+          3910,
+          6230,
+          8550
+        ],
+        "adaptive": [
+          -110.8,
+          -35.4,
+          40,
+          115.4,
+          190.8
+        ],
+        "views": [
+          {
+            "name": "wheel zoom in",
+            "before": [
+              330,
+              350
+            ],
+            "after": [
+              331.54098360655735,
+              348.20765027322403
+            ]
+          },
+          {
+            "name": "wheel zoom out",
+            "before": [
+              331.54098360655735,
+              348.20765027322403
+            ],
+            "after": [
+              329.99999999999994,
+              350
+            ]
+          },
+          {
+            "name": "box",
+            "before": [
+              329.99999999999994,
+              350
+            ],
+            "after": [
+              332.4393450627561,
+              343.7836073578381
+            ]
+          },
+          {
+            "name": "shift pan",
+            "before": [
+              332.4393450627561,
+              343.7836073578381
+            ],
+            "after": [
+              331.02596156369674,
+              342.37022385877873
+            ]
+          },
+          {
+            "name": "middle pan",
+            "before": [
+              331.02596156369674,
+              342.37022385877873
+            ],
+            "after": [
+              330.1147011498294,
+              341.4589634449114
+            ]
+          },
+          {
+            "name": "overview",
+            "before": [
+              330.1147011498294,
+              341.4589634449114
+            ],
+            "after": [
+              336.2808065554193,
+              347.6250688505013
+            ]
+          }
+        ],
+        "overviewUnchanged": true
+      }
+    },
+    {
+      "name": "global button/Home/Escape/right-click restore X and global Y including repeated full-range reset",
+      "result": "PASS",
+      "detail": {
+        "allFourResets": true,
+        "repeatedReset": true
+      }
+    },
+    {
+      "name": "hidden curves excluded from adaptive computation and original arrays remain intact",
+      "result": "PASS",
+      "detail": {
+        "hiddenExcluded": true,
+        "lockedWhenRestored": true,
+        "originalUnchanged": true
+      }
+    },
+    {
+      "name": "real reference lines/tooltips and processing views retain existing chart connections",
+      "result": "PASS",
+      "detail": {
+        "referenceGroups": 62,
+        "actualTooltip": true,
+        "processingPreserved": true
+      }
+    },
+    {
+      "name": "boundary interpolation excludes outside peaks, handles no internal node and duplicate wavelengths",
+      "result": "PASS",
+      "detail": {
+        "interior": [
+          11.36,
+          13.68,
+          16,
+          18.32,
+          20.64
+        ],
+        "noNode": [
+          12.1,
+          13.55,
+          15,
+          16.45,
+          17.9
+        ],
+        "duplicate": [
+          -800007,
+          2100000,
+          5000007,
+          7900015,
+          10800020
+        ]
+      }
+    },
+    {
+      "name": "negative/zero/constant/empty/all-hidden selections produce finite ranges",
+      "result": "PASS",
+      "detail": [
+        {
+          "name": "negative",
+          "ticks": [
+            -9.16,
+            -8.58,
+            -8,
+            -7.42,
+            -6.84
+          ]
+        },
+        {
+          "name": "zero",
+          "ticks": [
+            -1,
+            -0.5,
+            0,
+            0.5,
+            1
+          ]
+        },
+        {
+          "name": "constant",
+          "ticks": [
+            2,
+            2.5,
+            3,
+            3.5,
+            4
+          ]
+        },
+        {
+          "name": "empty",
+          "ticks": [
+            -1,
+            -0.5,
+            0,
+            0.5,
+            1
+          ]
+        },
+        {
+          "name": "no-curves",
+          "ticks": [
+            -1,
+            -0.5,
+            0,
+            0.5,
+            1
+          ]
+        },
+        {
+          "name": "all-hidden",
+          "ticks": [
+            -1,
+            -0.5,
+            0,
+            0.5,
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "ownedProcessesStopped": {
+    "chrome": true,
+    "api": true
+  },
+  "failed": 0
+}
