@@ -45,6 +45,8 @@ if not TOKEN: raise RuntimeError('必须配置 SIMLIBS_SESSION_TOKEN，禁止无
 TRUSTED = {'http://tauri.localhost', 'https://tauri.localhost', 'tauri://localhost',
            'http://localhost:1420', 'http://127.0.0.1:1420'}
 BACKEND = create_backend()
+from simlibs_ui.spectrum_browser import BrowserStore
+SPECTRUM_BROWSER = BrowserStore()
 
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -207,6 +209,20 @@ class Handler(BaseHTTPRequestHandler):
         if not self._authorized(): return
         try:
             parts = [p for p in urlparse(self.path).path.split("/") if p]
+            if parts[:2] == ['api', 'spectrum-browser']:
+                # Selected bytes only, bounded before allocating/reading the body.
+                action = parts[2] if len(parts) == 3 else ''
+                limit = 42_668_000 if action in ('import', 'references') else 65_536
+                try:
+                    length = int(self.headers.get('Content-Length') or 0)
+                    if self.headers.get('Transfer-Encoding') or not 0 < length <= limit:
+                        self.close_connection = True
+                        raise ApiError(413, '光谱浏览请求长度非法或超限', 'upload_limit')
+                    body = self._body()
+                    self._json(SPECTRUM_BROWSER.call(action, body, BACKEND.get_settings()))
+                except (ValueError, TypeError, KeyError, IndexError, OSError) as error:
+                    raise ApiError(400, str(error), 'spectrum_validation') from error
+                return
             body = self._body()
             if parts == ['api', 'shutdown']:
                 self._json({'stopping': True})

@@ -5,6 +5,7 @@ import AppIcon from './components/AppIcon.vue'
 import ThemeMenu from './components/ThemeMenu.vue'
 import RuntimeStatus from './components/RuntimeStatus.vue'
 import SinglePage from './pages/SinglePage.vue'
+import SpectrumBrowserPage from './pages/SpectrumBrowserPage.vue'
 import BatchPage from './pages/BatchPage.vue'
 import ScanPage from './pages/ScanPage.vue'
 import JobsPage from './pages/JobsPage.vue'
@@ -22,6 +23,7 @@ let disposeScrollbar: (() => void) | undefined
 onMounted(() => { disposeScrollbar = installAutoHideScrollbar(document.documentElement) })
 onUnmounted(() => disposeScrollbar?.())
 const pages: { id: Page; label: string; subtitle: string }[] = [
+  { id: 'spectrum-browser', label: '光谱浏览', subtitle: '' },
   { id: 'single', label: '单次模拟', subtitle: '' },
   { id: 'batch', label: '批量模拟', subtitle: '' },
   { id: 'scan', label: '参数扫描', subtitle: '' },
@@ -72,7 +74,7 @@ onUnmounted(() => { disposeTimers(); disposePreferences() })
     <main class="main-shell">
       <header class="topbar"><h1 class="topbar-title"><span class="topbar-context">工作空间 <span aria-hidden="true">/</span></span><span class="topbar-current">{{ current.label }}</span></h1><div><div class="topbar-actions"><button v-if="taskStatus" type="button" :class="['icon-btn', 'task-status-button', 'task-status-' + taskStatus.target.status]" :title="taskStatus.label" :aria-label="taskStatus.label" @click="goToTask"><AppIcon :name="taskStatus.icon" :size="18" /><span v-if="taskStatus.count > 1" class="task-status-count" aria-hidden="true">{{ taskStatus.count > 99 ? '99+' : taskStatus.count }}</span></button><ThemeMenu :mode="preferences.mode" :palette="preferences.palette" @select="setThemeMode" @palette="setPalette" /><div class="repository-control"><button type="button" class="icon-btn theme-trigger" aria-label="打开 GitHub 项目" title="GitHub 项目" :disabled="repositoryOpening" @click="openRepository"><AppIcon name="github" :size="18" /></button><p v-if="repositoryError" class="repository-feedback" role="status">{{ repositoryError }}</p></div></div></div></header>
       <div class="workspace"><p v-if="service.error" class="error-text" role="alert">{{ service.error }}</p><p v-if="nativeThemeError" class="error-text" role="alert">{{ nativeThemeError }}</p>
-        <Transition name="page" mode="out-in"><SinglePage v-if="page === 'single'" /><BatchPage v-else-if="page === 'batch'" /><ScanPage v-else-if="page === 'scan'" /><AdvancedPage v-else-if="page === 'advanced'" /><LinksPage v-else-if="page === 'links'" /><JobsPage v-else-if="page === 'jobs'" /><SettingsPage v-else /></Transition>
+        <Transition name="page" mode="out-in"><SpectrumBrowserPage v-if="page === 'spectrum-browser'" /><SinglePage v-else-if="page === 'single'" /><BatchPage v-else-if="page === 'batch'" /><ScanPage v-else-if="page === 'scan'" /><AdvancedPage v-else-if="page === 'advanced'" /><LinksPage v-else-if="page === 'links'" /><JobsPage v-else-if="page === 'jobs'" /><SettingsPage v-else /></Transition>
       </div>
     </main>
   </div>

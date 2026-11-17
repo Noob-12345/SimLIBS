@@ -1,6 +1,7 @@
 <script setup lang="ts">
 defineProps<{ name: string; size?: number }>()
 const paths: Record<string, string> = {
+  'spectrum-browser': 'M3 3v18h18M5 16l3-3 3 2 3-9 3 7 4-3',
   single: 'M9 3h6M10 3v6L4 18a2 2 0 0 0 1.7 3h12.6a2 2 0 0 0 1.7-3l-6-9V3M7.5 15h9',
   batch: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
   scan: 'M2 12h4l3-8 4 16 3-8h6',

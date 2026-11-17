@@ -1,4 +1,4 @@
-export type Page = 'single' | 'batch' | 'scan' | 'advanced' | 'links' | 'jobs' | 'settings'
+export type Page = 'spectrum-browser' | 'single' | 'batch' | 'scan' | 'advanced' | 'links' | 'jobs' | 'settings'
 export type TaskKind = 'single' | 'batch' | 'scan' | 'advanced'
 export type Mode = 'local' | 'server' | 'client'
 export interface ParameterDraft {
