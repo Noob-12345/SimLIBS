@@ -1,0 +1,1005 @@
+{
+    "taskId":  "T002",
+    "dispatchId":  "15198f82-1795-4b8e-8426-e82418e3d97c",
+    "revision":  1,
+    "head":  "fe4ca874437edb688eeb610693005734bd9b8a51",
+    "protected":  [
+                      {
+                          "file":  "PROJECT_FUNCTIONS_AND_PRINCIPLES.md",
+                          "sha256":  "28cc37591ea9f93de266ec5b132ffbc5ee93516fb2bd56a3a0e897f7c1e05303"
+                      },
+                      {
+                          "file":  "README.md",
+                          "sha256":  "e5618043a58ec4c2a1ac1d51a0d0ece01ee9e740000728f80cbe9bf002328e87"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/AlI.csv",
+                          "sha256":  "ecb0b7bec8287c7911cb04924093d63d18649d5bb1c6d433a88a83701752e682"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/AlII.csv",
+                          "sha256":  "4d4ae93dfd2e665245190ce241906f1179be305ef5d10467867bf22b8dbf6b2f"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CaI.csv",
+                          "sha256":  "6a72a48fe01e3ae3f39dc48b764c3e42ccefdb95e08b6772d2b3c2d16419e526"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CaII.csv",
+                          "sha256":  "da084f3732ee4d10280712276a349428c83b27e1190bc3f2240691975484bfa5"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CeI.csv",
+                          "sha256":  "40dbbc55fc766d69680efd6d8ffa949458ca694b47b4af8ce2313139eb466c20"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CeII.csv",
+                          "sha256":  "0b88ce0f4d618625033be91a17a8da856e93bb4bad6a6386180a736b21d695fb"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CrI.csv",
+                          "sha256":  "3ae5a01084d923598f965d015306f4e57a34ad7a6e66fe6e7575f668c717431e"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CrII.csv",
+                          "sha256":  "60d8e52f491385d8e1a7069a832fbc00ed2cfc5763d9c089f2c7f9ffe52a84f4"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CuI.csv",
+                          "sha256":  "3bfa71d05c0ba33dee5ba2a51c24a74e1dd67d876b25e2ebb360264f0934905c"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CuII.csv",
+                          "sha256":  "d55c737c9ed073ce2de08dcf183463c9fd1a210ba3c2b59803b32949cd916a47"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/DyI.csv",
+                          "sha256":  "7bb6d404f8459aeb1b4da7fbb0d531217234c0b19df6b2a815fed0a047ff0e19"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/DyII.csv",
+                          "sha256":  "71153734440bd2ab97a0f3f76e62d3d87d2f991bf670059ba762e083610e9a90"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/ErI.csv",
+                          "sha256":  "59dee1b304f0b5eff0034577392f49af4ee5231b703ba2d560a03f1f2a4db993"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/ErII.csv",
+                          "sha256":  "669b18b86d57a62954beb4a05f3eebd7aba5d842178fd017c3e2f160f1d2bdb6"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/EuI.csv",
+                          "sha256":  "efc19c4605a020607e57180253d3c8069493d7ec20b060d8e2e9cc1942320c0c"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/EuII.csv",
+                          "sha256":  "24b2d754379041fcb2fbf46b42b2e716adab101bec202abcd9760e5cdb0f57a7"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/FeI.csv",
+                          "sha256":  "d79e4c89ccda8f901622473584ded8f9c1346228b1454acdeca736b6e6898834"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/FeII.csv",
+                          "sha256":  "2f04c76ec4cd68bc71197f66d21af2ff9070020bb1d89ced81c38ea5b9cbb7e2"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/GdI.csv",
+                          "sha256":  "4f83246cb9bf817215384ad225ca6ee4305603ce7e8e6ffb30daa8185e3f7909"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/GdII.csv",
+                          "sha256":  "bc2658d942908e0a99fe5b6d7a3836d896a7d390e4453e79314311d6c21aaeb1"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/HoI.csv",
+                          "sha256":  "176d07f53a5363722186240d3883d199f091ef96c34666d0cb4cc2a64379d332"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/HoII.csv",
+                          "sha256":  "d3df2f7b0e52d8bad02db1e288c0674a881d992784519ae15064505ba3eaf91a"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/KI.csv",
+                          "sha256":  "7ee9eb8792af5c21993b78d87f5005651c6852d1fb1a83b5bf56cba5816369b9"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/KII.csv",
+                          "sha256":  "3b7fdb628324f7a394f8f2f791c6ffd2204ef87172384404a6dc85950333834c"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LaI.csv",
+                          "sha256":  "6a7427384b7b2d6c9aaa6a8be1aa87eadceffd350b99a900083d896292fee25d"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LaII.csv",
+                          "sha256":  "0511e4d3a7e01dd009dc98e851308e3eefdc5f24a76340e62e2b3e92fb5ea9cf"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LiI.csv",
+                          "sha256":  "7f81dc5ce760c8cd606b484d6cbe189790acbc222398f61ab2cb8cfefbe5fd95"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LiII.csv",
+                          "sha256":  "44e90c0e96495aeadb2995bc1e0bbc4bfb134f63d6b11e61573a792ba49b3a99"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LuI.csv",
+                          "sha256":  "4f20532534e013833055aa2242ea2c93da09fde3b15784b1c0e1cf1571f0defb"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LuII.csv",
+                          "sha256":  "bded7ead8bb13ba001a24ac462225a31c6f621b9a6f44a55c3157c19f7883725"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MgI.csv",
+                          "sha256":  "4c8f7bf86c3d1149edcc166e881a3f337ec1c704bbd64a6ca5214ffc77a525f8"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MgII.csv",
+                          "sha256":  "2cae4e40ca86c4eca568ca5bfa4cdbfd00b48fcd007cc432f3dcd18c3d5885d0"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MnI.csv",
+                          "sha256":  "f399c7d1a59ed96c89b15498e77a4d16e12445c7fab9afd89a044a7ca543a664"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MnII.csv",
+                          "sha256":  "2428eeed7d9ae28e0833633b8f724bcc6f49a791d0385a69d6616b7849831767"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MoI.csv",
+                          "sha256":  "6850df3c0fdee4a9da61002aa46dad22a82e6cfd92dedc143b5cc0a1c9601bcf"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MoII.csv",
+                          "sha256":  "06acb00f233d80008f053168b3a044afca8d3272baf7c47d71b0a0c43b863281"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NaI.csv",
+                          "sha256":  "479bc8b46687db7a6df9383fc114c636a489f749573f43a76c9a1ebbd2358ee4"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NaII.csv",
+                          "sha256":  "988efd34a2c00ec359f7c13f4abb93047617befbacab001b055f883788dc7c8c"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NdI.csv",
+                          "sha256":  "3ab455f665bf886cef919c9e3dc7648f23784f1812d6559ee0da5c37f06b9963"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NdII.csv",
+                          "sha256":  "7607279c1b38829670a7d00e4a0d779c84425d9a868665239809c77cc3b922fe"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NiI.csv",
+                          "sha256":  "f6147260f519842c286df700027c8a08ea746b2c3b120e929303e0de8625f3c5"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NiII.csv",
+                          "sha256":  "a578b6b67db0f7b5c5910c84d245063a0342f5401a44f6431ac4cdb454735486"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/PbI.csv",
+                          "sha256":  "5b07a47905e9ca7bbd06fff959d6b6544850312ae53ceb708c2dbac37fce2020"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/PbII.csv",
+                          "sha256":  "bd213d6e23d68a87e6cd31c0e74f7dacd81fcc8a5994c1483dda956609905ae9"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/PrI.csv",
+                          "sha256":  "4b7ace2a15b353dcbb3ef8b80a45f8843ae5a695d68a4c038f8642cd3d754ca7"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/PrII.csv",
+                          "sha256":  "8e945034e6549a9a04c7df33545354e4dc8f64334813fc192db0a26e85e6f396"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/Readme.md",
+                          "sha256":  "fbdcbf4b730d2a155eaa8a05d52d19ec59be62928bbc5586e881a9072ea28a19"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/SiI.csv",
+                          "sha256":  "46aada762bb8ee570fb9c4d11e39f54ecc8336b7cea02dd18309596f08f13b88"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/SiII.csv",
+                          "sha256":  "a22010c1d2f1b6a13c8e15baf76658f1e342627dc5e9d71921110b40b58231c7"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/SmI.csv",
+                          "sha256":  "550ed95e55a4677ba49ee32e2376fbc7267ded53249213c4d1299d2d8f63fe28"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/SmII.csv",
+                          "sha256":  "0b86c1e5c9e37c482c025f7a8418671480d2dec4a7215236cc4a2e2e035ef164"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TbI.csv",
+                          "sha256":  "2e7332864e05e045e6b5ed593033bd8375f04a498054577dcaef4029b3de4c04"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TbII.csv",
+                          "sha256":  "9815bf39a41ad5eebf7f02e87c89bee7468bcb72b790c88f1580bb9074d3bda4"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TiI.csv",
+                          "sha256":  "73dd8cb6b94171ace3d36bc932183026824d5d131eccc245b15c2b7a6c2b58dc"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TiII.csv",
+                          "sha256":  "a06511e3ac9426a626a840d850f5a1f183abdd8c840ef498052ba88691393f17"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TmI.csv",
+                          "sha256":  "d4971dd0567372e005d6a7272bb72122aa04183c2e6535db014919501cc16940"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TmII.csv",
+                          "sha256":  "b1c8c24a02d8a719304ea98d16b83dd25ad1f9ce69268db11962712ddee93cde"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/YI.csv",
+                          "sha256":  "8723183983402a2fe9c58a6d3e1f14c6b2a40ca2e62cb3c8b0158cc5571a2ee0"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/YII.csv",
+                          "sha256":  "4ea8868963660d44df363b2d2f826ad8fb633e3ae8ff81191314313bf8d64f31"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/YbI.csv",
+                          "sha256":  "8cf861098d04c22e8106bd4c1e2f0e0244cce889e4a009ff9fab98d7ece7e6cc"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/YbII.csv",
+                          "sha256":  "b0c31fb62a35e8866c0fb0dbb479b8e56f94307896cc101de96fdc943b8b5666"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/ZnI.csv",
+                          "sha256":  "7ae416bc1924756e9446f2a6b99124d8bb3b50cbbcb4d23abd0b0ad55f6f86b0"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/ZnII.csv",
+                          "sha256":  "e2a24834cd06714e4b26c75b722b73771905cb5d5d03f97d158e740253df7938"
+                      },
+                      {
+                          "file":  "backend/Linedatabase/simlibs-atomic-metadata.json",
+                          "sha256":  "332d12067e79d192ae70080b15a33c8d7322a8df08944ca7ef2c5af500dba52d"
+                      },
+                      {
+                          "file":  "backend/README.md",
+                          "sha256":  "5a9e1e7dc3acc042aed116c2f2e04f49d3982c8443e4965c0cd5737c39360639"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/__init__.py",
+                          "sha256":  "9e97e6ed141a0f8cfe011547770c4af93bf442b91abd4d2b388fde51dd3a842a"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/adapter.py",
+                          "sha256":  "887bbb7a28c03d725032f37f5e81e0dc725d7580785b415d9ea43d70824488c2"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/advanced.py",
+                          "sha256":  "3c62e765b93e8040ff8b53aecbdcab60888e0c2e660b30377a9cffaf261abc51"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/advanced_local.py",
+                          "sha256":  "ae495d0906e7d84d1630e3f7d0a836f0ee46fab313d1d4907f1a2b7a44bc3c54"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/advanced_nist.py",
+                          "sha256":  "62706fe9d42a56049f2be13a7dd9b7fef2962558231486ec0b729b4dbb97f503"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/advanced_nist_render.py",
+                          "sha256":  "a2686002805b59b675538f3eba2b3ae44da95a9599197f8012674348f1b8112b"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/advanced_stark.py",
+                          "sha256":  "46007fbad20fbfbcc897c9aa6caf5c1762ad4ca3be01852bb017f6bbd003c3be"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/batch_pipeline.py",
+                          "sha256":  "0eecd726a0eb0ddce04c186d260f01038004864cc308ddae959fa1c34e81135d"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/batch_random.py",
+                          "sha256":  "e63b41cb97a72cb642cd13c868a3f0db27ade8b5c22c206ddad1228412620f2d"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/batch_records.py",
+                          "sha256":  "6c0c4f82d254242c6ef6a70dd429b4b9055d8284de484b73e8cd41d5870ac1ef"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/batch_template.py",
+                          "sha256":  "13b5caf50468e6bb1dc198804dc9d3d0711dee8bb5e09acc611bf1aa6cc708d4"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/jobs.py",
+                          "sha256":  "92e2898c521d4e0720024fa7aeb771fd1a860c1987889ff6fd7fd1e286137b2f"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/library_settings.py",
+                          "sha256":  "681986a80ffa0a21b96d280eddb4efe9449554d1e955f1f6d2b7e53f72187def"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/mode_engine.py",
+                          "sha256":  "c64d81d8981e85b6fd7970e6adc86ec72912d21f77b4b18d86023034707bd44b"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/models.py",
+                          "sha256":  "e69bcbe7001db40d4945cb45bf35af834abc5fa35246edfc5bbd9f748d433f70"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/nist_recon.py",
+                          "sha256":  "35c9fd896cfea9927b23f306074417e87b48f9c4a4bd4e0ddb62826c1212e973"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/offline_database.py",
+                          "sha256":  "b61f2bf62cdf6124ac40520930cf8ca70f95de725af976fc250d0e8801827dc4"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/offline_engine.py",
+                          "sha256":  "02b33db7b4f0be4b56815ceadd60d755bd9eff6015c27ee1ce987c85d8e41302"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/offline_lines.py",
+                          "sha256":  "9f80a71687acb9c6dc1dc5290d8ff350b85222c84f4f99a20607773a00897bae"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/operations.py",
+                          "sha256":  "810591b946b128e30ecbfb414de01138399770ba85859db7b5e00f7e2338d4ad"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/plotting.py",
+                          "sha256":  "3843cb3394d00dc17ae52260c6d8258d7ad915fa3364b54168208a05fcb892f6"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/runtime_diagnostics.py",
+                          "sha256":  "df1545c813d086a1c92b371d9e3d1a998f994bd81296fd9b6fae0d6a6bd661e9"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/settings.py",
+                          "sha256":  "feaa2338b715ffb7ad28ffd59dfdd696a74c424ab9f02879f37bb7a03c1812af"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_avantes.py",
+                          "sha256":  "5e384183c8f6d5ef32d4cd6461794edae7c1c50c72c2f30e7751938d7664532a"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_browser.py",
+                          "sha256":  "6d7b16a1f34cdf211f94a9b7e94a9b37e06a1df57606e259fe3a910316fbf52f"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_cwt.py",
+                          "sha256":  "ef048166485ad5655b9191f4d0758cb7604b408cc8d25e2b9c9035d09c4459f9"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_processing.py",
+                          "sha256":  "f6d96b710c02c7062afb619ce2c4d3b6eef38eb4e70d90ab96fb3ff76a85372a"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_reference.py",
+                          "sha256":  "994223ffce570c23fc1f44f9227a72d83a9103fae2c2ebf9545b3c71fc7b0607"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_sif.py",
+                          "sha256":  "dd178acd3203248d39b446f709761ec457a61c5b2138aaa58d29eb1893964496"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/storage.py",
+                          "sha256":  "310c22fde41d4c77973686d4edfa43186506da71713dcb9853a580bc685ad686"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/training.py",
+                          "sha256":  "c2563dd12b5ec48e426fb38498b3986e7136a7f55ef4f911b0d62bcc50507097"
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/worker.py",
+                          "sha256":  "56b6c54fb2749d0f2a425d7ac81ed88412156f6a549ee2b8799f1bee7e05389d"
+                      },
+                      {
+                          "file":  "backend/source/LICENSE.md",
+                          "sha256":  "77b4a7fcffb2582e4212efb4c5dc7db2ab23ef6ca67e493dea536993acb5b866"
+                      },
+                      {
+                          "file":  "backend/source/README.md",
+                          "sha256":  "893ea90d1520354f2c797c0dee84441f75e21ee14faee7817782f15284f40191"
+                      },
+                      {
+                          "file":  "backend/source/data.csv",
+                          "sha256":  "060f63e37a812ad5dc89889f59277d579dc914c94e5c0aca2d852ee65c8c3091"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/__init__.py",
+                          "sha256":  "2282c493b07437e8a5a2691360aa3c903518be068fb4de425ae75d5c24ad14cb"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/animation.py",
+                          "sha256":  "f4f19f24e6728098785fc69ef9a68187ebb2dcac0468d118c05fa6039d24cd52"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/data/paper_atomic_data.json",
+                          "sha256":  "0c944167ac036a6c3820b08717662e753664619aab77563aca0c8a750f1664f7"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/data/stark_broadening.json",
+                          "sha256":  "ffac32dc06d2fd48da8a18215e3c41192b07ff8e180a24ff013b478c6474afdd"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/nist_lines.py",
+                          "sha256":  "8da09d3016524ad992f3969347b2fee8ac387993a0350e6e8908525533b70b3a"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/nist_self_absorption.py",
+                          "sha256":  "8dcd4565a78b49f1c8b2e374ab5e7a581bdbb7e848c3edcd59673a302a3487f3"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/nist_stark.py",
+                          "sha256":  "59b0953b5f591907bba047144a8b2c23538f5c3cf625dab6c9bb87cec6d7e410"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/py.typed",
+                          "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/self_absorption.py",
+                          "sha256":  "422e0613a57dd990ee22bed87b4a7fb54167cd9303fc205d1991e35138ce0039"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/simulation.py",
+                          "sha256":  "be07b5e12cc04108c998e3bcc1324ee33685e0aab8520f7610f4c00dff6b69cb"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/stark_atomic_data.py",
+                          "sha256":  "037087b11fc40b5cd527a27a44cd0eaa2d568382209850c137e5a718d0c41b1d"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/stark_b.py",
+                          "sha256":  "eb8544e08d7725a4108b8b63ce05cf9658dfd099eb8dade10662f7456bb885e1"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/stark_resolver.py",
+                          "sha256":  "d53c632f6db780bbad97d0cfaf39462d22cac58489f9242ffb218f80eab3cbab"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/stark_semiempirical.py",
+                          "sha256":  "60ade6917180a3dcb6916592f7e6de4e1736b5918cfe3a0fbfef44ae0675330b"
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/stark_vamdc.py",
+                          "sha256":  "0e763205ff8bedf5d90b7a6e468391c5b71f14e2eae7205e781aace179b56df1"
+                      },
+                      {
+                          "file":  "backend/tests/__init__.py",
+                          "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                      },
+                      {
+                          "file":  "backend/tests/fixtures/README.md",
+                          "sha256":  "3a3bf11bd2f82908d384b4135bd432fbb0fc1e4e3491451d15ef20b8b66c5a6f"
+                      },
+                      {
+                          "file":  "backend/tests/fixtures/nist_H_singleion.csv",
+                          "sha256":  "f16de4cd5502ea03321d648343e5cf52b47143fac40cf6f89dcadce011a5b351"
+                      },
+                      {
+                          "file":  "backend/tests/fixtures/nist_mg_280_290.html",
+                          "sha256":  "b4fad2ef7244b4c7acae97b88be2836f74c9ee49c8370ab5ababd707873df3ab"
+                      },
+                      {
+                          "file":  "backend/tests/fixtures/nist_mse/B_2_ionization_initial.json",
+                          "sha256":  "4a037f026d677d4ef2abca14d777c369337f29051dd02bb08be3e7c1bc68b98e"
+                      },
+                      {
+                          "file":  "backend/tests/fixtures/nist_mse/B_2_levels_initial.json",
+                          "sha256":  "04ee33db3ca1290679b3ecd172ff1d7c2aec93ad2be1b79ddd213d6aa6a6976c"
+                      },
+                      {
+                          "file":  "backend/tests/fixtures/nist_mse/B_2_lines_initial.json",
+                          "sha256":  "b6adf1505a73ee9e6b3d8ce3b0dbf20c6aaf73ac6fbcc35fc6b9e2dda720f45f"
+                      },
+                      {
+                          "file":  "backend/tests/fixtures/nist_si_634_638.html",
+                          "sha256":  "8393776c9f3bfcd11c93636fba1339f59a6b8394987c3229c0f043cefe95199b"
+                      },
+                      {
+                          "file":  "backend/tests/fixtures/nist_si_ii_identity.tsv",
+                          "sha256":  "98cdefffa7724fd595c11108f4b0753267de9392ae14eef58b13458a0eb7d79c"
+                      },
+                      {
+                          "file":  "backend/tests/fixtures/starkb_si_ii_6347.html",
+                          "sha256":  "676880b4b144afb3411775d33f6e79651ac38b3f9866874be876c11aa849abac"
+                      },
+                      {
+                          "file":  "backend/tests/job_fixture.py",
+                          "sha256":  "d119c7441470e3abd92ea0f5901196fe9917f3db1f4d4b5205dbc730a7f92cd6"
+                      },
+                      {
+                          "file":  "backend/tests/mock_dynamic_worker.py",
+                          "sha256":  "b14db8c0289253d38b742629c64a33b955328f9d96ba5c784d165e49bdb02e82"
+                      },
+                      {
+                          "file":  "backend/tests/test_adapter.py",
+                          "sha256":  "3532acc3da8aaccf0db8ea8485cf7c471d36645c041457071e693ea60bd8ac20"
+                      },
+                      {
+                          "file":  "backend/tests/test_advanced_broadening.py",
+                          "sha256":  "fd481eb5fcab9a4d0a9538ae8a84537ca67b7dfe754f3f3b501b3f091310d099"
+                      },
+                      {
+                          "file":  "backend/tests/test_advanced_local.py",
+                          "sha256":  "7fb0ee094a4a621c1e024c8ea24f9b7b70dc97563d28820ee76f71cdf6b1bcce"
+                      },
+                      {
+                          "file":  "backend/tests/test_advanced_mse.py",
+                          "sha256":  "afa86d3aae98bbe8f8433f28631f7729e8d0b0e161ada371436ed150cb566e90"
+                      },
+                      {
+                          "file":  "backend/tests/test_advanced_nist.py",
+                          "sha256":  "c897e3ae78e67ff61addb7c36b197cbb3e2857e96b06dc535b3a253cd177e37a"
+                      },
+                      {
+                          "file":  "backend/tests/test_advanced_paper.py",
+                          "sha256":  "4d9331fd91701edf3f4011507c3380955936f0d45a4b8a24674271177f17ba51"
+                      },
+                      {
+                          "file":  "backend/tests/test_batch_random.py",
+                          "sha256":  "83624350cac4a00fb9c10c554c4d544d155f1a6011f118ce370197fb8a4f803e"
+                      },
+                      {
+                          "file":  "backend/tests/test_batch_random_browser.py",
+                          "sha256":  "0c1c5edd1d3efbc44f20f08a32ebfd20a3cef41b1438580858623725e5e2e127"
+                      },
+                      {
+                          "file":  "backend/tests/test_fidelity_browser.py",
+                          "sha256":  "3ca3d4b451bfafcac349fd30322d89214b3933b505ac9e653fbf8dd6b8633567"
+                      },
+                      {
+                          "file":  "backend/tests/test_flux.py",
+                          "sha256":  "a49eb9c28051111282708dd6ad54690df88d5e40ece915d5ea37e38ab4a2a26d"
+                      },
+                      {
+                          "file":  "backend/tests/test_generation_ui_browser.py",
+                          "sha256":  "6115702482479cf698282617538a8b0240a6aa8a59c81087f3be6f860208abe9"
+                      },
+                      {
+                          "file":  "backend/tests/test_jobs.py",
+                          "sha256":  "66d7780bd73123f3797a396cfe59dd590454ea894c42120c5a436797779170cf"
+                      },
+                      {
+                          "file":  "backend/tests/test_local_batch.py",
+                          "sha256":  "c17cfb036dc34c01a5f2705f7e2114e2abd2cd7e4080cd4f272fa33b9cf2b9db"
+                      },
+                      {
+                          "file":  "backend/tests/test_local_browser.py",
+                          "sha256":  "97f587c59260a105e7dd440cac951edadbd36ee224db0fe01d6e6256b78ae426"
+                      },
+                      {
+                          "file":  "backend/tests/test_local_preflight.py",
+                          "sha256":  "b3497395fce9732532b82fc32fea7d5ceccee9a276ff06ba5137ca625919c70b"
+                      },
+                      {
+                          "file":  "backend/tests/test_mode_fidelity.py",
+                          "sha256":  "7f46306c1145120e27648e222f3ea31c36eb1a308b1546ec9f29d5531ce9310f"
+                      },
+                      {
+                          "file":  "backend/tests/test_models.py",
+                          "sha256":  "e3c94de2b39421078dec0781cd840d0f365c1319522d3afb41513f97054671b5"
+                      },
+                      {
+                          "file":  "backend/tests/test_nist_recon.py",
+                          "sha256":  "18557a8cf948e4a6684ed343f9718306c6b477b14d27f7403473c8651fcad519"
+                      },
+                      {
+                          "file":  "backend/tests/test_nist_stark.py",
+                          "sha256":  "6c620323fadb990407c10d44747ae55be9396a0dcc02b3494b04f9d3cd12fb3c"
+                      },
+                      {
+                          "file":  "backend/tests/test_operations.py",
+                          "sha256":  "ffea858ddeceaf17f7c959e88fb5b88df2437e1e9de40766e58792fcc17195af"
+                      },
+                      {
+                          "file":  "backend/tests/test_spectrum_browser.py",
+                          "sha256":  "393aca493d3d8cacc2a7a3bbad69e5564e6c43cff7e48125418634f4afb6a436"
+                      },
+                      {
+                          "file":  "backend/tests/test_spectrum_instruments.py",
+                          "sha256":  "fb017d5d413d65e11496b0665aa85b8c7e86f807c42aa606995d1b401a1ecd7c"
+                      },
+                      {
+                          "file":  "backend/tests/test_spectrum_processing.py",
+                          "sha256":  "a0e1cbe65473e78b8ae3b896ff23b4c013e411b2116199f26231a9c824afd064"
+                      },
+                      {
+                          "file":  "backend/tests/test_stark_b.py",
+                          "sha256":  "199bc3c5984f43d21f55513cc99820ffd3412851df9d79da43d617a3476dfcec"
+                      },
+                      {
+                          "file":  "backend/tests/test_stark_cascade.py",
+                          "sha256":  "81d4d183e66c186b0921c8ccf73f77c61303b18cf041ec950aa8ab2f2441d1d3"
+                      },
+                      {
+                          "file":  "backend/tests/test_stark_resolver.py",
+                          "sha256":  "4c86af492328cc44b2a981ff7aa2295f726ec0ed5a9893b57dbeb6abafeabb01"
+                      },
+                      {
+                          "file":  "backend/tests/test_starkb_adapter.py",
+                          "sha256":  "6f988f2211b1c549e60f742fb67fa00439b9c4fccb3d92bffa32ac46e420cafb"
+                      },
+                      {
+                          "file":  "backend/tests/test_storage.py",
+                          "sha256":  "05018baf35ce3789e0eabfdc3994b444b60f66e1aef3d998dcbfaba164a87aac"
+                      },
+                      {
+                          "file":  "backend/tests/test_theme_catalog_browser.py",
+                          "sha256":  "860259336e9a448bc270792546f4b10aac2dd6b116fced338524cbc6a493cab2"
+                      },
+                      {
+                          "file":  "backend/tests/test_training.py",
+                          "sha256":  "37e3d1e6289419150bd993a34e7d6c63173de27adc238c42e94268fd3fb67a57"
+                      },
+                      {
+                          "file":  "backend/tests/test_training_rework.py",
+                          "sha256":  "d58db3198364f2b187f019a195190152b1fa65d5771fa5bbc02f7a37fa2a8edc"
+                      },
+                      {
+                          "file":  "backend/tests/test_ui_polish.py",
+                          "sha256":  "44cbe4c33195ae29595ff5da42cd615d44dbefde91e64a721e325de7f9092f6c"
+                      },
+                      {
+                          "file":  "backend/tests/test_ui_polish_browser.py",
+                          "sha256":  "c5f9037b5398f96ada83e8d72808b4c5afe50f7cdec8703e821445f17ebbaa91"
+                      },
+                      {
+                          "file":  "backend/tests/test_web_api.py",
+                          "sha256":  "9ef76bc95ba9d21b4d2b5a03bf72bcb80f0399ee31a96845208a46af72f5959b"
+                      },
+                      {
+                          "file":  "backend/tests/test_web_browser.py",
+                          "sha256":  "810a35c4c311924ecbf1a860183237c67b28559e019d3a31d02d88f7631d3560"
+                      },
+                      {
+                          "file":  "backend/tests/test_web_http.py",
+                          "sha256":  "d298cfe14e40bd99b36652db4e7b1ec9b6882cc775e7c4fcd6e59684a51ac697"
+                      },
+                      {
+                          "file":  "backend/tests/test_web_sampling.py",
+                          "sha256":  "4a870c224b33abb92f6addfabd3a4188219abf4a0e6f38b61311d46032fa2eaa"
+                      },
+                      {
+                          "file":  "backend/tests/test_web_training_browser.py",
+                          "sha256":  "af91e7d16db4a5b8cb456c2e6005ffd5326ece694c2c4b4df339f2f70829f8fc"
+                      },
+                      {
+                          "file":  "backend/tests/web_browser_support.py",
+                          "sha256":  "4b10c4c14ac57e73862c00eb7fbfd7ccdbe75212ebbbdc40cd3ed731dcfd4fd6"
+                      },
+                      {
+                          "file":  "backend/tests/windows_read_context.py",
+                          "sha256":  "39fdcbbbbd2346fc0fa8af954e7ef869ac13b677e1a4dce723b04f676ff6c532"
+                      },
+                      {
+                          "file":  "backend/web/backend_api.py",
+                          "sha256":  "611aec5976d9f786c9a1903ce53e27aaa32768cdf396abfc2b0879b35c9f3794"
+                      },
+                      {
+                          "file":  "backend/web/mock_backend.py",
+                          "sha256":  "ac1e2980b0340eb23b54e4a855e9b432126dd420526cfa17cb9d765c55cd867c"
+                      },
+                      {
+                          "file":  "backend/web/real_backend.py",
+                          "sha256":  "19b2110e4d5d073678b57f11dcb878b67798f7623db59762eae34cacfc30c094"
+                      },
+                      {
+                          "file":  "backend/web/sampling.py",
+                          "sha256":  "1cb35ff13a0af747c55e2b3c1f41f0c55e0930a18ed25b9dd6e2b784a874df52"
+                      },
+                      {
+                          "file":  "backend/web/server.py",
+                          "sha256":  "1e85423851020290a28175086cb2b93db21bd62263c41384f06cc197cb383d08"
+                      },
+                      {
+                          "file":  "package-lock.json",
+                          "sha256":  "5c274b144e01f26ddefd1c8297eb7a88ae4d3031e9a190cde7eb09e1a1987f16"
+                      },
+                      {
+                          "file":  "package.json",
+                          "sha256":  "7ba7aa9dd07bf6c21117c76d764180bcbebf77f0bfe0024cba953cb5445af728"
+                      },
+                      {
+                          "file":  "scripts/collect-desktop.mjs",
+                          "sha256":  "8c7bc597191ec2c4634613c5cfb135277fbfa9f77585d9977781b43c82274c36"
+                      },
+                      {
+                          "file":  "src-tauri/.gitignore",
+                          "sha256":  "e1b11c0407131ad35a1f11d8ec2545c53de147a76f05e264e5b500a14b977332"
+                      },
+                      {
+                          "file":  "src-tauri/Cargo.lock",
+                          "sha256":  "07e8962658933c5232977450b3188b41d24a2b883f8552beed72d402dfbf63e0"
+                      },
+                      {
+                          "file":  "src-tauri/Cargo.toml",
+                          "sha256":  "a999cc73b074eadb9f08d47bf566ac4a87dfa1723f1d3bd34c06c80cbc6d8540"
+                      },
+                      {
+                          "file":  "src-tauri/build.rs",
+                          "sha256":  "4ae2333b11623039cc115e29b696e7ff5cdfcd5b7d628280ddf48fa733e6418d"
+                      },
+                      {
+                          "file":  "src-tauri/capabilities/default.json",
+                          "sha256":  "d1715920985179dac473571ac3719692c110bd1357dfe3aca4daedb002ef5643"
+                      },
+                      {
+                          "file":  "src-tauri/icons/128x128.png",
+                          "sha256":  "1f3689f6374b0553996fdc99743799216703835070145d7f0e6ec11e6280139e"
+                      },
+                      {
+                          "file":  "src-tauri/icons/128x128@2x.png",
+                          "sha256":  "69194785eef4323955af73b0c03362ac0804db056c2424f9715076cabc0ed103"
+                      },
+                      {
+                          "file":  "src-tauri/icons/32x32.png",
+                          "sha256":  "d151f11e325f7502de0c739a2e51697aa569fd4701ae6e11fae1a3b4c7d5f157"
+                      },
+                      {
+                          "file":  "src-tauri/icons/Square107x107Logo.png",
+                          "sha256":  "fd8658ff0e2c177ce0779d11fea1574e9d7d82a52a3a9197038f37b07fe24475"
+                      },
+                      {
+                          "file":  "src-tauri/icons/Square142x142Logo.png",
+                          "sha256":  "c348fcf2d2f2f9714a41925184926f77f440676987d233ae1daf4fd94fda245f"
+                      },
+                      {
+                          "file":  "src-tauri/icons/Square150x150Logo.png",
+                          "sha256":  "d46dc2bc568f911b9cb978de68b4a7e3ad458fbac15196597849c43c40f4b65a"
+                      },
+                      {
+                          "file":  "src-tauri/icons/Square284x284Logo.png",
+                          "sha256":  "80d93a5257c89ea57023c30500c889b4df062430ffb0b4fed4ca4785d13e29ac"
+                      },
+                      {
+                          "file":  "src-tauri/icons/Square30x30Logo.png",
+                          "sha256":  "c3ce70e22ec2ed3ea2d0362a767d087e6cadb93ec71e80010649f892520175f4"
+                      },
+                      {
+                          "file":  "src-tauri/icons/Square310x310Logo.png",
+                          "sha256":  "624dd93ddb1f0d69f2a4aa7af0b0646ae3ae6347cbb42dab56ef88dba7f38d07"
+                      },
+                      {
+                          "file":  "src-tauri/icons/Square44x44Logo.png",
+                          "sha256":  "f9eca6f00dba41cfecfedbc9a6f88014b4ee0f9dbf016e202c7ede09c60107ef"
+                      },
+                      {
+                          "file":  "src-tauri/icons/Square71x71Logo.png",
+                          "sha256":  "66a6b51da8962a9472c9d29b1b08e3309561521bf7fbaac52b9f680df13ff487"
+                      },
+                      {
+                          "file":  "src-tauri/icons/Square89x89Logo.png",
+                          "sha256":  "fe8da53273722bb6fd66e98bf6810e8a7db22aeff27c6c1a096d57ba556b9ef4"
+                      },
+                      {
+                          "file":  "src-tauri/icons/StoreLogo.png",
+                          "sha256":  "5412fce324344999aad82f6b69abcaa6c8792eac7b79a4b321aaaeacd0525eaf"
+                      },
+                      {
+                          "file":  "src-tauri/icons/icon.icns",
+                          "sha256":  "3dc10493b7de48a61de58f768f8a5708d3a44a068c148cedf0502b9b9b71ba5d"
+                      },
+                      {
+                          "file":  "src-tauri/icons/icon.ico",
+                          "sha256":  "50423c17431f3cecb9b089788bd2bb54d0f6dd80b93a2677fe24ab9a6d916ed7"
+                      },
+                      {
+                          "file":  "src-tauri/icons/icon.png",
+                          "sha256":  "e31ddf85b4782dc0cc54edfe765fd337f4cdde15b88a0ce6b1e8e67415f9838d"
+                      },
+                      {
+                          "file":  "src-tauri/src/backend.rs",
+                          "sha256":  "c4171622f2d4fccf0b443268ff6e2bba68e1de59912eb2a98117511d9fb9faa5"
+                      },
+                      {
+                          "file":  "src-tauri/src/lib.rs",
+                          "sha256":  "6b204220b5716c99d5a3534055bee9c4c71b1e9223b7aab26b8d808b60af801f"
+                      },
+                      {
+                          "file":  "src-tauri/src/main.rs",
+                          "sha256":  "7084b8ac08673de8097da23a0397fd8f4949ef1f16ebeec645c46a4e9c66feb0"
+                      },
+                      {
+                          "file":  "src-tauri/tauri.conf.json",
+                          "sha256":  "79b01dd2ceacf01a70554dff0c5be2cef34c8d36b99b3f2ebb65e5c75d748984"
+                      },
+                      {
+                          "file":  "src-tauri/tests/desktop_file_scope.rs",
+                          "sha256":  "998772917a292241c974381e45a365613fbf776e7cb6726a8e27530437348932"
+                      },
+                      {
+                          "file":  "src/App.vue",
+                          "sha256":  "db606435e434f02b788bd6559fdb9a00a8bb765fd4e07e7fae391c3d2e098329"
+                      },
+                      {
+                          "file":  "src/assets/vue.svg",
+                          "sha256":  "5532db34f1c52841881bab8aeca6c3e8d092bd21a689a65f4d8f8cf8041eef9d"
+                      },
+                      {
+                          "file":  "src/components/AdvancedResults.vue",
+                          "sha256":  "2e603b2fb54953f7381c73638cc79002c5992e22c09556382a26ac2806e6dee1"
+                      },
+                      {
+                          "file":  "src/components/AppIcon.vue",
+                          "sha256":  "fc7509c01fb879769cd69ad4aa9c0680cffad42d99b2e45266ce149eece4423c"
+                      },
+                      {
+                          "file":  "src/components/BrowserProcessingPanel.vue",
+                          "sha256":  "4b73ac66de0d72a9d6b748d092b3649c4ad252b7ca3087a275a105a0e55a9da6"
+                      },
+                      {
+                          "file":  "src/components/BrowserReferencePanel.vue",
+                          "sha256":  "2db623c577a6ec060272a4964d466575690e4a55c48feff3970cce18df916444"
+                      },
+                      {
+                          "file":  "src/components/BrowserSidebar.vue",
+                          "sha256":  "0ca376466c59150ab113d80e9eda298e37e05115c368f3d1614ad3ec314c670f"
+                      },
+                      {
+                          "file":  "src/components/ChoiceSelect.vue",
+                          "sha256":  "5061063bac00322596f7c1c2e0bea06cd9d80e81ff4bcb8ccded378a4dd24000"
+                      },
+                      {
+                          "file":  "src/components/CompositionEditor.vue",
+                          "sha256":  "bb0caa453d6bc67a173e5a48fb71405d8b3dc8c9c7dd13847be7b559bb379519"
+                      },
+                      {
+                          "file":  "src/components/DemoProgress.vue",
+                          "sha256":  "31ad8261b82f426d9a61f078212c1a535f89edf526c17bdcc5c22366d597d142"
+                      },
+                      {
+                          "file":  "src/components/ElementCandidate.vue",
+                          "sha256":  "02f495aa241004046aa00671c6542c03f91a71e3a45c74a3629ecbc2d2cc4cf1"
+                      },
+                      {
+                          "file":  "src/components/EmptyStateArt.vue",
+                          "sha256":  "43fa6f033c9ed3135a9485067c92f20643604e802d302fcf941a7015e36a2692"
+                      },
+                      {
+                          "file":  "src/components/FileFormatIcon.vue",
+                          "sha256":  "2c90d0e7e0192392299f311dbc9a58f689d5deb430573ca173f989926f37bf8a"
+                      },
+                      {
+                          "file":  "src/components/ParameterEditor.vue",
+                          "sha256":  "bc2d29c2ec447a65734f023254a82fde9f95e677a8b53703d3b288667da84d8e"
+                      },
+                      {
+                          "file":  "src/components/ProcessingModeSelect.vue",
+                          "sha256":  "5cbbc32484ba85abe5c0861304e0f334417d02159d54d9bbdd54a9d893d5f40e"
+                      },
+                      {
+                          "file":  "src/components/RuntimeStatus.vue",
+                          "sha256":  "b72cb8424204b0e47fe52150ea14d478c7eeaf2f0375a16055783853d8f9e353"
+                      },
+                      {
+                          "file":  "src/components/SpectrumChart.vue",
+                          "sha256":  "44235c862e203aa5ee9493e30372c0ba090ac443e70831cb89e5246bada523ba"
+                      },
+                      {
+                          "file":  "src/components/SpectrumStage.vue",
+                          "sha256":  "ec73c5ffe19b54af4965cf1e748181c3a6ea5a8b394a3eaa00f08282d9cedca7"
+                      },
+                      {
+                          "file":  "src/components/SwitchHint.vue",
+                          "sha256":  "ed3a560f700cf2ef1290ceb924cb231fa0d44749c67f42787110c7a2f95b159a"
+                      },
+                      {
+                          "file":  "src/components/TaskActivity.vue",
+                          "sha256":  "1ff9f545e719a22013011e9308dfce97b00b2030e5792944c3896c1088c90831"
+                      },
+                      {
+                          "file":  "src/components/ThemeMenu.vue",
+                          "sha256":  "ffd4cbe3815ba6223fca2b8e1f52e003757ed51fb3e105b7c51acdbdff8549ef"
+                      },
+                      {
+                          "file":  "src/components/WavelengthBandBar.vue",
+                          "sha256":  "c25466fc66027b759f3a9448b4075c0818fa094b42ef2aa79eb9daa993753fe4"
+                      },
+                      {
+                          "file":  "src/components/WorkbenchLayout.vue",
+                          "sha256":  "53f779a4841578f9e7c37a233f55bae6c2ab9b55c3b3dafdb670f36af2fe7ffe"
+                      },
+                      {
+                          "file":  "src/lib/advanced.ts",
+                          "sha256":  "988e4ce1994f6cc0b1852bc397be347de425d74ab334c342bcf21220e7062339"
+                      },
+                      {
+                          "file":  "src/lib/backend.ts",
+                          "sha256":  "9ff4284ea9b38abd8bccd7980aa9acfbb582b7a2495aac14240b45c9a744281e"
+                      },
+                      {
+                          "file":  "src/lib/demo.ts",
+                          "sha256":  "64d973dc7d9bdd542fb2a9c3ce0cb32c845bfa3c67423be11ed4e139330451a8"
+                      },
+                      {
+                          "file":  "src/lib/fileAccess.ts",
+                          "sha256":  "83b3e10f45df698df4956f13578b51354f86d9415cbdbb2bc9d9d98b0a8025ba"
+                      },
+                      {
+                          "file":  "src/lib/issues.ts",
+                          "sha256":  "5a581d630b47880978563ea91e958ee727f1d3eb54b75474d04c3dad5f99d034"
+                      },
+                      {
+                          "file":  "src/lib/librarySettings.ts",
+                          "sha256":  "08ad47873fe0dac07eb9ee0e811cf0b365e11a78d7c4991a5ef3f512a55b2350"
+                      },
+                      {
+                          "file":  "src/lib/model.ts",
+                          "sha256":  "e2cd22788abdbb2e2bc9750c51b508703b5fc069f5758d0b313a8c7fdec6eb2b"
+                      },
+                      {
+                          "file":  "src/lib/outputDirectory.ts",
+                          "sha256":  "9966bd6bc7c041a7abc6e3a70bc287d42a57ef74473988b1b58f93a861eadeb2"
+                      },
+                      {
+                          "file":  "src/lib/preferences.ts",
+                          "sha256":  "8e0a37fb70b7c752bd44f5702a2083ada1aa4b08d5ad808bd5b0013ae76780be"
+                      },
+                      {
+                          "file":  "src/lib/spectrumInteraction.ts",
+                          "sha256":  "b7882d0f8f9941d4e6334e6f9ed3ca4cef239898d39e69177460b1549e9119ee"
+                      },
+                      {
+                          "file":  "src/lib/useSynchronizedScroll.ts",
+                          "sha256":  "fb73d07489686aaa7e090bb621801e10302fc17557211e61c325896747e02981"
+                      },
+                      {
+                          "file":  "src/lib/workbench.ts",
+                          "sha256":  "4605198c805d234d69f4adcdeaaec63ca9c8bc0758828c08faabed90cf140d1b"
+                      },
+                      {
+                          "file":  "src/main.ts",
+                          "sha256":  "9c28fa7fea752f7d71ef174ab0a7c0d7d4000ef4977504cdd83c178152b620d1"
+                      },
+                      {
+                          "file":  "src/pages/AdvancedPage.vue",
+                          "sha256":  "a3d3f7a53a1bad426f3ab9fba16c85e4c9695da6b5fdde89add0d922825370b0"
+                      },
+                      {
+                          "file":  "src/pages/BatchPage.vue",
+                          "sha256":  "74043069b90f4db8cf822f2f37cca3e2ead26a74bec53c98796e17dcc04a5222"
+                      },
+                      {
+                          "file":  "src/pages/JobsPage.vue",
+                          "sha256":  "3641b73bc261650979844f9865a824ddff1a92a9d011e93760c36069b9469fba"
+                      },
+                      {
+                          "file":  "src/pages/LinksPage.vue",
+                          "sha256":  "1c8592f6f0c9e082da486c7483d0c07e9323278bb0d6d4d6e5ac4fbbfff5510b"
+                      },
+                      {
+                          "file":  "src/pages/ScanPage.vue",
+                          "sha256":  "7f1ba5df174bf75be00bcd96835ac45e5503f69d9961509a5d72a6abd9a859e6"
+                      },
+                      {
+                          "file":  "src/pages/SettingsPage.vue",
+                          "sha256":  "79523f72499860db5c4bdb3d8c93ce01738255d7d0f9197a580e79d84a5f34b6"
+                      },
+                      {
+                          "file":  "src/pages/SinglePage.vue",
+                          "sha256":  "a9642533c88a844d13f8e0abfe8d16b42028f3ecbf47ae6bd9a4ba72eaf40650"
+                      },
+                      {
+                          "file":  "src/styles.css",
+                          "sha256":  "aa6e9d66e6322825a50fee9ba3c513fae35397cde9ea481cdb78472a7ce74988"
+                      },
+                      {
+                          "file":  "src/vite-env.d.ts",
+                          "sha256":  "23684774ecb20e3c5f5251dbcd357bdf77faff12b613d78bacc7ad3accd4611a"
+                      }
+                  ],
+    "allowed":  [
+                    "src/pages/SpectrumBrowserPage.vue",
+                    "src/components/BrowserSpectrumChart.vue",
+                    "src/lib/spectrumBrowser.ts"
+                ]
+}

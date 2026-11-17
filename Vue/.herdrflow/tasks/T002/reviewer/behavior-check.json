@@ -1,0 +1,529 @@
+{
+  "at": "2026-11-17T08:15:04.225Z",
+  "taskId": "T002",
+  "dispatchId": "15198f82-1795-4b8e-8426-e82418e3d97c",
+  "revision": 1,
+  "scope": "Actual App and Canvas with isolated UI test data through real file/reference/processing APIs; no scientific simulation",
+  "checks": [
+    {
+      "name": "empty centered import, first candidate correction, defaults do not loop",
+      "result": "PASS",
+      "detail": {
+        "empty": {
+          "sidebar": false,
+          "rect": {
+            "x": 244,
+            "y": 96,
+            "width": 1084,
+            "height": 872,
+            "top": 96,
+            "right": 1328,
+            "bottom": 968,
+            "left": 244
+          },
+          "button": {
+            "x": 733.5,
+            "y": 514,
+            "width": 105,
+            "height": 36,
+            "top": 514,
+            "right": 838.5,
+            "bottom": 550,
+            "left": 733.5
+          },
+          "workspace": {
+            "x": 212,
+            "y": 64,
+            "width": 1148,
+            "height": 936,
+            "top": 64,
+            "right": 1360,
+            "bottom": 1000,
+            "left": 212
+          }
+        },
+        "duplicateCorrected": true,
+        "defaultAndCommitNoLoop": true
+      }
+    },
+    {
+      "name": "real File CSV success green toolbar, original node/negative preservation, no completion text",
+      "result": "PASS",
+      "detail": {
+        "color": "rgb(29, 114, 89)",
+        "good": "#1d7259",
+        "rect": {
+          "x": 1191,
+          "y": 124,
+          "width": 105,
+          "height": 36,
+          "top": 124,
+          "right": 1296,
+          "bottom": 160,
+          "left": 1191
+        },
+        "toolbar": {
+          "x": 244,
+          "y": 96,
+          "width": 1074,
+          "height": 92,
+          "top": 96,
+          "right": 1318,
+          "bottom": 188,
+          "left": 244
+        }
+      }
+    },
+    {
+      "name": "automatic multi-column/unit/start/X changes, input debounce, failures keep prior data",
+      "result": "PASS",
+      "detail": {
+        "multi": 2,
+        "units": 4,
+        "debounce": true,
+        "xChanged": true,
+        "errorPreserved": true
+      }
+    },
+    {
+      "name": "latest selection wins delayed old success/error, controls remain enabled, new file supersedes selection",
+      "result": "PASS",
+      "detail": {
+        "outOfOrder": true,
+        "editablePending": true,
+        "newFileWins": true
+      }
+    },
+    {
+      "name": "automatic sheet defaults snapshot and frame/vector selection using real XLSX/SIF/Raw8",
+      "result": "PASS",
+      "detail": {
+        "sheet": true,
+        "sifFrame": true,
+        "rawVectors": true
+      }
+    },
+    {
+      "name": "cancel/errors/candidate correction/debounce cleanup and remount no refetch",
+      "result": "PASS",
+      "detail": {
+        "cancel": true,
+        "error": true,
+        "candidate": true,
+        "debounceUnmount": true,
+        "inflightUnmount": true,
+        "remountNoRefetch": true
+      }
+    },
+    {
+      "name": "independent X reset/global-Y/adaptive-Y and locked Y through drag/wheel/overview",
+      "result": "PASS",
+      "detail": {
+        "global": [
+          -737.2,
+          1608.9,
+          3955,
+          6301.1,
+          8647.2
+        ],
+        "adaptive": [
+          -113.2,
+          -29.1,
+          55,
+          139.1,
+          223.2
+        ],
+        "globalYPreservesX": true,
+        "resetXY": true
+      }
+    },
+    {
+      "name": "legend top-right independent row, dark/light/narrow and stable single/multi hover dimensions",
+      "result": "PASS",
+      "detail": [
+        {
+          "width": 1360,
+          "mode": "light",
+          "layout": {
+            "overflow": false,
+            "legend": {
+              "x": 1237.875,
+              "y": 269,
+              "width": 65.125,
+              "height": 24,
+              "top": 269,
+              "right": 1303,
+              "bottom": 293,
+              "left": 1237.875
+            },
+            "area": {
+              "x": 601,
+              "y": 269,
+              "width": 702,
+              "height": 24,
+              "top": 269,
+              "right": 1303,
+              "bottom": 293,
+              "left": 601
+            },
+            "actions": {
+              "x": 1085,
+              "y": 225,
+              "width": 218,
+              "height": 36,
+              "top": 225,
+              "right": 1303,
+              "bottom": 261,
+              "left": 1085
+            },
+            "canvas": {
+              "x": 601,
+              "y": 301,
+              "width": 702,
+              "height": 380,
+              "top": 301,
+              "right": 1303,
+              "bottom": 681,
+              "left": 601
+            },
+            "labels": [
+              {
+                "title": "恢复全波长与全局强度范围（Home）",
+                "aria": "恢复完整波长范围并重置强度范围"
+              },
+              {
+                "title": "恢复全局强度（保持当前横向选区）",
+                "aria": "仅恢复全局强度范围并保持横向选区"
+              },
+              {
+                "title": "自适应当前选区强度并锁定纵轴",
+                "aria": "按当前选区自适应强度并锁定纵轴"
+              }
+            ]
+          }
+        },
+        {
+          "width": 1360,
+          "mode": "dark",
+          "layout": {
+            "overflow": false,
+            "legend": {
+              "x": 1163.515625,
+              "y": 269,
+              "width": 139.484375,
+              "height": 24,
+              "top": 269,
+              "right": 1303,
+              "bottom": 293,
+              "left": 1163.515625
+            },
+            "area": {
+              "x": 601,
+              "y": 269,
+              "width": 702,
+              "height": 24,
+              "top": 269,
+              "right": 1303,
+              "bottom": 293,
+              "left": 601
+            },
+            "actions": {
+              "x": 1085,
+              "y": 225,
+              "width": 218,
+              "height": 36,
+              "top": 225,
+              "right": 1303,
+              "bottom": 261,
+              "left": 1085
+            },
+            "canvas": {
+              "x": 601,
+              "y": 301,
+              "width": 702,
+              "height": 380,
+              "top": 301,
+              "right": 1303,
+              "bottom": 681,
+              "left": 601
+            },
+            "labels": [
+              {
+                "title": "恢复全波长与全局强度范围（Home）",
+                "aria": "恢复完整波长范围并重置强度范围"
+              },
+              {
+                "title": "恢复全局强度（保持当前横向选区）",
+                "aria": "仅恢复全局强度范围并保持横向选区"
+              },
+              {
+                "title": "自适应当前选区强度并锁定纵轴",
+                "aria": "按当前选区自适应强度并锁定纵轴"
+              }
+            ]
+          }
+        },
+        {
+          "width": 440,
+          "mode": "light",
+          "layout": {
+            "overflow": false,
+            "legend": {
+              "x": 89,
+              "y": 325.5,
+              "width": 316,
+              "height": 24,
+              "top": 325.5,
+              "right": 405,
+              "bottom": 349.5,
+              "left": 89
+            },
+            "area": {
+              "x": 89,
+              "y": 325.5,
+              "width": 316,
+              "height": 24,
+              "top": 325.5,
+              "right": 405,
+              "bottom": 349.5,
+              "left": 89
+            },
+            "actions": {
+              "x": 89,
+              "y": 281.5,
+              "width": 316,
+              "height": 36,
+              "top": 281.5,
+              "right": 405,
+              "bottom": 317.5,
+              "left": 89
+            },
+            "canvas": {
+              "x": 89,
+              "y": 357.5,
+              "width": 316,
+              "height": 300,
+              "top": 357.5,
+              "right": 405,
+              "bottom": 657.5,
+              "left": 89
+            },
+            "labels": [
+              {
+                "title": "恢复全波长与全局强度范围（Home）",
+                "aria": "恢复完整波长范围并重置强度范围"
+              },
+              {
+                "title": "恢复全局强度（保持当前横向选区）",
+                "aria": "仅恢复全局强度范围并保持横向选区"
+              },
+              {
+                "title": "自适应当前选区强度并锁定纵轴",
+                "aria": "按当前选区自适应强度并锁定纵轴"
+              }
+            ]
+          }
+        },
+        {
+          "width": 440,
+          "mode": "dark",
+          "layout": {
+            "overflow": false,
+            "legend": {
+              "x": 89,
+              "y": 325.5,
+              "width": 316,
+              "height": 24,
+              "top": 325.5,
+              "right": 405,
+              "bottom": 349.5,
+              "left": 89
+            },
+            "area": {
+              "x": 89,
+              "y": 325.5,
+              "width": 316,
+              "height": 24,
+              "top": 325.5,
+              "right": 405,
+              "bottom": 349.5,
+              "left": 89
+            },
+            "actions": {
+              "x": 89,
+              "y": 281.5,
+              "width": 316,
+              "height": 36,
+              "top": 281.5,
+              "right": 405,
+              "bottom": 317.5,
+              "left": 89
+            },
+            "canvas": {
+              "x": 89,
+              "y": 357.5,
+              "width": 316,
+              "height": 300,
+              "top": 357.5,
+              "right": 405,
+              "bottom": 657.5,
+              "left": 89
+            },
+            "labels": [
+              {
+                "title": "恢复全波长与全局强度范围（Home）",
+                "aria": "恢复完整波长范围并重置强度范围"
+              },
+              {
+                "title": "恢复全局强度（保持当前横向选区）",
+                "aria": "仅恢复全局强度范围并保持横向选区"
+              },
+              {
+                "title": "自适应当前选区强度并锁定纵轴",
+                "aria": "按当前选区自适应强度并锁定纵轴"
+              }
+            ]
+          }
+        },
+        {
+          "width": 360,
+          "mode": "light",
+          "layout": {
+            "overflow": false,
+            "legend": {
+              "x": 89,
+              "y": 343.5,
+              "width": 236,
+              "height": 24,
+              "top": 343.5,
+              "right": 325,
+              "bottom": 367.5,
+              "left": 89
+            },
+            "area": {
+              "x": 89,
+              "y": 343.5,
+              "width": 236,
+              "height": 24,
+              "top": 343.5,
+              "right": 325,
+              "bottom": 367.5,
+              "left": 89
+            },
+            "actions": {
+              "x": 89,
+              "y": 299.5,
+              "width": 236,
+              "height": 36,
+              "top": 299.5,
+              "right": 325,
+              "bottom": 335.5,
+              "left": 89
+            },
+            "canvas": {
+              "x": 89,
+              "y": 375.5,
+              "width": 236,
+              "height": 300,
+              "top": 375.5,
+              "right": 325,
+              "bottom": 675.5,
+              "left": 89
+            },
+            "labels": [
+              {
+                "title": "恢复全波长与全局强度范围（Home）",
+                "aria": "恢复完整波长范围并重置强度范围"
+              },
+              {
+                "title": "恢复全局强度（保持当前横向选区）",
+                "aria": "仅恢复全局强度范围并保持横向选区"
+              },
+              {
+                "title": "自适应当前选区强度并锁定纵轴",
+                "aria": "按当前选区自适应强度并锁定纵轴"
+              }
+            ]
+          }
+        },
+        {
+          "width": 360,
+          "mode": "dark",
+          "layout": {
+            "overflow": false,
+            "legend": {
+              "x": 89,
+              "y": 343.5,
+              "width": 236,
+              "height": 24,
+              "top": 343.5,
+              "right": 325,
+              "bottom": 367.5,
+              "left": 89
+            },
+            "area": {
+              "x": 89,
+              "y": 343.5,
+              "width": 236,
+              "height": 24,
+              "top": 343.5,
+              "right": 325,
+              "bottom": 367.5,
+              "left": 89
+            },
+            "actions": {
+              "x": 89,
+              "y": 299.5,
+              "width": 236,
+              "height": 36,
+              "top": 299.5,
+              "right": 325,
+              "bottom": 335.5,
+              "left": 89
+            },
+            "canvas": {
+              "x": 89,
+              "y": 375.5,
+              "width": 236,
+              "height": 300,
+              "top": 375.5,
+              "right": 325,
+              "bottom": 675.5,
+              "left": 89
+            },
+            "labels": [
+              {
+                "title": "恢复全波长与全局强度范围（Home）",
+                "aria": "恢复完整波长范围并重置强度范围"
+              },
+              {
+                "title": "恢复全局强度（保持当前横向选区）",
+                "aria": "仅恢复全局强度范围并保持横向选区"
+              },
+              {
+                "title": "自适应当前选区强度并锁定纵轴",
+                "aria": "按当前选区自适应强度并锁定纵轴"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "reference/processing/legend and all-hidden regression, original arrays intact",
+      "result": "PASS",
+      "detail": {
+        "references": 62,
+        "processing": true,
+        "hidden": true,
+        "dataIntact": true
+      }
+    }
+  ],
+  "errors": [],
+  "ownedProcessesStopped": {
+    "chrome": true,
+    "api": true
+  },
+  "failed": 0
+}

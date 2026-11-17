@@ -1,0 +1,14 @@
+{
+  "taskId": "T002",
+  "dispatchId": "15198f82-1795-4b8e-8426-e82418e3d97c",
+  "revision": 1,
+  "baseline": "fe4ca874437edb688eeb610693005734bd9b8a51",
+  "frozen": true,
+  "files": {
+    "src/pages/SpectrumBrowserPage.vue": "f262c5eef99622fce62c5980ced54394e98ff738de06437b264325dc8779c60c",
+    "src/components/BrowserSpectrumChart.vue": "e976b169da0c554631c913c831008a85ad4842579d92a8d53dad0089a0fd9411",
+    "src/lib/spectrumBrowser.ts": "1e4710e13ff197e184d8902003cbf9519048c17771721290af7bb12c583ca2fa",
+    "dist-desktop/SimLIBS.exe": "339d2e3e946c8cf751680ddf029fd36aab491deddaead54cd9a76d848b26a798",
+    "dist-desktop/SimLIBS-Setup.exe": "b2c9aab21284fd385961aa5527f163ba0d74772bb9e519aab20d14d24c0ef488"
+  }
+}

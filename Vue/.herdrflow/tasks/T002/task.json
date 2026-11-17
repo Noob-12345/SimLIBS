@@ -1,0 +1,35 @@
+{
+  "taskId": "T002",
+  "dispatchId": "15198f82-1795-4b8e-8426-e82418e3d97c",
+  "revision": 1,
+  "status": "completed",
+  "owner": "implementer",
+  "goal": "光谱浏览六项调整：空态居中导入、成功绿色按钮、数据选择自动更新、删除完成文案、独立横纵轴操作和图例、稳定悬停读数尺寸",
+  "acceptance": [
+    "空态隐藏左侧控件并居中导入，成功后右上角绿色打开文件按钮",
+    "每次数据选择自动更新，最新请求获胜，原始节点与负值保真",
+    "删除导入完成保留节点与负值提示",
+    "重置图标恢复全波长，全局按钮只恢复全局Y，自适应按钮按当前选区Y",
+    "图例和三个操作按钮分区且窄屏不溢出",
+    "悬停读数和空提示高度稳定，保留原始节点细节",
+    "既有参考线、处理、显隐、拖拽和真实导入保持"
+  ],
+  "allowedPaths": [
+    "src/pages/SpectrumBrowserPage.vue",
+    "src/components/BrowserSpectrumChart.vue",
+    "src/lib/spectrumBrowser.ts"
+  ],
+  "forbiddenPaths": [
+    "src/styles.css",
+    "backend",
+    "src-tauri",
+    "package.json",
+    "package-lock.json"
+  ],
+  "evidence": ["implementation.md", "final-files.json", "behavior-check.json", "build.log", "desktop-build.log", "review.md"],
+  "fixRounds": 0,
+  "reviewVerdict": "pass",
+  "delivery": "dist-desktop root EXE and NSIS",
+  "reviewEvidence": ["review.md", "reviewer/behavior-check.json", "final-files.json"],
+  "acceptanceEvidence": "acceptance.md"
+}

@@ -29,13 +29,14 @@ export const spectrumBrowser = reactive({
   references:[] as ReferenceGroup[], selected:[] as string[], referenceIssues:[] as {file:string;error:string}[],
   addedElements:[] as string[], rememberedSpecies:{} as Record<string,string[]>,configuredIds:[] as string[],configuredLoaded:false,configuredCount:0,
   referencesExpanded:false,processingExpanded:false,sidebarCollapsed:false,hiddenCurves:[] as string[],
-  pending:false, referencePending:false, error:'', referenceError:'', notice:'',
+  pending:false, importing:false, referencePending:false, error:'', referenceError:'', notice:'',
   userElement:'',userSpecies:'',userUnit:'nm' as AxisUnit,userColumn:'0',
   target:'',processingPending:false,processingError:'',processingResult:null as ProcessingResult|null,processingView:'original',
   processing:{mode:'both',order:'6',epsilon:'0.0001',max_iter:'1000',wavelet:'mexh',scales:'1,2,3,4,5,6,7',neighbor:'2',min_length:'2',threshold:'200',window:'3'}
 })
 export const browserSelectionInfo=computed(()=>spectrumBrowser.candidate??spectrumBrowser.info)
 let revision=0, referenceRevision=0, controller:AbortController|undefined, referenceController:AbortController|undefined
+let selectionTimer:ReturnType<typeof setTimeout>|undefined
 let processingRevision=0,processingController:AbortController|undefined
 const api=<T>(action:string,body:unknown,signal?:AbortSignal)=>request<T>('/spectrum-browser/'+action,body,true,signal)
 const fileName=(path:string)=>path.split(/[\\/]/).pop()||'selected-file'
@@ -68,30 +69,48 @@ export function frameDefaults(){const f=browserSelectionInfo.value?.frames.find(
 function snapshot():Selection{const s=spectrumBrowser;return{sheet:s.sheet,start:s.start,x:s.x,ys:[...s.ys],unit:s.unit,duplicates:s.duplicates,frame:s.frame,curves:[...s.curves]}}
 function options(selection=snapshot(),info=browserSelectionInfo.value){return info?.frames.length?{frame:selection.frame,curves:selection.curves,duplicates:selection.duplicates}:{sheet:Number(selection.sheet),start:Number(selection.start),x:Number(selection.x),y:selection.ys.map(Number),unit:selection.unit,duplicates:selection.duplicates}}
 function release(info:ImportInfo|null){if(info)void api('release',{document:info.document}).catch(()=>{})}
-export function cancelSpectrum(){revision++;controller?.abort();const s=spectrumBrowser;s.pending=false;release(s.candidate);s.candidate=null;if(s.committed)Object.assign(s,s.committed);s.notice='已取消；保留上一成功光谱'}
-function commit(info:ImportInfo,result:Measurement,selection:Selection){const s=spectrumBrowser,previous=s.info,old=s.spectrum;s.info=markRaw(info);s.candidate=null;s.committed=selection;s.spectrum=validate(result);s.hiddenCurves=old?.sha256===result.sha256?s.hiddenCurves.filter(id=>result.curves.some(c=>c.id===id)):[];clearProcessing();s.target=result.curves[0]?.id??'';if(previous&&previous.document!==info.document)release(previous)}
+function clearSelectionTimer(){clearTimeout(selectionTimer);selectionTimer=undefined}
+export function cancelSpectrum(){clearSelectionTimer();revision++;controller?.abort();const s=spectrumBrowser;s.pending=false;s.importing=false;s.error='';release(s.candidate);s.candidate=null;if(s.committed)Object.assign(s,{...s.committed,ys:[...s.committed.ys],curves:[...s.committed.curves]});s.notice=s.spectrum?'已取消；保留上一成功光谱':'已取消'}
+// Only user events call this function: defaults, commit and rollback never enqueue work.
+export function updateSpectrumSelection(patch:Partial<Selection>){
+  const s=spectrumBrowser;if(s.importing||!browserSelectionInfo.value)return
+  Object.assign(s,patch)
+  if(patch.sheet!==undefined)sheetDefaults()
+  if(patch.frame!==undefined)frameDefaults()
+  if(patch.x!==undefined)s.ys=s.ys.filter(y=>y!==s.x)
+  clearSelectionTimer();revision++;controller?.abort();s.pending=true;s.error='';s.notice=''
+  selectionTimer=setTimeout(()=>{selectionTimer=undefined;void applySpectrum()},patch.start!==undefined?220:0)
+}
+export function disposeSpectrumSelection(){
+  clearSelectionTimer()
+  if(spectrumBrowser.pending)cancelSpectrum()
+}
+function commit(info:ImportInfo,result:Measurement,selection:Selection){const measurement=validate(result),s=spectrumBrowser,previous=s.info,old=s.spectrum;s.info=markRaw(info);s.candidate=null;s.committed=selection;s.spectrum=measurement;s.hiddenCurves=old?.sha256===result.sha256?s.hiddenCurves.filter(id=>result.curves.some(c=>c.id===id)):[];clearProcessing();s.target=result.curves[0]?.id??'';if(previous&&previous.document!==info.document)release(previous)}
 function retainView(result:Measurement,oldUnit:string|undefined){const s=spectrumBrowser;if(!s.view)return;const low=result.xs[0]!,high=result.xs[result.xs.length-1]!;if(oldUnit!==result.unit||s.view[1]<=low||s.view[0]>=high){s.view=null;return}s.view=[Math.max(low,s.view[0]),Math.min(high,s.view[1])]}
 export async function importSpectrum(file?:File){
-  const id=++revision;controller?.abort();controller=new AbortController();const signal=controller.signal,s=spectrumBrowser;s.pending=true;s.error='';s.notice=''
+  clearSelectionTimer()
+  const id=++revision;controller?.abort();controller=new AbortController();const signal=controller.signal,s=spectrumBrowser;s.pending=true;s.importing=true;s.error='';s.notice=''
   try{
     const chosen=file?await browserFile(file):await selectedBytes()
     if(id!==revision)return
     if(!chosen)return
     release(s.candidate);s.candidate=null
+    if(s.committed)Object.assign(s,{...s.committed,ys:[...s.committed.ys],curves:[...s.committed.curves]})
     const info=await api<ImportInfo>('import',{name:chosen.name,data:base64(chosen.bytes)},signal)
     if(id!==revision){release(info);return}
     s.candidate=markRaw(info);defaults(info);const selection=snapshot()
     const measurement=await api<Measurement>('select',{document:info.document,options:options(selection,info)},signal)
     if(id!==revision)return
-    commit(info,measurement,selection);s.view=null;s.notice='导入完成，保留全部原始节点与负值'
+    commit(info,measurement,selection);s.view=null
   }catch(error){if(id===revision&&!signal.aborted)s.error=String(error instanceof Error?error.message:error)}
-  finally{if(id===revision)s.pending=false}
+  finally{if(id===revision){s.pending=false;s.importing=false}}
 }
 export async function applySpectrum(){
-  const s=spectrumBrowser,info=browserSelectionInfo.value;if(!info)return
+  clearSelectionTimer()
+  const s=spectrumBrowser,info=browserSelectionInfo.value;if(!info||s.importing)return
   const id=++revision;controller?.abort();controller=new AbortController();const signal=controller.signal;s.pending=true;s.error=''
   const selection=snapshot(),oldUnit=s.spectrum?.unit
-  try{const result=await api<Measurement>('select',{document:info.document,options:options(selection,info)},signal);if(id===revision){commit(info,result,selection);retainView(result,oldUnit);s.notice='已按选定帧／列更新'}}
+  try{const result=await api<Measurement>('select',{document:info.document,options:options(selection,info)},signal);if(id===revision){commit(info,result,selection);retainView(result,oldUnit);s.notice=''}}
   catch(error){if(id===revision&&!signal.aborted)s.error=String(error instanceof Error?error.message:error)}
   finally{if(id===revision)s.pending=false}
 }
