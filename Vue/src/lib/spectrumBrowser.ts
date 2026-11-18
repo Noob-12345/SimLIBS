@@ -11,9 +11,9 @@ export interface Measurement {
   name: string; format: string; sha256: string; unit: 'nm' | 'pixel'; nodes: number; xs: number[]
   curves: {id:string;label:string;ys:number[]}[]; provenance: Record<string,unknown>
 }
-export interface ReferenceState {line:number;role:string;aki?:string;aki_unit:string;energy?:string;energy_unit:string;configuration?:string;term?:string;j?:string;g?:string}
-export interface ReferencePosition {wavelength_nm:number;records:{states:ReferenceState[]}[]}
-export interface ReferenceGroup {id:string;element:string;species:string;label:string;xs:number[];positions:ReferencePosition[];source:string;sha256:string;original_unit:string;unit:string;count:number;unit_contract?:string;originKind?:'configured'|'user'}
+export interface ReferenceState {line:number;role:string;aki?:string;aki_unit:string;energy?:string;energy_unit:string;configuration?:string;term?:string;j?:string;g?:string;intensity?:string;wavelength_angstrom?:string;line_ref?:string;aki_ref?:string}
+export interface ReferencePosition {wavelength_nm:number;wavelength_angstrom?:string;records:{states:ReferenceState[]}[]}
+export interface ReferenceGroup {id:string;element:string;species:string;label:string;xs:number[];positions:ReferencePosition[];source:string;sha256:string;original_unit:string;unit:string;count:number;unit_contract?:string;originKind?:'configured'|'user'|'nist';metadata?:Record<string,unknown>}
 interface ImportInfo {
   document:string;name:string;format:string;sha256:string;bytes:number;metadata:Record<string,unknown>
   tables:{name:string;columns:string[];recommended_start:number;recommended_x:number;recommended_y:number[];preview:{line:number;values:string[]}[]}[]
@@ -26,7 +26,7 @@ export const spectrumBrowser = reactive({
   candidate:null as ImportInfo|null,committed:null as Selection|null,
   view:null as [number,number]|null,
   sheet:'0', start:'1', x:'0', ys:['1'] as string[], unit:'nm' as AxisUnit, duplicates:'error', frame:'', curves:[] as string[],
-  references:[] as ReferenceGroup[], selected:[] as string[], referenceIssues:[] as {file:string;error:string}[],
+  references:[] as ReferenceGroup[], selected:[] as string[], referenceIssues:[] as {file:string;error:string}[], nistPending:false, nistElement:'Fe', nistIssues:[] as {file:string;error:string}[], nistStatus:'',
   addedElements:[] as string[], rememberedSpecies:{} as Record<string,string[]>,configuredIds:[] as string[],configuredLoaded:false,configuredCount:0,
   referencesExpanded:false,processingExpanded:false,sidebarCollapsed:false,hiddenCurves:[] as string[],
   pending:false, importing:false, referencePending:false, error:'', referenceError:'', notice:'',
@@ -115,7 +115,7 @@ export async function applySpectrum(){
   finally{if(id===revision)s.pending=false}
 }
 export async function loadReferences(file?:File,user=false){
-  const id=++referenceRevision;referenceController?.abort();referenceController=new AbortController();const signal=referenceController.signal,s=spectrumBrowser;s.referencePending=true;s.referenceError=''
+  const id=++referenceRevision;referenceController?.abort();referenceController=new AbortController();const signal=referenceController.signal,s=spectrumBrowser;s.referencePending=true;s.nistPending=false;s.referenceError=''
   try{
     let body:Record<string,unknown>={}
     if(user){const chosen=file?await browserFile(file):await selectedBytes(true);if(id!==referenceRevision||!chosen)return;body={name:chosen.name,data:base64(chosen.bytes),options:{unit:s.userUnit,column:Number(s.userColumn),...(s.userElement.trim()?{element:s.userElement.trim()}:{}),...(s.userSpecies.trim()?{species:s.userSpecies.trim()}: {})}}}
@@ -133,8 +133,23 @@ export async function loadReferences(file?:File,user=false){
   }catch(error){if(id===referenceRevision&&!signal.aborted)s.referenceError=String(error instanceof Error?error.message:error)}
   finally{if(id===referenceRevision)s.referencePending=false}
 }
-export function cancelReferences(){referenceRevision++;referenceController?.abort();spectrumBrowser.referencePending=false}
-export function clearReferences(){cancelReferences();const s=spectrumBrowser;s.references=[];s.selected=[];s.addedElements=[];s.rememberedSpecies={};s.configuredIds=[];s.configuredLoaded=false;s.configuredCount=0;s.referenceError='';s.referenceIssues=[]}
+export function cancelReferences(){referenceRevision++;referenceController?.abort();spectrumBrowser.referencePending=false;spectrumBrowser.nistPending=false}
+export async function loadNistReferences(element=spectrumBrowser.nistElement){
+  const id=++referenceRevision;referenceController?.abort();referenceController=new AbortController();const signal=referenceController.signal,s=spectrumBrowser;s.referencePending=false;s.nistPending=true;s.referenceError='';s.nistElement=element
+  try{
+    const result=await api<{groups:ReferenceGroup[];issues:{file:string;error:string}[]}>('references',{source:'nist',element},signal);if(id!==referenceRevision)return
+    if(!result.groups.length)throw Error('NIST未返回可用Persistent Lines：'+(result.issues?.map(x=>x.error).join('; ')||'无有效表'))
+    const nist:ReferenceGroup[]=result.groups.map(g=>({...g,originKind:'nist' as const,id:'nist:'+g.id}))
+    const previous=s.references.filter(g=>g.originKind==='nist'&&g.element===element)
+    const old=s.references.filter(g=>!previous.includes(g))
+    const selectedKeys=new Set(s.references.filter(g=>s.selected.includes(g.id)).map(referenceKey))
+    const merged=[...old,...nist];if(merged.reduce((n,g)=>n+g.count,0)>100000)throw Error('合并参考线超过100000，请先清空参考库')
+    s.references=markRaw(merged);s.nistIssues=result.issues;s.nistStatus=element+' 可用态：'+nist.map(g=>g.species).join(' / ');s.addedElements=s.addedElements.includes(element)?s.addedElements:[...s.addedElements,element]
+    s.selected=merged.filter(g=>selectedKeys.has(referenceKey(g))||nist.includes(g)&&!previous.some(p=>p.species===g.species)).map(g=>g.id)
+    s.rememberedSpecies[element]=merged.filter(g=>g.element===element&&s.selected.includes(g.id)).map(referenceKey)
+  }catch(error){if(id===referenceRevision&&!signal.aborted)s.referenceError=String(error instanceof Error?error.message:error)}finally{if(id===referenceRevision)s.nistPending=false}
+}
+export function clearReferences(){cancelReferences();const s=spectrumBrowser;s.references=[];s.selected=[];s.addedElements=[];s.rememberedSpecies={};s.configuredIds=[];s.configuredLoaded=false;s.configuredCount=0;s.referenceError='';s.referenceIssues=[];s.nistIssues=[];s.nistStatus=''}
 function referenceKey(g:ReferenceGroup){return JSON.stringify([g.originKind,g.source,g.element,g.species,g.original_unit,g.originKind==='user'?g.sha256:''])}
 export function addReferenceElement(element:string){const s=spectrumBrowser,groups=s.references.filter(g=>g.element===element);if(!groups.length||s.addedElements.includes(element))return;s.addedElements.push(element);s.selected.push(...groups.map(g=>g.id));s.rememberedSpecies[element]=groups.map(referenceKey)}
 export function toggleReferenceElement(element:string){const s=spectrumBrowser,groups=s.references.filter(g=>g.element===element),selected=groups.filter(g=>s.selected.includes(g.id));if(selected.length){s.rememberedSpecies[element]=selected.map(referenceKey);s.selected=s.selected.filter(id=>!groups.some(g=>g.id===id))}else{const previous=s.rememberedSpecies[element],targets=previous?.length?groups.filter(g=>previous.includes(referenceKey(g))):groups;s.selected=[...new Set([...s.selected,...targets.map(g=>g.id)])]}}

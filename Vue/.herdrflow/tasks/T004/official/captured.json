@@ -1,0 +1,555 @@
+[
+  {
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/periodictable.htm",
+    "final_url": "https://physics.nist.gov/PhysRefData/Handbook/periodictable.htm",
+    "status": 200,
+    "bytes": 13751,
+    "sha256": "26f376d295cc4c6643ef52266fd58d5dfd47102a01cc9cf1abfa7cf0653c871c",
+    "fetched_at": "2026-11-17T15:15:54.056203+00:00",
+    "title": "NIST: Basic Atomic Spectroscopic Data - Perodic Table",
+    "headers": [],
+    "first_rows": [],
+    "data_rows": 0,
+    "medium_notes": []
+  },
+  {
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable3.htm",
+    "final_url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable3.htm",
+    "status": 200,
+    "bytes": 29733,
+    "sha256": "f46a36b1e875d2d6cca0f0f4cdd3b82782e46d3491eac25184b3749543a49ba0",
+    "fetched_at": "2026-11-17T15:15:54.441254+00:00",
+    "title": "Persistent Lines of Neutral Iron ( Fe I )",
+    "headers": [
+      "Intensity",
+      "Wavelength (Å)",
+      "A ki (10 8 s -1 )",
+      "Energy Levels (cm -1 )",
+      "Configurations",
+      "Terms",
+      "J",
+      "Line Ref.",
+      "A ki Ref."
+    ],
+    "first_rows": [
+      {
+        "row": 4,
+        "cells": [
+          "1000",
+          "2483.2708",
+          "4.81",
+          "0.000",
+          "3 d 6 4 s 2",
+          "a 5 D",
+          "4",
+          "NJLT94",
+          "OWLW91"
+        ]
+      },
+      {
+        "row": 5,
+        "cells": [
+          "",
+          "",
+          "",
+          "40257.311",
+          "3 d 6 ( 5 D)4 s 4 p ( 1 P)",
+          "x 5 F°",
+          "5",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 6,
+        "cells": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 7,
+        "cells": [
+          "600",
+          "2488.1426",
+          "4.20",
+          "415.933",
+          "3 d 6 4 s 2",
+          "a 5 D",
+          "3",
+          "NJLT94",
+          "OWLW91"
+        ]
+      },
+      {
+        "row": 8,
+        "cells": [
+          "",
+          "",
+          "",
+          "40594.429",
+          "3 d 6 ( 5 D)4 s 4 p ( 1 P)",
+          "x 5 F°",
+          "4",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 9,
+        "cells": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      }
+    ],
+    "data_rows": 60,
+    "medium_notes": []
+  },
+  {
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable4.htm",
+    "final_url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable4.htm",
+    "status": 200,
+    "bytes": 23308,
+    "sha256": "ccd826a6b621738d4bb96bb880dabaaf8e935f3cafde7ebfd74d30bc2d6f7f15",
+    "fetched_at": "2026-11-17T15:15:54.329215+00:00",
+    "title": "Persistent Lines of Singly Ionized Iron ( Fe II )",
+    "headers": [
+      "Intensity",
+      "Wavelength (Å)",
+      "A ki (10 8 s -1 )",
+      "Energy Levels (cm -1 )",
+      "Configurations",
+      "Terms",
+      "J",
+      "Line Ref.",
+      "A ki Ref."
+    ],
+    "first_rows": [
+      {
+        "row": 4,
+        "cells": [
+          "400",
+          "2343.4951",
+          "1.73",
+          "0.000",
+          "3 d 6 ( 5 D)4 s",
+          "a 6 D",
+          "9/2",
+          "NLTH91",
+          "M03"
+        ]
+      },
+      {
+        "row": 5,
+        "cells": [
+          "",
+          "",
+          "",
+          "42658.224",
+          "3 d 6 ( 5 D)4 p",
+          "z 6 P°",
+          "7/2",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 6,
+        "cells": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 7,
+        "cells": [
+          "1000",
+          "2382.0376",
+          "3.13",
+          "0.000",
+          "3 d 6 ( 5 D)4 s",
+          "a 6 D",
+          "9/2",
+          "NLTH91",
+          "M03"
+        ]
+      },
+      {
+        "row": 8,
+        "cells": [
+          "",
+          "",
+          "",
+          "41968.046",
+          "3 d 6 ( 5 D)4 p",
+          "z 6 F°",
+          "11/2",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 9,
+        "cells": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      }
+    ],
+    "data_rows": 39,
+    "medium_notes": []
+  },
+  {
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/hydrogentable3.htm",
+    "final_url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/hydrogentable3.htm",
+    "status": 200,
+    "bytes": 22400,
+    "sha256": "81f0cc43a12c5aa714883f514b6a7e64bacdc285fdfccd99e885e2bd2bc4452f",
+    "fetched_at": "2026-11-17T15:15:57.241226+00:00",
+    "title": "Persistent Lines of Neutral Hydrogen ( H I )",
+    "headers": [
+      "Intensity",
+      "Wavelength (Å)",
+      "A ki (10 8 s -1 )",
+      "Energy Levels (cm -1 )",
+      "Configurations",
+      "Terms",
+      "J",
+      "Line Ref.",
+      "A ki Ref."
+    ],
+    "first_rows": [
+      {
+        "row": 4,
+        "cells": [
+          "50",
+          "949.7430",
+          "0.34375",
+          "0.0000",
+          "1 s",
+          "2 S",
+          "1/2",
+          "MK00a",
+          "BM00"
+        ]
+      },
+      {
+        "row": 5,
+        "cells": [
+          "",
+          "",
+          "",
+          "105291.6443",
+          "5 p",
+          "2 P°",
+          "1/2,3/2",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 6,
+        "cells": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 7,
+        "cells": [
+          "100",
+          "972.5367",
+          "0.6819",
+          "0.0000",
+          "1 s",
+          "2 S",
+          "1/2",
+          "MK00a",
+          "BM00"
+        ]
+      },
+      {
+        "row": 8,
+        "cells": [
+          "",
+          "",
+          "",
+          "102823.8791",
+          "4 p",
+          "2 P°",
+          "1/2,3/2",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 9,
+        "cells": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      }
+    ],
+    "data_rows": 42,
+    "medium_notes": []
+  },
+  {
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/heliumtable4.htm",
+    "final_url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/heliumtable4.htm",
+    "status": 200,
+    "bytes": 24563,
+    "sha256": "3b5192156879d89ff9c880c33cac0b23fb4d40a35b5867fceb79878d1dbaf957",
+    "fetched_at": "2026-11-17T15:15:57.460019+00:00",
+    "title": "Persistent Lines of Singly Ionized Helium ( He II )",
+    "headers": [
+      "Intensity",
+      "Wavelength (Å)",
+      "A ki (10 8 s -1 )",
+      "Energy Levels (cm -1 )",
+      "Configurations",
+      "Terms",
+      "J",
+      "Line Ref.",
+      "A ki Ref."
+    ],
+    "first_rows": [
+      {
+        "row": 4,
+        "cells": [
+          "300",
+          "256.3166",
+          "26.77",
+          "0.0000",
+          "1 s",
+          "2 S",
+          "1/2",
+          "MK00b",
+          "BM00"
+        ]
+      },
+      {
+        "row": 5,
+        "cells": [
+          "",
+          "",
+          "",
+          "390142.5605",
+          "3 p",
+          "2 P°",
+          "3/2",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 6,
+        "cells": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 7,
+        "cells": [
+          "150",
+          "256.3177",
+          "26.77",
+          "0.0000",
+          "1 s",
+          "2 S",
+          "1/2",
+          "MK00b",
+          "BM00"
+        ]
+      },
+      {
+        "row": 8,
+        "cells": [
+          "",
+          "",
+          "",
+          "390140.8250",
+          "3 p",
+          "2 P°",
+          "1/2",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 9,
+        "cells": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      }
+    ],
+    "data_rows": 48,
+    "medium_notes": []
+  },
+  {
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/leadtable3.htm",
+    "final_url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/leadtable3.htm",
+    "status": 200,
+    "bytes": 23618,
+    "sha256": "8ee8c735e5fc97dca829f845dc34d4cb47b05623b703b701c5292024de1a0c98",
+    "fetched_at": "2026-11-17T15:15:55.779242+00:00",
+    "title": "Persistent Lines of Neutral Lead ( Pb I )",
+    "headers": [
+      "Intensity",
+      "Wavelength (Å)",
+      "A ki (10 8 s -1 )",
+      "Energy Levels (cm -1 )",
+      "Configurations",
+      "Terms",
+      "J",
+      "Line Ref.",
+      "A ki Ref."
+    ],
+    "first_rows": [
+      {
+        "row": 4,
+        "cells": [
+          "200",
+          "2022.016",
+          "0.059",
+          "0.000",
+          "6 p 2 1 / 2",
+          "( 1 / 2 , 1 / 2 )",
+          "0",
+          "WA68",
+          "M00"
+        ]
+      },
+      {
+        "row": 5,
+        "cells": [
+          "",
+          "",
+          "",
+          "49439.616",
+          "6 p 3 / 2 7 s 1 / 2",
+          "( 3 / 2 , 1 / 2 )°",
+          "1",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 6,
+        "cells": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 7,
+        "cells": [
+          "200",
+          "2053.284",
+          "0.102",
+          "0.000",
+          "6 p 2 1 / 2",
+          "( 1 / 2 , 1 / 2 )",
+          "0",
+          "WA68",
+          "M00"
+        ]
+      },
+      {
+        "row": 8,
+        "cells": [
+          "",
+          "",
+          "",
+          "48686.934",
+          "6 p 1 / 2 8 s 1 / 2",
+          "( 1 / 2 , 1 / 2 )°",
+          "1",
+          "",
+          ""
+        ]
+      },
+      {
+        "row": 9,
+        "cells": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      }
+    ],
+    "data_rows": 36,
+    "medium_notes": []
+  }
+]

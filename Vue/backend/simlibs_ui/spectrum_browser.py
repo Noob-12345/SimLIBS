@@ -221,6 +221,10 @@ class BrowserStore:
                 with self.lock:self.documents.pop(str(body.get('document','')),None)
                 return dict(released=True)
             if action=='references':
+                if body.get('source')=='nist':
+                    if set(body) != {'source','element'}:raise ValueError('NIST仅接受元素符号，不接受URL或路径')
+                    from .spectrum_nist import fetch
+                    return fetch(str(body.get('element','')))
                 from .spectrum_reference import configured,uploaded
                 return uploaded(body) if 'data' in body else configured(settings['line_database'])
             raise ValueError('未知光谱浏览操作')

@@ -1,0 +1,58 @@
+[
+  {
+    "file": "periodic.html",
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/periodictable.htm",
+    "status": 200,
+    "sha256": "b6e09d664256d14a862f7cf3c94d3dd9a6f3e24a9640874e771c752840aaef49",
+    "title": "NIST: Basic Atomic Spectroscopic Data - Perodic Table",
+    "bytes": 13751
+  },
+  {
+    "file": "iron3.html",
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable3.htm",
+    "status": 200,
+    "sha256": "c6f7c8a924964abea553ed2503882ccfb2f5e5b418f79ff61d0fffd7ca1582d5",
+    "title": "Persistent Lines of Neutral Iron\u00a0(\u00a0Fe\u00a0I\u00a0)",
+    "bytes": 29733
+  },
+  {
+    "file": "iron4.html",
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable4.htm",
+    "status": 200,
+    "sha256": "bdbe41c0e6acae9b81fb88e94077d3c6c5de4a7974bf8a7914b5e8c70d38115f",
+    "title": "Persistent Lines of Singly Ionized Iron\u00a0(\u00a0Fe\u00a0II\u00a0)",
+    "bytes": 23308
+  },
+  {
+    "file": "magnesium3.html",
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/magnesiumtable3.htm",
+    "status": 200,
+    "sha256": "4d7622b29305b30edcc018a745b477f45d3a41e9367bb97265f65e024fe5665a",
+    "title": "Persistent Lines of Neutral Magnesium\u00a0(\u00a0Mg\u00a0I\u00a0)",
+    "bytes": 22529
+  },
+  {
+    "file": "magnesium4.html",
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/magnesiumtable4.htm",
+    "status": 200,
+    "sha256": "a8a56aa9627959552debe278f0bc2eced7eadcd247a99c89497a4f077e165e08",
+    "title": "Persistent Lines of Singly Ionized Magnesium\u00a0(\u00a0Mg\u00a0II\u00a0)",
+    "bytes": 20094
+  },
+  {
+    "file": "hydrogen3.html",
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/hydrogentable3.htm",
+    "status": 200,
+    "sha256": "d25e2d0073d11caa50164658b1197566b1b29272456a39d109bd8555d618b604",
+    "title": "Persistent Lines of Neutral Hydrogen\u00a0(\u00a0H\u00a0I\u00a0)",
+    "bytes": 22400
+  },
+  {
+    "file": "hydrogen4.html",
+    "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/hydrogentable4.htm",
+    "status": 200,
+    "sha256": "06bfe414a25ed0b75efb9499c2acecb579f62bedf79e497aad01b4799a568133",
+    "title": "Persistent Lines of Singly Ionized Hydrogen\u00a0(\u00a0H\u00a0II\u00a0)",
+    "bytes": 8016
+  }
+]

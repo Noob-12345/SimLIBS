@@ -1,0 +1,22 @@
+{
+  "taskId": "T005",
+  "dispatchId": "16a6adbb-5162-4d9f-a23d-44b91e20f0e1",
+  "revision": 1,
+  "status": "completed",
+  "owner": "implementer",
+  "goal": "将光谱区显示全局和自适应强度按钮改为与重置同尺寸同风格的十字箭头和上下箭头图标",
+  "acceptance": [
+    "显示全局是四向十字箭头图标按钮",
+    "自适应强度是上下双向箭头图标按钮",
+    "两个按钮与重置icon-btn尺寸样式一致且保留准确title/aria-label",
+    "既有轴逻辑、图例布局、窄屏和键盘可达性保持"
+  ],
+  "allowedPaths": ["src/components/AppIcon.vue", "src/components/BrowserSpectrumChart.vue"],
+  "forbiddenPaths": ["src/pages/SpectrumBrowserPage.vue", "src/lib/spectrumBrowser.ts", "src/styles.css", "backend", "src-tauri", "package.json", "package-lock.json"],
+  "evidence": ["implementation.md", "npm run build", "review.md"],
+  "fixRounds": 0,
+  "reviewVerdict": "pass",
+  "reviewEvidence": ["review.md", "reviewer/behavior-check.json", "reviewer/collection.md"],
+  "delivery": "dist-desktop root EXE and NSIS collected after user exited SimLIBS",
+  "acceptanceEvidence": "acceptance.md"
+}

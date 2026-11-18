@@ -1,0 +1,37 @@
+{
+    "taskId":  "T005",
+    "dispatchId":  "16a6adbb-5162-4d9f-a23d-44b91e20f0e1",
+    "revision":  1,
+    "head":  "ae4b1d4db01b0042b23bb65f01728494abec5dd2",
+    "chartScriptSha256":  "b817ac0a32376ea9b4adae7274f13d0966f1dbd760645627ed84707d7af911c4",
+    "files":  [
+                  {
+                      "file":  "src/pages/SpectrumBrowserPage.vue",
+                      "sha256":  "8f1cd1f84e61a5a3bdee53d2c8f048c97c0ac7bf0c5bee0f141030a105ac931d"
+                  },
+                  {
+                      "file":  "src/components/AppIcon.vue",
+                      "sha256":  "fc7509c01fb879769cd69ad4aa9c0680cffad42d99b2e45266ce149eece4423c"
+                  },
+                  {
+                      "file":  "src/components/BrowserSpectrumChart.vue",
+                      "sha256":  "e976b169da0c554631c913c831008a85ad4842579d92a8d53dad0089a0fd9411"
+                  },
+                  {
+                      "file":  "dist-desktop/SimLIBS.exe",
+                      "sha256":  "8946bb31c78821e9370b2866109951a496a60f9b34ab65026ca59ea7e802a1a5"
+                  },
+                  {
+                      "file":  "dist-desktop/SimLIBS-Setup.exe",
+                      "sha256":  "dfb5b13e1345fc9ae0b936f825573f6882af0960a0ab4387dc2e7a0a3e848a76"
+                  },
+                  {
+                      "file":  "dist-desktop/SHA256SUMS.txt",
+                      "sha256":  "9138b2eb9863c31618881da5d877cfbb3886ad3353349ea6c9f3670ba96e381b"
+                  },
+                  {
+                      "file":  "dist-desktop/artifact-manifest.json",
+                      "sha256":  "34a21a71102885650a3375bae55909e32849860f5ef61ee7ad70d20f6c85594b"
+                  }
+              ]
+}

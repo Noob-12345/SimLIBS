@@ -1,0 +1,725 @@
+{
+  "at": "2026-11-17T08:38:10.841Z",
+  "taskId": "T003",
+  "dispatchId": "489619a1-691c-44b3-8a87-1687dcb4f081",
+  "revision": 1,
+  "scope": "Isolated UI CSV through real file/selection APIs; delayed selection geometry only",
+  "checks": [
+    {
+      "name": "stable geometry and cancel at 1360px",
+      "result": "PASS",
+      "detail": {
+        "before": {
+          "scrollY": 50,
+          "pending": false,
+          "rule": "error",
+          "toolbar": {
+            "top": 46,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 154,
+            "height": 813.5
+          },
+          "chart": {
+            "top": 154,
+            "height": 740
+          },
+          "canvas": {
+            "top": 251,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "during": {
+          "scrollY": 50,
+          "pending": true,
+          "rule": "error",
+          "toolbar": {
+            "top": 46,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 154,
+            "height": 813.5
+          },
+          "chart": {
+            "top": 154,
+            "height": 740
+          },
+          "canvas": {
+            "top": 251,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": false,
+            "tabIndex": 0,
+            "hidden": "false",
+            "visibility": "visible",
+            "focused": false
+          }
+        },
+        "after": {
+          "scrollY": 50,
+          "pending": false,
+          "rule": "keep",
+          "toolbar": {
+            "top": 46,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 154,
+            "height": 813.5
+          },
+          "chart": {
+            "top": 154,
+            "height": 740
+          },
+          "canvas": {
+            "top": 251,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "cancelBefore": {
+          "scrollY": 50,
+          "pending": false,
+          "rule": "keep",
+          "toolbar": {
+            "top": 46,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 154,
+            "height": 813.5
+          },
+          "chart": {
+            "top": 154,
+            "height": 740
+          },
+          "canvas": {
+            "top": 251,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "cancelPending": {
+          "scrollY": 50,
+          "pending": true,
+          "rule": "keep",
+          "toolbar": {
+            "top": 46,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 154,
+            "height": 813.5
+          },
+          "chart": {
+            "top": 154,
+            "height": 740
+          },
+          "canvas": {
+            "top": 251,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": false,
+            "tabIndex": 0,
+            "hidden": "false",
+            "visibility": "visible",
+            "focused": false
+          }
+        },
+        "cancelled": {
+          "scrollY": 50,
+          "pending": false,
+          "rule": "keep",
+          "toolbar": {
+            "top": 46,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 154,
+            "height": 813.5
+          },
+          "chart": {
+            "top": 154,
+            "height": 740
+          },
+          "canvas": {
+            "top": 251,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "tabSkipsIdleCancel": true
+      }
+    },
+    {
+      "name": "stable geometry and cancel at 960px",
+      "result": "PASS",
+      "detail": {
+        "before": {
+          "scrollY": 30,
+          "pending": false,
+          "rule": "keep",
+          "toolbar": {
+            "top": 58,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 166,
+            "height": 809.5
+          },
+          "chart": {
+            "top": 166,
+            "height": 740
+          },
+          "canvas": {
+            "top": 263,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "during": {
+          "scrollY": 30,
+          "pending": true,
+          "rule": "keep",
+          "toolbar": {
+            "top": 58,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 166,
+            "height": 809.5
+          },
+          "chart": {
+            "top": 166,
+            "height": 740
+          },
+          "canvas": {
+            "top": 263,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": false,
+            "tabIndex": 0,
+            "hidden": "false",
+            "visibility": "visible",
+            "focused": false
+          }
+        },
+        "after": {
+          "scrollY": 30,
+          "pending": false,
+          "rule": "error",
+          "toolbar": {
+            "top": 58,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 166,
+            "height": 809.5
+          },
+          "chart": {
+            "top": 166,
+            "height": 740
+          },
+          "canvas": {
+            "top": 263,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "cancelBefore": {
+          "scrollY": 30,
+          "pending": false,
+          "rule": "error",
+          "toolbar": {
+            "top": 58,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 166,
+            "height": 809.5
+          },
+          "chart": {
+            "top": 166,
+            "height": 740
+          },
+          "canvas": {
+            "top": 263,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "cancelPending": {
+          "scrollY": 30,
+          "pending": true,
+          "rule": "error",
+          "toolbar": {
+            "top": 58,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 166,
+            "height": 809.5
+          },
+          "chart": {
+            "top": 166,
+            "height": 740
+          },
+          "canvas": {
+            "top": 263,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": false,
+            "tabIndex": 0,
+            "hidden": "false",
+            "visibility": "visible",
+            "focused": false
+          }
+        },
+        "cancelled": {
+          "scrollY": 30,
+          "pending": false,
+          "rule": "error",
+          "toolbar": {
+            "top": 58,
+            "height": 92
+          },
+          "sidebar": {
+            "top": 166,
+            "height": 809.5
+          },
+          "chart": {
+            "top": 166,
+            "height": 740
+          },
+          "canvas": {
+            "top": 263,
+            "height": 380
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "tabSkipsIdleCancel": true
+      }
+    },
+    {
+      "name": "stable geometry and cancel at 440px",
+      "result": "PASS",
+      "detail": {
+        "before": {
+          "scrollY": 782,
+          "pending": false,
+          "rule": "error",
+          "toolbar": {
+            "top": -707,
+            "height": 143.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "during": {
+          "scrollY": 782,
+          "pending": true,
+          "rule": "error",
+          "toolbar": {
+            "top": -707,
+            "height": 143.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": false,
+            "tabIndex": 0,
+            "hidden": "false",
+            "visibility": "visible",
+            "focused": false
+          }
+        },
+        "after": {
+          "scrollY": 782,
+          "pending": false,
+          "rule": "keep",
+          "toolbar": {
+            "top": -707,
+            "height": 143.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "cancelBefore": {
+          "scrollY": 782,
+          "pending": false,
+          "rule": "keep",
+          "toolbar": {
+            "top": -707,
+            "height": 143.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "cancelPending": {
+          "scrollY": 782,
+          "pending": true,
+          "rule": "keep",
+          "toolbar": {
+            "top": -707,
+            "height": 143.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": false,
+            "tabIndex": 0,
+            "hidden": "false",
+            "visibility": "visible",
+            "focused": false
+          }
+        },
+        "cancelled": {
+          "scrollY": 782,
+          "pending": false,
+          "rule": "keep",
+          "toolbar": {
+            "top": -707,
+            "height": 143.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "tabSkipsIdleCancel": true
+      }
+    },
+    {
+      "name": "stable geometry and cancel at 360px",
+      "result": "PASS",
+      "detail": {
+        "before": {
+          "scrollY": 800,
+          "pending": false,
+          "rule": "keep",
+          "toolbar": {
+            "top": -725,
+            "height": 161.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "during": {
+          "scrollY": 800,
+          "pending": true,
+          "rule": "keep",
+          "toolbar": {
+            "top": -725,
+            "height": 161.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": false,
+            "tabIndex": 0,
+            "hidden": "false",
+            "visibility": "visible",
+            "focused": false
+          }
+        },
+        "after": {
+          "scrollY": 800,
+          "pending": false,
+          "rule": "error",
+          "toolbar": {
+            "top": -725,
+            "height": 161.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "cancelBefore": {
+          "scrollY": 800,
+          "pending": false,
+          "rule": "error",
+          "toolbar": {
+            "top": -725,
+            "height": 161.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "cancelPending": {
+          "scrollY": 800,
+          "pending": true,
+          "rule": "error",
+          "toolbar": {
+            "top": -725,
+            "height": 161.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": false,
+            "tabIndex": 0,
+            "hidden": "false",
+            "visibility": "visible",
+            "focused": false
+          }
+        },
+        "cancelled": {
+          "scrollY": 800,
+          "pending": false,
+          "rule": "error",
+          "toolbar": {
+            "top": -725,
+            "height": 161.5
+          },
+          "sidebar": {
+            "top": 174.5,
+            "height": 805.5
+          },
+          "chart": {
+            "top": -547.5,
+            "height": 706
+          },
+          "canvas": {
+            "top": -424.5,
+            "height": 300
+          },
+          "cancel": {
+            "disabled": true,
+            "tabIndex": -1,
+            "hidden": "true",
+            "visibility": "hidden",
+            "focused": false
+          }
+        },
+        "tabSkipsIdleCancel": true
+      }
+    },
+    {
+      "name": "rapid latest rule wins and data unchanged",
+      "result": "PASS",
+      "detail": {
+        "latest": "error",
+        "nodes": 200,
+        "negative": -90,
+        "originalArraysUnchanged": true
+      }
+    }
+  ],
+  "errors": [],
+  "ownedProcessesStopped": {
+    "chrome": true,
+    "api": true
+  },
+  "failed": 0
+}

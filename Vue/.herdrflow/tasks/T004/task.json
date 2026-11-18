@@ -1,0 +1,55 @@
+{
+    "taskId":  "T004",
+    "dispatchId":  "229c687f-8bda-4b35-bea4-2e7841ace916",
+    "revision":  1,
+    "status":  "completed",
+    "owner":  "implementer",
+    "goal":  "谱线位置参考新增按元素查询NIST Handbook Persistent Lines在线来源",
+    "acceptance":  [
+                       "当前库旁有NIST在线入口和独立元素选择",
+                       "真实Persistent Lines I/II解析并叠加",
+                       "Å/nm、原字段、来源URL与hash保真",
+                       "本地/CSV/在线隔离、刷新去重、失败取消防旧响应",
+                       "有限官方HTTPS请求和明确错误",
+                       "定向unit/live/browser/build及独立review通过"
+                   ],
+    "allowedPaths":  [
+                         "backend/simlibs_ui/spectrum_nist.py",
+                         "backend/simlibs_ui/spectrum_browser.py",
+                         "backend/tests/test_spectrum_nist.py",
+                         "src/lib/spectrumBrowser.ts",
+                         "src/components/BrowserReferencePanel.vue"
+                     ],
+    "forbiddenPaths":  [
+                           "src/components/SpectrumChart.vue",
+                           "src/components/BrowserSpectrumChart.vue",
+                           "src/components/AppIcon.vue",
+                           "src/pages/SpectrumBrowserPage.vue",
+                           "src/styles.css",
+                           "backend/source",
+                           "backend/Linedatabase",
+                           "src-tauri",
+                           "package.json",
+                           "package-lock.json"
+                       ],
+    "evidence":  [
+                     "implementation.md",
+                     "live-nist.json",
+                     "browser-check.json",
+                     "build.log",
+                     "desktop-build.log",
+                     "final-files.json",
+                     "review.md"
+                 ],
+    "fixRounds":  0,
+    "reviewVerdict":  "pass",
+    "reviewEvidence":  [
+                           "review.md",
+                           "reviewer/supplement.md",
+                           "browser-check.json",
+                           "cleanup-check.json",
+                           "collection-check.json"
+                       ],
+    "delivery":  "dist-desktop root EXE and NSIS collected after user exited SimLIBS",
+    "acceptanceEvidence":  "acceptance.md"
+}

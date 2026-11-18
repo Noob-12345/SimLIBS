@@ -1,0 +1,62 @@
+{
+  "taskId": "T004",
+  "dispatchId": "229c687f-8bda-4b35-bea4-2e7841ace916",
+  "revision": 1,
+  "at": "2026-11-17T15:44:44.720Z",
+  "checks": [
+    {
+      "name": "real File, same-row NIST entry, narrow layout, real Fe I/II, metadata and refresh isolation",
+      "result": "PASS",
+      "detail": {
+        "layout": {
+          "body": {
+            "x": 245,
+            "y": 967,
+            "width": 290,
+            "height": 161.09375,
+            "top": 967,
+            "right": 535,
+            "bottom": 1128.09375,
+            "left": 245
+          },
+          "buttons": [
+            {
+              "text": "加载当前谱线库",
+              "r": {
+                "x": 265,
+                "y": 967,
+                "width": 121,
+                "height": 51.09375,
+                "top": 967,
+                "right": 386,
+                "bottom": 1018.09375,
+                "left": 265
+              }
+            },
+            {
+              "text": "加载 NIST 在线谱线库",
+              "r": {
+                "x": 394,
+                "y": 967,
+                "width": 121,
+                "height": 51.09375,
+                "top": 967,
+                "right": 515,
+                "bottom": 1018.09375,
+                "left": 394
+              }
+            }
+          ]
+        },
+        "groups": 2,
+        "refreshSameCount": true
+      }
+    }
+  ],
+  "errors": [],
+  "ownedProcessesStopped": {
+    "chrome": false,
+    "api": true
+  },
+  "failed": 0
+}

@@ -1,0 +1,96 @@
+{
+    "taskId":  "T003",
+    "dispatchId":  "489619a1-691c-44b3-8a87-1687dcb4f081",
+    "revision":  1,
+    "baseline":  "ae4b1d4db01b0042b23bb65f01728494abec5dd2",
+    "frozen":  true,
+    "trackedChangedPaths":  [
+                                "dist-desktop/SHA256SUMS.txt",
+                                "dist-desktop/SimLIBS-Setup.exe",
+                                "dist-desktop/SimLIBS.exe",
+                                "dist-desktop/artifact-manifest.json",
+                                "src/pages/SpectrumBrowserPage.vue"
+                            ],
+    "unexpectedPaths":  [
+
+                        ],
+    "diffCheckExitCode":  0,
+    "behavior":  {
+                     "errors":  0,
+                     "failed":  0,
+                     "passed":  5
+                 },
+    "desktopBuildExitCode":  0,
+    "files":  [
+                  {
+                      "file":  "src/pages/SpectrumBrowserPage.vue",
+                      "bytes":  11279,
+                      "sha256":  "8f1cd1f84e61a5a3bdee53d2c8f048c97c0ac7bf0c5bee0f141030a105ac931d"
+                  },
+                  {
+                      "file":  "dist-desktop/SimLIBS.exe",
+                      "bytes":  5143040,
+                      "sha256":  "8946bb31c78821e9370b2866109951a496a60f9b34ab65026ca59ea7e802a1a5"
+                  },
+                  {
+                      "file":  "dist-desktop/SimLIBS-Setup.exe",
+                      "bytes":  6008990,
+                      "sha256":  "dfb5b13e1345fc9ae0b936f825573f6882af0960a0ab4387dc2e7a0a3e848a76"
+                  },
+                  {
+                      "file":  "dist-desktop/SHA256SUMS.txt",
+                      "bytes":  11783,
+                      "sha256":  "9138b2eb9863c31618881da5d877cfbb3886ad3353349ea6c9f3670ba96e381b"
+                  },
+                  {
+                      "file":  "dist-desktop/artifact-manifest.json",
+                      "bytes":  25110,
+                      "sha256":  "34a21a71102885650a3375bae55909e32849860f5ef61ee7ad70d20f6c85594b"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T003/implementation.md",
+                      "bytes":  2750,
+                      "sha256":  "42ad14f617381d16006c9c94936b9e47268193988ff4dc1f1f7bc00f2c74f88e"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T003/final-source.diff",
+                      "bytes":  7655,
+                      "sha256":  "1075e57444ba433a68b7491173f99b411c8edad127327fe58f83469f74320610"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T003/behavior-check.json",
+                      "bytes":  16747,
+                      "sha256":  "23276ecd795a5ad1ce90c1cebe0f5ac396ad04eee1fac20f2a13222be10cd543"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T003/behavior-check.log",
+                      "bytes":  1570,
+                      "sha256":  "88ee3df1b61793121cfae3c2590fe875a056e0203e1e519d31b099f603158680"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T003/build.log",
+                      "bytes":  860,
+                      "sha256":  "5bb7a5a5cc7879a115fb9954b770ef0724a5b4f2a67f54547fdd707fb22932f8"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T003/desktop-build.log",
+                      "bytes":  54410,
+                      "sha256":  "203c780fee165189c1e1bc639517152358694e6a638428dcdff0c64b1ac992ad"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T003/cdp-check.mjs",
+                      "bytes":  9446,
+                      "sha256":  "d3891d24055e364601d179b77717ba75b0aaa4c01ab5cb7c91b1c1c00b46595a"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T003/harness.mjs",
+                      "bytes":  937,
+                      "sha256":  "d4cebeeb05db6f8170c15cc1ec30d0cd15004e2f75e05fb34bf473515b533ec8"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T003/cdp-server.py",
+                      "bytes":  938,
+                      "sha256":  "c7a40e24a1a52cb06d08339e7014cb2c7960ccb2af11e44facecdd7259b25043"
+                  }
+              ]
+}

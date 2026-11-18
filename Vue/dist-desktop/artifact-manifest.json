@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "deliveryDirectory": "dist-desktop",
-  "collectedAt": "2026-11-17T08:02:49.578Z",
+  "collectedAt": "2026-11-18T05:46:42.160Z",
   "runtime": "Windows x64 / system WebView2 / external Python 3.11",
   "frontend": "embedded static dist",
   "scientificSource": "real Python / local LTE-Saha / NIST",
@@ -11,15 +11,15 @@
       "kind": "windows-x64-application",
       "file": "SimLIBS.exe",
       "source": "src-tauri\\target\\release\\simlibs-vue.exe",
-      "bytes": 5143040,
-      "sha256": "339d2e3e946c8cf751680ddf029fd36aab491deddaead54cd9a76d848b26a798"
+      "bytes": 5144064,
+      "sha256": "91bc9d2f9bc37589d96f3aa7e16c2810a3b8b5c3f95b2838e5b72db5e6fa3352"
     },
     {
       "kind": "nsis-installer",
       "file": "SimLIBS-Setup.exe",
       "source": "src-tauri\\target\\release\\bundle\\nsis\\SimLIBS_0.1.0_x64-setup.exe",
-      "bytes": 6008583,
-      "sha256": "b2c9aab21284fd385961aa5527f163ba0d74772bb9e519aab20d14d24c0ef488"
+      "bytes": 6013200,
+      "sha256": "d3f879fbd9e66df00ef548a5c38556a3470c7f04c39b35e267b487ecec2fe240"
     },
     {
       "kind": "python-backend-resource",
@@ -162,14 +162,20 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/simlibs_ui/spectrum_browser.py",
-      "bytes": 13351,
-      "sha256": "6d7b16a1f34cdf211f94a9b7e94a9b37e06a1df57606e259fe3a910316fbf52f"
+      "bytes": 13640,
+      "sha256": "207214f61b86dc7da83167f7242d64b8a9f43f17269688900e04bd37309a40dd"
     },
     {
       "kind": "python-backend-resource",
       "file": "backend/simlibs_ui/spectrum_cwt.py",
       "bytes": 2687,
       "sha256": "ef048166485ad5655b9191f4d0758cb7604b408cc8d25e2b9c9035d09c4459f9"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/spectrum_nist.py",
+      "bytes": 11817,
+      "sha256": "372dc21699f24ead352d0747cec74cdf6d1cf4209a76b66258887fe2678afa5f"
     },
     {
       "kind": "python-backend-resource",

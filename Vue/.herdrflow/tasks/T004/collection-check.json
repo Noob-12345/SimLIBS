@@ -1,0 +1,612 @@
+{
+    "taskId":  "T004",
+    "dispatchId":  "229c687f-8bda-4b35-bea4-2e7841ace916",
+    "revision":  1,
+    "result":  "pass",
+    "collectedAt":  "2026-11-18T05:46:42.160Z",
+    "deliveryDirectory":  "dist-desktop",
+    "verifiedArtifacts":  120,
+    "artifacts":  [
+                      {
+                          "file":  "SimLIBS.exe",
+                          "sha256":  "91bc9d2f9bc37589d96f3aa7e16c2810a3b8b5c3f95b2838e5b72db5e6fa3352",
+                          "bytes":  5144064
+                      },
+                      {
+                          "file":  "SimLIBS-Setup.exe",
+                          "sha256":  "d3f879fbd9e66df00ef548a5c38556a3470c7f04c39b35e267b487ecec2fe240",
+                          "bytes":  6013200
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/adapter.py",
+                          "sha256":  "887bbb7a28c03d725032f37f5e81e0dc725d7580785b415d9ea43d70824488c2",
+                          "bytes":  24366
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/advanced.py",
+                          "sha256":  "3c62e765b93e8040ff8b53aecbdcab60888e0c2e660b30377a9cffaf261abc51",
+                          "bytes":  12533
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/advanced_local.py",
+                          "sha256":  "ae495d0906e7d84d1630e3f7d0a836f0ee46fab313d1d4907f1a2b7a44bc3c54",
+                          "bytes":  17764
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/advanced_nist.py",
+                          "sha256":  "62706fe9d42a56049f2be13a7dd9b7fef2962558231486ec0b729b4dbb97f503",
+                          "bytes":  26241
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/advanced_nist_render.py",
+                          "sha256":  "a2686002805b59b675538f3eba2b3ae44da95a9599197f8012674348f1b8112b",
+                          "bytes":  2361
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/advanced_stark.py",
+                          "sha256":  "46007fbad20fbfbcc897c9aa6caf5c1762ad4ca3be01852bb017f6bbd003c3be",
+                          "bytes":  10683
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/batch_pipeline.py",
+                          "sha256":  "0eecd726a0eb0ddce04c186d260f01038004864cc308ddae959fa1c34e81135d",
+                          "bytes":  9458
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/batch_random.py",
+                          "sha256":  "e63b41cb97a72cb642cd13c868a3f0db27ade8b5c22c206ddad1228412620f2d",
+                          "bytes":  4382
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/batch_records.py",
+                          "sha256":  "6c0c4f82d254242c6ef6a70dd429b4b9055d8284de484b73e8cd41d5870ac1ef",
+                          "bytes":  1785
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/batch_template.py",
+                          "sha256":  "13b5caf50468e6bb1dc198804dc9d3d0711dee8bb5e09acc611bf1aa6cc708d4",
+                          "bytes":  4648
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/jobs.py",
+                          "sha256":  "92e2898c521d4e0720024fa7aeb771fd1a860c1987889ff6fd7fd1e286137b2f",
+                          "bytes":  9341
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/library_settings.py",
+                          "sha256":  "681986a80ffa0a21b96d280eddb4efe9449554d1e955f1f6d2b7e53f72187def",
+                          "bytes":  1999
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/models.py",
+                          "sha256":  "e69bcbe7001db40d4945cb45bf35af834abc5fa35246edfc5bbd9f748d433f70",
+                          "bytes":  14725
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/mode_engine.py",
+                          "sha256":  "c64d81d8981e85b6fd7970e6adc86ec72912d21f77b4b18d86023034707bd44b",
+                          "bytes":  8761
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/nist_recon.py",
+                          "sha256":  "35c9fd896cfea9927b23f306074417e87b48f9c4a4bd4e0ddb62826c1212e973",
+                          "bytes":  9016
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/offline_database.py",
+                          "sha256":  "b61f2bf62cdf6124ac40520930cf8ca70f95de725af976fc250d0e8801827dc4",
+                          "bytes":  8989
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/offline_engine.py",
+                          "sha256":  "02b33db7b4f0be4b56815ceadd60d755bd9eff6015c27ee1ce987c85d8e41302",
+                          "bytes":  6924
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/offline_lines.py",
+                          "sha256":  "9f80a71687acb9c6dc1dc5290d8ff350b85222c84f4f99a20607773a00897bae",
+                          "bytes":  4932
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/operations.py",
+                          "sha256":  "810591b946b128e30ecbfb414de01138399770ba85859db7b5e00f7e2338d4ad",
+                          "bytes":  9581
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/plotting.py",
+                          "sha256":  "3843cb3394d00dc17ae52260c6d8258d7ad915fa3364b54168208a05fcb892f6",
+                          "bytes":  3888
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/runtime_diagnostics.py",
+                          "sha256":  "df1545c813d086a1c92b371d9e3d1a998f994bd81296fd9b6fae0d6a6bd661e9",
+                          "bytes":  5985
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/settings.py",
+                          "sha256":  "feaa2338b715ffb7ad28ffd59dfdd696a74c424ab9f02879f37bb7a03c1812af",
+                          "bytes":  3193
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_avantes.py",
+                          "sha256":  "5e384183c8f6d5ef32d4cd6461794edae7c1c50c72c2f30e7751938d7664532a",
+                          "bytes":  6352
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_browser.py",
+                          "sha256":  "207214f61b86dc7da83167f7242d64b8a9f43f17269688900e04bd37309a40dd",
+                          "bytes":  13640
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_cwt.py",
+                          "sha256":  "ef048166485ad5655b9191f4d0758cb7604b408cc8d25e2b9c9035d09c4459f9",
+                          "bytes":  2687
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_nist.py",
+                          "sha256":  "372dc21699f24ead352d0747cec74cdf6d1cf4209a76b66258887fe2678afa5f",
+                          "bytes":  11817
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_processing.py",
+                          "sha256":  "f6d96b710c02c7062afb619ce2c4d3b6eef38eb4e70d90ab96fb3ff76a85372a",
+                          "bytes":  7546
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_reference.py",
+                          "sha256":  "994223ffce570c23fc1f44f9227a72d83a9103fae2c2ebf9545b3c71fc7b0607",
+                          "bytes":  7165
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/spectrum_sif.py",
+                          "sha256":  "dd178acd3203248d39b446f709761ec457a61c5b2138aaa58d29eb1893964496",
+                          "bytes":  8876
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/storage.py",
+                          "sha256":  "310c22fde41d4c77973686d4edfa43186506da71713dcb9853a580bc685ad686",
+                          "bytes":  8946
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/training.py",
+                          "sha256":  "c2563dd12b5ec48e426fb38498b3986e7136a7f55ef4f911b0d62bcc50507097",
+                          "bytes":  8408
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/worker.py",
+                          "sha256":  "56b6c54fb2749d0f2a425d7ac81ed88412156f6a549ee2b8799f1bee7e05389d",
+                          "bytes":  5210
+                      },
+                      {
+                          "file":  "backend/simlibs_ui/__init__.py",
+                          "sha256":  "9e97e6ed141a0f8cfe011547770c4af93bf442b91abd4d2b388fde51dd3a842a",
+                          "bytes":  136
+                      },
+                      {
+                          "file":  "backend/web/backend_api.py",
+                          "sha256":  "611aec5976d9f786c9a1903ce53e27aaa32768cdf396abfc2b0879b35c9f3794",
+                          "bytes":  23862
+                      },
+                      {
+                          "file":  "backend/web/real_backend.py",
+                          "sha256":  "19b2110e4d5d073678b57f11dcb878b67798f7623db59762eae34cacfc30c094",
+                          "bytes":  51369
+                      },
+                      {
+                          "file":  "backend/web/sampling.py",
+                          "sha256":  "1cb35ff13a0af747c55e2b3c1f41f0c55e0930a18ed25b9dd6e2b784a874df52",
+                          "bytes":  3831
+                      },
+                      {
+                          "file":  "backend/web/server.py",
+                          "sha256":  "1e85423851020290a28175086cb2b93db21bd62263c41384f06cc197cb383d08",
+                          "bytes":  16051
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/animation.py",
+                          "sha256":  "f4f19f24e6728098785fc69ef9a68187ebb2dcac0468d118c05fa6039d24cd52",
+                          "bytes":  4041
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/nist_lines.py",
+                          "sha256":  "8da09d3016524ad992f3969347b2fee8ac387993a0350e6e8908525533b70b3a",
+                          "bytes":  7734
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/nist_self_absorption.py",
+                          "sha256":  "8dcd4565a78b49f1c8b2e374ab5e7a581bdbb7e848c3edcd59673a302a3487f3",
+                          "bytes":  29670
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/nist_stark.py",
+                          "sha256":  "59b0953b5f591907bba047144a8b2c23538f5c3cf625dab6c9bb87cec6d7e410",
+                          "bytes":  13604
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/py.typed",
+                          "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                          "bytes":  0
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/self_absorption.py",
+                          "sha256":  "422e0613a57dd990ee22bed87b4a7fb54167cd9303fc205d1991e35138ce0039",
+                          "bytes":  24194
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/simulation.py",
+                          "sha256":  "be07b5e12cc04108c998e3bcc1324ee33685e0aab8520f7610f4c00dff6b69cb",
+                          "bytes":  14466
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/stark_atomic_data.py",
+                          "sha256":  "037087b11fc40b5cd527a27a44cd0eaa2d568382209850c137e5a718d0c41b1d",
+                          "bytes":  33032
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/stark_b.py",
+                          "sha256":  "eb8544e08d7725a4108b8b63ce05cf9658dfd099eb8dade10662f7456bb885e1",
+                          "bytes":  21309
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/stark_resolver.py",
+                          "sha256":  "d53c632f6db780bbad97d0cfaf39462d22cac58489f9242ffb218f80eab3cbab",
+                          "bytes":  20750
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/stark_semiempirical.py",
+                          "sha256":  "60ade6917180a3dcb6916592f7e6de4e1736b5918cfe3a0fbfef44ae0675330b",
+                          "bytes":  13539
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/stark_vamdc.py",
+                          "sha256":  "0e763205ff8bedf5d90b7a6e468391c5b71f14e2eae7205e781aace179b56df1",
+                          "bytes":  16501
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/__init__.py",
+                          "sha256":  "2282c493b07437e8a5a2691360aa3c903518be068fb4de425ae75d5c24ad14cb",
+                          "bytes":  332
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/data/paper_atomic_data.json",
+                          "sha256":  "0c944167ac036a6c3820b08717662e753664619aab77563aca0c8a750f1664f7",
+                          "bytes":  807191
+                      },
+                      {
+                          "file":  "backend/source/simLIBS/data/stark_broadening.json",
+                          "sha256":  "ffac32dc06d2fd48da8a18215e3c41192b07ff8e180a24ff013b478c6474afdd",
+                          "bytes":  30602104
+                      },
+                      {
+                          "file":  "backend/source/LICENSE.md",
+                          "sha256":  "77b4a7fcffb2582e4212efb4c5dc7db2ab23ef6ca67e493dea536993acb5b866",
+                          "bytes":  1091
+                      },
+                      {
+                          "file":  "backend/Linedatabase/AlI.csv",
+                          "sha256":  "ecb0b7bec8287c7911cb04924093d63d18649d5bb1c6d433a88a83701752e682",
+                          "bytes":  694
+                      },
+                      {
+                          "file":  "backend/Linedatabase/AlII.csv",
+                          "sha256":  "4d4ae93dfd2e665245190ce241906f1179be305ef5d10467867bf22b8dbf6b2f",
+                          "bytes":  982
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CaI.csv",
+                          "sha256":  "6a72a48fe01e3ae3f39dc48b764c3e42ccefdb95e08b6772d2b3c2d16419e526",
+                          "bytes":  1308
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CaII.csv",
+                          "sha256":  "da084f3732ee4d10280712276a349428c83b27e1190bc3f2240691975484bfa5",
+                          "bytes":  571
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CeI.csv",
+                          "sha256":  "40dbbc55fc766d69680efd6d8ffa949458ca694b47b4af8ce2313139eb466c20",
+                          "bytes":  1179
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CeII.csv",
+                          "sha256":  "0b88ce0f4d618625033be91a17a8da856e93bb4bad6a6386180a736b21d695fb",
+                          "bytes":  3118
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CrI.csv",
+                          "sha256":  "3ae5a01084d923598f965d015306f4e57a34ad7a6e66fe6e7575f668c717431e",
+                          "bytes":  948
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CrII.csv",
+                          "sha256":  "60d8e52f491385d8e1a7069a832fbc00ed2cfc5763d9c089f2c7f9ffe52a84f4",
+                          "bytes":  774
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CuI.csv",
+                          "sha256":  "3bfa71d05c0ba33dee5ba2a51c24a74e1dd67d876b25e2ebb360264f0934905c",
+                          "bytes":  1232
+                      },
+                      {
+                          "file":  "backend/Linedatabase/CuII.csv",
+                          "sha256":  "d55c737c9ed073ce2de08dcf183463c9fd1a210ba3c2b59803b32949cd916a47",
+                          "bytes":  678
+                      },
+                      {
+                          "file":  "backend/Linedatabase/DyI.csv",
+                          "sha256":  "7bb6d404f8459aeb1b4da7fbb0d531217234c0b19df6b2a815fed0a047ff0e19",
+                          "bytes":  1275
+                      },
+                      {
+                          "file":  "backend/Linedatabase/DyII.csv",
+                          "sha256":  "71153734440bd2ab97a0f3f76e62d3d87d2f991bf670059ba762e083610e9a90",
+                          "bytes":  2327
+                      },
+                      {
+                          "file":  "backend/Linedatabase/ErI.csv",
+                          "sha256":  "59dee1b304f0b5eff0034577392f49af4ee5231b703ba2d560a03f1f2a4db993",
+                          "bytes":  1378
+                      },
+                      {
+                          "file":  "backend/Linedatabase/ErII.csv",
+                          "sha256":  "669b18b86d57a62954beb4a05f3eebd7aba5d842178fd017c3e2f160f1d2bdb6",
+                          "bytes":  1618
+                      },
+                      {
+                          "file":  "backend/Linedatabase/EuI.csv",
+                          "sha256":  "efc19c4605a020607e57180253d3c8069493d7ec20b060d8e2e9cc1942320c0c",
+                          "bytes":  1101
+                      },
+                      {
+                          "file":  "backend/Linedatabase/EuII.csv",
+                          "sha256":  "24b2d754379041fcb2fbf46b42b2e716adab101bec202abcd9760e5cdb0f57a7",
+                          "bytes":  1607
+                      },
+                      {
+                          "file":  "backend/Linedatabase/FeI.csv",
+                          "sha256":  "d79e4c89ccda8f901622473584ded8f9c1346228b1454acdeca736b6e6898834",
+                          "bytes":  2103
+                      },
+                      {
+                          "file":  "backend/Linedatabase/FeII.csv",
+                          "sha256":  "2f04c76ec4cd68bc71197f66d21af2ff9070020bb1d89ced81c38ea5b9cbb7e2",
+                          "bytes":  1517
+                      },
+                      {
+                          "file":  "backend/Linedatabase/GdI.csv",
+                          "sha256":  "4f83246cb9bf817215384ad225ca6ee4305603ce7e8e6ffb30daa8185e3f7909",
+                          "bytes":  2362
+                      },
+                      {
+                          "file":  "backend/Linedatabase/GdII.csv",
+                          "sha256":  "bc2658d942908e0a99fe5b6d7a3836d896a7d390e4453e79314311d6c21aaeb1",
+                          "bytes":  2154
+                      },
+                      {
+                          "file":  "backend/Linedatabase/HoI.csv",
+                          "sha256":  "176d07f53a5363722186240d3883d199f091ef96c34666d0cb4cc2a64379d332",
+                          "bytes":  1652
+                      },
+                      {
+                          "file":  "backend/Linedatabase/HoII.csv",
+                          "sha256":  "d3df2f7b0e52d8bad02db1e288c0674a881d992784519ae15064505ba3eaf91a",
+                          "bytes":  1666
+                      },
+                      {
+                          "file":  "backend/Linedatabase/KI.csv",
+                          "sha256":  "7ee9eb8792af5c21993b78d87f5005651c6852d1fb1a83b5bf56cba5816369b9",
+                          "bytes":  846
+                      },
+                      {
+                          "file":  "backend/Linedatabase/KII.csv",
+                          "sha256":  "3b7fdb628324f7a394f8f2f791c6ffd2204ef87172384404a6dc85950333834c",
+                          "bytes":  166
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LaI.csv",
+                          "sha256":  "6a7427384b7b2d6c9aaa6a8be1aa87eadceffd350b99a900083d896292fee25d",
+                          "bytes":  2266
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LaII.csv",
+                          "sha256":  "0511e4d3a7e01dd009dc98e851308e3eefdc5f24a76340e62e2b3e92fb5ea9cf",
+                          "bytes":  1972
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LiI.csv",
+                          "sha256":  "7f81dc5ce760c8cd606b484d6cbe189790acbc222398f61ab2cb8cfefbe5fd95",
+                          "bytes":  1001
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LiII.csv",
+                          "sha256":  "44e90c0e96495aeadb2995bc1e0bbc4bfb134f63d6b11e61573a792ba49b3a99",
+                          "bytes":  573
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LuI.csv",
+                          "sha256":  "4f20532534e013833055aa2242ea2c93da09fde3b15784b1c0e1cf1571f0defb",
+                          "bytes":  1502
+                      },
+                      {
+                          "file":  "backend/Linedatabase/LuII.csv",
+                          "sha256":  "bded7ead8bb13ba001a24ac462225a31c6f621b9a6f44a55c3157c19f7883725",
+                          "bytes":  1543
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MgI.csv",
+                          "sha256":  "4c8f7bf86c3d1149edcc166e881a3f337ec1c704bbd64a6ca5214ffc77a525f8",
+                          "bytes":  961
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MgII.csv",
+                          "sha256":  "2cae4e40ca86c4eca568ca5bfa4cdbfd00b48fcd007cc432f3dcd18c3d5885d0",
+                          "bytes":  969
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MnI.csv",
+                          "sha256":  "f399c7d1a59ed96c89b15498e77a4d16e12445c7fab9afd89a044a7ca543a664",
+                          "bytes":  689
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MnII.csv",
+                          "sha256":  "2428eeed7d9ae28e0833633b8f724bcc6f49a791d0385a69d6616b7849831767",
+                          "bytes":  910
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MoI.csv",
+                          "sha256":  "6850df3c0fdee4a9da61002aa46dad22a82e6cfd92dedc143b5cc0a1c9601bcf",
+                          "bytes":  1526
+                      },
+                      {
+                          "file":  "backend/Linedatabase/MoII.csv",
+                          "sha256":  "06acb00f233d80008f053168b3a044afca8d3272baf7c47d71b0a0c43b863281",
+                          "bytes":  1040
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NaI.csv",
+                          "sha256":  "479bc8b46687db7a6df9383fc114c636a489f749573f43a76c9a1ebbd2358ee4",
+                          "bytes":  853
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NaII.csv",
+                          "sha256":  "988efd34a2c00ec359f7c13f4abb93047617befbacab001b055f883788dc7c8c",
+                          "bytes":  241
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NdI.csv",
+                          "sha256":  "3ab455f665bf886cef919c9e3dc7648f23784f1812d6559ee0da5c37f06b9963",
+                          "bytes":  882
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NdII.csv",
+                          "sha256":  "7607279c1b38829670a7d00e4a0d779c84425d9a868665239809c77cc3b922fe",
+                          "bytes":  2487
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NiI.csv",
+                          "sha256":  "f6147260f519842c286df700027c8a08ea746b2c3b120e929303e0de8625f3c5",
+                          "bytes":  1196
+                      },
+                      {
+                          "file":  "backend/Linedatabase/NiII.csv",
+                          "sha256":  "a578b6b67db0f7b5c5910c84d245063a0342f5401a44f6431ac4cdb454735486",
+                          "bytes":  713
+                      },
+                      {
+                          "file":  "backend/Linedatabase/PbI.csv",
+                          "sha256":  "5b07a47905e9ca7bbd06fff959d6b6544850312ae53ceb708c2dbac37fce2020",
+                          "bytes":  1254
+                      },
+                      {
+                          "file":  "backend/Linedatabase/PbII.csv",
+                          "sha256":  "bd213d6e23d68a87e6cd31c0e74f7dacd81fcc8a5994c1483dda956609905ae9",
+                          "bytes":  358
+                      },
+                      {
+                          "file":  "backend/Linedatabase/PrI.csv",
+                          "sha256":  "4b7ace2a15b353dcbb3ef8b80a45f8843ae5a695d68a4c038f8642cd3d754ca7",
+                          "bytes":  1069
+                      },
+                      {
+                          "file":  "backend/Linedatabase/PrII.csv",
+                          "sha256":  "8e945034e6549a9a04c7df33545354e4dc8f64334813fc192db0a26e85e6f396",
+                          "bytes":  1711
+                      },
+                      {
+                          "file":  "backend/Linedatabase/Readme.md",
+                          "sha256":  "fbdcbf4b730d2a155eaa8a05d52d19ec59be62928bbc5586e881a9072ea28a19",
+                          "bytes":  122
+                      },
+                      {
+                          "file":  "backend/Linedatabase/SiI.csv",
+                          "sha256":  "46aada762bb8ee570fb9c4d11e39f54ecc8336b7cea02dd18309596f08f13b88",
+                          "bytes":  1996
+                      },
+                      {
+                          "file":  "backend/Linedatabase/SiII.csv",
+                          "sha256":  "a22010c1d2f1b6a13c8e15baf76658f1e342627dc5e9d71921110b40b58231c7",
+                          "bytes":  1191
+                      },
+                      {
+                          "file":  "backend/Linedatabase/simlibs-atomic-metadata.json",
+                          "sha256":  "332d12067e79d192ae70080b15a33c8d7322a8df08944ca7ef2c5af500dba52d",
+                          "bytes":  19867
+                      },
+                      {
+                          "file":  "backend/Linedatabase/SmI.csv",
+                          "sha256":  "550ed95e55a4677ba49ee32e2376fbc7267ded53249213c4d1299d2d8f63fe28",
+                          "bytes":  1153
+                      },
+                      {
+                          "file":  "backend/Linedatabase/SmII.csv",
+                          "sha256":  "0b86c1e5c9e37c482c025f7a8418671480d2dec4a7215236cc4a2e2e035ef164",
+                          "bytes":  1583
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TbI.csv",
+                          "sha256":  "2e7332864e05e045e6b5ed593033bd8375f04a498054577dcaef4029b3de4c04",
+                          "bytes":  1198
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TbII.csv",
+                          "sha256":  "9815bf39a41ad5eebf7f02e87c89bee7468bcb72b790c88f1580bb9074d3bda4",
+                          "bytes":  2248
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TiI.csv",
+                          "sha256":  "73dd8cb6b94171ace3d36bc932183026824d5d131eccc245b15c2b7a6c2b58dc",
+                          "bytes":  1602
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TiII.csv",
+                          "sha256":  "a06511e3ac9426a626a840d850f5a1f183abdd8c840ef498052ba88691393f17",
+                          "bytes":  1275
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TmI.csv",
+                          "sha256":  "d4971dd0567372e005d6a7272bb72122aa04183c2e6535db014919501cc16940",
+                          "bytes":  1792
+                      },
+                      {
+                          "file":  "backend/Linedatabase/TmII.csv",
+                          "sha256":  "b1c8c24a02d8a719304ea98d16b83dd25ad1f9ce69268db11962712ddee93cde",
+                          "bytes":  1556
+                      },
+                      {
+                          "file":  "backend/Linedatabase/YbI.csv",
+                          "sha256":  "8cf861098d04c22e8106bd4c1e2f0e0244cce889e4a009ff9fab98d7ece7e6cc",
+                          "bytes":  1048
+                      },
+                      {
+                          "file":  "backend/Linedatabase/YbII.csv",
+                          "sha256":  "b0c31fb62a35e8866c0fb0dbb479b8e56f94307896cc101de96fdc943b8b5666",
+                          "bytes":  1285
+                      },
+                      {
+                          "file":  "backend/Linedatabase/YI.csv",
+                          "sha256":  "8723183983402a2fe9c58a6d3e1f14c6b2a40ca2e62cb3c8b0158cc5571a2ee0",
+                          "bytes":  501
+                      },
+                      {
+                          "file":  "backend/Linedatabase/YII.csv",
+                          "sha256":  "4ea8868963660d44df363b2d2f826ad8fb633e3ae8ff81191314313bf8d64f31",
+                          "bytes":  1471
+                      },
+                      {
+                          "file":  "backend/Linedatabase/ZnI.csv",
+                          "sha256":  "7ae416bc1924756e9446f2a6b99124d8bb3b50cbbcb4d23abd0b0ad55f6f86b0",
+                          "bytes":  844
+                      },
+                      {
+                          "file":  "backend/Linedatabase/ZnII.csv",
+                          "sha256":  "e2a24834cd06714e4b26c75b722b73771905cb5d5d03f97d158e740253df7938",
+                          "bytes":  547
+                      },
+                      {
+                          "file":  "backend/README.md",
+                          "sha256":  "5a9e1e7dc3acc042aed116c2f2e04f49d3982c8443e4965c0cd5737c39360639",
+                          "bytes":  6142
+                      }
+                  ],
+    "rootUpdated":  true
+}

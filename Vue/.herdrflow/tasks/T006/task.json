@@ -1,0 +1,18 @@
+{
+  "taskId": "T006",
+  "dispatchId": "09c2198a-eba1-4236-bca0-379723d27c79",
+  "revision": 1,
+  "status": "planned",
+  "owner": "implementer",
+  "goal": "统一全部光谱区方向框选：左向右放大，右向左缩小",
+  "acceptance": [
+    "SpectrumChart左向右放大、右向左缩小",
+    "BrowserSpectrumChart左向右放大、右向左缩小",
+    "边界夹紧无NaN/零宽，平移/滚轮/键盘/右键/概览保持",
+    "数据和当前T003/T005其他dirty不变"
+  ],
+  "allowedPaths": ["src/components/SpectrumChart.vue", "src/components/BrowserSpectrumChart.vue"],
+  "forbiddenPaths": ["src/pages/SpectrumBrowserPage.vue", "src/lib/spectrumBrowser.ts", "src/components/AppIcon.vue", "src/styles.css", "backend", "src-tauri", "package.json", "package-lock.json"],
+  "evidence": ["implementation.md", "behavior-check.json", "review.md"],
+  "fixRounds": 0
+}

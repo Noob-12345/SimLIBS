@@ -16,7 +16,7 @@ const paths: Record<string, string> = {
   jobs: 'M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9M12 7v5l3 2',
   settings: 'M4 6h16M4 12h16M4 18h16M9 3v6M15 9v6M8 15v6',
   plus: 'M12 5v14M5 12h14', minus: 'M5 12h14', close: 'M6 6l12 12M18 6 6 18',
-  reset: 'M3 10a9 9 0 1 1 2 8M3 4v6h6', chevron: 'm9 5 7 7-7 7', down: 'm5 9 7 7 7-7',
+  reset: 'M3 10a9 9 0 1 1 2 8M3 4v6h6', 'cross-arrows': 'M12 3v18M3 12h18M12 3l-3 3m3-3 3 3M12 21l-3-3m3 3 3-3M3 12l3-3m-3 3 3 3M21 12l-3-3m3 3-3 3', 'vertical-arrows': 'M12 3v18m0-18-3 3m3-3 3 3m-3 15-3-3m3 3 3-3', chevron: 'm9 5 7 7-7 7', down: 'm5 9 7 7 7-7',
   play: 'm8 5 11 7-11 7z', pause: 'M8 5v14M16 5v14', prev: 'M5 5v14m14-14L8 12l11 7z', next: 'M19 5v14M5 5l11 7-11 7z',
   download: 'M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6', refresh: 'M20 7a9 9 0 0 0-15-1L3 9m0-5v5h5M4 17a9 9 0 0 0 15 1l2-3m0 5v-5h-5',
   sun: 'M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5',

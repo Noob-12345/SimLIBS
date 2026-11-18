@@ -1,0 +1,481 @@
+diff --git a/backend/simlibs_ui/spectrum_browser.py b/backend/simlibs_ui/spectrum_browser.py
+index 32cf6dd..6c57164 100644
+--- a/backend/simlibs_ui/spectrum_browser.py
++++ b/backend/simlibs_ui/spectrum_browser.py
+@@ -221,6 +221,10 @@ class BrowserStore:
+                 with self.lock:self.documents.pop(str(body.get('document','')),None)
+                 return dict(released=True)
+             if action=='references':
++                if body.get('source')=='nist':
++                    if set(body) != {'source','element'}:raise ValueError('NIST仅接受元素符号，不接受URL或路径')
++                    from .spectrum_nist import fetch
++                    return fetch(str(body.get('element','')))
+                 from .spectrum_reference import configured,uploaded
+                 return uploaded(body) if 'data' in body else configured(settings['line_database'])
+             raise ValueError('未知光谱浏览操作')
+diff --git a/src/components/BrowserReferencePanel.vue b/src/components/BrowserReferencePanel.vue
+index b31bb31..3184fc4 100644
+--- a/src/components/BrowserReferencePanel.vue
++++ b/src/components/BrowserReferencePanel.vue
+@@ -4,30 +4,34 @@ import { isTauri } from '@tauri-apps/api/core'
+ import AppIcon from './AppIcon.vue'
+ import ChoiceSelect from './ChoiceSelect.vue'
+ import ElementCandidate from './ElementCandidate.vue'
+-import { elementColor } from '../lib/model'
+-import { spectrumBrowser as state, loadReferences, cancelReferences, clearReferences, addReferenceElement, toggleReferenceElement, toggleReferenceSpecies } from '../lib/spectrumBrowser'
+-const id=useId(),input=ref<HTMLInputElement>(),adding=ref(''),error=ref('')
+-const symbols=computed(()=>[...new Set(state.references.map(g=>g.element))].filter(e=>!state.addedElements.includes(e)))
++import { elementColor, symbols } from '../lib/model'
++import { spectrumBrowser as state, loadReferences, loadNistReferences, cancelReferences, clearReferences, addReferenceElement, toggleReferenceElement, toggleReferenceSpecies } from '../lib/spectrumBrowser'
++const id=useId(),input=ref<HTMLInputElement>(),adding=ref(''),error=ref(''),nistExpanded=ref(false)
++const availableSymbols=computed(()=>[...new Set(state.references.map(g=>g.element))].filter(e=>!state.addedElements.includes(e)))
+ const sourceGroups=computed(()=>state.references.filter(g=>state.addedElements.includes(g.element)))
+ const units=[{value:'nm',label:'nm'},{value:'angstrom',label:'Å（×0.1 → nm）'},{value:'um',label:'μm（×1000 → nm）'}]
+ const enabled=(element:string)=>state.references.some(g=>g.element===element&&state.selected.includes(g.id))
+-function add(){const symbol=symbols.value.find(e=>e.toLowerCase()===adding.value.trim().toLowerCase());if(!symbol){error.value='请选择当前已加载库中的元素';return}addReferenceElement(symbol);adding.value='';error.value=''}
++function add(){const symbol=availableSymbols.value.find(e=>e.toLowerCase()===adding.value.trim().toLowerCase());if(!symbol){error.value='请选择当前已加载库中的元素';return}addReferenceElement(symbol);adding.value='';error.value=''}
+ async function choose(){if(isTauri())await loadReferences(undefined,true);else input.value?.click()}
+ function file(event:Event){const target=event.target as HTMLInputElement,f=target.files?.[0];if(f)void loadReferences(f,true);target.value=''}
+ </script>
+ <template>
+   <section class="panel reference-panel">
+-    <button type="button" class="reference-heading" :aria-expanded="state.referencesExpanded" :aria-controls="id" @click="state.referencesExpanded=!state.referencesExpanded"><h2>谱线位置参考</h2><span v-if="state.referencePending">加载中…</span><span v-else-if="state.referenceError" class="reference-error">加载失败</span><span v-else-if="state.configuredLoaded" class="reference-success">已加载 · {{ state.configuredCount }} 位置</span><span v-else-if="state.references.length">用户库 · {{ state.references.length }} species</span><AppIcon name="chevron" :size="14" :class="{expanded:state.referencesExpanded}" /></button>
++    <button type="button" class="reference-heading" :aria-expanded="state.referencesExpanded" :aria-controls="id" @click="state.referencesExpanded=!state.referencesExpanded"><h2>谱线位置参考</h2><span v-if="state.referencePending||state.nistPending">加载中…</span><span v-else-if="state.referenceError" class="reference-error">加载失败</span><span v-else-if="state.configuredLoaded" class="reference-success">本地库 · {{ state.configuredCount }} 位置</span><span v-else-if="state.references.length">参考组 · {{ state.references.length }}</span><AppIcon name="chevron" :size="14" :class="{expanded:state.referencesExpanded}" /></button>
+     <div :id="id" v-show="state.referencesExpanded" class="reference-body">
+-      <div class="reference-actions"><button type="button" :class="['btn',{'reference-loaded':state.configuredLoaded&&!state.referencePending}]" :disabled="state.referencePending" @click="loadReferences()">{{ state.referencePending?'正在加载…':state.configuredLoaded?'已加载 · 刷新当前库':'加载当前谱线库' }}</button><button v-if="state.referencePending" type="button" class="btn" @click="cancelReferences">取消</button><button v-if="state.references.length" type="button" class="icon-btn" title="清空参考库" aria-label="清空参考库" @click="clearReferences"><AppIcon name="close" :size="14" /></button></div>
++      <div class="reference-actions"><div class="reference-entry-grid"><button type="button" :class="['btn',{'reference-loaded':state.configuredLoaded&&!state.referencePending}]" :disabled="state.referencePending||state.nistPending" @click="loadReferences()">{{ state.referencePending?'正在加载…':state.configuredLoaded?'已加载 · 刷新当前库':'加载当前谱线库' }}</button><button type="button" class="btn nist-button" :disabled="state.referencePending||state.nistPending" :aria-expanded="nistExpanded" :aria-controls="id+'-nist'" title="选择元素并从 NIST Handbook Persistent Lines 加载 I/II" @click="nistExpanded=!nistExpanded">加载 NIST 在线谱线库</button></div><div class="reference-secondary-actions"><button v-if="state.referencePending||state.nistPending" type="button" class="btn reference-cancel" @click="cancelReferences">取消</button><button v-if="state.references.length" type="button" class="icon-btn" title="清空参考库" aria-label="清空参考库" @click="clearReferences"><AppIcon name="close" :size="14" /></button></div></div>
+       <p v-if="state.referenceError" class="error-text" role="alert">{{ state.referenceError }}<span v-if="state.references.length">；上次成功数据保留。</span></p>
+-      <form v-if="state.references.length" class="add-element" @submit.prevent="add"><ElementCandidate :id="id+'-element'" v-model="adding" :symbols="symbols" :disabled="state.referencePending" :issue="error" /><button type="submit" class="btn sm" :disabled="!symbols.length">添加</button></form><p v-if="error" class="error-text" role="alert">{{ error }}</p>
+-      <div class="reference-elements"><div v-for="element in state.addedElements" :key="element" class="reference-element"><button type="button" :class="['element-tile',{'element-muted':!enabled(element)}]" :style="{'--el-color':elementColor(element)}" :aria-pressed="enabled(element)" :aria-label="(enabled(element)?'关闭':'启用')+'参考元素 '+element" :title="'点击启用／关闭 '+element" @click="toggleReferenceElement(element)">{{ element }}</button><div class="reference-species"><label v-for="group in state.references.filter(g=>g.element===element)" :key="group.id"><input type="checkbox" :checked="state.selected.includes(group.id)" :aria-label="'参考 '+group.label" @change="toggleReferenceSpecies(group.id)" /><span>{{ group.species }}</span><small>{{ group.count }}</small></label></div></div></div>
++      <div v-if="nistExpanded" :id="id+'-nist'" class="nist-online"><label :for="id+'-nist-element'">NIST 元素</label><ElementCandidate :id="id+'-nist-element'" v-model="state.nistElement" :symbols="symbols" :disabled="state.referencePending||state.nistPending" /><button type="button" class="btn sm nist-query" :disabled="state.referencePending||state.nistPending" @click="loadNistReferences(state.nistElement)">{{ state.nistPending?'正在加载 NIST…':'加载／刷新元素' }}</button><small>NIST Handbook Persistent Lines · 官方在线来源，仅查询所选元素 I/II。</small><small v-if="state.nistStatus" role="status">{{ state.nistStatus }}</small><small v-for="issue in state.nistIssues" :key="issue.file" class="error-text">{{ issue.file }}：{{ issue.error }}</small></div><form v-if="state.references.length" class="add-element" @submit.prevent="add"><ElementCandidate :id="id+'-element'" v-model="adding" :symbols="availableSymbols" :disabled="state.referencePending||state.nistPending" :issue="error" /><button type="submit" class="btn sm" :disabled="!availableSymbols.length">添加</button></form><p v-if="error" class="error-text" role="alert">{{ error }}</p>
++      <div class="reference-elements"><div v-for="element in state.addedElements" :key="element" class="reference-element"><button type="button" :class="['element-tile',{'element-muted':!enabled(element)}]" :style="{'--el-color':elementColor(element)}" :aria-pressed="enabled(element)" :aria-label="(enabled(element)?'关闭':'启用')+'参考元素 '+element" :title="'点击启用／关闭 '+element" @click="toggleReferenceElement(element)">{{ element }}</button><div class="reference-species"><label v-for="group in state.references.filter(g=>g.element===element)" :key="group.id" :title="group.source"><input type="checkbox" :checked="state.selected.includes(group.id)" :aria-label="'参考 '+group.label" @change="toggleReferenceSpecies(group.id)" /><span>{{ group.species }}</span><small>{{ group.originKind==='nist'?'NIST':group.originKind==='user'?'CSV':'本地' }} · {{ group.count }}</small></label></div></div></div>
++      <details v-for="group in sourceGroups.filter(g=>g.originKind==='nist')" :key="group.id" class="nist-originals"><summary>{{ group.label }} · 来源与原字段</summary><p class="hint">{{ group.source }}<br />获取时间：{{ group.metadata?.fetched_at }}<br />HTML SHA256：{{ group.sha256 }}<br />波长原值 Å，仅除以10转换为 nm，不推断空气/真空介质。</p><details v-for="position in group.positions" :key="position.wavelength_nm"><summary>{{ position.wavelength_angstrom }} Å · {{ position.wavelength_nm }} nm</summary><article v-for="(record,i) in position.records" :key="i"><dl v-for="row in record.states" :key="row.line"><dt>页面行</dt><dd>{{ row.line }}</dd><dt>Intensity</dt><dd>{{ row.intensity||'—' }}</dd><dt>Å 原值</dt><dd>{{ row.wavelength_angstrom||'（该行未重复列出）' }}</dd><dt>Aki</dt><dd>{{ row.aki||'—' }} {{ row.aki_unit }}</dd><dt>Energy</dt><dd>{{ row.energy||'—' }} {{ row.energy_unit }}</dd><dt>Configuration</dt><dd>{{ row.configuration||'—' }}</dd><dt>Term / J</dt><dd>{{ row.term||'—' }} / {{ row.j||'—' }}</dd><dt>Line Ref</dt><dd>{{ row.line_ref||'—' }}</dd><dt>Aki Ref</dt><dd>{{ row.aki_ref||'—' }}</dd></dl></article></details></details>
+       <p v-if="state.spectrum?.unit==='pixel'" class="hint">pixel 轴不叠加 nm 参考。</p>
+       <details><summary>用户参考 CSV／来源</summary><div class="row2"><label class="field">元素（可留空）<input v-model="state.userElement" placeholder="Fe" /></label><label class="field">species（可留空）<input v-model="state.userSpecies" placeholder="II" /></label></div><label class="field">波长列（从0开始）<input v-model="state.userColumn" inputmode="numeric" /></label><ChoiceSelect v-model="state.userUnit" label="参考波长原单位" :options="units" /><button type="button" class="btn sm" :disabled="state.referencePending" @click="choose">打开用户参考 CSV</button><input ref="input" type="file" accept=".csv" class="reference-file" aria-label="选择参考谱线CSV" @change="file" /><p class="hint">虚线仅位置，不是元素鉴定。悬停可读库原字段；无 Aki 的线仍显示。</p><p v-for="issue in state.referenceIssues" :key="issue.file" class="hint">{{ issue.file }}：{{ issue.error }}</p><div v-for="group in sourceGroups" :key="group.id" class="reference-source"><b>{{ group.label }}</b> · {{ group.source }} · {{ group.original_unit }} → nm<small>{{ group.unit_contract }}</small><small class="mono">SHA256 {{ group.sha256 }}</small></div></details>
+     </div>
+   </section>
+ </template>
+ <style scoped>
+-.reference-panel{padding:0;min-width:0}.reference-heading{width:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:17px 20px;border:0;border-radius:13px;background:transparent;color:var(--text);text-align:left}.reference-heading h2{margin:0;margin-right:auto}.reference-heading>span{font-size:11px;color:var(--muted)}.reference-heading>svg{transition:transform .18s}.reference-heading>svg.expanded{transform:rotate(90deg)}.reference-heading .reference-success{color:var(--good)}.reference-heading .reference-error{color:var(--bad)}.reference-body{padding:0 20px 18px}.reference-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.reference-loaded{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,var(--border));background:color-mix(in srgb,var(--good) 7%,var(--panel))}.reference-elements{display:flex;flex-wrap:wrap;gap:14px;margin:15px 0}.reference-element{display:flex;align-items:flex-start;gap:8px}.reference-species{display:flex;gap:6px;flex-wrap:wrap;max-width:170px}.reference-species label{display:flex;gap:4px;align-items:center;font-size:12px}.reference-species small{color:var(--muted);font-size:10px}.element-muted{--el-color:var(--muted)!important;filter:grayscale(1);background:var(--panel-soft);border-color:var(--border)}.reference-file{display:none}details{font-size:12px}summary{cursor:pointer;color:var(--accent-text)}details .field{margin-top:10px}.reference-source{margin:10px 0;overflow-wrap:anywhere;font-size:11px}.reference-source small{display:block;color:var(--muted);font-size:10px}.hint{margin:10px 0}@media(max-width:740px){.reference-heading{padding:16px}.reference-body{padding:0 16px 16px}}
++.reference-panel{padding:0;min-width:0}.reference-heading{width:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:17px 20px;border:0;border-radius:13px;background:transparent;color:var(--text);text-align:left}.reference-heading h2{margin:0;margin-right:auto}.reference-heading>span{font-size:11px;color:var(--muted)}.reference-heading>svg{transition:transform .18s}.reference-heading>svg.expanded{transform:rotate(90deg)}.reference-heading .reference-success{color:var(--good)}.reference-heading .reference-error{color:var(--bad)}.reference-body{padding:0 20px 18px}.reference-actions{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}.reference-entry-grid{display:flex;gap:8px;min-width:0}.reference-entry-grid>.btn{flex:1 1 0;min-width:0;white-space:normal;line-height:1.35}.reference-secondary-actions{display:flex;gap:8px;min-height:36px}.reference-loaded{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,var(--border));background:color-mix(in srgb,var(--good) 7%,var(--panel))}.nist-button{color:var(--accent-text)}.nist-online{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}.nist-online .element-candidate{flex:1 1 120px}.nist-online small{flex-basis:100%;color:var(--muted);font-size:10px}.reference-elements{display:flex;flex-wrap:wrap;gap:14px;margin:15px 0}.reference-element{display:flex;align-items:flex-start;gap:8px}.reference-species{display:flex;gap:6px;flex-wrap:wrap;max-width:170px}.reference-species label{display:flex;gap:4px;align-items:center;font-size:12px}.reference-species small{color:var(--muted);font-size:10px}.element-muted{--el-color:var(--muted)!important;filter:grayscale(1);background:var(--panel-soft);border-color:var(--border)}.reference-file{display:none}details{font-size:12px}summary{cursor:pointer;color:var(--accent-text)}details .field{margin-top:10px}.reference-source{margin:10px 0;overflow-wrap:anywhere;font-size:11px}.reference-source small{display:block;color:var(--muted);font-size:10px}.hint{margin:10px 0}@media(max-width:740px){.reference-heading{padding:16px}.reference-body{padding:0 16px 16px}}
++</style>
++<style scoped>
++.reference-species label{max-width:100%;overflow-wrap:anywhere}.nist-originals{overflow-wrap:anywhere}.nist-originals dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 8px;font-size:11px}.nist-originals dd{margin:0}.nist-originals article{margin:10px 0;border-top:1px solid var(--border);padding-top:8px}
+ </style>
+diff --git a/src/lib/spectrumBrowser.ts b/src/lib/spectrumBrowser.ts
+index 6413559..3cf93bf 100644
+--- a/src/lib/spectrumBrowser.ts
++++ b/src/lib/spectrumBrowser.ts
+@@ -11,9 +11,9 @@ export interface Measurement {
+   name: string; format: string; sha256: string; unit: 'nm' | 'pixel'; nodes: number; xs: number[]
+   curves: {id:string;label:string;ys:number[]}[]; provenance: Record<string,unknown>
+ }
+-export interface ReferenceState {line:number;role:string;aki?:string;aki_unit:string;energy?:string;energy_unit:string;configuration?:string;term?:string;j?:string;g?:string}
+-export interface ReferencePosition {wavelength_nm:number;records:{states:ReferenceState[]}[]}
+-export interface ReferenceGroup {id:string;element:string;species:string;label:string;xs:number[];positions:ReferencePosition[];source:string;sha256:string;original_unit:string;unit:string;count:number;unit_contract?:string;originKind?:'configured'|'user'}
++export interface ReferenceState {line:number;role:string;aki?:string;aki_unit:string;energy?:string;energy_unit:string;configuration?:string;term?:string;j?:string;g?:string;intensity?:string;wavelength_angstrom?:string;line_ref?:string;aki_ref?:string}
++export interface ReferencePosition {wavelength_nm:number;wavelength_angstrom?:string;records:{states:ReferenceState[]}[]}
++export interface ReferenceGroup {id:string;element:string;species:string;label:string;xs:number[];positions:ReferencePosition[];source:string;sha256:string;original_unit:string;unit:string;count:number;unit_contract?:string;originKind?:'configured'|'user'|'nist';metadata?:Record<string,unknown>}
+ interface ImportInfo {
+   document:string;name:string;format:string;sha256:string;bytes:number;metadata:Record<string,unknown>
+   tables:{name:string;columns:string[];recommended_start:number;recommended_x:number;recommended_y:number[];preview:{line:number;values:string[]}[]}[]
+@@ -26,7 +26,7 @@ export const spectrumBrowser = reactive({
+   candidate:null as ImportInfo|null,committed:null as Selection|null,
+   view:null as [number,number]|null,
+   sheet:'0', start:'1', x:'0', ys:['1'] as string[], unit:'nm' as AxisUnit, duplicates:'error', frame:'', curves:[] as string[],
+-  references:[] as ReferenceGroup[], selected:[] as string[], referenceIssues:[] as {file:string;error:string}[],
++  references:[] as ReferenceGroup[], selected:[] as string[], referenceIssues:[] as {file:string;error:string}[], nistPending:false, nistElement:'Fe', nistIssues:[] as {file:string;error:string}[], nistStatus:'',
+   addedElements:[] as string[], rememberedSpecies:{} as Record<string,string[]>,configuredIds:[] as string[],configuredLoaded:false,configuredCount:0,
+   referencesExpanded:false,processingExpanded:false,sidebarCollapsed:false,hiddenCurves:[] as string[],
+   pending:false, importing:false, referencePending:false, error:'', referenceError:'', notice:'',
+@@ -115,7 +115,7 @@ export async function applySpectrum(){
+   finally{if(id===revision)s.pending=false}
+ }
+ export async function loadReferences(file?:File,user=false){
+-  const id=++referenceRevision;referenceController?.abort();referenceController=new AbortController();const signal=referenceController.signal,s=spectrumBrowser;s.referencePending=true;s.referenceError=''
++  const id=++referenceRevision;referenceController?.abort();referenceController=new AbortController();const signal=referenceController.signal,s=spectrumBrowser;s.referencePending=true;s.nistPending=false;s.referenceError=''
+   try{
+     let body:Record<string,unknown>={}
+     if(user){const chosen=file?await browserFile(file):await selectedBytes(true);if(id!==referenceRevision||!chosen)return;body={name:chosen.name,data:base64(chosen.bytes),options:{unit:s.userUnit,column:Number(s.userColumn),...(s.userElement.trim()?{element:s.userElement.trim()}:{}),...(s.userSpecies.trim()?{species:s.userSpecies.trim()}: {})}}}
+@@ -133,8 +133,23 @@ export async function loadReferences(file?:File,user=false){
+   }catch(error){if(id===referenceRevision&&!signal.aborted)s.referenceError=String(error instanceof Error?error.message:error)}
+   finally{if(id===referenceRevision)s.referencePending=false}
+ }
+-export function cancelReferences(){referenceRevision++;referenceController?.abort();spectrumBrowser.referencePending=false}
+-export function clearReferences(){cancelReferences();const s=spectrumBrowser;s.references=[];s.selected=[];s.addedElements=[];s.rememberedSpecies={};s.configuredIds=[];s.configuredLoaded=false;s.configuredCount=0;s.referenceError='';s.referenceIssues=[]}
++export function cancelReferences(){referenceRevision++;referenceController?.abort();spectrumBrowser.referencePending=false;spectrumBrowser.nistPending=false}
++export async function loadNistReferences(element=spectrumBrowser.nistElement){
++  const id=++referenceRevision;referenceController?.abort();referenceController=new AbortController();const signal=referenceController.signal,s=spectrumBrowser;s.referencePending=false;s.nistPending=true;s.referenceError='';s.nistElement=element
++  try{
++    const result=await api<{groups:ReferenceGroup[];issues:{file:string;error:string}[]}>('references',{source:'nist',element},signal);if(id!==referenceRevision)return
++    if(!result.groups.length)throw Error('NIST未返回可用Persistent Lines：'+(result.issues?.map(x=>x.error).join('; ')||'无有效表'))
++    const nist:ReferenceGroup[]=result.groups.map(g=>({...g,originKind:'nist' as const,id:'nist:'+g.id}))
++    const previous=s.references.filter(g=>g.originKind==='nist'&&g.element===element)
++    const old=s.references.filter(g=>!previous.includes(g))
++    const selectedKeys=new Set(s.references.filter(g=>s.selected.includes(g.id)).map(referenceKey))
++    const merged=[...old,...nist];if(merged.reduce((n,g)=>n+g.count,0)>100000)throw Error('合并参考线超过100000，请先清空参考库')
++    s.references=markRaw(merged);s.nistIssues=result.issues;s.nistStatus=element+' 可用态：'+nist.map(g=>g.species).join(' / ');s.addedElements=s.addedElements.includes(element)?s.addedElements:[...s.addedElements,element]
++    s.selected=merged.filter(g=>selectedKeys.has(referenceKey(g))||nist.includes(g)&&!previous.some(p=>p.species===g.species)).map(g=>g.id)
++    s.rememberedSpecies[element]=merged.filter(g=>g.element===element&&s.selected.includes(g.id)).map(referenceKey)
++  }catch(error){if(id===referenceRevision&&!signal.aborted)s.referenceError=String(error instanceof Error?error.message:error)}finally{if(id===referenceRevision)s.nistPending=false}
++}
++export function clearReferences(){cancelReferences();const s=spectrumBrowser;s.references=[];s.selected=[];s.addedElements=[];s.rememberedSpecies={};s.configuredIds=[];s.configuredLoaded=false;s.configuredCount=0;s.referenceError='';s.referenceIssues=[];s.nistIssues=[];s.nistStatus=''}
+ function referenceKey(g:ReferenceGroup){return JSON.stringify([g.originKind,g.source,g.element,g.species,g.original_unit,g.originKind==='user'?g.sha256:''])}
+ export function addReferenceElement(element:string){const s=spectrumBrowser,groups=s.references.filter(g=>g.element===element);if(!groups.length||s.addedElements.includes(element))return;s.addedElements.push(element);s.selected.push(...groups.map(g=>g.id));s.rememberedSpecies[element]=groups.map(referenceKey)}
+ export function toggleReferenceElement(element:string){const s=spectrumBrowser,groups=s.references.filter(g=>g.element===element),selected=groups.filter(g=>s.selected.includes(g.id));if(selected.length){s.rememberedSpecies[element]=selected.map(referenceKey);s.selected=s.selected.filter(id=>!groups.some(g=>g.id===id))}else{const previous=s.rememberedSpecies[element],targets=previous?.length?groups.filter(g=>previous.includes(referenceKey(g))):groups;s.selected=[...new Set([...s.selected,...targets.map(g=>g.id)])]}}
+diff --git a/backend/simlibs_ui/spectrum_nist.py b/backend/simlibs_ui/spectrum_nist.py
+new file mode 100644
+--- /dev/null
++++ b/backend/simlibs_ui/spectrum_nist.py
+@@ -0,0 +1,245 @@
++"""Verified NIST Handbook Persistent Lines client and parser."""
++from __future__ import annotations
++
++from datetime import datetime, timezone
++import hashlib
++import json
++import math
++import re
++import time
++from urllib.parse import urljoin, urlparse
++
++import requests
++from bs4 import BeautifulSoup
++
++BASE = 'https://physics.nist.gov'
++PERIODIC_URL = BASE + '/PhysRefData/Handbook/periodictable.htm'
++MAX_HTML = 16_000_000
++CONNECT_TIMEOUT = 8
++READ_TIMEOUT = 18
++OVERALL_TIMEOUT = 35
++SPECIES = (('I', 3), ('II', 4))
++
++
++def _text(node):
++    return ' '.join(node.get_text(' ', strip=True).split())
++
++
++def _cells(row):
++    cells = row.find_all(['th', 'td'], recursive=False)
++    if len(cells) < 2:
++        cells = row.find_all(['th', 'td'])
++    return [_text(cell) for cell in cells]
++
++
++def _header_map(values):
++    normalized = [re.sub(r'[\s.]+', '', value.lower()) for value in values]
++    aliases = {
++        'intensity': ('intensity',),
++        'wavelength': ('wavelength',),
++        'aki': ('aki',),
++        'energy': ('energylevels', 'energy'),
++        'configuration': ('configurations', 'configuration'),
++        'term': ('terms', 'term'),
++        'j': ('j',),
++        'line_ref': ('lineref',),
++        'aki_ref': ('akiref',),
++    }
++    result = {}
++    for key, names in aliases.items():
++        for index, value in enumerate(normalized):
++            if (key == 'aki' and value.startswith('aki') and 'ref' not in value) or (key != 'aki' and any(value == name or (key in ('wavelength', 'energy') and value.startswith(name)) for name in names)):
++                result[key] = index
++                break
++    return result
++
++
++def _state(row, indices, row_number, units):
++    def value(key):
++        index = indices.get(key)
++        return row[index].strip() if index is not None and index < len(row) else ''
++    return {
++        'line': row_number,
++        'role': 'source row',
++        'intensity': value('intensity'),
++        'aki': value('aki'),
++        'aki_unit': units['aki'],
++        'energy': value('energy'),
++        'energy_unit': units['energy'],
++        'configuration': value('configuration'),
++        'term': value('term'),
++        'j': value('j'),
++        'line_ref': value('line_ref'),
++        'aki_ref': value('aki_ref'),
++    }
++
++
++def parse_html(html: bytes, url: str, element: str, species: str):
++    """Parse one verified Persistent Lines page, preserving source rows."""
++    _safe_url(url)
++    if species not in ('I', 'II') or not re.fullmatch(r'[A-Z][a-z]?', element or ''):
++        raise ValueError('NIST元素/电离态无效')
++    if len(html) > MAX_HTML:
++        raise ValueError('NIST响应超过16MB限制')
++    soup = BeautifulSoup(html, 'html.parser')
++    title = _text(soup.title) if soup.title else ''
++    identity = r'\(\s*' + re.escape(element) + r'\s+' + re.escape(species) + r'\s*\)'
++    if not title or 'persistent lines' not in title.lower() or not re.search(identity, title):
++        raise ValueError(f'NIST页面元素/电离态校验失败：{title or "无标题"}')
++    table = None; indices = None; header_values = []
++    for candidate in soup.find_all('table'):
++        for row in candidate.find_all('tr'):
++            if row.find_parent('table') is not candidate:
++                continue
++            cells = row.find_all(['th', 'td'], recursive=False)
++            if any(cell.find('table') for cell in cells):
++                continue
++            values = [value for value in _cells(row) if value]
++            current = _header_map(values)
++            if {'intensity', 'wavelength', 'aki', 'energy', 'configuration', 'term', 'j', 'line_ref', 'aki_ref'} <= set(current):
++                table, indices, header_values = candidate, current, values
++                break
++        if table is not None:
++            break
++    if table is None:
++        raise ValueError(f'NIST {element} {species} 无可读取的持久线数据（页面未提供有效Persistent Lines表）')
++    if len(header_values) != 9 or 'Å' not in header_values[indices['wavelength']]:
++        raise ValueError('NIST表头结构或Å单位不受支持')
++    aki_header = header_values[indices['aki']] if indices['aki'] < len(header_values) else ''
++    energy_header = header_values[indices['energy']] if indices['energy'] < len(header_values) else ''
++    aki_unit = '10^8 s^-1' if re.search(r'10\s*[⁸8]|10\s*\^\s*8', aki_header) else ('s^-1' if 's' in aki_header.lower() else '')
++    energy_unit = 'cm^-1' if 'cm' in energy_header.lower() else ('eV' if re.search(r'\bev\b', energy_header, re.I) else '')
++    units = {'aki': aki_unit, 'energy': energy_unit}
++    positions = {}; current_wavelength = None
++    for row_number, row in enumerate(table.find_all('tr'), 1):
++        if row.find_parent('table') is not table:
++            continue
++        values = _cells(row)
++        cells = row.find_all(['th', 'td'], recursive=False)
++        if len(values) != 9 or not any(values) or any(cell.find('table') for cell in cells):
++            current_wavelength = None
++            continue
++        wavelength = values[indices['wavelength']].strip() if indices['wavelength'] < len(values) else ''
++        state = _state(values, indices, row_number, units)
++        if not wavelength:
++            # Carry a displayed wavelength only for an immediately following
++            # source state row. Keep each row independent, never infer a pair.
++            if current_wavelength is not None and state['energy']:
++                state.update(wavelength_angstrom='', wavelength_nm=current_wavelength / 10)
++                positions[current_wavelength].append({'states': [state], 'page_row': row_number, 'wavelength_angstrom': ''})
++            else:
++                current_wavelength = None
++            continue
++        try:
++            angstrom = float(wavelength.replace(',', ''))
++        except ValueError:
++            current_wavelength = None
++            continue
++        if not math.isfinite(angstrom) or not 0 < angstrom < 10_000_000:
++            current_wavelength = None
++            continue
++        current_wavelength = angstrom
++        state.update(wavelength_angstrom=wavelength, wavelength_nm=angstrom / 10)
++        positions.setdefault(angstrom, []).append({'states': [state], 'page_row': row_number, 'wavelength_angstrom': wavelength})
++    if not positions:
++        raise ValueError('NIST Persistent Lines表为空')
++    digest = hashlib.sha256(html).hexdigest()
++    fetched = datetime.now(timezone.utc).isoformat()
++    group = {
++        'id': hashlib.sha256((url + element + species + digest).encode()).hexdigest()[:32],
++        'element': element,
++        'species': species,
++        'label': f'{element} {species} · NIST Persistent Lines',
++        'xs': sorted(value / 10 for value in positions),
++        'positions': [dict(wavelength_nm=value / 10, wavelength_angstrom=str(value), records=positions[value]) for value in sorted(positions)],
++        'source': url,
++        'sha256': digest,
++        'original_unit': 'angstrom',
++        'unit': 'nm',
++        'count': len(positions),
++        'originKind': 'nist',
++        'unit_contract': 'NIST Handbook table wavelength (Å), converted to nm by /10; no air/vacuum conversion',
++        'metadata': {'url': url, 'fetched_at': fetched, 'html_sha256': digest, 'title': title, 'source': 'NIST Handbook Persistent Lines', 'aki_header': aki_header, 'aki_multiplier': 100000000 if aki_unit == '10^8 s^-1' else None, 'energy_header': energy_header, 'row_contract': 'Each source row is independent; no inferred lower/upper pairing.'},
++    }
++    return group
++
++
++def _safe_url(url):
++    parsed = urlparse(url)
++    valid_path = parsed.path == '/PhysRefData/Handbook/periodictable.htm' or re.fullmatch(r'/PhysRefData/Handbook/Tables/[a-z]+table[134]\.htm', parsed.path)
++    if parsed.scheme != 'https' or parsed.netloc != 'physics.nist.gov' or parsed.query or parsed.fragment or not valid_path:
++        raise ValueError('NIST URL仅允许官方HTTPS Handbook路径')
++
++
++def _get(session, url, deadline):
++    _safe_url(url)
++    if time.monotonic() >= deadline:
++        raise ValueError('NIST请求超过整体超时')
++    remaining = deadline - time.monotonic()
++    try:
++        with session.get(url, timeout=(min(CONNECT_TIMEOUT, remaining), min(READ_TIMEOUT, remaining)), stream=True, verify=True, allow_redirects=False) as response:
++            if response.status_code != 200:
++                raise ValueError(f'NIST HTTP {response.status_code}：{url}')
++            _safe_url(response.url)
++            if response.url != url or 'html' not in response.headers.get('Content-Type', '').lower():
++                raise ValueError('NIST响应URL或Content-Type校验失败')
++            if int(response.headers.get('Content-Length', '0')) > MAX_HTML:
++                raise ValueError('NIST响应超过16MB限制')
++            chunks = []; size = 0
++            for chunk in response.iter_content(4096):
++                size += len(chunk)
++                if size > MAX_HTML:
++                    raise ValueError('NIST响应超过16MB限制')
++                if time.monotonic() >= deadline:
++                    raise ValueError('NIST请求超过整体超时')
++                chunks.append(chunk)
++            if time.monotonic() >= deadline:
++                raise ValueError('NIST请求超过整体超时')
++            return b''.join(chunks)
++    except requests.RequestException as error:
++        raise ValueError('NIST网络/TLS/超时错误：' + str(error)) from error
++
++
++def element_urls(element: str, session=None, deadline=None):
++    if not re.fullmatch(r'[A-Z][a-z]?', element or ''):
++        raise ValueError('NIST元素必须是合法元素符号')
++    session = session or requests.Session()
++    html = _get(session, PERIODIC_URL, deadline or time.monotonic() + OVERALL_TIMEOUT)
++    soup = BeautifulSoup(html, 'html.parser')
++    if not soup.title or 'nist' not in _text(soup.title).lower() or 'atomic spectroscopic data' not in _text(soup.title).lower():
++        raise ValueError('NIST周期表标题校验失败')
++    href = None
++    for anchor in soup.find_all('a', href=True):
++        if _text(anchor) == element:
++            href = urljoin(PERIODIC_URL, anchor['href'])
++            break
++    if not href:
++        raise ValueError(f'NIST周期表未找到元素 {element}')
++    _safe_url(href)
++    parsed = urlparse(href)
++    if parsed.scheme != 'https' or parsed.netloc != 'physics.nist.gov' or not re.fullmatch(r'/PhysRefData/Handbook/Tables/[A-Za-z]+table1\.htm', parsed.path):
++        raise ValueError('NIST元素链接不属于允许的Handbook路径')
++    return {species: href.replace('table1.htm', f'table{table}.htm') for species, table in SPECIES}
++
++
++def fetch(element: str):
++    start = time.monotonic(); deadline = start + OVERALL_TIMEOUT
++    session = requests.Session(); session.headers.update({'User-Agent': 'SimLIBS/1.0 NIST Persistent Lines reader'})
++    try:
++        urls = element_urls(element, session, deadline)
++        groups = []; issues = []; states = {}
++        for species, url in urls.items():
++            try:
++                html = _get(session, url, deadline)
++                groups.append(parse_html(html, url, element, species)); states[species] = 'available'
++            except (requests.RequestException, ValueError) as error:
++                states[species] = 'missing'
++                issues.append({'file': url, 'error': f'{element} {species}：{error}'})
++        if not groups:
++            raise ValueError(f'NIST {element} I/II均不可用：' + '; '.join(item['error'] for item in issues))
++        result = {'groups': groups, 'issues': issues, 'source': 'NIST Handbook Persistent Lines (online)', 'element': element, 'available_states': states}
++        if len(json.dumps(result, ensure_ascii=False).encode()) > 12_000_000:
++            raise ValueError('NIST参考响应超过12MB')
++        return result
++    finally:
++        session.close()
+diff --git a/backend/tests/test_spectrum_nist.py b/backend/tests/test_spectrum_nist.py
+new file mode 100644
+--- /dev/null
++++ b/backend/tests/test_spectrum_nist.py
+@@ -0,0 +1,101 @@
++import hashlib
++import io
++import unittest
++from pathlib import Path
++from unittest.mock import MagicMock, Mock, patch
++import requests
++import time
++
++from simlibs_ui.spectrum_nist import element_urls, parse_html, _safe_url, _get, PERIODIC_URL
++
++ROOT = Path(__file__).parents[2]
++FIX = ROOT / '.herdrflow/tasks/T004/fixtures'
++
++
++class NistTests(unittest.TestCase):
++    def test_real_captured_fe_double_row_and_source_fields(self):
++        html = (FIX / 'iron3.html').read_bytes(); url = 'https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable3.htm'
++        group = parse_html(html, url, 'Fe', 'I')
++        self.assertGreater(group['count'], 0)
++        self.assertEqual(group['source'], url)
++        self.assertEqual(group['sha256'], hashlib.sha256(html).hexdigest())
++        state = group['positions'][0]['records'][0]['states'][0]
++        self.assertEqual(state['wavelength_angstrom'], '2483.2708')
++        self.assertEqual(state['energy_unit'], 'cm^-1')
++        self.assertEqual(state['aki_unit'], '10^8 s^-1')
++        self.assertTrue(state['configuration']); self.assertTrue(state['term']); self.assertTrue(state['j'])
++        self.assertGreaterEqual(len(group['positions'][0]['records']), 2)
++
++    def test_empty_values_and_missing_state_are_not_fabricated(self):
++        html=(FIX/'iron3.html').read_bytes(); group=parse_html(html,'https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable3.htm','Fe','I')
++        state=group['positions'][0]['records'][1]['states'][0]
++        self.assertEqual(state['wavelength_angstrom'],''); self.assertEqual(state['aki'],''); self.assertEqual(state['line_ref'],'')
++        with self.assertRaises(ValueError): parse_html(b'<html><title>Error</title><body>404</body></html>','https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable3.htm','Fe','I')
++        with self.assertRaises(ValueError): parse_html(html,'https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable3.htm','Fe','III')
++
++    def test_url_allowlist_and_periodic_link(self):
++        for url in ('http://physics.nist.gov/PhysRefData/Handbook/Tables/irontable3.htm','https://example.com/PhysRefData/Handbook/Tables/irontable3.htm','https://physics.nist.gov/private'):
++            with self.assertRaises(ValueError): _safe_url(url)
++        session=Mock();response=MagicMock(content=b'<html><title>NIST: Basic Atomic Spectroscopic Data - Perodic Table</title><a href="Tables/irontable1.htm">Fe</a></html>',status_code=200,url=PERIODIC_URL,headers={'Content-Type':'text/html'})
++        response.iter_content.return_value=[response.content];session.get.return_value=response;response.__enter__.return_value=response
++        self.assertEqual(element_urls('Fe',session)['I'].endswith('irontable3.htm'),True)
++        self.assertTrue(session.get.call_args.kwargs['verify']);self.assertFalse(session.get.call_args.kwargs['allow_redirects'])
++        with self.assertRaises(ValueError): element_urls('../Fe',session)
++
++    def test_missing_species_is_reported(self):
++        html=(FIX/'iron3.html').read_bytes()
++        with patch('simlibs_ui.spectrum_nist._get', side_effect=[(FIX/'periodic.html').read_bytes(), html, ValueError('timeout')]):
++            from simlibs_ui.spectrum_nist import fetch
++            result=fetch('Fe')
++        self.assertIn('I',result['available_states']); self.assertEqual(result['available_states']['II'],'missing'); self.assertTrue(result['issues'])
++
++    def test_timeout_size_redirect_content_and_deadline(self):
++        session=Mock()
++        session.get.side_effect=requests.Timeout('read timeout')
++        with self.assertRaisesRegex(ValueError,'超时'): _get(session,PERIODIC_URL,time.monotonic()+10)
++        session.get.side_effect=None
++        response=MagicMock(status_code=200,url=PERIODIC_URL,headers={'Content-Type':'text/html'})
++        response.__enter__.return_value=response;session.get.return_value=response
++        for status in (404,500,302):
++            response.status_code=status
++            with self.assertRaisesRegex(ValueError,'HTTP'): _get(session,PERIODIC_URL,time.monotonic()+10)
++        response.status_code=200;response.headers={'Content-Type':'application/json'}
++        with self.assertRaises(ValueError):_get(session,PERIODIC_URL,time.monotonic()+10)
++        response.headers={'Content-Type':'text/html','Content-Length':'16000001'}
++        with self.assertRaisesRegex(ValueError,'16MB'):_get(session,PERIODIC_URL,time.monotonic()+10)
++        response.headers={'Content-Type':'text/html'};response.iter_content.return_value=[b'x'*32]
++        with patch('simlibs_ui.spectrum_nist.MAX_HTML',16):
++            with self.assertRaisesRegex(ValueError,'16MB'):_get(session,PERIODIC_URL,time.monotonic()+10)
++        with self.assertRaisesRegex(ValueError,'整体超时'):_get(session,PERIODIC_URL,time.monotonic()-1)
++        for symbol in ('https://evil.test','Fe/../../../','fe','','Xx'):
++            with self.assertRaises(ValueError):element_urls(symbol,session)
++
++    def test_identity_spacer_and_partial_empty_rows(self):
++        url='https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable3.htm'
++        html=(FIX/'iron3.html').read_bytes()
++        for element,species in [('F','I'),('Fe','II'),('Mg','I')]:
++            with self.assertRaises(ValueError):parse_html(html,url,element,species)
++        empty=(FIX/'hydrogen4.html').read_bytes()
++        with self.assertRaises(ValueError):parse_html(empty,'https://physics.nist.gov/PhysRefData/Handbook/Tables/hydrogentable4.htm','H','II')
++        group=parse_html(html.replace(b'4.81',b'&nbsp;',1),url,'Fe','I')
++        self.assertEqual(group['positions'][0]['records'][0]['states'][0]['aki'],'')
++        self.assertEqual(group['positions'][0]['records'][0]['states'][0]['line'],4)
++        self.assertEqual(len(group['positions'][0]['records']),2)
++
++    def test_spacer_breaks_state_row_association(self):
++        from bs4 import BeautifulSoup
++        html = (FIX / 'iron3.html').read_bytes()
++        url = 'https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable3.htm'
++        normal = parse_html(html, url, 'Fe', 'I')
++        self.assertEqual(len(normal['positions'][0]['records']), 2)
++        for spacer in ('<tr><td colspan="36"> </td></tr>', '<tr>'+'<td></td>'*9+'</tr>', '<tr><td>invalid</td></tr>'):
++            soup = BeautifulSoup(html, 'html.parser')
++            state_row = next(row for row in soup.find_all('tr') if row.find_parent('table') is soup.find_all('table')[-1] and '40257.311' in row.get_text())
++            state_row.insert_before(BeautifulSoup(spacer, 'html.parser').tr)
++            group = parse_html(str(soup).encode(), url, 'Fe', 'I')
++            self.assertEqual(len(group['positions'][0]['records']), 1)
++            self.assertFalse(any(s['energy']=='40257.311' for r in group['positions'][0]['records'] for s in r['states']))
++            self.assertEqual(group['count'], normal['count'])
++
++
++if __name__ == '__main__': unittest.main()

@@ -1,0 +1,16 @@
+{
+  "taskId": "T003",
+  "dispatchId": "489619a1-691c-44b3-8a87-1687dcb4f081",
+  "revision": 1,
+  "status": "completed",
+  "owner": "implementer",
+  "goal": "修复数据选择自动更新时提示和取消控件引发的页面布局抽动",
+  "acceptance": ["选择pending消息不插入整行引发抽动", "取消按钮不引发工具栏换行且取消仍可用", "1360/960/440/360px前中后几何稳定，自动更新和竞态保持", "空态/绿色按钮/数据和图表已有功能不变"],
+  "allowedPaths": ["src/pages/SpectrumBrowserPage.vue"],
+  "forbiddenPaths": ["src/lib/spectrumBrowser.ts", "src/components/BrowserSpectrumChart.vue", "src/styles.css", "backend", "src-tauri", "package.json", "package-lock.json"],
+  "evidence": ["implementation.md", "behavior-check.json", "desktop-build.log", "final-files.json", "review.md"],
+  "fixRounds": 0,
+  "reviewVerdict": "pass",
+  "reviewEvidence": ["review.md", "reviewer/behavior-check.json"],
+  "acceptanceEvidence": "acceptance.md"
+}

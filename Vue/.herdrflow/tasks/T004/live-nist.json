@@ -1,0 +1,260 @@
+{
+  "taskId": "T004",
+  "dispatchId": "229c687f-8bda-4b35-bea4-2e7841ace916",
+  "revision": 1,
+  "at": "2026-11-17T15:29:20.329588+00:00",
+  "mode": "real requests HTTPS, no mocks",
+  "source": "NIST Handbook Persistent Lines",
+  "elements": [
+    {
+      "element": "Fe",
+      "states": {
+        "I": {
+          "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable3.htm",
+          "status": 200,
+          "bytes": 29733,
+          "html_sha256": "e8909fb13a754e6c32a25847566a293afc484704ea0bdb34fd7d768b1b58279a",
+          "fetched_at": "2026-11-17T15:29:17.566754+00:00",
+          "title": "Persistent Lines of Neutral Iron ( Fe I )",
+          "available": true,
+          "count": 20,
+          "first": {
+            "wavelength_nm": 248.32707999999997,
+            "wavelength_angstrom": "2483.2708",
+            "records": [
+              {
+                "states": [
+                  {
+                    "line": 4,
+                    "role": "source row",
+                    "intensity": "1000",
+                    "aki": "4.81",
+                    "aki_unit": "10^8 s^-1",
+                    "energy": "0.000",
+                    "energy_unit": "cm^-1",
+                    "configuration": "3 d 6 4 s 2",
+                    "term": "a 5 D",
+                    "j": "4",
+                    "line_ref": "NJLT94",
+                    "aki_ref": "OWLW91",
+                    "wavelength_angstrom": "2483.2708",
+                    "wavelength_nm": 248.32707999999997
+                  }
+                ],
+                "page_row": 4,
+                "wavelength_angstrom": "2483.2708"
+              },
+              {
+                "states": [
+                  {
+                    "line": 5,
+                    "role": "source row",
+                    "intensity": "",
+                    "aki": "",
+                    "aki_unit": "10^8 s^-1",
+                    "energy": "40257.311",
+                    "energy_unit": "cm^-1",
+                    "configuration": "3 d 6 ( 5 D)4 s 4 p ( 1 P)",
+                    "term": "x 5 F°",
+                    "j": "5",
+                    "line_ref": "",
+                    "aki_ref": "",
+                    "wavelength_angstrom": "",
+                    "wavelength_nm": 248.32707999999997
+                  }
+                ],
+                "page_row": 5,
+                "wavelength_angstrom": ""
+              }
+            ]
+          }
+        },
+        "II": {
+          "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/irontable4.htm",
+          "status": 200,
+          "bytes": 23308,
+          "html_sha256": "75423bf3c3b76336bd17be53015dad737cfe59edbe2d9b4a5f28b7403c4b9c7e",
+          "fetched_at": "2026-11-17T15:29:17.936397+00:00",
+          "title": "Persistent Lines of Singly Ionized Iron ( Fe II )",
+          "available": true,
+          "count": 13,
+          "first": {
+            "wavelength_nm": 234.34951,
+            "wavelength_angstrom": "2343.4951",
+            "records": [
+              {
+                "states": [
+                  {
+                    "line": 4,
+                    "role": "source row",
+                    "intensity": "400",
+                    "aki": "1.73",
+                    "aki_unit": "10^8 s^-1",
+                    "energy": "0.000",
+                    "energy_unit": "cm^-1",
+                    "configuration": "3 d 6 ( 5 D)4 s",
+                    "term": "a 6 D",
+                    "j": "9/2",
+                    "line_ref": "NLTH91",
+                    "aki_ref": "M03",
+                    "wavelength_angstrom": "2343.4951",
+                    "wavelength_nm": 234.34951
+                  }
+                ],
+                "page_row": 4,
+                "wavelength_angstrom": "2343.4951"
+              },
+              {
+                "states": [
+                  {
+                    "line": 5,
+                    "role": "source row",
+                    "intensity": "",
+                    "aki": "",
+                    "aki_unit": "10^8 s^-1",
+                    "energy": "42658.224",
+                    "energy_unit": "cm^-1",
+                    "configuration": "3 d 6 ( 5 D)4 p",
+                    "term": "z 6 P°",
+                    "j": "7/2",
+                    "line_ref": "",
+                    "aki_ref": "",
+                    "wavelength_angstrom": "",
+                    "wavelength_nm": 234.34951
+                  }
+                ],
+                "page_row": 5,
+                "wavelength_angstrom": ""
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "element": "Mg",
+      "states": {
+        "I": {
+          "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/magnesiumtable3.htm",
+          "status": 200,
+          "bytes": 22529,
+          "html_sha256": "37ed676747bcb3ae136f0f4a9d9574148e798ab92542221130964f71e23afebf",
+          "fetched_at": "2026-11-17T15:29:19.972050+00:00",
+          "title": "Persistent Lines of Neutral Magnesium ( Mg I )",
+          "available": true,
+          "count": 12,
+          "first": {
+            "wavelength_nm": 202.5824,
+            "wavelength_angstrom": "2025.824",
+            "records": [
+              {
+                "states": [
+                  {
+                    "line": 4,
+                    "role": "source row",
+                    "intensity": "2",
+                    "aki": "0.612",
+                    "aki_unit": "10^8 s^-1",
+                    "energy": "0.000",
+                    "energy_unit": "cm^-1",
+                    "configuration": "3 s 2",
+                    "term": "1 S",
+                    "j": "0",
+                    "line_ref": "KM91a",
+                    "aki_ref": "M03",
+                    "wavelength_angstrom": "2025.824",
+                    "wavelength_nm": 202.5824
+                  }
+                ],
+                "page_row": 4,
+                "wavelength_angstrom": "2025.824"
+              },
+              {
+                "states": [
+                  {
+                    "line": 5,
+                    "role": "source row",
+                    "intensity": "",
+                    "aki": "",
+                    "aki_unit": "10^8 s^-1",
+                    "energy": "49346.729",
+                    "energy_unit": "cm^-1",
+                    "configuration": "3 s 4 p",
+                    "term": "1 P°",
+                    "j": "1",
+                    "line_ref": "",
+                    "aki_ref": "",
+                    "wavelength_angstrom": "",
+                    "wavelength_nm": 202.5824
+                  }
+                ],
+                "page_row": 5,
+                "wavelength_angstrom": ""
+              }
+            ]
+          }
+        },
+        "II": {
+          "url": "https://physics.nist.gov/PhysRefData/Handbook/Tables/magnesiumtable4.htm",
+          "status": 200,
+          "bytes": 20094,
+          "html_sha256": "fd56aafa2a3b833db2404feaead4fa58a1df63830f1125f0466a7407e7b05239",
+          "fetched_at": "2026-11-17T15:29:20.307643+00:00",
+          "title": "Persistent Lines of Singly Ionized Magnesium ( Mg II )",
+          "available": true,
+          "count": 10,
+          "first": {
+            "wavelength_nm": 102.59681,
+            "wavelength_angstrom": "1025.9681",
+            "records": [
+              {
+                "states": [
+                  {
+                    "line": 4,
+                    "role": "source row",
+                    "intensity": "14",
+                    "aki": "0.032",
+                    "aki_unit": "10^8 s^-1",
+                    "energy": "0.00",
+                    "energy_unit": "cm^-1",
+                    "configuration": "3 s",
+                    "term": "2 S",
+                    "j": "1/2",
+                    "line_ref": "KM91a",
+                    "aki_ref": "M03",
+                    "wavelength_angstrom": "1025.9681",
+                    "wavelength_nm": 102.59681
+                  }
+                ],
+                "page_row": 4,
+                "wavelength_angstrom": "1025.9681"
+              },
+              {
+                "states": [
+                  {
+                    "line": 5,
+                    "role": "source row",
+                    "intensity": "",
+                    "aki": "",
+                    "aki_unit": "10^8 s^-1",
+                    "energy": "97468.92",
+                    "energy_unit": "cm^-1",
+                    "configuration": "5 p",
+                    "term": "2 P°",
+                    "j": "3/2",
+                    "line_ref": "",
+                    "aki_ref": "",
+                    "wavelength_angstrom": "",
+                    "wavelength_nm": 102.59681
+                  }
+                ],
+                "page_row": 5,
+                "wavelength_angstrom": ""
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

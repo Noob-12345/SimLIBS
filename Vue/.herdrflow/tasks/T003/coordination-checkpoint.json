@@ -1,0 +1,33 @@
+{
+    "taskId":  "T003",
+    "dispatchId":  "489619a1-691c-44b3-8a87-1687dcb4f081",
+    "revision":  1,
+    "head":  "ae4b1d4db01b0042b23bb65f01728494abec5dd2",
+    "scope":  "page component changed; other listed files protected",
+    "files":  [
+                  {
+                      "file":  "src/lib/spectrumBrowser.ts",
+                      "sha256":  "1e4710e13ff197e184d8902003cbf9519048c17771721290af7bb12c583ca2fa"
+                  },
+                  {
+                      "file":  "src/components/BrowserSpectrumChart.vue",
+                      "sha256":  "e976b169da0c554631c913c831008a85ad4842579d92a8d53dad0089a0fd9411"
+                  },
+                  {
+                      "file":  "src/styles.css",
+                      "sha256":  "aa6e9d66e6322825a50fee9ba3c513fae35397cde9ea481cdb78472a7ce74988"
+                  },
+                  {
+                      "file":  "package.json",
+                      "sha256":  "7ba7aa9dd07bf6c21117c76d764180bcbebf77f0bfe0024cba953cb5445af728"
+                  },
+                  {
+                      "file":  "package-lock.json",
+                      "sha256":  "5c274b144e01f26ddefd1c8297eb7a88ae4d3031e9a190cde7eb09e1a1987f16"
+                  },
+                  {
+                      "file":  "src/pages/SpectrumBrowserPage.vue",
+                      "sha256":  "8f1cd1f84e61a5a3bdee53d2c8f048c97c0ac7bf0c5bee0f141030a105ac931d"
+                  }
+              ]
+}

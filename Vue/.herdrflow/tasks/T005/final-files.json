@@ -1,0 +1,111 @@
+{
+    "taskId":  "T005",
+    "dispatchId":  "16a6adbb-5162-4d9f-a23d-44b91e20f0e1",
+    "revision":  1,
+    "head":  "ae4b1d4db01b0042b23bb65f01728494abec5dd2",
+    "frozen":  true,
+    "frontendBuildExitCode":  0,
+    "tauriBuildExitCode":  0,
+    "collectExecuted":  false,
+    "collectReason":  "User root EXE running; preserve accepted T003 desktop artifacts",
+    "behavior":  {
+                     "errors":  0,
+                     "failed":  0,
+                     "passed":  3
+                 },
+    "chartScriptUnchanged":  true,
+    "T003Protected":  [
+                          {
+                              "file":  "src/pages/SpectrumBrowserPage.vue",
+                              "sha256":  "8f1cd1f84e61a5a3bdee53d2c8f048c97c0ac7bf0c5bee0f141030a105ac931d",
+                              "unchanged":  true
+                          },
+                          {
+                              "file":  "dist-desktop/SimLIBS.exe",
+                              "sha256":  "8946bb31c78821e9370b2866109951a496a60f9b34ab65026ca59ea7e802a1a5",
+                              "unchanged":  true
+                          },
+                          {
+                              "file":  "dist-desktop/SimLIBS-Setup.exe",
+                              "sha256":  "dfb5b13e1345fc9ae0b936f825573f6882af0960a0ab4387dc2e7a0a3e848a76",
+                              "unchanged":  true
+                          },
+                          {
+                              "file":  "dist-desktop/SHA256SUMS.txt",
+                              "sha256":  "9138b2eb9863c31618881da5d877cfbb3886ad3353349ea6c9f3670ba96e381b",
+                              "unchanged":  true
+                          },
+                          {
+                              "file":  "dist-desktop/artifact-manifest.json",
+                              "sha256":  "34a21a71102885650a3375bae55909e32849860f5ef61ee7ad70d20f6c85594b",
+                              "unchanged":  true
+                          }
+                      ],
+    "files":  [
+                  {
+                      "file":  "src/components/AppIcon.vue",
+                      "bytes":  2963,
+                      "sha256":  "3740cc164626481a805b5dc3709c4996b930bef83deac0ac42e5c6b215dd5752"
+                  },
+                  {
+                      "file":  "src/components/BrowserSpectrumChart.vue",
+                      "bytes":  24717,
+                      "sha256":  "cd9ece43e63293047a8e46853c7bd8f6b31a39cbafe3d74e00df5f61752c6d41"
+                  },
+                  {
+                      "file":  "src/pages/SpectrumBrowserPage.vue",
+                      "bytes":  11279,
+                      "sha256":  "8f1cd1f84e61a5a3bdee53d2c8f048c97c0ac7bf0c5bee0f141030a105ac931d"
+                  },
+                  {
+                      "file":  "dist-desktop/SimLIBS.exe",
+                      "bytes":  5143040,
+                      "sha256":  "8946bb31c78821e9370b2866109951a496a60f9b34ab65026ca59ea7e802a1a5"
+                  },
+                  {
+                      "file":  "dist-desktop/SimLIBS-Setup.exe",
+                      "bytes":  6008990,
+                      "sha256":  "dfb5b13e1345fc9ae0b936f825573f6882af0960a0ab4387dc2e7a0a3e848a76"
+                  },
+                  {
+                      "file":  "src-tauri/target/release/simlibs-vue.exe",
+                      "bytes":  5143040,
+                      "sha256":  "4f3c96b0e5891e693e3c259cd60e06d71d6844fe33c8174dc83b146f7537ba5b"
+                  },
+                  {
+                      "file":  "src-tauri/target/release/bundle/nsis/SimLIBS_0.1.0_x64-setup.exe",
+                      "bytes":  6009642,
+                      "sha256":  "3151fa632c7230af718c4f8c8d66b9cac09fb4d2adfb408b80deb06ebf6b6d2e"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T005/implementation.md",
+                      "bytes":  2123,
+                      "sha256":  "66e119340de8c5822d7ded3f70937f161d393ecd3d4fc41678b91baf90f70b42"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T005/behavior-check.json",
+                      "bytes":  20195,
+                      "sha256":  "4ccc432e9d29a60c4ee3df4c1a2817baf5d222f82ddd9974f178c69cbe2ce8c0"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T005/build.log",
+                      "bytes":  860,
+                      "sha256":  "ad9253d7335e9edd3ee9eeff88c04da8b36092e36130f32f9c11147b320cc3b7"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T005/desktop-build.log",
+                      "bytes":  3156,
+                      "sha256":  "612fb16396f0d0ad0914f4217fe5a5d02ad31f9ec22e65887cf9b86ff30e9025"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T005/cdp-check.mjs",
+                      "bytes":  7022,
+                      "sha256":  "8ff9139c85e031da624334b336fc3c6c519c3efa9cbf930973dbe3c000b454d7"
+                  },
+                  {
+                      "file":  ".herdrflow/tasks/T005/harness.mjs",
+                      "bytes":  1288,
+                      "sha256":  "ca6a0d28417449ef1d908f2c755eee6c9ef8c609d5b2f62a88e3dca4ddb68ca9"
+                  }
+              ]
+}

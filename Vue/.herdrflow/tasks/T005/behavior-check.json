@@ -1,0 +1,695 @@
+{
+  "taskId": "T005",
+  "dispatchId": "16a6adbb-5162-4d9f-a23d-44b91e20f0e1",
+  "revision": 1,
+  "at": "2026-11-17T14:47:32.427Z",
+  "checks": [
+    {
+      "width": 1360,
+      "result": "PASS",
+      "buttons": [
+        {
+          "class": "icon-btn chart-reset",
+          "text": "",
+          "title": "恢复全波长与全局强度范围（Home）",
+          "aria": "恢复完整波长范围并重置强度范围",
+          "button": [
+            33,
+            33
+          ],
+          "svg": [
+            18,
+            18
+          ],
+          "path": "M3 10a9 9 0 1 1 2 8M3 4v6h6",
+          "box": {
+            "x": 3,
+            "y": 3.0597150325775146,
+            "width": 17.761140823364258,
+            "height": 18
+          },
+          "right": 1237
+        },
+        {
+          "class": "icon-btn",
+          "text": "",
+          "title": "恢复全局强度（保持当前横向选区）",
+          "aria": "仅恢复全局强度范围并保持横向选区",
+          "button": [
+            33,
+            33
+          ],
+          "svg": [
+            18,
+            18
+          ],
+          "path": "M12 3v18M3 12h18M12 3l-3 3m3-3 3 3M12 21l-3-3m3 3 3-3M3 12l3-3m-3 3 3 3M21 12l-3-3m3 3-3 3",
+          "box": {
+            "x": 3,
+            "y": 3,
+            "width": 18,
+            "height": 18
+          },
+          "right": 1276
+        },
+        {
+          "class": "icon-btn",
+          "text": "",
+          "title": "自适应当前选区强度并锁定纵轴",
+          "aria": "按当前选区自适应强度并锁定纵轴",
+          "button": [
+            33,
+            33
+          ],
+          "svg": [
+            18,
+            18
+          ],
+          "path": "M12 3v18m0-18-3 3m3-3 3 3m-3 15-3-3m3 3 3-3",
+          "box": {
+            "x": 9,
+            "y": 3,
+            "width": 6,
+            "height": 18
+          },
+          "right": 1315
+        }
+      ],
+      "normal": [
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(95, 104, 117)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(95, 104, 117)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(95, 104, 117)",
+          "boxShadow": "none"
+        }
+      ],
+      "hover": [
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(246, 248, 247)",
+          "color": "rgb(36, 41, 51)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(36, 41, 51)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(246, 248, 247)",
+          "color": "rgb(36, 41, 51)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(36, 41, 51)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(246, 248, 247)",
+          "color": "rgb(36, 41, 51)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(36, 41, 51)",
+          "boxShadow": "none"
+        }
+      ],
+      "focus": [
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "solid",
+          "outlineWidth": "3px",
+          "outlineColor": "color(srgb 0.898039 0.639216 0.152941 / 0.55)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "solid",
+          "outlineWidth": "3px",
+          "outlineColor": "color(srgb 0.898039 0.639216 0.152941 / 0.55)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "solid",
+          "outlineWidth": "3px",
+          "outlineColor": "color(srgb 0.898039 0.639216 0.152941 / 0.55)",
+          "boxShadow": "none"
+        }
+      ],
+      "global": [
+        -80,
+        210,
+        500,
+        790,
+        1080
+      ],
+      "adaptive": [
+        1.36,
+        3.68,
+        6,
+        8.32,
+        10.64
+      ],
+      "functionsPreserved": true
+    },
+    {
+      "width": 440,
+      "result": "PASS",
+      "buttons": [
+        {
+          "class": "icon-btn chart-reset",
+          "text": "",
+          "title": "恢复全波长与全局强度范围（Home）",
+          "aria": "恢复完整波长范围并重置强度范围",
+          "button": [
+            33,
+            33
+          ],
+          "svg": [
+            18,
+            18
+          ],
+          "path": "M3 10a9 9 0 1 1 2 8M3 4v6h6",
+          "box": {
+            "x": 3,
+            "y": 3.0597150325775146,
+            "width": 17.761140823364258,
+            "height": 18
+          },
+          "right": 66
+        },
+        {
+          "class": "icon-btn",
+          "text": "",
+          "title": "恢复全局强度（保持当前横向选区）",
+          "aria": "仅恢复全局强度范围并保持横向选区",
+          "button": [
+            33,
+            33
+          ],
+          "svg": [
+            18,
+            18
+          ],
+          "path": "M12 3v18M3 12h18M12 3l-3 3m3-3 3 3M12 21l-3-3m3 3 3-3M3 12l3-3m-3 3 3 3M21 12l-3-3m3 3-3 3",
+          "box": {
+            "x": 3,
+            "y": 3,
+            "width": 18,
+            "height": 18
+          },
+          "right": 105
+        },
+        {
+          "class": "icon-btn",
+          "text": "",
+          "title": "自适应当前选区强度并锁定纵轴",
+          "aria": "按当前选区自适应强度并锁定纵轴",
+          "button": [
+            33,
+            33
+          ],
+          "svg": [
+            18,
+            18
+          ],
+          "path": "M12 3v18m0-18-3 3m3-3 3 3m-3 15-3-3m3 3 3-3",
+          "box": {
+            "x": 9,
+            "y": 3,
+            "width": 6,
+            "height": 18
+          },
+          "right": 144
+        }
+      ],
+      "normal": [
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(95, 104, 117)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(95, 104, 117)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(95, 104, 117)",
+          "boxShadow": "none"
+        }
+      ],
+      "hover": [
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(246, 248, 247)",
+          "color": "rgb(36, 41, 51)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(36, 41, 51)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(246, 248, 247)",
+          "color": "rgb(36, 41, 51)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(36, 41, 51)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(246, 248, 247)",
+          "color": "rgb(36, 41, 51)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(36, 41, 51)",
+          "boxShadow": "none"
+        }
+      ],
+      "focus": [
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "solid",
+          "outlineWidth": "3px",
+          "outlineColor": "color(srgb 0.898039 0.639216 0.152941 / 0.55)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "solid",
+          "outlineWidth": "3px",
+          "outlineColor": "color(srgb 0.898039 0.639216 0.152941 / 0.55)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "solid",
+          "outlineWidth": "3px",
+          "outlineColor": "color(srgb 0.898039 0.639216 0.152941 / 0.55)",
+          "boxShadow": "none"
+        }
+      ],
+      "global": [
+        -80,
+        210,
+        500,
+        790,
+        1080
+      ],
+      "adaptive": [
+        1.36,
+        3.68,
+        6,
+        8.32,
+        10.64
+      ],
+      "functionsPreserved": true
+    },
+    {
+      "width": 360,
+      "result": "PASS",
+      "buttons": [
+        {
+          "class": "icon-btn chart-reset",
+          "text": "",
+          "title": "恢复全波长与全局强度范围（Home）",
+          "aria": "恢复完整波长范围并重置强度范围",
+          "button": [
+            33,
+            33
+          ],
+          "svg": [
+            18,
+            18
+          ],
+          "path": "M3 10a9 9 0 1 1 2 8M3 4v6h6",
+          "box": {
+            "x": 3,
+            "y": 3.0597150325775146,
+            "width": 17.761140823364258,
+            "height": 18
+          },
+          "right": 66
+        },
+        {
+          "class": "icon-btn",
+          "text": "",
+          "title": "恢复全局强度（保持当前横向选区）",
+          "aria": "仅恢复全局强度范围并保持横向选区",
+          "button": [
+            33,
+            33
+          ],
+          "svg": [
+            18,
+            18
+          ],
+          "path": "M12 3v18M3 12h18M12 3l-3 3m3-3 3 3M12 21l-3-3m3 3 3-3M3 12l3-3m-3 3 3 3M21 12l-3-3m3 3-3 3",
+          "box": {
+            "x": 3,
+            "y": 3,
+            "width": 18,
+            "height": 18
+          },
+          "right": 105
+        },
+        {
+          "class": "icon-btn",
+          "text": "",
+          "title": "自适应当前选区强度并锁定纵轴",
+          "aria": "按当前选区自适应强度并锁定纵轴",
+          "button": [
+            33,
+            33
+          ],
+          "svg": [
+            18,
+            18
+          ],
+          "path": "M12 3v18m0-18-3 3m3-3 3 3m-3 15-3-3m3 3 3-3",
+          "box": {
+            "x": 9,
+            "y": 3,
+            "width": 6,
+            "height": 18
+          },
+          "right": 144
+        }
+      ],
+      "normal": [
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(95, 104, 117)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(95, 104, 117)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(95, 104, 117)",
+          "boxShadow": "none"
+        }
+      ],
+      "hover": [
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(246, 248, 247)",
+          "color": "rgb(36, 41, 51)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(36, 41, 51)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(246, 248, 247)",
+          "color": "rgb(36, 41, 51)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(36, 41, 51)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(246, 248, 247)",
+          "color": "rgb(36, 41, 51)",
+          "padding": "1px 6px",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(36, 41, 51)",
+          "boxShadow": "none"
+        }
+      ],
+      "focus": [
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "solid",
+          "outlineWidth": "3px",
+          "outlineColor": "color(srgb 0.898039 0.639216 0.152941 / 0.55)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "solid",
+          "outlineWidth": "3px",
+          "outlineColor": "color(srgb 0.898039 0.639216 0.152941 / 0.55)",
+          "boxShadow": "none"
+        },
+        {
+          "width": "33px",
+          "height": "33px",
+          "borderTopWidth": "1px",
+          "borderTopStyle": "solid",
+          "borderTopColor": "rgb(224, 229, 229)",
+          "borderRadius": "7px",
+          "backgroundColor": "rgb(253, 254, 253)",
+          "color": "rgb(95, 104, 117)",
+          "padding": "1px 6px",
+          "outlineStyle": "solid",
+          "outlineWidth": "3px",
+          "outlineColor": "color(srgb 0.898039 0.639216 0.152941 / 0.55)",
+          "boxShadow": "none"
+        }
+      ],
+      "global": [
+        -80,
+        210,
+        500,
+        790,
+        1080
+      ],
+      "adaptive": [
+        1.36,
+        3.68,
+        6,
+        8.32,
+        10.64
+      ],
+      "functionsPreserved": true
+    }
+  ],
+  "errors": [],
+  "ownedChromeStopped": true,
+  "failed": 0
+}
