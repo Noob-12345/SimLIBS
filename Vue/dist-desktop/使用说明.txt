@@ -5,7 +5,7 @@
 安装使用：自行双击 SimLIBS-Setup.exe，按向导安装到当前 Windows 用户。生成者没有执行或安装此安装包。
 要求：Windows x64，系统 WebView2 Runtime。安装包使用 Tauri 默认的 WebView2 检测/引导策略，缺少运行时可能需联网。
 已接入真实 Python 后端，local=本地 LTE/Saha；client=NIST 计算线强+Python展宽；server=NIST官方页面。默认空谱，失败不回退示意结果。
-未打包 Python runtime：需配置具有原后端依赖的 Python 3.11 环境。本机默认 E:/Anaconda/envs/simLIBS/python.exe，可用 SIMLIBS_UI_PYTHON 或设置指定解释器。安装包不自动安装 Python/全局依赖，不保证跨机器免 Python。
+Python 环境自动引导：Python runtime 不打包。首次运行若没有可用解释器，程序自动创建独立托管环境——优先使用本机 conda 新建专用环境；无 conda 时尝试 winget 静默安装 Python 3.11；两者都不可用时界面引导手动安装，并在程序内选择 python.exe。依赖按 backend/requirements.txt 钉住的已验证版本装入托管环境（需联网，首次约几分钟），不改动用户显式指定的解释器或全局环境。仍可用 SIMLIBS_UI_PYTHON 或设置指定已有解释器。引导过程日志见 app_local_data_dir/bootstrap.log。
 配置/session/驱动缓存/默认任务输出写入当前用户 app_local_data_dir；backend 资源只读。关闭应用只清理 owned 后端和所属 worker/Chrome，不影响其他服务。
 CSV 打开及 CSV/JSON/PNG/GIF/ZIP 另存为沿用 Windows 原生对话框动态scope；取消不写文件，保存失败在界面说明。
 程序前端静态资源嵌入 EXE。正式运行不启动 1420 服务。

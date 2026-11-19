@@ -1,0 +1,14 @@
+# SimLIBS backend pinned dependencies, extracted from the verified runtime
+# (Python 3.11 / E:/Anaconda/envs/simLIBS). Pinned exactly so every managed
+# environment created by the desktop bootstrap resolves identically and the
+# scientific output stays reproducible. Update together with the verified
+# runtime, never bump silently.
+numpy==2.4.6
+pandas==3.0.5
+scipy==1.17.1
+matplotlib==3.11.1
+Pillow==12.3.0
+requests==2.34.2
+beautifulsoup4==4.15.0
+selenium==4.49.0
+webdriver-manager==4.1.2

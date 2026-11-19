@@ -43,7 +43,8 @@
       "../backend/Linedatabase/*.csv": "backend/Linedatabase/",
       "../backend/Linedatabase/*.json": "backend/Linedatabase/",
       "../backend/Linedatabase/*.md": "backend/Linedatabase/",
-      "../backend/README.md": "backend/README.md"
+      "../backend/README.md": "backend/README.md",
+      "../backend/requirements.txt": "backend/requirements.txt"
     },
     "shortDescription": "SimLIBS 真实光谱工作台",
     "windows": {

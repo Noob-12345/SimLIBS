@@ -1,6 +1,0 @@
-# 忽略运行产物
-.cli-settings.json
-output/
-__pycache__/
-*.pyc
-.pytest_cache/

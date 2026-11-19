@@ -14,7 +14,7 @@ simlibs_ui、web API、源 simLIBS 模块/许可证及 62 份谱线 CSV 复制�
 
 Windows EXE 自动启动 owned Python，127.0.0.1 系统分配端口、随机 session token、可信 origin，Windows Job Object 管理所属进程树。服务与 worker/浏览器关闭只清理本应用拥有的树，不按进程名清理其它服务。
 
-Python runtime 没有打包。需现有 Python 3.11 及 numpy/pandas/scipy/matplotlib/selenium/requests/beautifulsoup4/webdriver-manager 等原后端依赖。本机可复用 E:/Anaconda/envs/simLIBS/python.exe；可用 SIMLIBS_UI_PYTHON 或设置指定解释器。没有自动安装全局依赖，不保证跨机器无需 Python。
+Python runtime 没有打包。桌面壳在默认候选解释器缺少后端依赖时自动创建托管环境：优先 conda `create -p` 新建专用环境，其次 winget 安装 Python 3.11 后建 venv，均不可用时界面引导手动安装并选择解释器；依赖按本目录 `requirements.txt` 钉住的已验证版本装入托管环境，不改动用户显式指定的解释器或全局环境。显式解释器（SIMLIBS_UI_PYTHON 或设置页）仍需具备 numpy/pandas/scipy/matplotlib/selenium/requests/beautifulsoup4/webdriver-manager 等原后端依赖。引导日志位于 app_local_data_dir/bootstrap.log。
 
 安装后配置、session、驱动缓存、日志及默认 outputs 写入当前用户 app_local_data_dir。backend 本身只读，资源解析使用 Tauri resource_dir。便携 EXE 必须与同目录 backend 一起分发。用户设置输出目录用于新任务存储与另存为起点，已保存任务保留原路径。
 

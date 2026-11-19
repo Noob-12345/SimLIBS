@@ -10,8 +10,6 @@
 .workbuddy-ai/
 
 # ---------- 运行产物 / 缓存 ----------
-# UI 运行输出：任务目录、冒烟/评审快照
-UI/output/
 # Selenium / webdriver 驱动缓存
 .driver-cache/
 # 会话文件

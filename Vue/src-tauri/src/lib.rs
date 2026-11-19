@@ -1,4 +1,5 @@
 mod backend;
+mod env;
 use tauri::Manager;
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -26,10 +27,11 @@ fn default_output_directory(window: tauri::Window) -> Result<String, String> {
 pub fn run() {
     tauri::Builder::default()
         .manage(backend::Service::default())
+        .manage(env::BootstrapState::default())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![greet, default_output_directory, backend::backend_connect])
+        .invoke_handler(tauri::generate_handler![greet, default_output_directory, backend::backend_connect, env::bootstrap_python, env::use_python_for_env, env::env_status])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
         .run(|app, event| {if matches!(event, tauri::RunEvent::Exit) {backend::shutdown(app.state::<backend::Service>().inner());}});

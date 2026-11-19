@@ -19,7 +19,7 @@
 格式参考URL/固定版本/样本hash见 .ai-workflow/20261117-spectrum-browser/references/fixtures-provenance.json。测试可设 SIMLIBS_FORMAT_REFERENCES 指向该目录；处理参考可设 SIMLIBS_PROCESS_REFERENCES 指向任务证据根（源算法快照及 reference-env/site 的 PyWavelets1.8.0）。缺参考文件给出明确 skip，不自动联网。PyWavelets wheel 仅用于任务目录基准，无新增运行依赖、共享环境或锁文件变动。实现、验证与交付记录见本任务 implementation.md。
 
 
-这是基于 Tauri 2、Vue 3、TypeScript 的 **Windows 桌面软件**。Vue 是原生桌面窗口中的界面层；正式程序嵌入静态界面，双击启动，无需浏览器网址或 Vite 服务；程序自动启动并管理本应用拥有的 Python 后端。Python runtime 未打包，需已有 Python 3.11 及原后端依赖，可通过 SIMLIBS_UI_PYTHON 或设置指定解释器。便携 EXE 必须与 backend 资源目录一起分发。
+这是基于 Tauri 2、Vue 3、TypeScript 的 **Windows 桌面软件**。Vue 是原生桌面窗口中的界面层；正式程序嵌入静态界面，双击启动，无需浏览器网址或 Vite 服务；程序自动启动并管理本应用拥有的 Python 后端。Python runtime 不打包：首次运行若没有可用解释器，程序自动创建独立托管环境（优先 conda 新建专用环境，其次 winget 静默安装 Python 3.11，均不可用时界面引导手动安装并选择 python.exe），并按 `backend/requirements.txt` 钉住的已验证版本安装依赖；用户显式指定的解释器（SIMLIBS_UI_PYTHON 或设置页）永不自动改动。便携 EXE 必须与 backend 资源目录一起分发。
 
 2026-11-11 当前高级入口支持本地与客户端两模式，共用 Stark、仪器、自吸收、基体四项开关，新草稿均关闭。上方“模型与展宽”只放 Stark/仪器；自吸收及光程/密度位于“基体效应”区，独立于参数化基体开关。本地线位与 LTE/I-II Saha 光子面积来自设置中的 CSV 谱线库，不请求 NIST 线强；开启 Stark 后可通过原受控传输补查 STARK-B/NIST 系数身份，不能承诺完全离线。系数优先序为 JSON → 在线 STARK-B → NIST 原子输入＋DK1980 → 明确缺失，本地 q0/1 不适用 DK1980 的 q2/3 公式。宽度缺失时保留本地 LTE 面积、跳过该线 Stark/自吸收，仪器仍按开关最后施加；获取/格式/歧义故障仍报错。单次模拟的本地展宽入口和引擎保持原样。下文带日期的旧高级入口描述只记录对应历史版本。
 

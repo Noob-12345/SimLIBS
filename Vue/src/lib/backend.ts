@@ -121,6 +121,10 @@ export function apiParams(p: ValidParams) {
     local_temperature_K: p.temperatureMode === 'linked' ? 0 : p.temperature, local_broadening_enabled: p.broaden }
 }
 export const apiComposition = (comp: Composition[]) => comp.map(c => ({ el: c.symbol, pct: c.pct }))
+// Rust launch() classifies an unusable default Python candidate with this marker;
+// the managed-environment bootstrap flow auto-starts on it. Never emitted for an
+// explicitly selected interpreter.
+export const envBootstrapNeeded = (message: string) => message.startsWith('PYTHON_ENV_MISSING')
 export function fromParameters(p: any): ValidParams {
   const draft: ParameterDraft = { te: String(p.Te), ne: String(p.Ne), resolution: String(p.resolution), low: String(p.low_w), high: String(p.upper_w), step: String(p.broaden_grid_step), charge: String(p.max_ion_charge),
     mode: p.webscraping, flux: p.intensity_scale, broaden: p.local_broadening_enabled, gaussian: String(p.local_gaussian_nm), lorentz: String(p.local_lorentz_nm),

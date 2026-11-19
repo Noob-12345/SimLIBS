@@ -1,8 +1,8 @@
 {
   "version": "0.1.0",
   "deliveryDirectory": "dist-desktop",
-  "collectedAt": "2026-11-18T05:46:42.160Z",
-  "runtime": "Windows x64 / system WebView2 / external Python 3.11",
+  "collectedAt": "2026-11-19T15:08:36.656Z",
+  "runtime": "Windows x64 / system WebView2 / managed bootstrap or external Python 3.11",
   "frontend": "embedded static dist",
   "scientificSource": "real Python / local LTE-Saha / NIST",
   "installerExecuted": false,
@@ -11,15 +11,15 @@
       "kind": "windows-x64-application",
       "file": "SimLIBS.exe",
       "source": "src-tauri\\target\\release\\simlibs-vue.exe",
-      "bytes": 5144064,
-      "sha256": "91bc9d2f9bc37589d96f3aa7e16c2810a3b8b5c3f95b2838e5b72db5e6fa3352"
+      "bytes": 5193728,
+      "sha256": "800e66d49c290388871611f3ebd652c9a2291b6be0f443c88f7a2381d1deee93"
     },
     {
       "kind": "nsis-installer",
       "file": "SimLIBS-Setup.exe",
       "source": "src-tauri\\target\\release\\bundle\\nsis\\SimLIBS_0.1.0_x64-setup.exe",
-      "bytes": 6013200,
-      "sha256": "d3f879fbd9e66df00ef548a5c38556a3470c7f04c39b35e267b487ecec2fe240"
+      "bytes": 6033315,
+      "sha256": "3bfbdf1534f3d51783a558a972f04252f79d7cb27cacecf055c6ab82261295d0"
     },
     {
       "kind": "python-backend-resource",
@@ -162,8 +162,8 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/simlibs_ui/spectrum_browser.py",
-      "bytes": 13640,
-      "sha256": "207214f61b86dc7da83167f7242d64b8a9f43f17269688900e04bd37309a40dd"
+      "bytes": 13866,
+      "sha256": "47f882912930bb7301447fe40280aed7e948a202acee50173a612d4a1d1cdf2e"
     },
     {
       "kind": "python-backend-resource",
@@ -726,8 +726,14 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/README.md",
-      "bytes": 6142,
-      "sha256": "5a9e1e7dc3acc042aed116c2f2e04f49d3982c8443e4965c0cd5737c39360639"
+      "bytes": 6435,
+      "sha256": "09eebebe0c0dbbb3669176b8931141b795c5e2a55a88940db8a865a4f6dc70a3"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/requirements.txt",
+      "bytes": 490,
+      "sha256": "05027f26a095654996a1e7910aa29c026c2f24caf4d3b559553d13a0654cfa3c"
     }
   ]
 }

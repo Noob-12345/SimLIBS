@@ -16,7 +16,7 @@ small,.hint,.muted,.run-hint,.balance-hint,.range-labels,.chart-bottom,.legend b
 .field,.switch,.segmented>button,.table-link,.btn,.filter-group label,.filter-group select,.theme-card-label,td,.detail-list dd{font-size:var(--text-body)}
 .field,.btn,.activity-line strong,.theme-card-label{font-weight:500}
 .btn.primary,.sidebar-caption,th{font-weight:600}
-.field>span,.field>label>span,.metric small,.section-number,.task-id,.engine-status span{font-size:var(--text-meta);font-weight:400}
+.field>span,.field>label>span,.metric small,.section-number,.engine-status span{font-size:var(--text-meta);font-weight:400}
 .mono{font-family:var(--font-ui);font-variant-numeric:tabular-nums}
 .code{font-family:var(--font-code);font-size:var(--text-meta)}
 .brand strong{font-size:var(--text-page);font-weight:700}
@@ -478,6 +478,7 @@ tbody tr.selected{background:var(--accent-soft)}
 .refresh-note{color:var(--muted);margin-top:13px}
 .jobs-empty{padding:85px 20px}
 .table-time{display:block;color:var(--muted);margin-top:5px}
+.task-name{font-weight:600}
 .task-summary{min-width:160px;max-width:320px;}
 .task-running{color:var(--accent-text);background:var(--accent-soft)}
 .task-completed{color:var(--good);background:color-mix(in srgb,var(--good) 8%,var(--panel));border-color:color-mix(in srgb,var(--good) 18%,var(--border))}

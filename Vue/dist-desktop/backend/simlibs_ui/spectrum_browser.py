@@ -24,6 +24,11 @@ MAX_VALUES=4_000_000
 MAX_RESPONSE=48_000_000
 MAX_CELLS=4_000_000
 MAX_CACHE=192_000_000
+# Multi-file browsing: several documents stay cached side by side so the UI can
+# overlay them. Oldest-inserted document is evicted first when any cap is hit.
+MAX_DOCUMENTS=8
+MAX_RAW=256_000_000
+CACHE_TTL=21600
 NS={'s':'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
 
 
@@ -182,7 +187,7 @@ def select(document,options):
 
 
 class BrowserStore:
-    """At most two documents/64MB input per local session; bounded concurrency."""
+    """At most MAX_DOCUMENTS documents/MAX_RAW input bytes; bounded concurrency."""
     def __init__(self):
         self.documents=OrderedDict();self.lock=threading.RLock();self.gate=threading.BoundedSemaphore(2)
     def call(self,action,body,settings):
@@ -200,8 +205,8 @@ class BrowserStore:
                 summary=describe(document);key=uuid.uuid4().hex
                 with self.lock:
                     now=time.monotonic()
-                    for old in [k for k,(stamp,d) in self.documents.items() if now-stamp>1800]:self.documents.pop(old)
-                    while self.documents and (len(self.documents)>=2 or sum(d['bytes'] for _,d in self.documents.values())+len(data)>64_000_000 or sum(d['_cache_bytes'] for _,d in self.documents.values())+document['_cache_bytes']>MAX_CACHE):self.documents.popitem(last=False)
+                    for old in [k for k,(stamp,d) in self.documents.items() if now-stamp>CACHE_TTL]:self.documents.pop(old)
+                    while self.documents and (len(self.documents)>=MAX_DOCUMENTS or sum(d['bytes'] for _,d in self.documents.values())+len(data)>MAX_RAW or sum(d['_cache_bytes'] for _,d in self.documents.values())+document['_cache_bytes']>MAX_CACHE):self.documents.popitem(last=False)
                     self.documents[key]=(now,document)
                 return dict(document=key,**summary)
             if action in ('select','process'):

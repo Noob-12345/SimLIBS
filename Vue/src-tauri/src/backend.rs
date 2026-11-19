@@ -32,8 +32,8 @@ impl Drop for Owned {
         let _=self.child.kill(); let _=self.child.wait(); let _=fs::remove_file(&self.ready);
     }
 }
-fn state_dir(app:&tauri::AppHandle)->Result<PathBuf,String> {app.path().app_local_data_dir().map_err(|e|e.to_string())}
-fn resources(app:&tauri::AppHandle)->Result<PathBuf,String> {
+pub(crate) fn state_dir(app:&tauri::AppHandle)->Result<PathBuf,String> {app.path().app_local_data_dir().map_err(|e|e.to_string())}
+pub(crate) fn resources(app:&tauri::AppHandle)->Result<PathBuf,String> {
     let resource=app.path().resource_dir().map_err(|e|e.to_string())?.join("backend");
     if resource.join("web/server.py").is_file(){return Ok(resource)}
     #[cfg(debug_assertions)] {let dev=PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../backend");if dev.join("web/server.py").is_file(){return Ok(dev)}}
@@ -68,8 +68,32 @@ fn launch(app:tauri::AppHandle,state:Service,python:Option<String>,restart:bool)
     if let Some(service)=guard.as_mut(){if service.child.try_wait().map_err(|e|e.to_string())?.is_none(){return Ok(service.connection.clone())} guard.take();}
     let resource=resources(&app)?;let directory=state_dir(&app)?;fs::create_dir_all(&directory).map_err(|e|e.to_string())?;
     let config=directory.join("owned-python.json");
-    let selected=python.filter(|s|!s.trim().is_empty()).or_else(||std::env::var("SIMLIBS_UI_PYTHON").ok()).or_else(||fs::read_to_string(&config).ok().and_then(|s|serde_json::from_str::<String>(&s).ok())).unwrap_or_else(||["E:/Anaconda/envs/simLIBS/python.exe","D:/Anaconda3/envs/simLIBS/python.exe"].into_iter().find(|p|std::path::Path::new(p).is_file()).unwrap_or("python").into());
-    if selected!="python" && !std::path::Path::new(&selected).is_file(){return Err(format!("Python 解释器不存在：{selected}"))}
+    let managed=crate::env::managed_python(&directory);
+    let mut explicit=python.filter(|s|!s.trim().is_empty()).or_else(||std::env::var("SIMLIBS_UI_PYTHON").ok().filter(|s|!s.trim().is_empty()));
+    let mut stale_managed=false;
+    if explicit.is_none() {
+        if let Some(saved)=fs::read_to_string(&config).ok().and_then(|s|serde_json::from_str::<String>(&s).ok()).filter(|s|!s.trim().is_empty()) {
+            // A saved managed-environment path that no longer exists re-enters the
+            // default chain instead of erroring, so bootstrap can recreate it.
+            if std::path::Path::new(&saved)==managed && !managed.is_file() { stale_managed=true } else { explicit=Some(saved) }
+        }
+    }
+    let selected=match &explicit {
+        Some(p) => {if !std::path::Path::new(p).is_file(){return Err(format!("Python 解释器不存在：{p}"))} p.clone()}
+        None => if managed.is_file() {managed.to_string_lossy().into_owned()} else {["E:/Anaconda/envs/simLIBS/python.exe","D:/Anaconda3/envs/simLIBS/python.exe"].into_iter().find(|p|std::path::Path::new(p).is_file()).unwrap_or("python").to_string()}
+    };
+    // Default candidates only: an unusable fallback is classified as a bootstrap
+    // need (frontend auto-starts the managed-environment flow) instead of a raw
+    // launch failure. Explicit user choices keep the existing errors. The import
+    // probe costs a second or two per cold start; the managed/venv env it guards
+    // is what makes a fresh machine work. SIMLIBS_FORCE_BOOTSTRAP=1 short-circuits
+    // the probe for testing the bootstrap path on developer machines.
+    if explicit.is_none() || stale_managed {
+        let forced=std::env::var("SIMLIBS_FORCE_BOOTSTRAP").map(|v|v.trim()=="1").unwrap_or(false);
+        let managed_selected=std::path::Path::new(&selected)==managed;
+        let usable=(!forced && selected!="python" && crate::env::probe_imports(std::path::Path::new(&selected)).is_ok()) || (forced && managed_selected);
+        if !usable {return Err(format!("PYTHON_ENV_MISSING：没有找到可用的 Python {} 及后端依赖环境（尝试：{selected}）；可自动创建托管环境，或在界面中手动选择解释器。", crate::env::PYTHON_SPEC))}
+    }
     #[cfg(windows)] let token=win::token()?;
     #[cfg(not(windows))] let token=return Err("当前 owned 后端仅支持 Windows".into());
     let ready=directory.join(format!("ready-{}.json",&token[..16]));let log=fs::File::create(directory.join("backend.log")).map_err(|e|e.to_string())?;

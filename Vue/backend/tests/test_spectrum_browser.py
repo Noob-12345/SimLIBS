@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 import zipfile
 
-from simlibs_ui.spectrum_browser import BrowserStore,parse,select,_xlsx
+from simlibs_ui.spectrum_browser import BrowserStore,MAX_DOCUMENTS,parse,select,_xlsx
 from simlibs_ui.spectrum_reference import markers,configured
 from simlibs_ui.settings import Settings
 
@@ -103,7 +103,14 @@ class BrowserTests(unittest.TestCase):
             raw=upload((REF/'public.Raw8').read_bytes(),'instrument.raw')
             result=store.call('select',dict(document=raw['document'],options={'frame':'0','curves':['scope','dark']}),settings)
             self.assertEqual([x['id'] for x in result['curves']],['scope','dark'])
-        self.assertLessEqual(len(store.documents),2)
+        self.assertLessEqual(len(store.documents),MAX_DOCUMENTS)
+        # Multi-document cache: the first upload stays selectable alongside the rest.
+        still=store.call('select',dict(document=a['document'],options={}),settings)
+        self.assertEqual(still['curves'][0]['ys'],[-2,3])
+        # Fill past the document cap: the oldest inserted document is evicted first.
+        for i in range(MAX_DOCUMENTS-len(store.documents)+1):
+            upload(b'400,-2\n401,3',f'filler-{i}.csv')
+        self.assertLessEqual(len(store.documents),MAX_DOCUMENTS)
         with self.assertRaises(ValueError):store.call('select',dict(document=a['document'],options={}),settings)
         with self.assertRaises(ValueError):store.call('import',dict(path='C:/private'),settings)
         with patch('simlibs_ui.spectrum_browser.MAX_CACHE',1):
