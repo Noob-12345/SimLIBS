@@ -217,7 +217,7 @@ class BrowserStore:
                 measurement=select(document,body.get('options',{}))
                 if action=='process':
                     from .spectrum_processing import process
-                    result=process(measurement,str(body.get('curve','')),body.get('parameters',{}))
+                    result=process(measurement,str(body.get('curve','')),body.get('parameters',{}),body.get('reference_xs'))
                     if len(json.dumps(result,ensure_ascii=False,allow_nan=False).encode())>MAX_RESPONSE:
                         raise ValueError('处理结果响应超过48MB')
                     return result

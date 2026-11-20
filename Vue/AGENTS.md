@@ -1,6 +1,6 @@
 ﻿# SimLIBS Vue 项目协作约定
 
-> 2026-10-15 现行角色规则：固定 plan / code / review 三角色，plan 只规划与统筹，最终审查仅由 review 完成。此规则覆盖本文件及历史材料所有“两角色”“plan 最终验收”“不新增 review”表述。下方带日期的任务段落只记录当时事实，不代表当前任务或当前产品状态；业务现状以最新任务证据与实际代码为准。2026-10-15 用户已重新提交五模块视觉优化清单，现任务为 `.ai-workflow/20261015-visual-refinement/plan.md`，授权 code 按小步实现，review 独立验收；工作流初始化时的待规划状态已被本次新授权替代。
+> 2026-11-20 现行角色规则：升级为固定 designer / plan / code / review 四角色工作流。Antigravity (`agy`，当前 Pane: `w3:pB`) 担任 designer，主要负责前端 UI/UX 与外观视觉设计；当用户提出涉及界面外观、版式、视觉规范等设计任务时，由 designer 先行设计并输出设计方案（`design.md`）移交给 plan，再由 plan 拆步派工给 code 实现及自测、review 独立代码审查，最终由 designer 负责视觉与交互验收（`designer-acceptance.md`）。非外观设计任务由 plan 统筹、code 实现、review 独立技术审查。此规则覆盖历史“两角色”“三角色”“plan 最终验收”“仅由 review 验收”表述。下方带日期的任务段落只记录当时事实，不代表当前任务或当前产品状态；业务现状以最新任务证据与实际代码为准。
 
 
 2026-10-14 当前任务 `.ai-workflow/20261014-advanced-batch-scan/`：用户已授权在真实后端基础上优化批量/扫描竞态并实现高级单次。高级页已替换历史占位，采用有限能级 LTE slab 自吸收与明确未标定的参数化元素响应/等离子体条件，独立任务、三谱共同尺度和完整导出；功能原理见根目录 PROJECT_FUNCTIONS_AND_PRINCIPLES.md。code 完成实现、自测与根目录正式交付后以本轮 code-ready/files 冻结交 plan；最终验收仅由原 plan 写 review。每步最多3业务文件、源 UI/源库/线库只读、自然长页面和根目录交付约定不变。以下历史“占位/未接引擎/冻结”仅表示对应旧任务当时状态，不能覆盖本轮授权和当前事实。
@@ -17,14 +17,17 @@
 
 项目根目录：`D:\LIBS\SimLIBS\Vue`。技术栈：Tauri 2、Vue 3、TypeScript、Vite、npm。
 
-## 三角色工作流（2026-10-15 起生效）
+## 四角色工作流（2026-11-20 升级生效）
 
-- plan 仅负责需求、方案、验收标准、统筹、状态与汇报，不写业务代码或最终 review.md。
-- code 负责实现、自测、构建和 implementation.md；每个业务小步最多3业务文件。
-- review 为独立第三角色，负责审查、必要验证及 review.md；不修改业务实现。
-- 顺序：用户 → plan → code → review → plan 汇报；返工由 plan 交同一 code，再由 review 复验。
-- 唯一现行规范为 `.ai-workflow/herdr-three-role/workflow.md`，交接模板为同目录 prompts.md。重复初始化复用窗口，只补缺失角色，实时发现 ID，保留模型和焦点。
-- 当前初始化证据在 `.ai-workflow/20261015-herdr-three-role-init/`。所有旧任务记录只作历史，不自动恢复。
+- **designer**：由 Antigravity 担任，负责前端 UI/UX、视觉规范、布局排版与交互体验设计。当任务涉及外观视觉时，由 designer 先行输出设计方案（`design.md`）交接给 plan，并在 review 通过后进行最终视觉与交互验收（`designer-acceptance.md`）。不编写业务实现代码。
+- **plan**：负责技术方案、验收标准、拆步、受控文件授权、派工统筹、状态维护与用户汇报。外观任务以 `design.md` 为技术拆分基准；不编写业务代码或最终 review.md。
+- **code**：负责依据 plan 规划与设计规范进行代码实现、自测、构建和 `implementation.md`；每个业务小步最多 3 个业务文件。
+- **review**：为独立技术审查角色，负责独立审查代码实现、必要验证及 `review.md`；不修改业务实现。
+- **流转顺序**：
+  - **外观/设计类任务**：用户 → designer (设计规范) → plan (技术拆步) → code (实现自测) → review (代码审查) → designer (最终视觉验收) → plan 汇报。
+  - **非设计类逻辑任务**：用户 → plan → code → review → plan 汇报。
+  - 返工由相应审查角色（review 或 designer）说明问题，经 plan 安排同一 code 修复后复验。
+- 唯一现行规范为 `.ai-workflow/herdr-three-role/workflow.md`，交接模板为同目录 `prompts.md`。重复初始化复用窗口，只补缺失角色，实时发现 ID，保留模型和焦点。
 最新前端与角色状态见 `.ai-workflow/20261009-vue-frontend/state.json`、`review.md`；此前续接见 `.ai-workflow/20261009-herdr-resume/`，工具链验收见 `.ai-workflow/20261009-tauri-prerequisites/review.md`。已经通过的安装和构建不重复执行，后续操作前核对实时 Herdr 角色和任务范围。
 
 当前 Windows 桌面前端交付见 `.ai-workflow/20261010-desktop-delivery/state.json`、`review.md`。产品入口为 `dist-desktop/SimLIBS.exe` 与中文 NSIS 安装包；Vue 嵌入 Tauri 窗口，网页仅作开发辅助。独立 release 验收通过；完整原生文件对话框点击及安装过程的验证边界按 review.md 如实保留。

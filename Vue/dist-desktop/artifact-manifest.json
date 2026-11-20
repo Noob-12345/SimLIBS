@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "deliveryDirectory": "dist-desktop",
-  "collectedAt": "2026-11-19T15:08:36.656Z",
+  "collectedAt": "2026-11-20T04:38:09.240Z",
   "runtime": "Windows x64 / system WebView2 / managed bootstrap or external Python 3.11",
   "frontend": "embedded static dist",
   "scientificSource": "real Python / local LTE-Saha / NIST",
@@ -11,15 +11,15 @@
       "kind": "windows-x64-application",
       "file": "SimLIBS.exe",
       "source": "src-tauri\\target\\release\\simlibs-vue.exe",
-      "bytes": 5193728,
-      "sha256": "800e66d49c290388871611f3ebd652c9a2291b6be0f443c88f7a2381d1deee93"
+      "bytes": 5196800,
+      "sha256": "ca1baa545caab502949fe4585985d2dcb965da2de285f4a08196386c958da4b9"
     },
     {
       "kind": "nsis-installer",
       "file": "SimLIBS-Setup.exe",
       "source": "src-tauri\\target\\release\\bundle\\nsis\\SimLIBS_0.1.0_x64-setup.exe",
-      "bytes": 6033315,
-      "sha256": "3bfbdf1534f3d51783a558a972f04252f79d7cb27cacecf055c6ab82261295d0"
+      "bytes": 6038824,
+      "sha256": "1f34db203df1e4fbfe4b19a44f72eccfb2eec98622ebbca297645fee39964a98"
     },
     {
       "kind": "python-backend-resource",
@@ -162,14 +162,20 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/simlibs_ui/spectrum_browser.py",
-      "bytes": 13866,
-      "sha256": "47f882912930bb7301447fe40280aed7e948a202acee50173a612d4a1d1cdf2e"
+      "bytes": 13891,
+      "sha256": "a6b0672fb1981b207d5dbda04d1f96a9094733c0302bcb53ab60c42f19b5c727"
     },
     {
       "kind": "python-backend-resource",
       "file": "backend/simlibs_ui/spectrum_cwt.py",
       "bytes": 2687,
       "sha256": "ef048166485ad5655b9191f4d0758cb7604b408cc8d25e2b9c9035d09c4459f9"
+    },
+    {
+      "kind": "python-backend-resource",
+      "file": "backend/simlibs_ui/spectrum_drift.py",
+      "bytes": 4891,
+      "sha256": "0a29f59b4597fbfb054ab5ad48e4689d55b3e9a1f96863fbd243bc5d11e911be"
     },
     {
       "kind": "python-backend-resource",
@@ -180,8 +186,8 @@
     {
       "kind": "python-backend-resource",
       "file": "backend/simlibs_ui/spectrum_processing.py",
-      "bytes": 7546,
-      "sha256": "f6d96b710c02c7062afb619ce2c4d3b6eef38eb4e70d90ab96fb3ff76a85372a"
+      "bytes": 11012,
+      "sha256": "cd72f8f4be40edfd13f2b035e68d62ea888d3764089fbd6db6c2e8c0b0e0f03c"
     },
     {
       "kind": "python-backend-resource",

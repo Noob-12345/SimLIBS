@@ -19,7 +19,7 @@ interface ImportInfo {
   tables:{name:string;columns:string[];recommended_start:number;recommended_x:number;recommended_y:number[];preview:{line:number;values:string[]}[]}[]
   frames:{id:string;label:string;unit:string;nodes:number;curves:string[];metadata:Record<string,unknown>}[]
 }
-export interface ProcessingResult {algorithm:string;curve:string;parameters:Record<string,unknown>;source:{sha256:string;selection:Record<string,unknown>;unit:string};background:number[]|null;corrected:number[]|null;iterations:number;converged:boolean;iteration_limit_reached:boolean;last_change:number|null;peaks:{index:number;x:number;intensity:number;original_intensity:number}[];ridge_count:number;note:string;source_hashes:Record<string,string>;docKey?:string}
+export interface ProcessingResult {algorithm:string;curve:string;parameters:Record<string,unknown>;source:{sha256:string;selection:Record<string,unknown>;unit:string};background:number[]|null;corrected:number[]|null;iterations:number;converged:boolean;iteration_limit_reached:boolean;last_change:number|null;peaks:{index:number;x:number;intensity:number;original_intensity:number;corrected_x?:number}[];ridge_count:number;drift_model:{degree:number;coefficients:number[];matched_line_count:number;exp_wl:number[];theo_wl:number[];tolerance:number;max_degree:number}|null;corrected_xs:number[]|null;note:string;source_hashes:Record<string,string>;docKey?:string}
 interface Selection {sheet:string;start:string;x:string;ys:string[];unit:AxisUnit;duplicates:string;frame:string;curves:string[]}
 // One loaded file: its own server document, committed selection, visibility and
 // per-curve hiding. Heavy payloads stay raw; the wrapper stays reactive so
@@ -38,18 +38,25 @@ export function docColor(colorIndex:number,curveIndex=0,curveCount=1,dark=false)
   const light=Math.max(25,Math.min(82,(dark?69:39)+spread))
   return 'hsl('+hue+' 68% '+light+'%)'
 }
+export type ReferenceSource = '' | 'local' | 'nist'
 export const spectrumBrowser = reactive({
   docs:[] as LoadedDocument[], activeKey:'',
   view:null as [number,number]|null,
   // Draft selection fields, always describing the ACTIVE document.
   sheet:'0', start:'1', x:'0', ys:['1'] as string[], unit:'nm' as AxisUnit, duplicates:'error', frame:'', curves:[] as string[],
-  references:[] as ReferenceGroup[], selected:[] as string[], referenceIssues:[] as {file:string;error:string}[], nistPending:false, nistElement:'Fe', nistIssues:[] as {file:string;error:string}[], nistStatus:'', referencePending:false, referenceError:'',
+  referenceSource:'' as ReferenceSource,
+  // Per-element, per-source explicit loads: an element shows a source's lines
+  // only after the user explicitly loaded it there (NIST chip click / local add
+  // form); user CSV groups stay visible in both modes. Switching modes never
+  // adds or drops lines by itself, and both sources' history is kept side by side.
+  elementLoaded:{} as Record<string,('configured'|'nist'|'user')[]>,
+  references:[] as ReferenceGroup[], selected:[] as string[], referenceIssues:[] as {file:string;error:string}[], nistPending:false, nistElement:'Fe', nistIssues:[] as {file:string;error:string}[], nistStatus:'', referencePending:false, referenceError:'', nistOk:null as boolean|null,
   addedElements:[] as string[], rememberedSpecies:{} as Record<string,string[]>,configuredIds:[] as string[],configuredLoaded:false,configuredCount:0,
   referencesExpanded:false,processingExpanded:false,sidebarCollapsed:false,
   pending:false, importing:false, error:'', notice:'', failedFiles:[] as {name:string;error:string}[],
   userElement:'',userSpecies:'',userUnit:'nm' as AxisUnit,userColumn:'0',
   target:null as {docKey:string;curve:string}|null,processingPending:false,processingError:'',processingResult:null as ProcessingResult|null,processingView:'original',
-  processing:{mode:'both',order:'6',epsilon:'0.0001',max_iter:'1000',wavelet:'mexh',scales:'1,2,3,4,5,6,7',neighbor:'2',min_length:'2',threshold:'200',window:'3'}
+  processing:{mode:'both',order:'6',epsilon:'0.0001',max_iter:'1000',wavelet:'mexh',scales:'1,2,3,4,5,6,7',neighbor:'2',min_length:'2',threshold:'200',window:'3',drift_correction:false,max_degree:'3',tolerance:'0.5'}
 })
 export const browserSelectionInfo=computed(()=>spectrumBrowser.docs.find(d=>d.key===spectrumBrowser.activeKey)?.info??null)
 export const activeDocument=computed(()=>spectrumBrowser.docs.find(d=>d.key===spectrumBrowser.activeKey)??null)
@@ -250,17 +257,45 @@ export async function loadNistReferences(element=spectrumBrowser.nistElement){
     const nist:ReferenceGroup[]=result.groups.map(g=>({...g,originKind:'nist' as const,id:'nist:'+g.id}))
     const previous=s.references.filter(g=>g.originKind==='nist'&&g.element===element)
     const old=s.references.filter(g=>!previous.includes(g))
+    // Mark this element as explicitly loaded from the online source; earlier
+    // selections (e.g. local lines) stay untouched for their own mode.
+    s.elementLoaded[element]=[...new Set<('configured'|'nist'|'user')>([...(s.elementLoaded[element]??[]),'nist'])]
     const selectedKeys=new Set(s.references.filter(g=>s.selected.includes(g.id)).map(referenceKey))
     const merged=[...old,...nist];if(merged.reduce((n,g)=>n+g.count,0)>100000)throw Error('合并参考线超过100000，请先清空参考库')
-    s.references=markRaw(merged);s.nistIssues=result.issues;s.nistStatus=element+' 可用态：'+nist.map(g=>g.species).join(' / ');s.addedElements=s.addedElements.includes(element)?s.addedElements:[...s.addedElements,element]
+    s.references=markRaw(merged);s.nistIssues=result.issues;s.nistStatus=element+' 可用态：'+nist.map(g=>g.species).join(' / ');s.addedElements=s.addedElements.includes(element)?s.addedElements:[...s.addedElements,element];s.nistOk=true
     s.selected=merged.filter(g=>selectedKeys.has(referenceKey(g))||nist.includes(g)&&!previous.some(p=>p.species===g.species)).map(g=>g.id)
     s.rememberedSpecies[element]=merged.filter(g=>g.element===element&&s.selected.includes(g.id)).map(referenceKey)
-  }catch(error){if(id===referenceRevision&&!signal.aborted)s.referenceError=String(error instanceof Error?error.message:error)}finally{if(id===referenceRevision)s.nistPending=false}
+  }catch(error){if(id===referenceRevision&&!signal.aborted){s.referenceError=String(error instanceof Error?error.message:error);s.nistOk=false}}finally{if(id===referenceRevision)s.nistPending=false}
 }
-export function clearReferences(){cancelReferences();const s=spectrumBrowser;s.references=[];s.selected=[];s.addedElements=[];s.rememberedSpecies={};s.configuredIds=[];s.configuredLoaded=false;s.configuredCount=0;s.referenceError='';s.referenceIssues=[];s.nistIssues=[];s.nistStatus=''}
+export function clearReferences(){cancelReferences();const s=spectrumBrowser;s.references=[];s.selected=[];s.addedElements=[];s.rememberedSpecies={};s.elementLoaded={};s.configuredIds=[];s.configuredLoaded=false;s.configuredCount=0;s.referenceError='';s.referenceIssues=[];s.nistIssues=[];s.nistStatus='';s.nistOk=null;s.referenceSource=''}
 function referenceKey(g:ReferenceGroup){return JSON.stringify([g.originKind,g.source,g.element,g.species,g.original_unit,g.originKind==='user'?g.sha256:''])}
-export function addReferenceElement(element:string){const s=spectrumBrowser,groups=s.references.filter(g=>g.element===element);if(!groups.length||s.addedElements.includes(element))return;s.addedElements.push(element);s.selected.push(...groups.map(g=>g.id));s.rememberedSpecies[element]=groups.map(referenceKey)}
-export function toggleReferenceElement(element:string){const s=spectrumBrowser,groups=s.references.filter(g=>g.element===element),selected=groups.filter(g=>s.selected.includes(g.id));if(selected.length){s.rememberedSpecies[element]=selected.map(referenceKey);s.selected=s.selected.filter(id=>!groups.some(g=>g.id===id))}else{const previous=s.rememberedSpecies[element],targets=previous?.length?groups.filter(g=>previous.includes(referenceKey(g))):groups;s.selected=[...new Set([...s.selected,...targets.map(g=>g.id)])]}}
+export function addReferenceElement(element:string){
+  const s=spectrumBrowser
+  const kinds=s.referenceSource==='nist'?['nist','user']:['configured','user']
+  const groups=s.references.filter(g=>g.element===element&&(g.originKind==='user'||kinds.includes(g.originKind??'')))
+  if(!groups.length)return
+  for(const g of groups)if(g.originKind){const loaded=s.elementLoaded[element]??[];if(!loaded.includes(g.originKind))s.elementLoaded[element]=[...loaded,g.originKind as 'configured'|'nist'|'user']}
+  if(!s.addedElements.includes(element))s.addedElements.push(element)
+  for(const g of groups)if(!s.selected.includes(g.id))s.selected.push(g.id)
+  s.rememberedSpecies[element]=[...new Set([...(s.rememberedSpecies[element]??[]),...groups.map(referenceKey)])]
+}
+// Lines display once their (element, source) pair has been explicitly loaded:
+// user CSVs always display, and loaded lines stay visible no matter which
+// library's workflow is active — switching modes never hides loaded history,
+// and never adds lines from a source the user did not explicitly load.
+export function setReferenceSource(source:ReferenceSource){spectrumBrowser.referenceSource=source}
+export function sourceAllowed(group:ReferenceGroup){
+  if(group.originKind==='user')return true
+  return (spectrumBrowser.elementLoaded[group.element]??[]).includes(group.originKind as 'configured'|'nist')
+}
+export function clearReferenceSource(){spectrumBrowser.referenceSource=''}
+export function toggleReferenceElement(element:string){
+  const s=spectrumBrowser,kinds=s.referenceSource==='nist'?['nist','user']:['configured','user']
+  const groups=s.references.filter(g=>g.element===element&&kinds.includes(g.originKind??''))
+  const selected=groups.filter(g=>s.selected.includes(g.id))
+  if(selected.length){s.rememberedSpecies[element]=selected.map(referenceKey);s.selected=s.selected.filter(id=>!groups.some(g=>g.id===id))}
+  else{const previous=s.rememberedSpecies[element],remembered=previous?.length?groups.filter(g=>previous.includes(referenceKey(g))):[],targets=remembered.length?remembered:groups;s.selected=[...new Set([...s.selected,...targets.map(g=>g.id)])]}
+}
 export function toggleReferenceSpecies(id:string){const s=spectrumBrowser,group=s.references.find(g=>g.id===id);if(!group)return;s.selected=s.selected.includes(id)?s.selected.filter(v=>v!==id):[...s.selected,id];const active=s.references.filter(g=>g.element===group.element&&s.selected.includes(g.id));if(active.length)s.rememberedSpecies[group.element]=active.map(referenceKey)}
 export function cancelProcessing(){processingRevision++;processingController?.abort();spectrumBrowser.processingPending=false}
 export function clearProcessing(){cancelProcessing();spectrumBrowser.processingResult=null;spectrumBrowser.processingView='original';spectrumBrowser.processingError=''}
@@ -271,7 +306,7 @@ export function setProcessingTarget(value:string){
   if(!s.docs.some(d=>d.key===docKey))return
   if(s.target?.docKey!==docKey||s.target.curve!==curve){s.target={docKey,curve};clearProcessing()}
 }
-export function processingParameters(){const p=spectrumBrowser.processing;return{mode:p.mode,order:Number(p.order),epsilon:Number(p.epsilon),max_iter:Number(p.max_iter),wavelet:p.wavelet,scales:p.scales.split(/[ ,;]+/).filter(Boolean).map(Number),neighbor:Number(p.neighbor),min_length:Number(p.min_length),threshold:Number(p.threshold),window:Number(p.window)}}
+export function processingParameters(){const p=spectrumBrowser.processing;return{mode:p.mode,order:Number(p.order),epsilon:Number(p.epsilon),max_iter:Number(p.max_iter),wavelet:p.wavelet,scales:p.scales.split(/[ ,;]+/).filter(Boolean).map(Number),neighbor:Number(p.neighbor),min_length:Number(p.min_length),threshold:Number(p.threshold),window:Number(p.window),drift_correction:p.drift_correction,max_degree:Number(p.max_degree),tolerance:Number(p.tolerance)}}
 export async function runProcessing(){
   const s=spectrumBrowser,doc=s.docs.find(d=>d.key===s.target?.docKey)
   if(!doc||!s.target)return
@@ -279,7 +314,16 @@ export async function runProcessing(){
   const parameters=processingParameters(),spectrum=doc.spectrum,curve=s.target.curve
   s.processingPending=true;s.processingError=''
   try{
-    const result=await api<ProcessingResult>('process',{document:doc.key,options:optionsFrom(doc.selection,doc.info),curve,parameters},signal)
+    const body:Record<string,unknown>={document:doc.key,options:optionsFrom(doc.selection,doc.info),curve,parameters}
+    if(parameters.drift_correction){
+      // Theoretical positions for drift matching: every selected, allowed
+      // reference group's wavelengths, sorted and deduplicated.
+      const seen=new Set<string>()
+      const positions:number[]=[]
+      for(const g of s.references)if(s.selected.includes(g.id)&&sourceAllowed(g))for(const v of g.xs){const key=v.toFixed(9);if(!seen.has(key)){seen.add(key);positions.push(v)}}
+      body.reference_xs=positions.sort((a,b)=>a-b)
+    }
+    const result=await api<ProcessingResult>('process',body,signal)
     if(id===processingRevision&&doc.spectrum===spectrum&&s.target?.curve===curve){s.processingResult=markRaw({...result,docKey:doc.key});s.processingView=result.corrected?'corrected':'original'}
   }catch(error){if(id===processingRevision&&!signal.aborted)s.processingError=String(error instanceof Error?error.message:error)}
   finally{if(id===processingRevision)s.processingPending=false}
