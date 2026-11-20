@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, shallowRef, useId, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
 import { docColor, spectrumBrowser, toggleDocCurve, toggleDocumentVisible, toggleReferenceSpecies, type LoadedDocument, type ReferenceGroup, type ReferencePosition } from '../lib/spectrumBrowser'
 import { elementColor } from '../lib/model'
@@ -43,6 +43,32 @@ const drawnCurves=computed<DrawnCurve[]>(()=>drawnDocs.value.flatMap(doc=>{
   const visible=doc.spectrum.curves.filter(c=>!doc.hiddenCurves.includes(c.id))
   return visible.map((curve,index)=>({doc,id:curve.id,label:curve.label,ys:curve.ys,xs:doc.spectrum.xs,color:docColor(doc.colorIndex,index,visible.length,dark.value)}))
 }))
+const overviewBands=[
+  {name:'其他短波',from:1,to:10,color:'#64748b'},
+  {name:'极紫外',from:10,to:100,color:'#a855f7'},
+  {name:'深紫外',from:100,to:280,color:'#6366f1'},
+  {name:'紫外',from:280,to:380,color:'#b34ca4'},
+  {name:'可见光',from:380,to:780,color:'#25876d'},
+  {name:'红外',from:780,to:100000,color:'#c76236'}
+]
+const overviewSegments=computed(()=>{
+  if(primaryUnit.value!=='nm'||!drawnCurves.value.length)return[]
+  const [low,high]=full.value,span=high-low
+  if(!Number.isFinite(low)||!Number.isFinite(high)||span<=0)return[]
+  return overviewBands.flatMap(band=>{const from=Math.max(low,band.from),to=Math.min(high,band.to);return to>from?[{...band,left:(from-low)/span*100,width:(to-from)/span*100}]:[]})
+})
+const bandTooltipId=useId(),bandTooltip=ref<HTMLElement>(),activeBand=shallowRef<(typeof overviewBands)[number]|null>(null),bandPoint=ref({left:12,top:12})
+const bandTitle=(band:(typeof overviewBands)[number])=>band.name+' · '+band.from+'–'+band.to+' nm'
+function clearBand(){activeBand.value=null}
+async function showBand(band:(typeof overviewBands)[number],event:MouseEvent|FocusEvent){
+  const element=event.currentTarget as HTMLElement
+  activeBand.value=band
+  await nextTick()
+  if(activeBand.value!==band||!bandTooltip.value||!element.isConnected)return
+  const rect=element.getBoundingClientRect(),tip=bandTooltip.value.getBoundingClientRect()
+  bandPoint.value={left:Math.max(8,Math.min(innerWidth-tip.width-8,rect.left+rect.width/2-tip.width/2)),top:rect.top>=tip.height+14?rect.top-tip.height-6:Math.min(innerHeight-tip.height-8,rect.bottom+6)}
+}
+watch(overviewSegments,clearBand)
 const processing=computed(()=>{const result=spectrumBrowser.processingResult;if(!result)return null;const doc=drawnDocs.value.find(d=>d.key===result.docKey);return doc?{doc,result}:null})
 const enabledReferences=computed(()=>primaryUnit.value==='nm'?props.references:[])
 // Position counts inside the current selection window; groups with zero hits
@@ -103,7 +129,7 @@ let lineTimer:ReturnType<typeof setTimeout>|undefined
 function clearLine(){clearTimeout(lineTimer);lineHits.value=[]}
 function keepLine(){clearTimeout(lineTimer)}
 function leaveLine(){clearTimeout(lineTimer);lineTimer=setTimeout(clearLine,220)}
-function scrollLine(event:Event){if(event.target instanceof Node&&tooltip.value?.contains(event.target))return;clearLine()}
+function scrollLine(event:Event){clearBand();if(event.target instanceof Node&&tooltip.value?.contains(event.target))return;clearLine()}
 function hitLine(event:PointerEvent){
   const el=canvas.value!,box=el.getBoundingClientRect(),g=geometry(el),px=event.clientX-box.left,py=event.clientY-box.top
   if(drag.value||primaryUnit.value!=='nm'||px<g.left||px>g.w-g.right||py<g.top||py>g.h-g.bottom){clearLine();return}
@@ -121,7 +147,7 @@ function hitLine(event:PointerEvent){
 function leave(event:PointerEvent){if(tooltip.value?.contains(event.relatedTarget as Node)){keepLine();return}leaveLine();hover.value=null;schedule()}
 let observer:ResizeObserver|undefined,theme:MutationObserver|undefined,frame=0
 let lastPlotWidth=-1,lastPlotHeight=-1
-function resizePlot(){const rect=canvas.value?.getBoundingClientRect();if(rect&&(rect.width!==lastPlotWidth||rect.height!==lastPlotHeight)){lastPlotWidth=rect.width;lastPlotHeight=rect.height;clearLine()}schedule()}
+function resizePlot(){const rect=canvas.value?.getBoundingClientRect();if(rect&&(rect.width!==lastPlotWidth||rect.height!==lastPlotHeight)){lastPlotWidth=rect.width;lastPlotHeight=rect.height;clearLine();clearBand()}schedule()}
 const fmt=(v:number)=>Number.isFinite(v)?Number(v.toPrecision(7)).toString():'—'
 function setRange(a:number,b:number){
   let width=Math.abs(b-a),left=Math.min(a,b),total=full.value[1]-full.value[0]
@@ -190,7 +216,7 @@ function draw(mini:boolean){
   const active=processing.value?drawnCurves.value.find(c=>c.doc.key===processing.value!.doc.key&&(c.id===processing.value!.result.curve||c.id==='derived:'+processing.value!.result.curve+':corrected')):undefined
   if(!mini&&processing.value&&active){ctx.fillStyle=color('--bad');for(const peak of processing.value.result.peaks){if(peak.x<s[0]||peak.x>s[1])continue;const x=X(peak.x),y=Y(active.ys[peak.index]!);ctx.beginPath();ctx.moveTo(x,y-4);ctx.lineTo(x-4,y-11);ctx.lineTo(x+4,y-11);ctx.closePath();ctx.fill()}}
   if(mini){const a=X(range.value[0]),b=X(range.value[1]);ctx.fillStyle=color('--accent');ctx.globalAlpha=.15;ctx.fillRect(a,g.top,b-a,ph);ctx.globalAlpha=1;ctx.strokeStyle=color('--accent-text');ctx.strokeRect(a,g.top,b-a,ph)}
-  if(!mini&&drag.value?.kind==='zoom'){ctx.fillStyle=color('--accent');ctx.globalAlpha=.16;ctx.fillRect(X(Math.min(drag.value.x,drag.value.now)),g.top,Math.abs(X(drag.value.x)-X(drag.value.now)),ph);ctx.globalAlpha=1}
+  if(!mini&&drag.value?.kind==='zoom'){const reverse=drag.value.now<drag.value.x,a=X(Math.min(drag.value.x,drag.value.now)),b=X(Math.max(drag.value.x,drag.value.now));ctx.fillStyle=reverse?color('--muted'):color('--accent');ctx.globalAlpha=reverse?.08:.16;ctx.fillRect(a,g.top,b-a,ph);ctx.globalAlpha=1;if(reverse){ctx.strokeStyle=color('--accent');ctx.setLineDash([3,3]);ctx.strokeRect(a,g.top,b-a,ph);ctx.setLineDash([])}}
   ctx.restore()
 }
 function down(event:PointerEvent,mini=false){
@@ -198,7 +224,7 @@ function down(event:PointerEvent,mini=false){
   clearLine();event.preventDefault();const x=position(event,mini);drag.value={kind:mini?'overview':event.button===1||event.shiftKey||event.altKey?'pan':'zoom',x,now:x,initial:[...range.value],pointerId:event.pointerId};(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
 }
 function move(event:PointerEvent,mini=false){const x=position(event,mini),d=drag.value;if(d){d.now=x;if(d.kind==='pan'){const delta=(event.movementX/(geometry(canvas.value!).w-82))*(d.initial[1]-d.initial[0]);setRange(range.value[0]-delta,range.value[1]-delta)}else if(d.kind==='overview'){const width=d.initial[1]-d.initial[0];if(width<full.value[1]-full.value[0])setRange(x-width/2,x+width/2)}schedule()}else if(!mini){hover.value=drawnCurves.value.length?pickHover(event.clientX-(canvas.value!.getBoundingClientRect().left),event.clientY-(canvas.value!.getBoundingClientRect().top)):null;hitLine(event);schedule()}}
-function up(event:PointerEvent,mini=false){const d=drag.value;if(!d)return;const x=position(event,mini);if(d.kind==='zoom')setRange(d.x,x);if(d.kind==='overview'&&d.initial[1]-d.initial[0]>=full.value[1]-full.value[0])setRange(d.x,x);drag.value=null;const target=event.currentTarget as HTMLElement;if(target.hasPointerCapture(event.pointerId))target.releasePointerCapture(event.pointerId);schedule()}
+function up(event:PointerEvent,mini=false){const d=drag.value;if(!d)return;const x=position(event,mini);if(d.kind==='zoom'){const dragSpan=Math.abs(x-d.x),currentSpan=range.value[1]-range.value[0],totalSpan=full.value[1]-full.value[0];if(dragSpan>currentSpan*.012){if(x>d.x)setRange(d.x,x);else{const factor=Math.max(1.2,currentSpan/dragSpan),center=(d.x+x)/2,newWidth=Math.min(totalSpan,currentSpan*factor);setRange(center-newWidth/2,center+newWidth/2)}}}if(d.kind==='overview'&&d.initial[1]-d.initial[0]>=full.value[1]-full.value[0])setRange(d.x,x);drag.value=null;const target=event.currentTarget as HTMLElement;if(target.hasPointerCapture(event.pointerId))target.releasePointerCapture(event.pointerId);schedule()}
 function wheel(event:WheelEvent){const x=position(event),s=range.value,factor=event.deltaY>0?1.2:1/1.2;setRange(x-(x-s[0])*factor,x+(s[1]-x)*factor)}
 function key(event:KeyboardEvent){
   if(['Home','Escape'].includes(event.key)){event.preventDefault();reset()}
@@ -252,6 +278,8 @@ onUnmounted(()=>{observer?.disconnect();theme?.disconnect();window.removeEventLi
     <div class="measured-readout" role="status"><div class="readout-content"><template v-if="hovered"><b>{{ hovered.doc.name }} · 节点 {{ hovered.index+1 }} · {{ fmt(hovered.x) }} {{ hovered.doc.spectrum.unit }}</b><span v-for="c in hovered.values" :key="c.label"><i class="readout-dot" :style="{background:c.color}" />{{ c.label }}：{{ fmt(c.y) }}</span><span v-if="hovered.last>hovered.first">重复轴 {{ hovered.first+1 }}–{{ hovered.last+1 }} · ←／→逐点</span></template><span v-else class="hint">悬停读取原始节点（跨文件吸附最近曲线）</span></div></div>
     <div class="chart-bottom"><span>{{ fmt(range[0]) }} — {{ fmt(range[1]) }} {{ primaryUnit ?? '' }}</span><details><summary>操作</summary><small>滚轮缩放 · 框选 · Shift／中键平移 · 概览联动 · ←／→逐节点 · Home全谱 · 自适应强度后锁定纵轴 · 点击图例切换文件/曲线显隐</small></details></div>
     <canvas ref="overview" class="measured-overview" role="img" aria-label="测量全局概览与选区" title="全局强度概览；拖动联动主图横向选区" @pointerdown="down($event,true)" @pointermove="move($event,true)" @pointerup="up($event,true)" @pointercancel="drag=null" />
+    <div v-if="primaryUnit==='nm'&&overviewSegments.length" class="overview-bands" aria-label="概览波长分区"><div class="overview-band-track"><span v-for="band in overviewSegments" :key="band.name" class="overview-band-segment" role="img" tabindex="0" :style="{left:band.left+'%',width:band.width+'%','--band-color':band.color}" :title="bandTitle(band)" :aria-label="bandTitle(band)" :aria-describedby="activeBand===band?bandTooltipId:undefined" @mouseenter="showBand(band,$event)" @mouseleave="clearBand" @focus="showBand(band,$event)" @blur="clearBand" @keydown.esc="clearBand" /></div></div>
+    <Teleport to="body"><Transition name="overview-band-tip"><div v-if="activeBand" :id="bandTooltipId" ref="bandTooltip" class="overview-band-tooltip" role="tooltip" :style="{left:bandPoint.left+'px',top:bandPoint.top+'px'}"><i :style="{backgroundColor:activeBand.color}" aria-hidden="true" />{{ bandTitle(activeBand) }}</div></Transition></Teleport>
     <p v-if="primaryUnit==='pixel'" class="hint">pixel 轴 · nm参考已禁用</p>
     <div v-else-if="enabledReferences.length" class="reference-legend"><span v-for="g in enabledReferences" :key="'bottom:'+g.id" :class="{'reference-empty':(referenceCounts.get(g.id)??0)===0}" :style="{color:(referenceCounts.get(g.id)??0)===0?'var(--muted)':referenceColor(g,dark)}">┆ {{ g.label }} · {{ referenceCounts.get(g.id)??0 }} 位置</span></div>
     <Teleport to="body"><section v-if="lineHits.length" ref="tooltip" class="browser-line-tooltip" role="region" aria-label="谱线位置参考详情" tabindex="0" :style="{left:linePoint.left+'px',top:linePoint.top+'px'}" @pointerenter="keepLine" @pointerleave="clearLine" @keydown.esc="clearLine"><header><b>谱线位置参考 · {{ lineHits.length }} 个命中位置</b><button type="button" class="icon-btn" aria-label="关闭参考详情" @click="clearLine"><AppIcon name="close" :size="13" /></button></header><article v-for="hit in lineHits" :key="hit.group.id+hit.position.wavelength_nm"><h3 :style="{color:referenceColor(hit.group,dark)}">{{ hit.group.label }} · {{ fmt(hit.position.wavelength_nm) }} nm</h3><small>{{ hit.group.source }} · 原波长 {{ hit.group.original_unit }}</small><div v-for="(record,r) in hit.position.records" :key="r"><dl v-for="state in record.states" :key="state.line"><dt>原行 {{ state.line }}</dt><dd></dd><dt>Aki</dt><dd>{{ state.aki||'—' }}<span v-if="state.aki"> {{ state.aki_unit||'（原单位未说明）' }}</span></dd><dt>Energy</dt><dd>{{ state.energy||'—' }}<span v-if="state.energy"> {{ state.energy_unit||'（原单位未说明）' }}</span></dd><dt>Configuration</dt><dd>{{ state.configuration||'—' }}</dd><dt>Term / J / g</dt><dd>{{ state.term||'—' }} / {{ state.j||'—' }} / {{ state.g||'—' }}</dd></dl></div></article><p>仅参考位置，不是元素鉴定；原行未推断为上下态。</p></section></Teleport>
@@ -259,4 +287,7 @@ onUnmounted(()=>{observer?.disconnect();theme?.disconnect();window.removeEventLi
 </template>
 <style scoped>
 .measured-chart{padding:20px 24px;min-width:0}.measured-main{display:block;width:100%;height:380px;touch-action:none;cursor:crosshair}.measured-overview{display:block;width:100%;height:94px;touch-action:none;cursor:crosshair;border:1px solid var(--border);border-radius:7px;background:var(--panel-soft)}.measured-readout{height:104px;min-height:104px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.readout-content{min-height:0;display:flex;align-content:flex-start;align-items:flex-start;flex-wrap:wrap;gap:6px 16px}.readout-content b,.readout-content small{flex-basis:100%}.readout-content small{color:var(--muted)}.readout-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}.reference-legend{display:flex;gap:8px 16px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:10px}.panel-heading{gap:12px;align-items:flex-start}.chart-bottom{flex-wrap:wrap;gap:8px}.measured-label{font-size:12px;color:var(--muted);white-space:nowrap}.chart-legend-area{width:100%;justify-content:flex-end;margin:0 0 8px;display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;min-width:0}.measured-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px 14px;min-width:0;max-width:100%}.measured-legend button{display:flex;align-items:baseline;gap:5px;border:0;background:transparent;color:var(--text);padding:3px 0;font-size:12px;min-width:0;max-width:100%;overflow-wrap:anywhere;text-align:left}.measured-legend i{display:block;width:13px;height:3px;background:var(--curve-color);flex:none;align-self:center}.measured-legend button.legend-hidden{color:var(--muted);text-decoration:line-through}.measured-legend button.legend-hidden i{background:var(--border)}.legend-reference{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);white-space:nowrap;border:0;background:transparent;padding:0;cursor:pointer}.legend-reference.legend-off{color:var(--muted);text-decoration:line-through}.legend-reference.legend-off .dash-swatch{border-top-color:var(--border)}.reference-legend-column{display:grid;grid-auto-flow:column;grid-template-rows:repeat(4,auto);grid-auto-columns:max-content;gap:3px 14px;flex:none;padding-left:12px;border-left:1px solid var(--border);justify-items:end}.dash-swatch{display:block;width:16px;height:0;border-top:2px dashed var(--curve-color);flex:none}.legend-curve{font-weight:400;padding-left:14px!important}.legend-meta{font-size:10px;color:var(--muted)}.measured-empty{text-align:center;color:var(--muted);font-size:12px}.chart-bottom details{font-size:11px;color:var(--muted);max-width:100%}.chart-bottom summary{cursor:pointer;color:var(--accent-text)}.chart-actions{margin-left:auto;align-items:center;display:flex;gap:6px;flex-wrap:wrap;min-width:0}.chart-reset{flex:none}.browser-line-tooltip{position:fixed;z-index:var(--layer-tooltip,70);width:min(360px,calc(100vw - 24px));max-height:min(330px,calc(100dvh - 24px));overflow:auto;overscroll-behavior:contain;padding:12px 14px;border:1px solid var(--border);border-radius:9px;background:var(--panel-overlay);color:var(--text);box-shadow:var(--shadow-overlay);font-size:12px}.browser-line-tooltip header{display:flex;align-items:center;justify-content:space-between;gap:8px}.browser-line-tooltip header .icon-btn{width:25px;height:25px;flex:none}.browser-line-tooltip article{padding:8px 0;border-bottom:1px solid var(--border)}.browser-line-tooltip h3{font-size:13px;margin-bottom:3px}.browser-line-tooltip small,.browser-line-tooltip p{font-size:10px;color:var(--muted)}.browser-line-tooltip p{margin-top:9px}.browser-line-tooltip dl{display:grid;grid-template-columns:92px minmax(0,1fr);gap:3px 8px;margin:8px 0;padding-top:6px;border-top:1px solid var(--border)}.browser-line-tooltip dt{color:var(--muted)}.browser-line-tooltip dd{margin:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.browser-line-tooltip dd>span{margin-left:.35em}@media(max-width:740px){.panel-heading{flex-wrap:wrap}.chart-legend-area,.chart-actions{width:100%;justify-content:flex-start}.measured-legend{justify-content:flex-start}.reference-legend-column{justify-items:start}.measured-chart{padding:16px 12px}.measured-main{height:300px}.measured-readout{height:128px;min-height:128px}}
+</style>
+<style scoped>
+.overview-bands{padding:0 14px;margin:6px 0 8px;min-width:0}.overview-band-track{position:relative;height:7px;border-radius:4px;background:var(--border);overflow:hidden}.overview-band-segment{position:absolute;top:0;bottom:0;display:block;background:var(--band-color);cursor:pointer;transition:filter .15s ease}.overview-band-segment:hover,.overview-band-segment:focus-visible{filter:brightness(1.15);outline:1px solid var(--text);outline-offset:-1px}.overview-band-tooltip{position:fixed;z-index:var(--layer-tooltip,70);display:flex;align-items:center;gap:6px;max-width:calc(100vw - 16px);padding:5px 8px;border:1px solid var(--border);border-radius:5px;background:var(--panel-overlay,var(--panel));color:var(--text);box-shadow:var(--shadow-overlay);font-size:11px;font-weight:500;pointer-events:none}.overview-band-tooltip i{width:6px;height:6px;border-radius:50%;flex:none}.overview-band-tip-enter-active,.overview-band-tip-leave-active{transition:opacity .12s ease}.overview-band-tip-enter-from,.overview-band-tip-leave-to{opacity:0}@media(prefers-reduced-motion:reduce){.overview-band-segment,.overview-band-tip-enter-active,.overview-band-tip-leave-active{transition:none}}:global(:root[data-reduced-motion=true]) .overview-band-segment,:global(:root[data-reduced-motion=true]) .overview-band-tip-enter-active,:global(:root[data-reduced-motion=true]) .overview-band-tip-leave-active{transition:none}
 </style>

@@ -2,7 +2,7 @@ import { computed, reactive, ref } from 'vue'
 import { defaults, elementDraft, type BatchSample, type DemoTask, type Page, type ScanResult, type Spectrum, type TaskKind } from './model'
 import type { RandomRules } from './demo'
 import { request, spectrumResult, fromParameters } from './backend'
-export const page = ref<Page>('single')
+export const page = ref<Page>('spectrum-browser')
 export const single = reactive({ params: defaults(), composition: [elementDraft()], result: null as Spectrum | null })
 export const advanced = reactive({ model:'nist' as 'local'|'nist', densityMode:'charge_balance' as 'charge_balance'|'specified', numberDensity:'1e16', starkText:'',starkName:'', params: {...defaults(),low:'285.27',high:'285.33',step:'0.01',charge:'2',broaden:false}, composition:[elementDraft('Mg')], result:null as Spectrum|null, selfAbsorption:false,starkBroadening:false,instrumentBroadening:false,matrix:false,column:'1e16',pathLength:'.01',teFactor:'1',neFactor:'1',gaussian:'.01',lorentz:'.002',temperature:'10000',responses:{} as Record<string,string> })
 export const batch = reactive({ params: defaults(), composition: [elementDraft()], generation: 'fixed' as 'fixed' | 'random' | 'template', count: '24', packageSize: '8', seed: '42', rules: { te: true, teMin: '0.8', teMax: '1.5', ne: true, neMin: '5e16', neMax: '2e17' } as RandomRules, templateText: '', templateName: '', result: null as BatchSample[] | null, jobId: '', manifest: null as any })
